@@ -1,5 +1,21 @@
+#!/usr/bin/make -f
 
-PAWPAW_TARGET = linux-x86_64
+CC ?= gcc
+TARGET_MACHINE := $(shell $(CC) -dumpmachine)
+
+ifeq ($(PAWPAW_TARGET),)
+ifneq (,$(findstring linux,$(TARGET_MACHINE)))
+PAWPAW_TARGET = linux-$(uname -m)
+else ifneq (,$(findstring apple,$(TARGET_MACHINE)))
+PAWPAW_TARGET = macos-universal
+else ifneq (,$(findstring mingw,$(TARGET_MACHINE)))
+PAWPAW_TARGET = win64
+else ifneq (,$(findstring wasm,$(TARGET_MACHINE)))
+PAWPAW_TARGET = wasm
+else
+$(error unknown target, cannot continue)
+endif
+endif
 
 ifeq ($(PAWPAW_TARGET),macos-universal)
 APP_EXT =
