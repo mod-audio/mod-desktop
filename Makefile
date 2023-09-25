@@ -281,10 +281,7 @@ $(PAWPAW_PREFIX)/lib/lv2/wolf-shaper.lv2: $(BOOTSTRAP_FILES)
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-$(PAWPAW_PREFIX)/bin/cxfreeze:
-	./PawPaw/bootstrap-mod.sh $(PAWPAW_TARGET)
-
-$(PAWPAW_PREFIX)/bin/jackd$(APP_EXT):
+$(PAWPAW_PREFIX)/bin/%:
 	./PawPaw/bootstrap-mod.sh $(PAWPAW_TARGET)
 
 # ---------------------------------------------------------------------------------------------------------------------

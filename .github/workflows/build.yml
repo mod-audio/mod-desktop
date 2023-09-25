@@ -19,9 +19,11 @@ jobs:
             ~/PawPawBuilds
           key: macos-universal-v${{ env.CACHE_VERSION }}
       - name: Set up dependencies
-        run: brew install meson
+        run: |
+          brew install meson
       - name: Build
-        run:  make PAWPAW_TARGET=macos-universal
+        run: |
+          make PAWPAW_TARGET=macos-universal
       - name: Pack
         run: |
           mv build mod-app-macOS-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}
@@ -54,9 +56,10 @@ jobs:
           sudo apt-get update -qq
       - name: Set up dependencies
         run: |
-          sudo apt-get install -yqq --allow-downgrades binutils-mingw-w64-x86-64 libc6:i386 libgcc-s1:i386 libstdc++6:i386 g++-mingw-w64-x86-64 gperf meson mingw-w64 wine-stable
+          sudo apt-get install -yqq --allow-downgrades autopoint binutils-mingw-w64-x86-64 libc6:i386 libgcc-s1:i386 libstdc++6:i386 g++-mingw-w64-x86-64 gperf meson mingw-w64 wine-stable
       - name: Build
-        run: make PAWPAW_TARGET=win64
+        run: |
+          make PAWPAW_TARGET=win64
       - name: Pack
         run: |
           mv build mod-app-win64-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}
