@@ -1,9 +1,15 @@
 
-PAWPAW_TARGET = win64
+PAWPAW_TARGET = linux
 
-ifeq ($(PAWPAW_TARGET),win64)
+ifeq ($(PAWPAW_TARGET),macos-universal)
+APP_EXT =
+SO_EXT = .dylib
+else ifeq ($(PAWPAW_TARGET),win64)
 APP_EXT = .exe
 SO_EXT = .dll
+else
+APP_EXT =
+SO_EXT = .so
 endif
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -12,8 +18,7 @@ PAWPAW_DIR = ~/PawPawBuilds
 PAWPAW_PREFIX = $(PAWPAW_DIR)/targets/$(PAWPAW_TARGET)
 
 BOOTSTRAP_FILES = \
-	$(PAWPAW_PREFIX)/bin/cxfreeze \
-	$(PAWPAW_PREFIX)/lib/libhylia.a
+	$(PAWPAW_PREFIX)/bin/cxfreeze
 
 # ---------------------------------------------------------------------------------------------------------------------
 
@@ -280,9 +285,6 @@ $(PAWPAW_PREFIX)/bin/cxfreeze:
 	./PawPaw/bootstrap-mod.sh $(PAWPAW_TARGET)
 
 $(PAWPAW_PREFIX)/bin/jackd$(APP_EXT):
-	./PawPaw/bootstrap-mod.sh $(PAWPAW_TARGET)
-
-$(PAWPAW_PREFIX)/lib/libhylia.a:
 	./PawPaw/bootstrap-mod.sh $(PAWPAW_TARGET)
 
 # ---------------------------------------------------------------------------------------------------------------------
