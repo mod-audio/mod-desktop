@@ -4,9 +4,6 @@
 [submodule "mod-ui"]
 	path = mod-ui
 	url = git@github.com:moddevices/mod-ui.git
-[submodule "browsepy"]
-	path = browsepy
-	url = git@github.com:moddevices/browsepy.git
 [submodule "mod-midi-merger"]
 	path = mod-midi-merger
 	url = git@github.com:moddevices/mod-midi-merger.git
