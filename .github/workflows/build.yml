@@ -32,7 +32,8 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ github.event.repository.name }}-macOS-${{ matrix.target }}-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}
-          path: *.tar.gz
+          path: |
+            *.tar.gz
 
   windows:
     runs-on: ubuntu-22.04
