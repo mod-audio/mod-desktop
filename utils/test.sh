@@ -33,6 +33,8 @@ fi
 JACKD+=" -C utils/jack-session.conf -R -S"
 
 if [ "${target}" = "win64" ]; then
+JACKD+=" -X coremidi -d coreaudio"
+elif [ "${target}" = "win64" ]; then
 JACKD+=" -X winmme -d portaudio -d 'ASIO::WineASIO Driver'"
 else
 JACKD+=" -d dummy"

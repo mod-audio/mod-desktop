@@ -9,7 +9,13 @@ from cx_Freeze import setup, Executable
 # ------------------------------------------------------------------------------------------------------------
 
 from sys import platform
-s = '\\' if platform == 'win32' else '/'
+
+if platform == 'win32':
+  exe = '.exe'
+  s = '\\'
+else:
+  exe = ''
+  s = '/'
 
 # ------------------------------------------------------------------------------------------------------------
 
@@ -24,7 +30,7 @@ options = {
 exe_options = {
   "script": f".{s}utils{s}mod-ui-wrapper.py",
   "copyright": "Copyright (C) 2023 MOD Audio UG",
-  "targetName": "mod-ui.exe",
+  "targetName": f"mod-ui{exe}",
 }
 
 setup(name = "mod-ui",

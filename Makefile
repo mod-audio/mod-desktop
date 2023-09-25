@@ -19,7 +19,7 @@ endif
 
 ifeq ($(PAWPAW_TARGET),macos-universal)
 APP_EXT =
-SO_EXT = .dylib
+SO_EXT = .so
 else ifeq ($(PAWPAW_TARGET),win64)
 APP_EXT = .exe
 SO_EXT = .dll
@@ -41,6 +41,7 @@ BOOTSTRAP_FILES = \
 TARGETS = \
 	build/jackd$(APP_EXT) \
 	build/mod-ui$(APP_EXT) \
+	build/jack/jack-session.conf \
 	build/jack/mod-host$(SO_EXT) \
 	build/jack/mod-midi-broadcaster$(SO_EXT) \
 	build/jack/mod-midi-merger$(SO_EXT) \
@@ -51,6 +52,10 @@ TARGETS = \
 	build/modtools
 
 ifeq ($(PAWPAW_TARGET),macos-universal)
+TARGETS += build/libjack.0.dylib
+TARGETS += build/libjackserver.0.dylib
+TARGETS += build/jack/jack_coreaudio.so
+TARGETS += build/jack/jack_coremidi.so
 else ifeq ($(PAWPAW_TARGET),win64)
 TARGETS += build/libjack64.dll
 TARGETS += build/libjackserver64.dll
@@ -71,7 +76,9 @@ BUNDLES += DragonflyEarlyReflections.lv2
 BUNDLES += DragonflyHallReverb.lv2
 BUNDLES += DragonflyPlateReverb.lv2
 BUNDLES += DragonflyRoomReverb.lv2
+ifneq ($(PAWPAW_TARGET),macos-universal)
 BUNDLES += fil4.lv2
+endif
 BUNDLES += Black_Pearl_4A.lv2
 BUNDLES += Black_Pearl_4B.lv2
 BUNDLES += Black_Pearl_5.lv2
@@ -94,9 +101,13 @@ BUNDLES += FluidSynthLeads.lv2
 BUNDLES += FluidSynthPads.lv2
 BUNDLES += Red_Zeppelin_4.lv2
 BUNDLES += Red_Zeppelin_5.lv2
+ifneq ($(PAWPAW_TARGET),macos-universal)
 BUNDLES += fomp.lv2
+endif
 BUNDLES += Kars.lv2
+ifneq ($(PAWPAW_TARGET),macos-universal)
 BUNDLES += midifilter.lv2
+endif
 BUNDLES += midigen.lv2
 BUNDLES += mod-bpf.lv2
 BUNDLES += MOD-CabinetLoader.lv2
@@ -122,14 +133,20 @@ BUNDLES += mod-mda-Shepard.lv2
 BUNDLES += mod-mda-SubSynth.lv2
 BUNDLES += mod-mda-ThruZero.lv2
 BUNDLES += mod-mda-Vocoder.lv2
-BUNDLES += modmeter.lv2
+ifneq ($(PAWPAW_TARGET),macos-universal)
+BUNDLES += modmeter.lv2 
 BUNDLES += modspectre.lv2
+endif
 BUNDLES += MVerb.lv2
 BUNDLES += Nekobi.lv2
 # BUNDLES += neural-amp-modeler.lv2
+ifneq ($(PAWPAW_TARGET),macos-universal)
 BUNDLES += notes.lv2
+endif
 BUNDLES += PingPongPan.lv2
+ifneq ($(PAWPAW_TARGET),macos-universal)
 BUNDLES += rt-neural-generic.lv2
+endif
 BUNDLES += wolf-shaper.lv2
 
 PLUGINS = $(BUNDLES:%=build/plugins/%)
@@ -195,15 +212,24 @@ build/modtools: mod-ui/modtools
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-build/mod-ui$(APP_EXT): $(BOOTSTRAP_FILES)
+build/jack/jack-session.conf: utils/jack-session.conf
+	@mkdir -p build/jack
+	ln -sf $(abspath $<) $@
+
+build/mod-ui$(APP_EXT): utils/mod-ui.py utils/mod-ui-wrapper.py $(BOOTSTRAP_FILES)
 	./utils/run.sh $(PAWPAW_TARGET) python3 utils/mod-ui.py build_exe
+	touch $@
 
 mod-host/mod-host.so: $(BOOTSTRAP_FILES)
 	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) SKIP_READLINE=1 SKIP_FFTW335=1 -C mod-host
 
-mod-midi-merger/build/mod-midi-broadcaster$(SO_EXT): mod-midi-merger/build/mod-midi-merger$(SO_EXT)
+mod-midi-merger/build/mod-midi-broadcaster$(SO_EXT): mod-midi-merger/build/mod-midi-merger-standalone$(APP_EXT)
+	touch $@
 
-mod-midi-merger/build/mod-midi-merger$(SO_EXT): mod-midi-merger/build/Makefile
+mod-midi-merger/build/mod-midi-merger$(SO_EXT): mod-midi-merger/build/mod-midi-merger-standalone$(APP_EXT)
+	touch $@
+
+mod-midi-merger/build/mod-midi-merger-standalone$(APP_EXT): mod-midi-merger/build/Makefile
 	./utils/run.sh $(PAWPAW_TARGET) cmake --build mod-midi-merger/build
 
 mod-midi-merger/build/Makefile: $(BOOTSTRAP_FILES)

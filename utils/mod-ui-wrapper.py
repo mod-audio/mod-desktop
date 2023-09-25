@@ -9,8 +9,10 @@ import json
 import uuid
 from tornado import gen, iostream, web, websocket
 
-ROOT = os.path.dirname(sys.argv[0])
+ROOT = os.path.abspath(os.path.dirname(sys.argv[0]))
 DATA_DIR = os.path.join(ROOT, 'data')
+
+sys.path = [ROOT] + sys.path
 
 os.environ['LV2_PATH'] = os.path.join(ROOT, 'plugins')
 os.environ['MOD_DATA_DIR'] = DATA_DIR

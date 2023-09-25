@@ -43,6 +43,8 @@ if [ "${CROSS_COMPILING}" -eq 0 ] && [ "${LINUX}" -eq 1 ]; then
     export LD_LIBRARY_PATH="${PAWPAW_PREFIX}/lib"
 fi
 
+# export PYTHON_PATH=""
+
 # ---------------------------------------------------------------------------------------------------------------------
 # run command
 

@@ -54,8 +54,11 @@ BR2_TARGET_OPTIMIZATION =
 MAKE1 = make -j1
 PARALLEL_JOBS = $(shell nproc)
 
-WORKDIR ?= $(HOME)/mod-workdir
-HOST_DIR = $(WORKDIR)/moddwarf-new/host
+ifeq ($(WINDOWS),true)
+HOST_DIR = $(PAWPAW_PREFIX)-host
+else
+HOST_DIR = $(PAWPAW_PREFIX)
+endif
 
 TARGET_CFLAGS = $(CFLAGS)
 TARGET_CXXFLAGS = $(CXXFLAGS)
@@ -163,7 +166,9 @@ all: $(STAMP_PINSTALLED)
 
 $(STAMP_PINSTALLED): $(STAMP_INSTALLED)
 	$(call $($(PKG)_POST_INSTALL_TARGET_HOOKS))
-ifeq ($(WINDOWS),true)
+ifeq ($(MACOS),true)
+	$(foreach b,$($(PKG)_BUNDLES),sed -i -e 's|lv2:binary <\([_a-zA-Z0-9-]*\)\.so>|lv2:binary <\1\.dylib>|g' $(PAWPAW_PREFIX)/usr/lib/lv2/$(b)/manifest.ttl;)
+else ifeq ($(WINDOWS),true)
 	$(foreach b,$($(PKG)_BUNDLES),sed -i -e 's|lv2:binary <\([_a-zA-Z0-9-]*\)\.so>|lv2:binary <\1\.dll>|g' $(PAWPAW_PREFIX)/usr/lib/lv2/$(b)/manifest.ttl;)
 	$(foreach b,$($(PKG)_BUNDLES),rm -f $(PAWPAW_PREFIX)/usr/lib/lv2/$(b)/*.dll.a;)
 endif
@@ -177,6 +182,8 @@ $(STAMP_BUILT): $(STAMP_CONFIGURED)
 ifeq ($(MACOS),true)
 	$(foreach p,$(wildcard $($(PKG)_BUILDDIR)/Makefile $($(PKG)_BUILDDIR)/*/makefile),\
 		sed -i -e 's/-Wl,--gc-sections//g' $(p);)
+	$(foreach p,$(wildcard $($(PKG)_BUILDDIR)/Makefile),\
+		sed -i -e 's/-Wl,--as-needed//g' $(p);)
 	$(foreach p,$(wildcard $($(PKG)_BUILDDIR)/*/makefile),\
 		sed -i -e 's/-Wl,--no-undefined//g' $(p);)
 	$(foreach p,$(wildcard $($(PKG)_BUILDDIR)/*/makefile),\
