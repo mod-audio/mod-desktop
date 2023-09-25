@@ -8,16 +8,21 @@ from cx_Freeze import setup, Executable
 
 # ------------------------------------------------------------------------------------------------------------
 
+from sys import platform
+s = '\\' if platform == 'win32' else '/'
+
+# ------------------------------------------------------------------------------------------------------------
+
 options = {
   "zip_include_packages": ["*"],
   "zip_exclude_packages": ["mod","modtools"],
-  "replace_paths": [["*",".\\lib\\"]],
-  "build_exe": ".\\build",
+  "replace_paths": [["*",f".{s}lib{s}"]],
+  "build_exe": f".{s}build",
   "optimize": True,
 }
 
 exe_options = {
-  "script": ".\\utils\\mod-ui-wrapper.py",
+  "script": f".{s}utils{s}mod-ui-wrapper.py",
   "copyright": "Copyright (C) 2023 MOD Audio UG",
   "targetName": "mod-ui.exe",
 }

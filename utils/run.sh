@@ -39,6 +39,10 @@ elif [ "_${1}" = "_python3" ]; then
     shift
 fi
 
+if [ "${CROSS_COMPILING}" -eq 0 ] && [ "${LINUX}" -eq 1 ]; then
+    export LD_LIBRARY_PATH="${PAWPAW_PREFIX}/lib"
+fi
+
 # ---------------------------------------------------------------------------------------------------------------------
 # run command
 

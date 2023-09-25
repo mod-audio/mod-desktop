@@ -1,5 +1,5 @@
 
-PAWPAW_TARGET = linux
+PAWPAW_TARGET = linux-x86_64
 
 ifeq ($(PAWPAW_TARGET),macos-universal)
 APP_EXT =
@@ -34,13 +34,16 @@ TARGETS = \
 	build/mod \
 	build/modtools
 
-ifeq ($(PAWPAW_TARGET),win64)
+ifeq ($(PAWPAW_TARGET),macos-universal)
+else ifeq ($(PAWPAW_TARGET),win64)
 TARGETS += build/libjack64.dll
 TARGETS += build/libjackserver64.dll
 TARGETS += build/jack/jack_portaudio.dll
 TARGETS += build/jack/jack_winmme.dll
 else
-TARGETS += build/jack/jack_dummy.dll
+TARGETS += build/libjack.so.0
+TARGETS += build/libjackserver.so.0
+TARGETS += build/jack/jack_alsa.so
 endif
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -121,6 +124,7 @@ all: $(TARGETS) $(PLUGINS)
 
 clean:
 	$(MAKE) clean -C mod-host
+	$(MAKE) clean -C mod-ui/utils
 
 plugins: $(PLUGINS)
 
@@ -129,7 +133,7 @@ run: $(TARGETS)
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-build/jackd%: $(PAWPAW_PREFIX)/bin/jackd%
+build/jackd$(APP_EXT): $(PAWPAW_PREFIX)/bin/jackd$(APP_EXT)
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
 
@@ -158,7 +162,7 @@ build/lib/libmod_utils$(SO_EXT): mod-ui/utils/libmod_utils.so
 	ln -sf $(abspath $<) $@
 
 build/default.pedalboard: mod-ui/default.pedalboard
-	@mkdir -p build/utils
+	@mkdir -p build
 	ln -sf $(abspath $<) $@
 
 build/html: mod-ui/html
@@ -269,6 +273,9 @@ $(PAWPAW_PREFIX)/lib/lv2/neural-amp-modeler.lv2: $(BOOTSTRAP_FILES)
 
 $(PAWPAW_PREFIX)/lib/lv2/notes.lv2: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) notes-lv2
+
+$(PAWPAW_PREFIX)/lib/lv2/fil4.lv2: $(BOOTSTRAP_FILES)
+	./utils/plugin-builder.sh $(PAWPAW_TARGET) x42-fil4
 
 $(PAWPAW_PREFIX)/lib/lv2/midifilter.lv2: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) x42-midifilter
