@@ -153,7 +153,7 @@ PLUGINS = $(BUNDLES:%=build/plugins/%)
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-all: $(TARGETS) $(PLUGINS)
+all: $(TARGETS)
 
 clean:
 	$(MAKE) clean -C mod-host
