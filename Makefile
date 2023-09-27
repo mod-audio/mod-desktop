@@ -3,7 +3,11 @@
 CC ?= gcc
 TARGET_MACHINE := $(shell $(CC) -dumpmachine)
 
-ifeq ($(PAWPAW_TARGET),win64)
+ifeq ($(PAWPAW_TARGET),macos-universal-10.15)
+MACOS = true
+else ifeq ($(PAWPAW_TARGET),wasm)
+WASM = true
+else ifeq ($(PAWPAW_TARGET),win64)
 WINDOWS = true
 else
 ifneq (,$(findstring linux,$(TARGET_MACHINE)))
