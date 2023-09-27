@@ -123,7 +123,7 @@ define cmake-package
 
 define $(PKG)_CONFIGURE_CMDS
 	rm -f $$($$(PKG)_BUILDDIR)/CMakeCache.txt && \
-	$$(CMAKE) -S $$($$(PKG)_BUILDDIR) -B $$($$(PKG)_BUILDDIR)/build \
+	$$(CMAKE) -S $$($$(PKG)_BUILDDIR) -B $$($$(PKG)_BUILDDIR) \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_INSTALL_LIBDIR=lib \
 		-DCMAKE_INSTALL_PREFIX='/usr' \
@@ -132,12 +132,12 @@ define $(PKG)_CONFIGURE_CMDS
 endef
 
 define $(PKG)_BUILD_CMDS
-	$(MAKE) -C $$($$(PKG)_BUILDDIR)/build
+	$(MAKE) -C $$($$(PKG)_BUILDDIR)
 endef
 
 ifndef $(PKG)_INSTALL_TARGET_CMDS
 define $(PKG)_INSTALL_TARGET_CMDS
-	$(MAKE) -C $$($$(PKG)_BUILDDIR)/build install DESTDIR=$(PAWPAW_PREFIX)
+	$(MAKE) -C $$($$(PKG)_BUILDDIR) install DESTDIR=$(PAWPAW_PREFIX)
 endef
 endif
 

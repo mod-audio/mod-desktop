@@ -23,30 +23,6 @@ export PAWPAW_QUIET=1
 source PawPaw/local.env "${target}"
 
 # ---------------------------------------------------------------------------------------------------------------------
-# merged usr mode
-
-mkdir -p "${PAWPAW_PREFIX}/usr"
-
-if [ ! -e "${PAWPAW_PREFIX}/usr/bin" ]; then
-    ln -s ../bin "${PAWPAW_PREFIX}/usr/bin"
-fi
-if [ ! -e "${PAWPAW_PREFIX}/usr/docs" ]; then
-    ln -s ../docs "${PAWPAW_PREFIX}/usr/docs"
-fi
-if [ ! -e "${PAWPAW_PREFIX}/usr/etc" ]; then
-    ln -s ../etc "${PAWPAW_PREFIX}/usr/etc"
-fi
-if [ ! -e "${PAWPAW_PREFIX}/usr/include" ]; then
-    ln -s ../include "${PAWPAW_PREFIX}/usr/include"
-fi
-if [ ! -e "${PAWPAW_PREFIX}/usr/lib" ]; then
-    ln -s ../lib "${PAWPAW_PREFIX}/usr/lib"
-fi
-if [ ! -e "${PAWPAW_PREFIX}/usr/share" ]; then
-    ln -s ../share "${PAWPAW_PREFIX}/usr/share"
-fi
-
-# ---------------------------------------------------------------------------------------------------------------------
 
 export CMAKE
 export PAWPAW_BUILDDIR

@@ -3,7 +3,9 @@
 CC ?= gcc
 TARGET_MACHINE := $(shell $(CC) -dumpmachine)
 
-ifeq ($(PAWPAW_TARGET),)
+ifeq ($(PAWPAW_TARGET),win64)
+WINDOWS = true
+else
 ifneq (,$(findstring linux,$(TARGET_MACHINE)))
 LINUX = true
 PAWPAW_TARGET = linux-$(uname -m)
@@ -60,6 +62,7 @@ TARGETS += build/jack/jack_coremidi.so
 else ifeq ($(WINDOWS),true)
 TARGETS += build/libjack64.dll
 TARGETS += build/libjackserver64.dll
+TARGETS += build/libpython3.8.dll
 TARGETS += build/jack/jack_portaudio.dll
 TARGETS += build/jack/jack_winmme.dll
 else
@@ -102,9 +105,9 @@ BUNDLES += FluidSynthLeads.lv2
 BUNDLES += FluidSynthPads.lv2
 BUNDLES += Red_Zeppelin_4.lv2
 BUNDLES += Red_Zeppelin_5.lv2
-ifneq ($(MACOS),true)
-BUNDLES += fomp.lv2
-endif
+# ifneq ($(MACOS),true)
+# BUNDLES += fomp.lv2
+# endif
 BUNDLES += Kars.lv2
 ifneq ($(MACOS),true)
 BUNDLES += midifilter.lv2
@@ -140,7 +143,7 @@ BUNDLES += modspectre.lv2
 endif
 BUNDLES += MVerb.lv2
 BUNDLES += Nekobi.lv2
-# BUNDLES += neural-amp-modeler.lv2
+BUNDLES += neural_amp_modeler.lv2
 ifneq ($(MACOS),true)
 BUNDLES += notes.lv2
 endif
@@ -175,6 +178,10 @@ build/libjack%: $(PAWPAW_PREFIX)/lib/libjack%
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
 
+build/libpython%: $(PAWPAW_PREFIX)/bin/libpython%
+	@mkdir -p build
+	ln -sf $(abspath $<) $@
+
 build/jack/jack_%: $(PAWPAW_PREFIX)/lib/jack/jack_%
 	@mkdir -p build/jack
 	ln -sf $(abspath $<) $@
@@ -196,6 +203,10 @@ build/lib/libmod_utils$(SO_EXT): mod-ui/utils/libmod_utils.so
 	ln -sf $(abspath $<) $@
 
 build/default.pedalboard: mod-ui/default.pedalboard
+	@mkdir -p build
+	ln -sf $(abspath $<) $@
+
+build/jackd.bat: utils/jackd.bat
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
 
@@ -311,7 +322,7 @@ $(PAWPAW_PREFIX)/lib/lv2/modmeter.lv2: $(BOOTSTRAP_FILES)
 $(PAWPAW_PREFIX)/lib/lv2/modspectre.lv2: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) modspectre
 
-$(PAWPAW_PREFIX)/lib/lv2/neural-amp-modeler.lv2: $(BOOTSTRAP_FILES)
+$(PAWPAW_PREFIX)/lib/lv2/neural_amp_modeler.lv2: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) neural-amp-modeler-lv2
 
 $(PAWPAW_PREFIX)/lib/lv2/notes.lv2: $(BOOTSTRAP_FILES)
