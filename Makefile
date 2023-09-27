@@ -5,22 +5,23 @@ TARGET_MACHINE := $(shell $(CC) -dumpmachine)
 
 ifeq ($(PAWPAW_TARGET),)
 ifneq (,$(findstring linux,$(TARGET_MACHINE)))
+LINUX = true
 PAWPAW_TARGET = linux-$(uname -m)
 else ifneq (,$(findstring apple,$(TARGET_MACHINE)))
-PAWPAW_TARGET = macos-universal
+MACOS = true
+PAWPAW_TARGET = macos-universal-10.15
 else ifneq (,$(findstring mingw,$(TARGET_MACHINE)))
+WINDOWS = true
 PAWPAW_TARGET = win64
 else ifneq (,$(findstring wasm,$(TARGET_MACHINE)))
+WASM = true
 PAWPAW_TARGET = wasm
 else
 $(error unknown target, cannot continue)
 endif
 endif
 
-ifeq ($(PAWPAW_TARGET),macos-universal)
-APP_EXT =
-SO_EXT = .so
-else ifeq ($(PAWPAW_TARGET),win64)
+ifeq ($(WINDOWS),true)
 APP_EXT = .exe
 SO_EXT = .dll
 else
@@ -51,12 +52,12 @@ TARGETS = \
 	build/mod \
 	build/modtools
 
-ifeq ($(PAWPAW_TARGET),macos-universal)
+ifeq ($(MACOS),true)
 TARGETS += build/libjack.0.dylib
 TARGETS += build/libjackserver.0.dylib
 TARGETS += build/jack/jack_coreaudio.so
 TARGETS += build/jack/jack_coremidi.so
-else ifeq ($(PAWPAW_TARGET),win64)
+else ifeq ($(WINDOWS),true)
 TARGETS += build/libjack64.dll
 TARGETS += build/libjackserver64.dll
 TARGETS += build/jack/jack_portaudio.dll
@@ -72,11 +73,11 @@ endif
 BUNDLES  = abGate.lv2
 BUNDLES += artyfx.lv2
 BUNDLES += carla-files.lv2
+ifneq ($(MACOS),true)
 BUNDLES += DragonflyEarlyReflections.lv2
 BUNDLES += DragonflyHallReverb.lv2
 BUNDLES += DragonflyPlateReverb.lv2
 BUNDLES += DragonflyRoomReverb.lv2
-ifneq ($(PAWPAW_TARGET),macos-universal)
 BUNDLES += fil4.lv2
 endif
 BUNDLES += Black_Pearl_4A.lv2
@@ -101,11 +102,11 @@ BUNDLES += FluidSynthLeads.lv2
 BUNDLES += FluidSynthPads.lv2
 BUNDLES += Red_Zeppelin_4.lv2
 BUNDLES += Red_Zeppelin_5.lv2
-ifneq ($(PAWPAW_TARGET),macos-universal)
+ifneq ($(MACOS),true)
 BUNDLES += fomp.lv2
 endif
 BUNDLES += Kars.lv2
-ifneq ($(PAWPAW_TARGET),macos-universal)
+ifneq ($(MACOS),true)
 BUNDLES += midifilter.lv2
 endif
 BUNDLES += midigen.lv2
@@ -133,18 +134,18 @@ BUNDLES += mod-mda-Shepard.lv2
 BUNDLES += mod-mda-SubSynth.lv2
 BUNDLES += mod-mda-ThruZero.lv2
 BUNDLES += mod-mda-Vocoder.lv2
-ifneq ($(PAWPAW_TARGET),macos-universal)
+ifneq ($(MACOS),true)
 BUNDLES += modmeter.lv2 
 BUNDLES += modspectre.lv2
 endif
 BUNDLES += MVerb.lv2
 BUNDLES += Nekobi.lv2
 # BUNDLES += neural-amp-modeler.lv2
-ifneq ($(PAWPAW_TARGET),macos-universal)
+ifneq ($(MACOS),true)
 BUNDLES += notes.lv2
 endif
 BUNDLES += PingPongPan.lv2
-ifneq ($(PAWPAW_TARGET),macos-universal)
+ifneq ($(MACOS),true)
 BUNDLES += rt-neural-generic.lv2
 endif
 BUNDLES += wolf-shaper.lv2

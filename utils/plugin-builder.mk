@@ -52,7 +52,12 @@ $(PKG)_PKGDIR = $(CURDIR)/mod-plugin-builder/plugins/package/$(pkgname)
 BR2_TARGET_OPTIMIZATION =
 
 MAKE1 = make -j1
+
+ifeq ($(MACOS),true)
+PARALLEL_JOBS = $(shell sysctl -n hw.logicalcpu)
+else
 PARALLEL_JOBS = $(shell nproc)
+endif
 
 ifeq ($(WINDOWS),true)
 HOST_DIR = $(PAWPAW_PREFIX)-host

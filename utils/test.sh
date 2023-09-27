@@ -17,6 +17,7 @@ fi
 # ---------------------------------------------------------------------------------------------------------------------
 # set up env
 
+export JACK_DRIVER_DIR=$(pwd)/build/jack
 export LV2_PATH=$(pwd)/build/plugins
 # export MOD_LOG=1
 
@@ -32,12 +33,14 @@ fi
 
 JACKD+=" -C utils/jack-session.conf -R -S"
 
-if [ "${target}" = "win64" ]; then
-JACKD+=" -X coremidi -d coreaudio"
+if [ "${target}" = "macos-universal-10.15" ]; then
+# JACKD+=" -X coremidi"
+JACKD+=" -d coreaudio"
+JACKD+=" -P 'Built-in'"
 elif [ "${target}" = "win64" ]; then
 JACKD+=" -X winmme -d portaudio -d 'ASIO::WineASIO Driver'"
 else
-JACKD+=" -d dummy"
+JACKD+=" -d alsa"
 fi
 
 JACKD+=" -r 48000 -p 128"

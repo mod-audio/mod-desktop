@@ -17,20 +17,20 @@ jobs:
         with:
           path: |
             ~/PawPawBuilds
-          key: macos-universal-v${{ env.CACHE_VERSION }}
+          key: macos-v${{ env.CACHE_VERSION }}
+      - name: Set sha8
+        id: slug
+        run: echo "::set-output name=sha8::$(echo ${{ github.sha }} | cut -c1-8)"
       - name: Set up dependencies
         run: |
           brew install meson
       - name: Build
         run: |
-          make PAWPAW_TARGET=macos-universal
+          make PAWPAW_TARGET=macos-universal-10.15
       - name: Pack
         run: |
           mv build mod-app-macOS-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}
-          tar chz mod-app-macOS-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}.tar.gz mod-app-macOS-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}
-      - name: Set sha8
-        id: slug
-        run: echo "::set-output name=sha8::$(echo ${{ github.sha }} | cut -c1-8)"
+          tar chzf mod-app-macOS-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}.tar.gz mod-app-macOS-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ github.event.repository.name }}-macOS-${{ matrix.target }}-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}
@@ -49,6 +49,9 @@ jobs:
           path: |
             ~/PawPawBuilds
           key: ${{ matrix.target }}-v${{ env.CACHE_VERSION }}
+      - name: Set sha8
+        id: slug
+        run: echo "::set-output name=sha8::$(echo ${{ github.sha }} | cut -c1-8)"
       - name: Fix GitHub's mess
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
@@ -64,9 +67,6 @@ jobs:
         run: |
           mv build mod-app-win64-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}
           zip -r -9 mod-app-win64-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}.zip mod-app-win64-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}
-      - name: Set sha8
-        id: slug
-        run: echo "::set-output name=sha8::$(echo ${{ github.sha }} | cut -c1-8)"
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ github.event.repository.name }}-${{ matrix.target }}-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}
