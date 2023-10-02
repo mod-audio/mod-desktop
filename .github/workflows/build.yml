@@ -40,7 +40,7 @@ jobs:
           tar chzf mod-app-macOS-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}.tar.gz mod-app-macOS-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ github.event.repository.name }}-macOS-${{ matrix.target }}-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}
+          name: ${{ github.event.repository.name }}-macOS-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}
           path: |
             *.tar.gz
 
@@ -56,7 +56,7 @@ jobs:
         with:
           path: |
             ~/PawPawBuilds
-          key: ${{ matrix.target }}-v${{ env.CACHE_VERSION }}
+          key: win64-v${{ env.CACHE_VERSION }}
       - name: Set sha8
         id: slug
         run: echo "::set-output name=sha8::$(echo ${{ github.sha }} | cut -c1-8)"
@@ -82,6 +82,6 @@ jobs:
           zip -r -9 mod-app-win64-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}.zip mod-app-win64-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ github.event.repository.name }}-${{ matrix.target }}-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}
+          name: ${{ github.event.repository.name }}-win64-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}
           path: |
             *.zip
