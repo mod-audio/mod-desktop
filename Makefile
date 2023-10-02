@@ -12,7 +12,7 @@ WINDOWS = true
 else
 ifneq (,$(findstring linux,$(TARGET_MACHINE)))
 LINUX = true
-PAWPAW_TARGET = linux-$(uname -m)
+PAWPAW_TARGET = linux-$(shell uname -m)
 else ifneq (,$(findstring apple,$(TARGET_MACHINE)))
 MACOS = true
 PAWPAW_TARGET = macos-universal-10.15
