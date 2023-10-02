@@ -174,6 +174,12 @@ run: $(TARGETS)
 
 # ---------------------------------------------------------------------------------------------------------------------
 
+macos:
+	$(MAKE) PAWPAW_TARGET=macos-universal-10.15
+
+wasm:
+	$(MAKE) PAWPAW_TARGET=wasm
+
 win64:
 	$(MAKE) PAWPAW_TARGET=win64
 

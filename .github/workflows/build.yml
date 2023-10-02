@@ -3,7 +3,8 @@ name: build
 on: [push, pull_request]
 
 env:
-  CACHE_VERSION: 1
+  CACHE_VERSION: 2
+  PAWPAW_SKIP_LTO: 1
 
 jobs:
   macos:
@@ -13,6 +14,7 @@ jobs:
         with:
           submodules: recursive
       - name: Set up cache
+        id: cache
         uses: actions/cache@v3
         with:
           path: |
@@ -24,10 +26,15 @@ jobs:
       - name: Set up dependencies
         run: |
           brew install meson
+      - name: Build dependencies
+        run: |
+          ./PawPaw/bootstrap-mod.sh macos-universal-10.15 && ./PawPaw/.cleanup.sh macos-universal-10.15
       - name: Build
+        if: steps.cache.outputs.cache-hit == 'true'
         run: |
           make PAWPAW_TARGET=macos-universal-10.15
       - name: Pack
+        if: steps.cache.outputs.cache-hit == 'true'
         run: |
           mv build mod-app-macOS-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}
           tar chzf mod-app-macOS-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}.tar.gz mod-app-macOS-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}
@@ -44,6 +51,7 @@ jobs:
         with:
           submodules: recursive
       - name: Set up cache
+        id: cache
         uses: actions/cache@v3
         with:
           path: |
@@ -60,10 +68,15 @@ jobs:
       - name: Set up dependencies
         run: |
           sudo apt-get install -yqq --allow-downgrades autopoint binutils-mingw-w64-x86-64 libc6:i386 libgcc-s1:i386 libstdc++6:i386 g++-mingw-w64-x86-64 gperf meson mingw-w64 wine-stable
+      - name: Build dependencies
+        run: |
+          ./PawPaw/bootstrap-mod.sh win64 && ./PawPaw/.cleanup.sh win64
       - name: Build
+        if: steps.cache.outputs.cache-hit == 'true'
         run: |
           make PAWPAW_TARGET=win64
       - name: Pack
+        if: steps.cache.outputs.cache-hit == 'true'
         run: |
           mv build mod-app-win64-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}
           zip -r -9 mod-app-win64-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}.zip mod-app-win64-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}
