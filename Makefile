@@ -69,6 +69,11 @@ TARGETS += build/libjackserver64.dll
 TARGETS += build/libpython3.8.dll
 TARGETS += build/jack/jack_portaudio.dll
 TARGETS += build/jack/jack_winmme.dll
+TARGETS += build/mod-app.exe
+TARGETS += build/Qt5Core.dll
+TARGETS += build/Qt5Gui.dll
+TARGETS += build/Qt5Svg.dll
+TARGETS += build/Qt5Widgets.dll
 else
 TARGETS += build/libjack.so.0
 TARGETS += build/libjackserver.so.0
@@ -201,6 +206,10 @@ build/jackd$(APP_EXT): $(PAWPAW_PREFIX)/bin/jackd$(APP_EXT)
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
 
+build/Qt5%.dll: $(PAWPAW_PREFIX)/bin/Qt5%.dll
+	@mkdir -p build
+	ln -sf $(abspath $<) $@
+
 build/libjack%: $(PAWPAW_PREFIX)/lib/libjack%
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
@@ -227,6 +236,10 @@ build/jack/mod-midi-merger$(SO_EXT): mod-midi-merger/build/mod-midi-merger$(SO_E
 
 build/lib/libmod_utils$(SO_EXT): mod-ui/utils/libmod_utils.so
 	@mkdir -p build/lib
+	ln -sf $(abspath $<) $@
+
+build/mod-app$(APP_EXT): systray/mod-app$(APP_EXT)
+	@mkdir -p build
 	ln -sf $(abspath $<) $@
 
 build/default.pedalboard: mod-ui/default.pedalboard
@@ -276,6 +289,9 @@ mod-midi-merger/build/Makefile: $(BOOTSTRAP_FILES)
 
 mod-ui/utils/libmod_utils.so: $(BOOTSTRAP_FILES)
 	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) -C mod-ui/utils
+
+systray/mod-app$(APP_EXT): systray/main.cpp systray/mod-app.hpp
+	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) -C systray
 
 # ---------------------------------------------------------------------------------------------------------------------
 

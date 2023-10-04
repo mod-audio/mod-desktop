@@ -1,6 +1,7 @@
 /build/
 *.dll
 *.exe
+*.o
 *.tar.gz
 *.zip
 qrc_*.hpp

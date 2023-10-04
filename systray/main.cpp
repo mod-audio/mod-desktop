@@ -4,6 +4,10 @@
 #include "mod-app.hpp"
 #include "qrc_mod-app.hpp"
 
+#ifndef _WIN32
+#include <dlfcn.h>
+#endif
+
 int main(int argc, char* argv[])
 {
     // TODO set branding here
@@ -18,10 +22,26 @@ int main(int argc, char* argv[])
         return 1;
     }
 
+   #ifdef _WIN32
+    WCHAR wc[MAX_PATH + 256] = {};
+    GetModuleFileNameW(GetModuleHandleW(nullptr), wc, sizeof(wc)/sizeof(wc[0]));
+
+    if (wchar_t* const wcc = wcsrchr(wc, '\\'))
+        *wcc = 0;
+
+    SetCurrentDirectoryW(wc);
+
+    const QString cwd(QString::fromWCharArray(wc));
+
+    std::wcscat(wc, L"\\plugins");
+    SetEnvironmentVariableW(L"LV2_PATH", wc);
+   #else
+    // TODO
+    const QString cwd;
+   #endif
+
     app.setQuitOnLastWindowClosed(false);
 
-    AppWindow window;
-    window.show();
-
+    AppWindow window(cwd);
     return app.exec();
 }
