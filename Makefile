@@ -74,6 +74,12 @@ TARGETS += build/Qt5Core.dll
 TARGETS += build/Qt5Gui.dll
 TARGETS += build/Qt5Svg.dll
 TARGETS += build/Qt5Widgets.dll
+TARGETS += build/bearer/qgenericbearer.dll
+TARGETS += build/generic/qtuiotouchplugin.dll
+TARGETS += build/iconengines/qsvgicon.dll
+TARGETS += build/imageformats/qsvg.dll
+TARGETS += build/platforms/qwindows.dll
+TARGETS += build/styles/qwindowsvistastyle.dll
 else
 TARGETS += build/libjack.so.0
 TARGETS += build/libjackserver.so.0
@@ -210,6 +216,30 @@ build/Qt5%.dll: $(PAWPAW_PREFIX)/bin/Qt5%.dll
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
 
+build/bearer/q%.dll: $(PAWPAW_PREFIX)/lib/qt5/plugins/bearer/q%.dll
+	@mkdir -p build/bearer
+	ln -sf $(abspath $<) $@
+
+build/generic/q%.dll: $(PAWPAW_PREFIX)/lib/qt5/plugins/generic/q%.dll
+	@mkdir -p build/generic
+	ln -sf $(abspath $<) $@
+
+build/iconengines/q%.dll: $(PAWPAW_PREFIX)/lib/qt5/plugins/iconengines/q%.dll
+	@mkdir -p build/iconengines
+	ln -sf $(abspath $<) $@
+
+build/imageformats/q%.dll: $(PAWPAW_PREFIX)/lib/qt5/plugins/imageformats/q%.dll
+	@mkdir -p build/imageformats
+	ln -sf $(abspath $<) $@
+
+build/platforms/q%.dll: $(PAWPAW_PREFIX)/lib/qt5/plugins/platforms/q%.dll
+	@mkdir -p build/platforms
+	ln -sf $(abspath $<) $@
+
+build/styles/q%.dll: $(PAWPAW_PREFIX)/lib/qt5/plugins/styles/q%.dll
+	@mkdir -p build/styles
+	ln -sf $(abspath $<) $@
+
 build/libjack%: $(PAWPAW_PREFIX)/lib/libjack%
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
@@ -243,10 +273,6 @@ build/mod-app$(APP_EXT): systray/mod-app$(APP_EXT)
 	ln -sf $(abspath $<) $@
 
 build/default.pedalboard: mod-ui/default.pedalboard
-	@mkdir -p build
-	ln -sf $(abspath $<) $@
-
-build/jackd.bat: utils/jackd.bat
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
 
@@ -287,7 +313,7 @@ mod-midi-merger/build/mod-midi-merger-standalone$(APP_EXT): mod-midi-merger/buil
 mod-midi-merger/build/Makefile: $(BOOTSTRAP_FILES)
 	./utils/run.sh $(PAWPAW_TARGET) cmake -S mod-midi-merger -B mod-midi-merger/build
 
-mod-ui/utils/libmod_utils.so: $(BOOTSTRAP_FILES)
+mod-ui/utils/libmod_utils.so: $(BOOTSTRAP_FILES) mod-ui/utils/utils_lilv.cpp
 	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) -C mod-ui/utils
 
 systray/mod-app$(APP_EXT): systray/main.cpp systray/mod-app.hpp

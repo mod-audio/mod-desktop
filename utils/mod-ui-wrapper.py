@@ -14,15 +14,19 @@ DATA_DIR = os.path.join(ROOT, 'data')
 
 sys.path = [ROOT] + sys.path
 
-os.environ['LV2_PATH'] = os.path.join(ROOT, 'plugins')
+os.environ['LV2_PATH'] = os.path.join(DATA_DIR, 'lv2') + os.path.pathsep + os.path.join(ROOT, 'plugins')
+os.environ['MOD_APP'] = '1'
 os.environ['MOD_DATA_DIR'] = DATA_DIR
 os.environ['MOD_DEFAULT_PEDALBOARD'] = os.path.join(ROOT, 'default.pedalboard')
 os.environ['MOD_DEV_ENVIRONMENT'] = '0'
+os.environ['MOD_DEVICE_HOST_PORT'] = '18182'
 os.environ['MOD_DEVICE_WEBSERVER_PORT'] = '18181'
 os.environ['MOD_LOG'] = os.environ.get("MOD_LOG", '1')
 os.environ['MOD_KEY_PATH'] = os.path.join(DATA_DIR, 'keys')
 os.environ['MOD_HTML_DIR'] = os.path.join(ROOT, 'html')
 os.environ['MOD_USER_FILES_DIR'] = os.path.join(DATA_DIR, 'user-files')
+os.environ['MOD_USER_PEDALBOARDS_DIR'] = os.path.join(DATA_DIR, 'pedalboards')
+os.environ['MOD_USER_PLUGINS_DIR'] = os.path.join(DATA_DIR, 'lv2')
 
 os.makedirs(os.path.join(DATA_DIR, 'user-files', 'Audio Loops'), exist_ok=True)
 os.makedirs(os.path.join(DATA_DIR, 'user-files', 'Audio Recordings'), exist_ok=True)

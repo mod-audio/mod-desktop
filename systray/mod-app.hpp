@@ -41,6 +41,12 @@ public:
         if (! waitForFinished(500))
             kill();
     }
+
+public slots:
+    void startSlot()
+    {
+        start();
+    }
 };
 
 class AppWindow : public QMainWindow
@@ -90,11 +96,13 @@ public:
 
         sysmenu = new QMenu(this);
         sysmenu->addAction(openAction);
+        sysmenu->addAction(settingsAction);
         sysmenu->addSeparator();
         sysmenu->addAction(quitAction);
 
         systray = new QSystemTrayIcon(icon, this);
         systray->setContextMenu(sysmenu);
+        // systray->setIcon(QPixmap(":/mod-logo.svg"));
         connect(systray, &QSystemTrayIcon::messageClicked, this, &AppWindow::messageClicked);
         connect(systray, &QSystemTrayIcon::activated, this, &AppWindow::iconActivated);
 
@@ -207,23 +215,23 @@ protected:
 
     void timerEvent(QTimerEvent* const event) override
     {
-        if (event->timerId() == timerId)
+        if (timerId != 0 && event->timerId() == timerId)
         {
-            if (startingHost || stoppingHost || processHost.state() != QProcess::NotRunning)
+            // if (startingHost || stoppingHost || processHost.state() != QProcess::NotRunning)
             {
                 const QByteArray text = processHost.readAll().trimmed();
                 if (! text.isEmpty())
                     ui.text_host->appendPlainText(text);
             }
 
-            if (startingUI || stoppingUI || processUI.state() != QProcess::NotRunning)
+            // if (startingUI || stoppingUI || processUI.state() != QProcess::NotRunning)
             {
                 const QByteArray text = processUI.readAll().trimmed();
                 if (! text.isEmpty())
                     ui.text_ui->appendPlainText(text);
             }
 
-            startingHost = startingUI = false;
+            // startingHost = startingUI = false;
         }
 
         QMainWindow::timerEvent(event);
@@ -266,15 +274,15 @@ private:
         if (settings.contains("Geometry"))
             restoreGeometry(settings.value("Geometry").toByteArray());
 
-        if (settings.value("FirstRun", true).toBool())
+//         if (settings.value("FirstRun", true).toBool())
         {
             setStopped();
             QTimer::singleShot(0, this, &QMainWindow::show);
         }
-        else
-        {
-            QTimer::singleShot(100, this, &AppWindow::start);
-        }
+//         else
+//         {
+//             QTimer::singleShot(100, this, &AppWindow::start);
+//         }
 
         QTimer::singleShot(1, systray, &QSystemTrayIcon::show);
     }
@@ -286,7 +294,7 @@ private:
         ui.b_start->setEnabled(false);
         ui.b_stop->setEnabled(true);
         ui.b_opengui->setEnabled(true);
-        systray->setToolTip(tr("Running"));
+        systray->setToolTip(tr("MOD App: Running"));
     }
 
     void setStopped()
@@ -296,7 +304,7 @@ private:
         ui.b_start->setEnabled(true);
         ui.b_stop->setEnabled(false);
         ui.b_opengui->setEnabled(false);
-        systray->setToolTip(tr("Stopped"));
+        systray->setToolTip(tr("MOD App: Stopped"));
     }
 
     QString getProcessErrorAsString(QProcess::ProcessError error)
@@ -359,7 +367,7 @@ private slots:
             "-R",
             "-S",
            #if defined(Q_OS_WIN)
-            // "-X", "winmme",
+//             "-X", "winmme",
            #elif defined(Q_OS_MAC)
             "-X", "coremidi",
            #endif
@@ -431,8 +439,7 @@ private slots:
             processUI.terminate();
         }
 
-        // setRunning();
-
+        setStopped();
         showErrorMessage(tr("Could not start MOD Host.\n") + getProcessErrorAsString(error));
     }
 
@@ -451,26 +458,29 @@ private slots:
             processHost.terminate();
         }
 
+        setStopped();
         showErrorMessage(tr("Could not start MOD UI.\n") + getProcessErrorAsString(error));
     }
 
     void hostStartSuccess()
     {
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
+        startingHost = false;
         startingUI = true;
-        processUI.start();
+        QTimer::singleShot(1000, &processUI, &AppProcess::startSlot);
     }
 
     void uiStartSuccess()
     {
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
+        startingUI = false;
         setRunning();
     }
 
     void hostFinished(int exitCode, QProcess::ExitStatus exitStatus)
     {
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
-        stoppingHost = false;
+        startingHost = stoppingHost = false;
         stopUIIfNeeded();
         setStopped();
     }
@@ -478,7 +488,7 @@ private slots:
     void uiFinished(int exitCode, QProcess::ExitStatus exitStatus)
     {
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
-        stoppingUI = false;
+        startingUI = stoppingUI = false;
         stopHostIfNeeded();
     }
 

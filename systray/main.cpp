@@ -29,12 +29,15 @@ int main(int argc, char* argv[])
     if (wchar_t* const wcc = wcsrchr(wc, '\\'))
         *wcc = 0;
 
+    const QString cwd(QString::fromWCharArray(wc));
     SetCurrentDirectoryW(wc);
 
-    const QString cwd(QString::fromWCharArray(wc));
-
-    std::wcscat(wc, L"\\plugins");
-    SetEnvironmentVariableW(L"LV2_PATH", wc);
+    WCHAR lv2path[(MAX_PATH + 256) * 2] = {};
+    std::wcscat(lv2path, wc);
+    std::wcscat(lv2path, L"\\data\\lv2;");
+    std::wcscat(lv2path, wc);
+    std::wcscat(lv2path, L"\\plugins");
+    SetEnvironmentVariableW(L"LV2_PATH", lv2path);
    #else
     // TODO
     const QString cwd;
