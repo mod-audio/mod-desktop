@@ -1,3 +1,7 @@
 /build/
+*.dll
+*.exe
 *.tar.gz
 *.zip
+qrc_*.hpp
+ui_*.hpp
