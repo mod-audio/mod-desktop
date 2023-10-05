@@ -76,10 +76,10 @@ Source: "..\build\html\fonts\Ek-Mukta\Ek-Mukta-700\*.ttf"; DestDir: "{app}\html\
 Source: "..\build\html\fonts\Ek-Mukta\Ek-Mukta-700\*.woff"; DestDir: "{app}\html\fonts\Ek-Mukta\Ek-Mukta-700"; Flags: ignoreversion;
 Source: "..\build\html\fonts\Ek-Mukta\Ek-Mukta-700\*.woff2"; DestDir: "{app}\html\fonts\Ek-Mukta\Ek-Mukta-700"; Flags: ignoreversion;
 Source: "..\build\html\fonts\Ek-Mukta\Ek-Mukta-regular\*.eot"; DestDir: "{app}\html\fonts\Ek-Mukta\Ek-Mukta-regular"; Flags: ignoreversion;
-Source: "..\build\html\fonts\Ek-Mukta\Ek-Mukta-regular"; DestDir: "{app}\html\fonts\Ek-Mukta\Ek-Mukta-regular\*.svg"; Flags: ignoreversion;
-Source: "..\build\html\fonts\Ek-Mukta\Ek-Mukta-regular"; DestDir: "{app}\html\fonts\Ek-Mukta\Ek-Mukta-regular\*.ttf"; Flags: ignoreversion;
-Source: "..\build\html\fonts\Ek-Mukta\Ek-Mukta-regular"; DestDir: "{app}\html\fonts\Ek-Mukta\Ek-Mukta-regular\*.woff"; Flags: ignoreversion;
-Source: "..\build\html\fonts\Ek-Mukta\Ek-Mukta-regular"; DestDir: "{app}\html\fonts\Ek-Mukta\Ek-Mukta-regular\*.woff2"; Flags: ignoreversion;
+Source: "..\build\html\fonts\Ek-Mukta\Ek-Mukta-regular\*.svg"; DestDir: "{app}\html\fonts\Ek-Mukta\Ek-Mukta-regular"; Flags: ignoreversion;
+Source: "..\build\html\fonts\Ek-Mukta\Ek-Mukta-regular\*.ttf"; DestDir: "{app}\html\fonts\Ek-Mukta\Ek-Mukta-regular"; Flags: ignoreversion;
+Source: "..\build\html\fonts\Ek-Mukta\Ek-Mukta-regular\*.woff"; DestDir: "{app}\html\fonts\Ek-Mukta\Ek-Mukta-regular"; Flags: ignoreversion;
+Source: "..\build\html\fonts\Ek-Mukta\Ek-Mukta-regular\*.woff2"; DestDir: "{app}\html\fonts\Ek-Mukta\Ek-Mukta-regular"; Flags: ignoreversion;
 Source: "..\build\html\fonts\comforta\*.ttf"; DestDir: "{app}\html\fonts\comforta"; Flags: ignoreversion;
 Source: "..\build\html\fonts\cooper\*.eot"; DestDir: "{app}\html\fonts\cooper"; Flags: ignoreversion;
 Source: "..\build\html\fonts\cooper\*.ttf"; DestDir: "{app}\html\fonts\cooper"; Flags: ignoreversion;
