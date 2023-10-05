@@ -4,7 +4,10 @@
 #include "mod-app.hpp"
 #include "qrc_mod-app.hpp"
 
-#ifndef _WIN32
+#ifdef _WIN32
+#include <shlobj.h>
+const WCHAR* user_files_dir = nullptr;
+#else
 #include <dlfcn.h>
 #endif
 
@@ -32,12 +35,23 @@ int main(int argc, char* argv[])
     const QString cwd(QString::fromWCharArray(wc));
     SetCurrentDirectoryW(wc);
 
-    WCHAR lv2path[(MAX_PATH + 256) * 2] = {};
-    std::wcscat(lv2path, wc);
-    std::wcscat(lv2path, L"\\data\\lv2;");
-    std::wcscat(lv2path, wc);
-    std::wcscat(lv2path, L"\\plugins");
-    SetEnvironmentVariableW(L"LV2_PATH", lv2path);
+    WCHAR path[(MAX_PATH + 256) * 2] = {};
+    std::wcscat(path, wc);
+    std::wcscat(path, L"\\data\\lv2;");
+    std::wcscat(path, wc);
+    std::wcscat(path, L"\\plugins");
+    SetEnvironmentVariableW(L"LV2_PATH", path);
+
+    if (SHGetSpecialFolderPathW(nullptr, path, CSIDL_MYDOCUMENTS, FALSE))
+    {
+        std::wcscat(path, L"\\mod-app");
+        _wmkdir(path);
+        SetEnvironmentVariableW(L"MOD_DATA_DIR", path);
+
+        std::wcscat(path, L"\\user-files");
+        _wmkdir(path);
+        user_files_dir = path;
+    }
    #else
     // TODO
     const QString cwd;

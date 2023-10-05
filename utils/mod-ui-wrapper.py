@@ -10,13 +10,12 @@ import uuid
 from tornado import gen, iostream, web, websocket
 
 ROOT = os.path.abspath(os.path.dirname(sys.argv[0]))
-DATA_DIR = os.path.join(ROOT, 'data')
+DATA_DIR = os.getenv('MOD_DATA_DIR')
 
 sys.path = [ROOT] + sys.path
 
 os.environ['LV2_PATH'] = os.path.join(DATA_DIR, 'lv2') + os.path.pathsep + os.path.join(ROOT, 'plugins')
 os.environ['MOD_APP'] = '1'
-os.environ['MOD_DATA_DIR'] = DATA_DIR
 os.environ['MOD_DEFAULT_PEDALBOARD'] = os.path.join(ROOT, 'default.pedalboard')
 os.environ['MOD_DEV_ENVIRONMENT'] = '0'
 os.environ['MOD_DEVICE_HOST_PORT'] = '18182'
