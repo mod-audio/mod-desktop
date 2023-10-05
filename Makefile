@@ -47,6 +47,7 @@ BOOTSTRAP_FILES = \
 
 TARGETS = \
 	build/jackd$(APP_EXT) \
+	build/mod-screenshot$(APP_EXT) \
 	build/mod-ui$(APP_EXT) \
 	build/jack/jack-session.conf \
 	build/jack/mod-host$(SO_EXT) \
@@ -294,6 +295,10 @@ build/jack/jack-session.conf: utils/jack-session.conf
 	@mkdir -p build/jack
 	ln -sf $(abspath $<) $@
 
+build/mod-screenshot$(APP_EXT): utils/mod-screenshot.py $(BOOTSTRAP_FILES)
+	./utils/run.sh $(PAWPAW_TARGET) python3 utils/mod-screenshot.py build_exe
+	touch $@
+
 build/mod-ui$(APP_EXT): utils/mod-ui.py utils/mod-ui-wrapper.py $(BOOTSTRAP_FILES)
 	./utils/run.sh $(PAWPAW_TARGET) python3 utils/mod-ui.py build_exe
 	touch $@
@@ -313,7 +318,7 @@ mod-midi-merger/build/mod-midi-merger-standalone$(APP_EXT): mod-midi-merger/buil
 mod-midi-merger/build/Makefile: $(BOOTSTRAP_FILES)
 	./utils/run.sh $(PAWPAW_TARGET) cmake -S mod-midi-merger -B mod-midi-merger/build
 
-mod-ui/utils/libmod_utils.so: $(BOOTSTRAP_FILES) mod-ui/utils/utils_lilv.cpp
+mod-ui/utils/libmod_utils.so: $(BOOTSTRAP_FILES) mod-ui/utils/utils.h mod-ui/utils/utils_jack.cpp mod-ui/utils/utils_lilv.cpp
 	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) -C mod-ui/utils
 
 systray/mod-app$(APP_EXT): systray/main.cpp systray/mod-app.hpp
