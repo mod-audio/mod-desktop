@@ -24,6 +24,9 @@
 #include <windows.h>
 #endif
 
+QString getUserFilesDir();
+void writeMidiChannelsToProfile(int pedalboard, int snapshot);
+
 class AppProcess : public QProcess
 {
 public:
@@ -55,7 +58,8 @@ class AppWindow : public QMainWindow
 
     Ui_AppWindow ui;
 
-    QAction* openAction = nullptr;
+    QAction* openGuiAction = nullptr;
+    QAction* openUserFilesAction = nullptr;
     QAction* settingsAction = nullptr;
     QAction* quitAction = nullptr;
     QMenu* sysmenu = nullptr;
@@ -71,6 +75,10 @@ class AppWindow : public QMainWindow
     bool stoppingUI = false;
     int timerId = 0;
 
+   #ifdef Q_OS_WIN
+    QStringList matchingWasapiInputDevices;
+   #endif
+
 public:
     AppWindow(const QString& cwd)
         : processHost(this, cwd),
@@ -85,8 +93,11 @@ public:
 
         const QIcon icon(":/mod-logo.svg");
 
-        openAction = new QAction(tr("&Open GUI"), this);
-        connect(openAction, &QAction::triggered, this, &AppWindow::openGui);
+        openGuiAction = new QAction(tr("&Open GUI"), this);
+        connect(openGuiAction, &QAction::triggered, this, &AppWindow::openGui);
+
+        openUserFilesAction = new QAction(tr("&Open User Files"), this);
+        connect(openUserFilesAction, &QAction::triggered, this, &AppWindow::openUserFilesDir);
 
         settingsAction = new QAction(tr("&Settings"), this);
         connect(settingsAction, &QAction::triggered, this, &QMainWindow::show);
@@ -95,7 +106,8 @@ public:
         connect(quitAction, &QAction::triggered, qApp, &QCoreApplication::quit);
 
         sysmenu = new QMenu(this);
-        sysmenu->addAction(openAction);
+        sysmenu->addAction(openGuiAction);
+        sysmenu->addAction(openUserFilesAction);
         sysmenu->addAction(settingsAction);
         sysmenu->addSeparator();
         sysmenu->addAction(quitAction);
@@ -128,6 +140,13 @@ public:
         timerId = startTimer(500);
     }
 
+    ~AppWindow()
+    {
+        printf("----------- %s %d\n", __FUNCTION__, __LINE__);
+
+        close();
+    }
+
     void fillInDeviceList()
     {
         printf("--------------------------------------------------------\n");
@@ -142,6 +161,7 @@ public:
 
             QStringList apis;
             apis.reserve(numHostApis);
+            QString matchingInputDevName;
 
             for (PaHostApiIndex i = 0; i < numHostApis; ++i)
                 apis.push_back(Pa_GetHostApiInfo(i)->name);
@@ -152,13 +172,40 @@ public:
             {
                 const PaDeviceInfo* const devInfo = Pa_GetDeviceInfo(i);
                 const QString& hostApiName(apis[devInfo->hostApi]);
-                
-                if (hostApiName != "ASIO" && hostApiName != "Windows WASAPI")
-                    continue;
 
-                wchar_t wdevName[MAX_PATH + 2];
-                MultiByteToWideChar(CP_UTF8, 0, devInfo->name, -1, wdevName, MAX_PATH-1);
-                ui.cb_device->addItem(hostApiName + "::" + QString::fromWCharArray(wdevName));
+                if (hostApiName != "ASIO" && hostApiName != "Windows WASAPI")
+                {
+                    matchingInputDevName.clear();
+                    continue;
+                }
+
+                if (hostApiName == "Windows WASAPI")
+                {
+                    printf("DEBUG WASAPI %d %s %d %d\n",
+                           i, devInfo->name, devInfo->maxInputChannels, devInfo->maxOutputChannels);
+                }
+
+                const QString devName(QString::fromUtf8(devInfo->name));
+
+                if (devInfo->maxOutputChannels == 0)
+                {
+                    if (devInfo->maxInputChannels == 0)
+                        continue;
+
+                    if (hostApiName == "Windows WASAPI")
+                        matchingInputDevName = devName;
+                    else
+                        matchingInputDevName.clear();
+
+                    continue;
+                }
+
+                ui.cb_device->addItem(hostApiName + "::" + devName);
+
+                matchingWasapiInputDevices.append(devInfo->maxInputChannels == 0 && !matchingInputDevName.isEmpty()
+                    ? hostApiName + "::" + matchingInputDevName
+                    : "");
+                matchingInputDevName.clear();
             }
 
             Pa_Terminate();
@@ -193,23 +240,7 @@ protected:
         }
         else
         {
-            if (timerId != 0)
-            {
-                killTimer(timerId);
-                timerId = 0;
-            }
-
-            if (processUI.state() != QProcess::NotRunning)
-            {
-                stoppingUI = true;
-                processUI.terminate();
-            }
-
-            if (processHost.state() != QProcess::NotRunning)
-            {
-                stoppingHost = true;
-                processHost.terminate();
-            }
+            close();
         }
     }
 
@@ -246,7 +277,10 @@ private:
         settings.setValue("Geometry", saveGeometry());
         settings.setValue("AudioDevice", ui.cb_device->currentText());
         settings.setValue("AudioBufferSize", ui.cb_buffersize->currentText());
-        settings.setValue("ShowLogs", ui.tab_logs->isEnabled());
+        settings.setValue("EnableMIDI", ui.gb_midi->isChecked());
+        settings.setValue("PedalboardsMidiChannel", ui.sp_midi_pb->value());
+        settings.setValue("SnapshotsMidiChannel", ui.sp_midi_ss->value());
+        settings.setValue("ShowLogs", ui.gb_logs->isChecked());
     }
 
     void loadSettings()
@@ -269,20 +303,24 @@ private:
 
         ui.cb_buffersize->setCurrentIndex(settings.value("AudioBufferSize", "128").toString() == "256" ? 1 : 0);
 
+        ui.gb_midi->setChecked(settings.value("EnableMIDI", false).toBool());
+        ui.sp_midi_pb->setValue(settings.value("PedalboardsMidiChannel", 0).toInt());
+        ui.sp_midi_pb->setValue(settings.value("SnapshotsMidiChannel", 0).toInt());
+
         adjustSize();
 
         if (settings.contains("Geometry"))
             restoreGeometry(settings.value("Geometry").toByteArray());
 
-//         if (settings.value("FirstRun", true).toBool())
+        if (settings.value("FirstRun", true).toBool() || getenv("KDE_FULL_SESSION") != nullptr)
         {
             setStopped();
             QTimer::singleShot(0, this, &QMainWindow::show);
         }
-//         else
-//         {
-//             QTimer::singleShot(100, this, &AppWindow::start);
-//         }
+        else
+        {
+            QTimer::singleShot(100, this, &AppWindow::start);
+        }
 
         QTimer::singleShot(1, systray, &QSystemTrayIcon::show);
     }
@@ -350,9 +388,36 @@ private:
         processUI.terminate();
     }
 
+    void close()
+    {
+        printf("----------- %s %d\n", __FUNCTION__, __LINE__);
+
+        saveSettings();
+
+        if (timerId != 0)
+        {
+            killTimer(timerId);
+            timerId = 0;
+        }
+
+        if (processUI.state() != QProcess::NotRunning)
+        {
+            stoppingUI = true;
+            processUI.terminate();
+        }
+
+        if (processHost.state() != QProcess::NotRunning)
+        {
+            stoppingHost = true;
+            processHost.terminate();
+        }
+    }
+
 private slots:
     void start()
     {
+        saveSettings();
+
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
         if (processHost.state() != QProcess::NotRunning)
         {
@@ -363,14 +428,34 @@ private slots:
         ui.text_host->clear();
         ui.text_ui->clear();
 
+        writeMidiChannelsToProfile(ui.sp_midi_pb->value(), ui.sp_midi_ss->value());
+
+        const bool midiEnabled = ui.gb_midi->isChecked();
+
+      #if defined(Q_OS_WIN) || defined(Q_OS_MAC)
+        const QString argPre1 = midiEnabled ? "-X" : "-S";
+       #ifdef Q_OS_WIN
+        const QString argPre2 = midiEnabled ? "winmme" : "-S";
+       #else
+        const QString argPre2 = midiEnabled ? "coremidi" : "-S";
+       #endif
+        const QString argPost1;
+        const QString argPost2;
+      #else
+        const QString argPre1;
+        const QString argPre2;
+        const QString argPost1 = midiEnabled ? "-X" : "-z";
+        const QString argPost2 = midiEnabled ? "seqmidi" : "n";
+      #endif
+
+       #ifdef Q_OS_WIN
+        const QString& inputDev(matchingWasapiInputDevices[ui.cb_device->currentIndex()]);
+       #endif
+
         const QStringList arguments = {
             "-R",
             "-S",
-           #if defined(Q_OS_WIN)
-//             "-X", "winmme",
-           #elif defined(Q_OS_MAC)
-            "-X", "coremidi",
-           #endif
+            argPre1, argPre2,
             "-C",
            #ifdef Q_OS_WIN
             ".\\jack\\jack-session.conf",
@@ -388,11 +473,16 @@ private slots:
             "-r", "48000",
             "-p",
             ui.cb_buffersize->currentIndex() == 0 ? "128" : "256",
+           #ifdef Q_OS_WIN
+            inputDev.isEmpty() ? "-d" : "-C",
+            inputDev.isEmpty() ? ui.cb_device->currentText() : inputDev,
+            inputDev.isEmpty() ? "-d" : "-P",
+            ui.cb_device->currentText(),
+           #else
             "-d",
             ui.cb_device->currentText(),
-           #if !(defined(Q_OS_WIN) || defined(Q_OS_MAC))
-            "-X", "seqmidi",
            #endif
+            argPost1, argPost2
         };
         processHost.setArguments(arguments);
 
@@ -418,10 +508,16 @@ private slots:
         processUI.terminate();
     }
 
-    void openGui()
+    void openGui() const
     {
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
         QDesktopServices::openUrl(QUrl("http://127.0.0.1:18181"));
+    }
+
+    void openUserFilesDir() const
+    {
+        printf("----------- %s %d\n", __FUNCTION__, __LINE__);
+        QDesktopServices::openUrl(QUrl::fromLocalFile(getUserFilesDir()));
     }
 
     void hostStartError(QProcess::ProcessError error)

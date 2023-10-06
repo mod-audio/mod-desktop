@@ -38,7 +38,7 @@ for f in $(find -L build/plugins/ -type f); do
 done
 
 # generate version
-echo "#define VERSION \"0.0.0\"" > utils/win64-version.iss
+echo "#define VERSION \"$(make version)\"" > utils/win64-version.iss
 
 # create the installer file
 pushd "utils"

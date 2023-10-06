@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>614</width>
-    <height>631</height>
+    <width>622</width>
+    <height>657</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -309,6 +309,58 @@
      </widget>
     </item>
     <item>
+     <widget class="QGroupBox" name="gb_midi">
+      <property name="title">
+       <string>Enable MIDI</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="1">
+        <widget class="QSpinBox" name="sp_midi_pb">
+         <property name="specialValueText">
+          <string>Disabled</string>
+         </property>
+         <property name="maximum">
+          <number>16</number>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>MIDI Program channel for Pedalboards:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>MIDI Program channel for Snapshots:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QSpinBox" name="sp_midi_ss">
+         <property name="specialValueText">
+          <string>Disabled</string>
+         </property>
+         <property name="maximum">
+          <number>16</number>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
      <widget class="QGroupBox" name="gb_logs">
       <property name="title">
        <string>Show Logs</string>
@@ -412,7 +464,7 @@
  <resources>
   <include location="mod-app.qrc"/>
   <include location="mod-app.qrc"/>
-  <include location="mod-logo.qrc"/>
+  <include location="mod-app.qrc"/>
  </resources>
  <connections/>
 </ui>

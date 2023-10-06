@@ -4,12 +4,58 @@
 #include "mod-app.hpp"
 #include "qrc_mod-app.hpp"
 
+#include <QtCore/QJsonDocument>
+#include <QtCore/QJsonObject>
+
 #ifdef _WIN32
 #include <shlobj.h>
-const WCHAR* user_files_dir = nullptr;
+static const WCHAR* user_files_dir = nullptr;
 #else
 #include <dlfcn.h>
 #endif
+
+QString getUserFilesDir()
+{
+   #ifdef _WIN32
+    if (user_files_dir != nullptr)
+        return QString::fromWCharArray(user_files_dir);
+   #else
+    // TODO
+   #endif
+
+    return {};
+}
+
+void writeMidiChannelsToProfile(int pedalboard, int snapshot)
+{
+   #ifdef _WIN32
+    WCHAR path[MAX_PATH + 256] = {};
+    GetEnvironmentVariableW(L"MOD_DATA_DIR", path, sizeof(path)/sizeof(path[0]));
+    std::wcscat(path, L"\\profile5.json");
+    QFile jsonFile(QString::fromWCharArray(path));
+   #else
+    char path[MAX_PATH + 256] = {};
+    std::strcpy(path, getenv("MOD_DATA_DIR"));
+    std::strcat(path, "/profile5.json");
+    QFile jsonFile(QString::fromUtf8(path));
+   #endif
+
+    const bool exists = jsonFile.exists();
+
+    if (! jsonFile.open(QIODevice::ReadWrite|QIODevice::Truncate|QIODevice::Text))
+        return;
+
+    QJsonObject jsonObj;
+
+    if (exists)
+        jsonObj = QJsonDocument::fromJson(jsonFile.readAll()).object();
+
+    jsonObj["midiChannelForPedalboardsNavigation"] = pedalboard;
+    jsonObj["midiChannelForSnapshotsNavigation"] = snapshot;
+
+    jsonFile.seek(0);
+    jsonFile.write(QJsonDocument(jsonObj).toJson());
+}
 
 int main(int argc, char* argv[])
 {

@@ -1,5 +1,7 @@
 #!/usr/bin/make -f
 
+VERSION = 0.0.1
+
 CC ?= gcc
 TARGET_MACHINE := $(shell $(CC) -dumpmachine)
 
@@ -89,6 +91,7 @@ endif
 
 # ---------------------------------------------------------------------------------------------------------------------
 
+# FIXME *.so extension
 BUNDLES  = abGate.lv2
 BUNDLES += artyfx.lv2
 BUNDLES += carla-files.lv2
@@ -97,6 +100,7 @@ BUNDLES += DragonflyEarlyReflections.lv2
 BUNDLES += DragonflyHallReverb.lv2
 BUNDLES += DragonflyPlateReverb.lv2
 BUNDLES += DragonflyRoomReverb.lv2
+# FIXME *.so extension
 BUNDLES += fil4.lv2
 endif
 BUNDLES += Black_Pearl_4A.lv2
@@ -126,14 +130,19 @@ BUNDLES += Red_Zeppelin_5.lv2
 # endif
 BUNDLES += Kars.lv2
 ifneq ($(MACOS),true)
+# FIXME *.so extension
 BUNDLES += midifilter.lv2
 endif
 BUNDLES += midigen.lv2
+# FIXME *.so extension
 BUNDLES += mod-bpf.lv2
 BUNDLES += MOD-CabinetLoader.lv2
 BUNDLES += MOD-ConvolutionLoader.lv2
+# FIXME *.so extension
 BUNDLES += mod-gain.lv2
+# FIXME *.so extension
 BUNDLES += mod-gain2x2.lv2
+# FIXME *.so extension
 BUNDLES += mod-hpf.lv2
 BUNDLES += mod-mda-Ambience.lv2
 BUNDLES += mod-mda-BeatBox.lv2
@@ -154,7 +163,9 @@ BUNDLES += mod-mda-SubSynth.lv2
 BUNDLES += mod-mda-ThruZero.lv2
 BUNDLES += mod-mda-Vocoder.lv2
 ifneq ($(MACOS),true)
-BUNDLES += modmeter.lv2 
+# FIXME *.so extension
+BUNDLES += modmeter.lv2
+# FIXME *.so extension
 BUNDLES += modspectre.lv2
 endif
 BUNDLES += MVerb.lv2
@@ -165,6 +176,7 @@ BUNDLES += notes.lv2
 endif
 BUNDLES += PingPongPan.lv2
 ifneq ($(MACOS),true)
+# FIXME plugin binary missing (win32 RUNTIME vs LIBRARY)
 BUNDLES += rt-neural-generic.lv2
 endif
 BUNDLES += wolf-shaper.lv2
@@ -183,6 +195,9 @@ plugins: $(PLUGINS)
 
 run: $(TARGETS)
 	./utils/test.sh $(PAWPAW_TARGET)
+
+version:
+	@echo $(VERSION)
 
 # ---------------------------------------------------------------------------------------------------------------------
 
@@ -326,92 +341,92 @@ systray/mod-app$(APP_EXT): systray/main.cpp systray/mod-app.hpp
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-build/plugins/%: $(PAWPAW_PREFIX)/lib/lv2/%
+build/plugins/%: $(PAWPAW_PREFIX)/lib/lv2/%/manifest.ttl
 	@mkdir -p build/plugins
 	ln -sf $(abspath $<) $@
 
-$(PAWPAW_PREFIX)/lib/lv2/abGate.lv2: $(BOOTSTRAP_FILES)
+$(PAWPAW_PREFIX)/lib/lv2/abGate.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) abgate
 
-$(PAWPAW_PREFIX)/lib/lv2/rt-neural-generic.lv2: $(BOOTSTRAP_FILES)
+$(PAWPAW_PREFIX)/lib/lv2/rt-neural-generic.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) aidadsp-lv2
 
-$(PAWPAW_PREFIX)/lib/lv2/artyfx.lv2: $(BOOTSTRAP_FILES)
+$(PAWPAW_PREFIX)/lib/lv2/artyfx.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) artyfx
 
-$(PAWPAW_PREFIX)/lib/lv2/carla-files.lv2: $(BOOTSTRAP_FILES)
+$(PAWPAW_PREFIX)/lib/lv2/carla-files.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) carla-plugins
 
-$(PAWPAW_PREFIX)/lib/lv2/Kars.lv2: $(BOOTSTRAP_FILES)
+$(PAWPAW_PREFIX)/lib/lv2/Kars.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) dpf-plugins
 
-$(PAWPAW_PREFIX)/lib/lv2/MVerb.lv2: $(BOOTSTRAP_FILES)
+$(PAWPAW_PREFIX)/lib/lv2/MVerb.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) dpf-plugins
 
-$(PAWPAW_PREFIX)/lib/lv2/Nekobi.lv2: $(BOOTSTRAP_FILES)
+$(PAWPAW_PREFIX)/lib/lv2/Nekobi.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) dpf-plugins
 
-$(PAWPAW_PREFIX)/lib/lv2/PingPongPan.lv2: $(BOOTSTRAP_FILES)
+$(PAWPAW_PREFIX)/lib/lv2/PingPongPan.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) dpf-plugins
 
-$(PAWPAW_PREFIX)/lib/lv2/Dragonfly%: $(BOOTSTRAP_FILES)
+$(PAWPAW_PREFIX)/lib/lv2/Dragonfly%/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) dragonfly-reverb
 
-$(PAWPAW_PREFIX)/lib/lv2/Black_Pearl_%: $(BOOTSTRAP_FILES)
+$(PAWPAW_PREFIX)/lib/lv2/Black_Pearl_%/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) fluidplug
 
-$(PAWPAW_PREFIX)/lib/lv2/Fluid%: $(BOOTSTRAP_FILES)
+$(PAWPAW_PREFIX)/lib/lv2/Fluid%/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) fluidplug
 
-$(PAWPAW_PREFIX)/lib/lv2/Red_Zeppelin_%: $(BOOTSTRAP_FILES)
+$(PAWPAW_PREFIX)/lib/lv2/Red_Zeppelin_%/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) fluidplug
 
-$(PAWPAW_PREFIX)/lib/lv2/fomp.lv2: $(BOOTSTRAP_FILES)
+$(PAWPAW_PREFIX)/lib/lv2/fomp.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) fomp
 
-$(PAWPAW_PREFIX)/lib/lv2/MOD-CabinetLoader.lv2: $(BOOTSTRAP_FILES)
+$(PAWPAW_PREFIX)/lib/lv2/MOD-CabinetLoader.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) mod-convolution-loader
 
-$(PAWPAW_PREFIX)/lib/lv2/MOD-ConvolutionLoader.lv2: $(BOOTSTRAP_FILES)
+$(PAWPAW_PREFIX)/lib/lv2/MOD-ConvolutionLoader.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) mod-convolution-loader
 
-$(PAWPAW_PREFIX)/lib/lv2/mod-mda-%: $(BOOTSTRAP_FILES)
+$(PAWPAW_PREFIX)/lib/lv2/mod-mda-%/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) mod-mda-lv2
 
-$(PAWPAW_PREFIX)/lib/lv2/mod-bpf.lv2: $(BOOTSTRAP_FILES)
+$(PAWPAW_PREFIX)/lib/lv2/mod-bpf.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) mod-utilities
 
-$(PAWPAW_PREFIX)/lib/lv2/mod-hpf.lv2: $(BOOTSTRAP_FILES)
+$(PAWPAW_PREFIX)/lib/lv2/mod-hpf.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) mod-utilities
 
-$(PAWPAW_PREFIX)/lib/lv2/mod-gain.lv2: $(BOOTSTRAP_FILES)
+$(PAWPAW_PREFIX)/lib/lv2/mod-gain.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) mod-utilities
 
-$(PAWPAW_PREFIX)/lib/lv2/mod-gain2x2.lv2: $(BOOTSTRAP_FILES)
+$(PAWPAW_PREFIX)/lib/lv2/mod-gain2x2.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) mod-utilities
 
-$(PAWPAW_PREFIX)/lib/lv2/modmeter.lv2: $(BOOTSTRAP_FILES)
+$(PAWPAW_PREFIX)/lib/lv2/modmeter.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) modmeter
 
-$(PAWPAW_PREFIX)/lib/lv2/modspectre.lv2: $(BOOTSTRAP_FILES)
+$(PAWPAW_PREFIX)/lib/lv2/modspectre.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) modspectre
 
-$(PAWPAW_PREFIX)/lib/lv2/neural_amp_modeler.lv2: $(BOOTSTRAP_FILES)
+$(PAWPAW_PREFIX)/lib/lv2/neural_amp_modeler.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) neural-amp-modeler-lv2
 
-$(PAWPAW_PREFIX)/lib/lv2/notes.lv2: $(BOOTSTRAP_FILES)
+$(PAWPAW_PREFIX)/lib/lv2/notes.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) notes-lv2
 
-$(PAWPAW_PREFIX)/lib/lv2/fil4.lv2: $(BOOTSTRAP_FILES)
+$(PAWPAW_PREFIX)/lib/lv2/fil4.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) x42-fil4
 
-$(PAWPAW_PREFIX)/lib/lv2/midifilter.lv2: $(BOOTSTRAP_FILES)
+$(PAWPAW_PREFIX)/lib/lv2/midifilter.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) x42-midifilter
 
-$(PAWPAW_PREFIX)/lib/lv2/midigen.lv2: $(BOOTSTRAP_FILES)
+$(PAWPAW_PREFIX)/lib/lv2/midigen.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) x42-midigen
 
-$(PAWPAW_PREFIX)/lib/lv2/wolf-shaper.lv2: $(BOOTSTRAP_FILES)
+$(PAWPAW_PREFIX)/lib/lv2/wolf-shaper.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) wolf-shaper
 
 # ---------------------------------------------------------------------------------------------------------------------

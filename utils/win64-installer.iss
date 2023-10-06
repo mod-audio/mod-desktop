@@ -2,11 +2,11 @@
 
 [Setup]
 ArchitecturesInstallIn64BitMode=x64
-AppName=mod-app
+AppName=MOD App
 AppPublisher=MOD Audio
-AppPublisherURL=https://github.com/moddevices/Cardinal/
-AppSupportURL=https://github.com/moddevices/Cardinal/issues/
-AppUpdatesURL=https://github.com/moddevices/Cardinal/releases/
+AppPublisherURL=https://mod.audio/
+AppSupportURL=https://github.com/moddevices/mod-app/issues/
+AppUpdatesURL=https://github.com/moddevices/mod-app/releases/
 AppVersion={#VERSION}
 DefaultDirName={commonpf64}\mod-app
 DisableDirPage=yes
@@ -91,9 +91,9 @@ Source: "..\build\html\fonts\england-hand\*.eot"; DestDir: "{app}\html\fonts\eng
 Source: "..\build\html\fonts\england-hand\*.svg"; DestDir: "{app}\html\fonts\england-hand"; Flags: ignoreversion;
 Source: "..\build\html\fonts\england-hand\*.ttf"; DestDir: "{app}\html\fonts\england-hand"; Flags: ignoreversion;
 Source: "..\build\html\fonts\england-hand\*.woff"; DestDir: "{app}\html\fonts\england-hand"; Flags: ignoreversion;
-Source: "..\build\html\fonts\epf\*.css"; DestDir: "{app}\html\fonts\epf\*.css"; Flags: ignoreversion;
-Source: "..\build\html\fonts\epf\*.eot"; DestDir: "{app}\html\fonts\epf\*.eot"; Flags: ignoreversion;
-Source: "..\build\html\fonts\epf\*.svg"; DestDir: "{app}\html\fonts\epf\*.svg"; Flags: ignoreversion;
+Source: "..\build\html\fonts\epf\*.css"; DestDir: "{app}\html\fonts\epf"; Flags: ignoreversion;
+Source: "..\build\html\fonts\epf\*.eot"; DestDir: "{app}\html\fonts\epf"; Flags: ignoreversion;
+Source: "..\build\html\fonts\epf\*.svg"; DestDir: "{app}\html\fonts\epf"; Flags: ignoreversion;
 Source: "..\build\html\fonts\epf\*.ttf"; DestDir: "{app}\html\fonts\epf"; Flags: ignoreversion;
 Source: "..\build\html\fonts\epf\*.woff"; DestDir: "{app}\html\fonts\epf"; Flags: ignoreversion;
 Source: "..\build\html\fonts\nexa\*.css"; DestDir: "{app}\html\fonts\nexa"; Flags: ignoreversion;
