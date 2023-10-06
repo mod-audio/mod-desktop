@@ -73,6 +73,7 @@ class AppWindow : public QMainWindow
     bool startingUI = false;
     bool stoppingHost = false;
     bool stoppingUI = false;
+    bool successfullyStarted = false;
     int timerId = 0;
 
    #ifdef Q_OS_WIN
@@ -89,6 +90,7 @@ public:
         connect(ui.b_start, &QPushButton::clicked, this, &AppWindow::start);
         connect(ui.b_stop, &QPushButton::clicked, this, &AppWindow::stop);
         connect(ui.b_opengui, &QPushButton::clicked, this, &AppWindow::openGui);
+        connect(ui.b_openuserfiles, &QPushButton::clicked, this, &AppWindow::openUserFilesDir);
         connect(ui.gb_logs, &QGroupBox::toggled, this, &AppWindow::showLogs);
 
         const QIcon icon(":/mod-logo.svg");
@@ -274,6 +276,7 @@ private:
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
         QSettings settings;
         settings.setValue("FirstRun", false);
+        settings.setValue("AutoStart", ui.cb_autostart->isChecked());
         settings.setValue("Geometry", saveGeometry());
         settings.setValue("AudioDevice", ui.cb_device->currentText());
         settings.setValue("AudioBufferSize", ui.cb_buffersize->currentText());
@@ -281,6 +284,7 @@ private:
         settings.setValue("PedalboardsMidiChannel", ui.sp_midi_pb->value());
         settings.setValue("SnapshotsMidiChannel", ui.sp_midi_ss->value());
         settings.setValue("ShowLogs", ui.gb_logs->isChecked());
+        settings.setValue("SuccessfullyStarted", successfullyStarted);
     }
 
     void loadSettings()
@@ -302,17 +306,20 @@ private:
         }
 
         ui.cb_buffersize->setCurrentIndex(settings.value("AudioBufferSize", "128").toString() == "256" ? 1 : 0);
+        ui.cb_autostart->setChecked(settings.value("AutoStart", false).toBool());
 
         ui.gb_midi->setChecked(settings.value("EnableMIDI", false).toBool());
         ui.sp_midi_pb->setValue(settings.value("PedalboardsMidiChannel", 0).toInt());
         ui.sp_midi_pb->setValue(settings.value("SnapshotsMidiChannel", 0).toInt());
+
+        successfullyStarted = settings.value("SuccessfullyStarted", false).toBool();
 
         adjustSize();
 
         if (settings.contains("Geometry"))
             restoreGeometry(settings.value("Geometry").toByteArray());
 
-        if (settings.value("FirstRun", true).toBool() || getenv("KDE_FULL_SESSION") != nullptr)
+        if (settings.value("FirstRun", true).toBool() || !ui.cb_autostart->isChecked() || !successfullyStarted)
         {
             setStopped();
             QTimer::singleShot(0, this, &QMainWindow::show);
@@ -328,20 +335,26 @@ private:
     void setRunning()
     {
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
+        successfullyStarted = true;
         ui.cb_device->setEnabled(false);
+        ui.cb_buffersize->setEnabled(false);
         ui.b_start->setEnabled(false);
         ui.b_stop->setEnabled(true);
         ui.b_opengui->setEnabled(true);
+        ui.gb_midi->setEnabled(true);
         systray->setToolTip(tr("MOD App: Running"));
+        systray->showMessage(tr("MOD App"), tr("Running"), QSystemTrayIcon::Information);
     }
 
     void setStopped()
     {
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
         ui.cb_device->setEnabled(true);
+        ui.cb_buffersize->setEnabled(true);
         ui.b_start->setEnabled(true);
         ui.b_stop->setEnabled(false);
         ui.b_opengui->setEnabled(false);
+        ui.gb_midi->setEnabled(true);
         systray->setToolTip(tr("MOD App: Stopped"));
     }
 
@@ -418,6 +431,8 @@ private slots:
     {
         saveSettings();
 
+        successfullyStarted = false;
+
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
         if (processHost.state() != QProcess::NotRunning)
         {
@@ -432,59 +447,71 @@ private slots:
 
         const bool midiEnabled = ui.gb_midi->isChecked();
 
-      #if defined(Q_OS_WIN) || defined(Q_OS_MAC)
-        const QString argPre1 = midiEnabled ? "-X" : "-S";
-       #ifdef Q_OS_WIN
-        const QString argPre2 = midiEnabled ? "winmme" : "-S";
-       #else
-        const QString argPre2 = midiEnabled ? "coremidi" : "-S";
-       #endif
-        const QString argPost1;
-        const QString argPost2;
-      #else
-        const QString argPre1;
-        const QString argPre2;
-        const QString argPost1 = midiEnabled ? "-X" : "-z";
-        const QString argPost2 = midiEnabled ? "seqmidi" : "n";
-      #endif
-
-       #ifdef Q_OS_WIN
-        const QString& inputDev(matchingWasapiInputDevices[ui.cb_device->currentIndex()]);
-       #endif
-
-        const QStringList arguments = {
+        QStringList arguments = {
             "-R",
             "-S",
-            argPre1, argPre2,
             "-C",
            #ifdef Q_OS_WIN
             ".\\jack\\jack-session.conf",
            #else
             "./jack/jack-session.conf",
            #endif
-            "-d",
-           #if defined(Q_OS_WIN)
-            "portaudio",
-           #elif defined(Q_OS_MAC)
-            "coreaudio",
-           #else
-            "alsa",
-           #endif
-            "-r", "48000",
-            "-p",
-            ui.cb_buffersize->currentIndex() == 0 ? "128" : "256",
-           #ifdef Q_OS_WIN
-            inputDev.isEmpty() ? "-d" : "-C",
-            inputDev.isEmpty() ? ui.cb_device->currentText() : inputDev,
-            inputDev.isEmpty() ? "-d" : "-P",
-            ui.cb_device->currentText(),
-           #else
-            "-d",
-            ui.cb_device->currentText(),
-           #endif
-            argPost1, argPost2
         };
+
+       #if defined(Q_OS_WIN) || defined(Q_OS_MAC)
+        if (midiEnabled)
+        {
+            arguments.append("-X");
+           #ifdef Q_OS_WIN
+            arguments.append("winmme");
+           #else
+            arguments.append("coremidi");
+           #endif
+        }
+       #endif
+
+        arguments.append("-d");
+       #if defined(Q_OS_WIN)
+        arguments.append("portaudio");
+       #elif defined(Q_OS_MAC)
+        arguments.append("coreaudio");
+       #else
+        arguments.append("alsa");
+       #endif
+
+        arguments.append("-r");
+        arguments.append("48000");
+
+        arguments.append("-p");
+        arguments.append(ui.cb_buffersize->currentIndex() == 0 ? "128" : "256");
+
+        arguments.append("-d");
+        arguments.append(ui.cb_device->currentText());
+
+       #ifdef Q_OS_WIN
+        const QString& inputDev(matchingWasapiInputDevices[ui.cb_device->currentIndex()]);
+
+        if (! inputDev.isEmpty())
+        {
+            arguments.append("-P");
+            arguments.append(ui.cb_device->currentText());
+            arguments.append("-C");
+            arguments.append(inputDev);
+        }
+       #endif
+
+       #if !(defined(Q_OS_WIN) || defined(Q_OS_MAC))
+        if (! midiEnabled)
+        {
+            arguments.append("-X");
+            arguments.append("seqmidi");
+        }
+       #endif
+
         processHost.setArguments(arguments);
+
+        ui.text_host->appendPlainText("Starting jackd using:");
+        ui.text_host->appendPlainText(arguments.join(" "));
 
         ui.b_start->setEnabled(false);
 
@@ -495,17 +522,12 @@ private slots:
     void stop()
     {
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
-        if (processHost.state() == QProcess::NotRunning)
-        {
-            qWarning() << "stop ignored";
-            stopUIIfNeeded();
-            return;
-        }
-
         ui.b_stop->setEnabled(false);
 
-        stoppingUI = true;
-        processUI.terminate();
+        stopUIIfNeeded();
+        stopHostIfNeeded();
+
+        ui.b_stop->setEnabled(true);
     }
 
     void openGui() const
@@ -586,6 +608,7 @@ private slots:
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
         startingUI = stoppingUI = false;
         stopHostIfNeeded();
+        setStopped();
     }
 
     void iconActivated(QSystemTrayIcon::ActivationReason reason)
