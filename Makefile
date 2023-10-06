@@ -145,11 +145,9 @@ BUNDLES += mod-gain.lv2
 BUNDLES += mod-gain2x2.lv2
 # FIXME *.so extension
 BUNDLES += mod-hpf.lv2
-BUNDLES += mod-mda-Ambience.lv2
 BUNDLES += mod-mda-BeatBox.lv2
 BUNDLES += mod-mda-Degrade.lv2
 BUNDLES += mod-mda-Detune.lv2
-BUNDLES += mod-mda-DubDelay.lv2
 BUNDLES += mod-mda-DX10.lv2
 BUNDLES += mod-mda-EPiano.lv2
 BUNDLES += mod-mda-JX10.lv2
