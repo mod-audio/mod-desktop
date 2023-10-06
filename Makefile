@@ -125,9 +125,10 @@ BUNDLES += FluidSynthLeads.lv2
 BUNDLES += FluidSynthPads.lv2
 BUNDLES += Red_Zeppelin_4.lv2
 BUNDLES += Red_Zeppelin_5.lv2
-# ifneq ($(MACOS),true)
+ifneq ($(MACOS),true)
+# FIXME needs python2
 # BUNDLES += fomp.lv2
-# endif
+endif
 BUNDLES += Kars.lv2
 ifneq ($(MACOS),true)
 # FIXME *.so extension
@@ -153,7 +154,6 @@ BUNDLES += mod-mda-DX10.lv2
 BUNDLES += mod-mda-EPiano.lv2
 BUNDLES += mod-mda-JX10.lv2
 BUNDLES += mod-mda-Leslie.lv2
-BUNDLES += mod-mda-Overdrive.lv2
 BUNDLES += mod-mda-Piano.lv2
 BUNDLES += mod-mda-RePsycho.lv2
 BUNDLES += mod-mda-RingMod.lv2
@@ -179,7 +179,22 @@ ifneq ($(MACOS),true)
 # FIXME plugin binary missing (win32 RUNTIME vs LIBRARY)
 BUNDLES += rt-neural-generic.lv2
 endif
+# FIXME *.so extension
+BUNDLES += tinygain.lv2
 BUNDLES += wolf-shaper.lv2
+
+# TODO check
+BUNDLES += Harmless.lv2
+BUNDLES += Larynx.lv2
+BUNDLES += Modulay.lv2
+BUNDLES += Shiroverb.lv2
+
+
+# TODO build fails
+# BUNDLES += mod-ams.lv2
+# BUNDLES += mod-cv-control.lv2
+# BUNDLES += sooperlooper.lv2
+# BUNDLES += sooperlooper-2x2.lv2
 
 PLUGINS = $(BUNDLES:%=build/plugins/%)
 
@@ -343,7 +358,7 @@ systray/mod-app$(APP_EXT): systray/main.cpp systray/mod-app.hpp
 
 build/plugins/%: $(PAWPAW_PREFIX)/lib/lv2/%/manifest.ttl
 	@mkdir -p build/plugins
-	ln -sf $(abspath $<) $@
+	ln -sf $(subst /manifest.ttl,,$(abspath $<)) $@
 
 $(PAWPAW_PREFIX)/lib/lv2/abGate.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) abgate
@@ -426,8 +441,35 @@ $(PAWPAW_PREFIX)/lib/lv2/midifilter.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
 $(PAWPAW_PREFIX)/lib/lv2/midigen.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) x42-midigen
 
+$(PAWPAW_PREFIX)/lib/lv2/Harmless.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
+	./utils/plugin-builder.sh $(PAWPAW_TARGET) shiro-plugins
+
+$(PAWPAW_PREFIX)/lib/lv2/Larynx.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
+	./utils/plugin-builder.sh $(PAWPAW_TARGET) shiro-plugins
+
+$(PAWPAW_PREFIX)/lib/lv2/Modulay.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
+	./utils/plugin-builder.sh $(PAWPAW_TARGET) shiro-plugins
+
+$(PAWPAW_PREFIX)/lib/lv2/Shiroverb.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
+	./utils/plugin-builder.sh $(PAWPAW_TARGET) shiro-plugins
+
+$(PAWPAW_PREFIX)/lib/lv2/sooperlooper.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
+	./utils/plugin-builder.sh $(PAWPAW_TARGET) sooperlooper-lv2
+
+$(PAWPAW_PREFIX)/lib/lv2/sooperlooper-2x2.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
+	./utils/plugin-builder.sh $(PAWPAW_TARGET) sooperlooper-lv2
+
+$(PAWPAW_PREFIX)/lib/lv2/tinygain.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
+	./utils/plugin-builder.sh $(PAWPAW_TARGET) x42-tinygain
+
 $(PAWPAW_PREFIX)/lib/lv2/wolf-shaper.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) wolf-shaper
+
+$(PAWPAW_PREFIX)/lib/lv2/mod-ams.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
+	./utils/plugin-builder.sh $(PAWPAW_TARGET) mod-ams-lv2
+
+$(PAWPAW_PREFIX)/lib/lv2/mod-cv-control.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
+	./utils/plugin-builder.sh $(PAWPAW_TARGET) mod-cv-plugins
 
 # ---------------------------------------------------------------------------------------------------------------------
 

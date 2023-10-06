@@ -446,6 +446,7 @@ private slots:
         writeMidiChannelsToProfile(ui.sp_midi_pb->value(), ui.sp_midi_ss->value());
 
         const bool midiEnabled = ui.gb_midi->isChecked();
+        const QString devName(ui.cb_device->currentText());
 
         QStringList arguments = {
             "-R",
@@ -485,20 +486,29 @@ private slots:
         arguments.append("-p");
         arguments.append(ui.cb_buffersize->currentIndex() == 0 ? "128" : "256");
 
-        arguments.append("-d");
-        arguments.append(ui.cb_device->currentText());
-
        #ifdef Q_OS_WIN
         const QString& inputDev(matchingWasapiInputDevices[ui.cb_device->currentIndex()]);
 
+        // WASAPI forced duplex
         if (! inputDev.isEmpty())
         {
             arguments.append("-P");
-            arguments.append(ui.cb_device->currentText());
+            arguments.append(devName);
             arguments.append("-C");
             arguments.append(inputDev);
         }
+        // WASAPI playback only mode
+        else if (devName.startsWith("Windows WASAPI::"))
+        {
+            arguments.append("-P");
+            arguments.append(devName);
+        }
+        else
        #endif
+        {
+            arguments.append("-d");
+            arguments.append(devName);
+        }
 
        #if !(defined(Q_OS_WIN) || defined(Q_OS_MAC))
         if (! midiEnabled)

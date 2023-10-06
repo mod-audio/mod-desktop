@@ -60,7 +60,7 @@ PARALLEL_JOBS = $(shell nproc)
 endif
 
 ifeq ($(WINDOWS),true)
-HOST_DIR = $(PAWPAW_PREFIX)-host
+HOST_DIR = ~/mod-workdir/moddwarf-new/host/
 else
 HOST_DIR = $(PAWPAW_PREFIX)
 endif

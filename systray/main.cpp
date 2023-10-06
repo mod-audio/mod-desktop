@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
 
     if (SHGetSpecialFolderPathW(nullptr, path, CSIDL_MYDOCUMENTS, FALSE))
     {
-        std::wcscat(path, L"\\mod-app");
+        std::wcscat(path, L"\\MOD App");
         _wmkdir(path);
         SetEnvironmentVariableW(L"MOD_DATA_DIR", path);
 
