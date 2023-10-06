@@ -4,7 +4,7 @@
 
 This is the source code repository for MOD App, a little tool by [MOD Audio](https://mod.audio/) that combines all the goodies from MOD for the desktop platform packaged in a convenient installer.
 
-![screenshot](docs/Screenshot_Module-Browser.png "Screenshot")
+![screenshot](mod-app.png "mod-app")
 
 ## Download
 
