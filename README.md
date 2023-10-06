@@ -14,11 +14,10 @@ Feedback and testing is very much appreciated, make sure to report issues you fi
 
 Current known issues:
 
-- Pedalboard save crashes mod-ui, due to being unable to create a screenshot/thumbnail for it
+- Pedalboard save fails to create screenshot/thumbnail
 - Handling of Windows filepaths is not always correct (differences between POSIX vs Windows path separators)
 - jackd.exe (through mod-host) asks for public network permissions which are not needed
 - JACK is used "as-is", which assumes it is not running yet. TBD if we use a custom server name or something else
-- MIDI usage crashes jackd.exe, issue reported as [jack2#931](https://github.com/jackaudio/jack2/issues/931)
 - Host crash stops the UI process, instead of being automatically restart like in MOD units
 
 ## Download
