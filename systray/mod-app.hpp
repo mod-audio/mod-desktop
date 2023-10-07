@@ -116,7 +116,9 @@ public:
 
         systray = new QSystemTrayIcon(icon, this);
         systray->setContextMenu(sysmenu);
-        // systray->setIcon(QPixmap(":/mod-logo.svg"));
+       #ifndef Q_OS_WIN
+        systray->setIcon(QPixmap(":/mod-logo.svg"));
+       #endif
         connect(systray, &QSystemTrayIcon::messageClicked, this, &AppWindow::messageClicked);
         connect(systray, &QSystemTrayIcon::activated, this, &AppWindow::iconActivated);
 
@@ -153,7 +155,7 @@ public:
     {
         printf("--------------------------------------------------------\n");
 
-       #ifdef Q_OS_WIN
+      #ifdef Q_OS_WIN
         SetEnvironmentVariableW(L"JACK_NO_AUDIO_RESERVATION", L"1");
         SetEnvironmentVariableW(L"JACK_NO_START_SERVER", L"1");
 
@@ -211,16 +213,20 @@ public:
             }
 
             Pa_Terminate();
-
-            if (ui.cb_device->count())
-                ui.b_start->setEnabled(true);
         }
-       #else
+      #else
         setenv("JACK_NO_AUDIO_RESERVATION", "1", 1);
         setenv("JACK_NO_START_SERVER", "1", 1);
 
+       #ifdef Q_OS_MAC
+        // TODO
+       #else
         // TODO
        #endif
+      #endif
+
+        if (ui.cb_device->count())
+            ui.b_start->setEnabled(true);
 
         printf("--------------------------------------------------------\n");
     }

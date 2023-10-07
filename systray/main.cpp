@@ -14,10 +14,13 @@ static const WCHAR* user_files_dir = nullptr;
 #include <dlfcn.h>
 #endif
 
-#ifdef __APPLE__
+#if defined(__APPLE__)
 #include <sys/syslimits.h>
-#define MAX_PATH PATH_MAX
+#elif defined(__linux__)
+#include <linux/limits.h>
 #endif
+
+#include <cstring>
 
 QString getUserFilesDir()
 {
@@ -39,7 +42,7 @@ void writeMidiChannelsToProfile(int pedalboard, int snapshot)
     std::wcscat(path, L"\\profile5.json");
     QFile jsonFile(QString::fromWCharArray(path));
    #else
-    char path[MAX_PATH + 256] = {};
+    char path[PATH_MAX + 256] = {};
     std::strcpy(path, getenv("MOD_DATA_DIR"));
     std::strcat(path, "/profile5.json");
     QFile jsonFile(QString::fromUtf8(path));
