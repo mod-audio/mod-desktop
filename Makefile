@@ -328,6 +328,7 @@ build/mod-screenshot$(APP_EXT): utils/mod-screenshot.py $(BOOTSTRAP_FILES)
 	touch $@
 
 build/mod-ui$(APP_EXT): utils/mod-ui.py utils/mod-ui-wrapper.py $(BOOTSTRAP_FILES)
+	rm -f build/libpython3.8.dll
 	./utils/run.sh $(PAWPAW_TARGET) python3 utils/mod-ui.py build_exe
 	touch $@
 
