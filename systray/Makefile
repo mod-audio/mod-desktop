@@ -3,7 +3,7 @@
 CC ?= gcc
 CXX ?= g++
 
-CXXFLAGS += -fPIC
+CXXFLAGS += -fPIC -std=gnu++14
 
 TARGET_MACHINE := $(shell $(CC) -dumpmachine)
 
@@ -77,6 +77,7 @@ clean:
 	rm -f $(TARGET) $(EXTRAS) qrc_mod-app.hpp ui_mod-app.hpp
 
 $(TARGET): $(OBJS)
+	@$(shell mkdir -p $(@D))
 	$(CXX) $^ $(LDFLAGS) $(QT5_LIBS) -o $@
 
 main.cpp.o: main.cpp mod-app.hpp qrc_mod-app.hpp ui_mod-app.hpp

@@ -14,6 +14,11 @@ static const WCHAR* user_files_dir = nullptr;
 #include <dlfcn.h>
 #endif
 
+#ifdef __APPLE__
+#include <sys/syslimits.h>
+#define MAX_PATH PATH_MAX
+#endif
+
 QString getUserFilesDir()
 {
    #ifdef _WIN32

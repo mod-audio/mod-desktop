@@ -66,13 +66,13 @@ TARGETS += build/libjack.0.dylib
 TARGETS += build/libjackserver.0.dylib
 TARGETS += build/jack/jack_coreaudio.so
 TARGETS += build/jack/jack_coremidi.so
+TARGETS += build/mod-app.app
 else ifeq ($(WINDOWS),true)
 TARGETS += build/libjack64.dll
 TARGETS += build/libjackserver64.dll
 TARGETS += build/libpython3.8.dll
 TARGETS += build/jack/jack_portaudio.dll
 TARGETS += build/jack/jack_winmme.dll
-TARGETS += build/mod-app.exe
 TARGETS += build/Qt5Core.dll
 TARGETS += build/Qt5Gui.dll
 TARGETS += build/Qt5Svg.dll
@@ -217,6 +217,9 @@ version:
 macos:
 	$(MAKE) PAWPAW_TARGET=macos-universal-10.15
 
+macos-app:
+	./utils/run.sh macos-universal-10.15 $(MAKE) -C systray
+
 macos-plugins:
 	$(MAKE) PAWPAW_TARGET=macos-universal-10.15 plugins
 
@@ -298,6 +301,10 @@ build/lib/libmod_utils$(SO_EXT): mod-ui/utils/libmod_utils.so
 	ln -sf $(abspath $<) $@
 
 build/mod-app$(APP_EXT): systray/mod-app$(APP_EXT)
+	@mkdir -p build
+	ln -sf $(abspath $<) $@
+
+build/mod-app.app: systray/mod-app$(APP_EXT)
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
 
