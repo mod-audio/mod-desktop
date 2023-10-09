@@ -17,10 +17,11 @@
 #ifdef Q_OS_MAC
 #include <CoreAudio/CoreAudio.h>
 #include <CoreFoundation/CFString.h>
+#else
+#include <portaudio.h>
 #endif
 
 #ifdef Q_OS_WIN
-#include <portaudio.h>
 #include <windows.h>
 #endif
 
@@ -155,10 +156,17 @@ public:
     {
         printf("--------------------------------------------------------\n");
 
-      #ifdef Q_OS_WIN
+       #ifdef Q_OS_WIN
         SetEnvironmentVariableW(L"JACK_NO_AUDIO_RESERVATION", L"1");
         SetEnvironmentVariableW(L"JACK_NO_START_SERVER", L"1");
+       #else
+        setenv("JACK_NO_AUDIO_RESERVATION", "1", 1);
+        setenv("JACK_NO_START_SERVER", "1", 1);
+       #endif
 
+       #ifdef Q_OS_MAC
+        // TODO
+       #else
         if (Pa_Initialize() == paNoError)
         {
             const PaHostApiIndex numHostApis = Pa_GetHostApiCount();
@@ -177,6 +185,7 @@ public:
                 const PaDeviceInfo* const devInfo = Pa_GetDeviceInfo(i);
                 const QString& hostApiName(apis[devInfo->hostApi]);
 
+               #ifdef Q_OS_WIN
                 if (hostApiName != "ASIO" && hostApiName != "Windows WASAPI")
                 {
                     matchingInputDevName.clear();
@@ -188,11 +197,13 @@ public:
                     printf("DEBUG WASAPI %d %s %d %d\n",
                            i, devInfo->name, devInfo->maxInputChannels, devInfo->maxOutputChannels);
                 }
+               #endif
 
                 const QString devName(QString::fromUtf8(devInfo->name));
 
                 if (devInfo->maxOutputChannels == 0)
                 {
+                   #ifdef Q_OS_WIN
                     if (devInfo->maxInputChannels == 0)
                         continue;
 
@@ -200,30 +211,29 @@ public:
                         matchingInputDevName = devName;
                     else
                         matchingInputDevName.clear();
+                   #endif
 
                     continue;
                 }
 
+               #ifndef Q_OS_WIN
+                if (devName.contains("Loopback: PCM") || (devName != "pulse" && ! devName.contains("hw:")))
+                    continue;
+               #endif
+
                 ui.cb_device->addItem(hostApiName + "::" + devName);
 
+               #ifdef Q_OS_WIN
                 matchingWasapiInputDevices.append(devInfo->maxInputChannels == 0 && !matchingInputDevName.isEmpty()
                     ? hostApiName + "::" + matchingInputDevName
                     : "");
+               #endif
                 matchingInputDevName.clear();
             }
 
             Pa_Terminate();
         }
-      #else
-        setenv("JACK_NO_AUDIO_RESERVATION", "1", 1);
-        setenv("JACK_NO_START_SERVER", "1", 1);
-
-       #ifdef Q_OS_MAC
-        // TODO
-       #else
-        // TODO
        #endif
-      #endif
 
         if (ui.cb_device->count())
             ui.b_start->setEnabled(true);
@@ -256,21 +266,20 @@ protected:
     {
         if (timerId != 0 && event->timerId() == timerId)
         {
-            // if (startingHost || stoppingHost || processHost.state() != QProcess::NotRunning)
-            {
-                const QByteArray text = processHost.readAll().trimmed();
-                if (! text.isEmpty())
-                    ui.text_host->appendPlainText(text);
-            }
+            if (startingHost || stoppingHost || processHost.state() != QProcess::NotRunning)
+                readHostLog();
 
-            // if (startingUI || stoppingUI || processUI.state() != QProcess::NotRunning)
+            if (startingUI || stoppingUI || processUI.state() != QProcess::NotRunning)
             {
                 const QByteArray text = processUI.readAll().trimmed();
                 if (! text.isEmpty())
+                {
                     ui.text_ui->appendPlainText(text);
-            }
 
-            // startingHost = startingUI = false;
+                    if (text == "Internal client mod-host successfully loaded")
+                        startingUI = false;
+                }
+            }
         }
 
         QMainWindow::timerEvent(event);
@@ -387,6 +396,23 @@ private:
             systray->showMessage(tr("Error"), message, QSystemTrayIcon::Critical);
     }
 
+    void readHostLog()
+    {
+        const QByteArray text = processHost.readAll().trimmed();
+
+        if (text.isEmpty())
+            return;
+
+        ui.text_host->appendPlainText(text);
+
+        if (text.contains("Internal client mod-host successfully loaded"))
+        {
+            startingHost = false;
+            startingUI = true;
+            QTimer::singleShot(1000, &processUI, &AppProcess::startSlot);
+        }
+    }
+
     void stopHostIfNeeded()
     {
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
@@ -442,7 +468,7 @@ private slots:
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
         if (processHost.state() != QProcess::NotRunning)
         {
-            qWarning() << "start ignored";
+            printf("----------- %s %d start ignored\n", __FUNCTION__, __LINE__);
             return;
         }
 
@@ -465,25 +491,23 @@ private slots:
            #endif
         };
 
-       #if defined(Q_OS_WIN) || defined(Q_OS_MAC)
         if (midiEnabled)
         {
             arguments.append("-X");
-           #ifdef Q_OS_WIN
+           #if defined(Q_OS_WIN)
             arguments.append("winmme");
-           #else
+           #elif defined(Q_OS_MAC)
             arguments.append("coremidi");
+           #else
+            arguments.append("alsarawmidi");
            #endif
         }
-       #endif
 
         arguments.append("-d");
-       #if defined(Q_OS_WIN)
-        arguments.append("portaudio");
-       #elif defined(Q_OS_MAC)
+       #ifdef Q_OS_MAC
         arguments.append("coreaudio");
        #else
-        arguments.append("alsa");
+        arguments.append("portaudio");
        #endif
 
         arguments.append("-r");
@@ -516,7 +540,7 @@ private slots:
             arguments.append(devName);
         }
 
-       #if !(defined(Q_OS_WIN) || defined(Q_OS_MAC))
+       #if 0 // !(defined(Q_OS_WIN) || defined(Q_OS_MAC))
         if (! midiEnabled)
         {
             arguments.append("-X");
@@ -561,7 +585,7 @@ private slots:
     void hostStartError(QProcess::ProcessError error)
     {
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
-        stopUIIfNeeded();
+        readHostLog();
 
         // crashed while stopping, ignore
         if (error == QProcess::Crashed && stoppingHost)
@@ -599,9 +623,7 @@ private slots:
     void hostStartSuccess()
     {
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
-        startingHost = false;
-        startingUI = true;
-        QTimer::singleShot(1000, &processUI, &AppProcess::startSlot);
+        readHostLog();
     }
 
     void uiStartSuccess()
@@ -615,6 +637,7 @@ private slots:
     {
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
         startingHost = stoppingHost = false;
+        readHostLog();
         stopUIIfNeeded();
         setStopped();
     }

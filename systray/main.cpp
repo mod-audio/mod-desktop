@@ -12,6 +12,10 @@
 static const WCHAR* user_files_dir = nullptr;
 #else
 #include <dlfcn.h>
+#include <signal.h>
+#include <sys/stat.h>
+#include <unistd.h>
+static const char* user_files_dir = nullptr;
 #endif
 
 #if defined(__APPLE__)
@@ -24,12 +28,14 @@ static const WCHAR* user_files_dir = nullptr;
 
 QString getUserFilesDir()
 {
-   #ifdef _WIN32
     if (user_files_dir != nullptr)
+    {
+       #ifdef _WIN32
         return QString::fromWCharArray(user_files_dir);
-   #else
-    // TODO
-   #endif
+       #else
+        return QString::fromUtf8(user_files_dir);
+       #endif
+    }
 
     return {};
 }
@@ -65,6 +71,14 @@ void writeMidiChannelsToProfile(int pedalboard, int snapshot)
     jsonFile.write(QJsonDocument(jsonObj).toJson());
 }
 
+#ifndef _WIN32
+static void signal(int)
+{
+    qApp->setQuitOnLastWindowClosed(true);
+    qApp->quit();
+}
+#endif
+
 int main(int argc, char* argv[])
 {
     // TODO set branding here
@@ -80,35 +94,75 @@ int main(int argc, char* argv[])
     }
 
    #ifdef _WIN32
-    WCHAR wc[MAX_PATH + 256] = {};
-    GetModuleFileNameW(GetModuleHandleW(nullptr), wc, sizeof(wc)/sizeof(wc[0]));
+    WCHAR path[MAX_PATH + 256] = {};
 
-    if (wchar_t* const wcc = wcsrchr(wc, '\\'))
+    GetModuleFileNameW(GetModuleHandleW(nullptr), path, sizeof(path)/sizeof(path[0]));
+
+    if (wchar_t* const wcc = wcsrchr(path, '\\'))
         *wcc = 0;
 
-    const QString cwd(QString::fromWCharArray(wc));
-    SetCurrentDirectoryW(wc);
+    const QString cwd(QString::fromWCharArray(path));
+    SetCurrentDirectoryW(path);
 
-    WCHAR path[(MAX_PATH + 256) * 2] = {};
-    std::wcscat(path, wc);
-    std::wcscat(path, L"\\data\\lv2;");
-    std::wcscat(path, wc);
-    std::wcscat(path, L"\\plugins");
-    SetEnvironmentVariableW(L"LV2_PATH", path);
+    WCHAR lv2path[(MAX_PATH + 256) * 2] = {};
+    std::wcscat(lv2path, path);
+    std::wcscat(lv2path, L"\\plugins;");
 
-    if (SHGetSpecialFolderPathW(nullptr, path, CSIDL_MYDOCUMENTS, FALSE))
-    {
-        std::wcscat(path, L"\\MOD App");
-        _wmkdir(path);
-        SetEnvironmentVariableW(L"MOD_DATA_DIR", path);
+    SHGetSpecialFolderPathW(nullptr, path, CSIDL_MYDOCUMENTS, FALSE);
 
-        std::wcscat(path, L"\\user-files");
-        _wmkdir(path);
-        user_files_dir = path;
-    }
+    std::wcscat(path, L"\\MOD App");
+    _wmkdir(path);
+    SetEnvironmentVariableW(L"MOD_DATA_DIR", path);
+
+    std::wcscat(lv2path, path);
+    std::wcscat(lv2path, L"\\data\\lv2;");
+    SetEnvironmentVariableW(L"LV2_PATH", lv2path);
+
+    std::wcscat(path, L"\\user-files");
+    _wmkdir(path);
+    user_files_dir = path;
    #else
-    // TODO
-    const QString cwd;
+    char path[PATH_MAX + 256] = {};
+
+    Dl_info info = {};
+    dladdr((void*)main, &info);
+    std::strncpy(path, info.dli_fname, sizeof(path));
+
+    if (char* const c = strrchr(path, '/'))
+        *c = 0;
+
+    const QString cwd(QString::fromUtf8(path));
+    chdir(path);
+
+    const size_t pathlen = std::strlen(path);
+    std::memcpy(path + pathlen, "/jack", 6);
+    setenv("JACK_DRIVER_DIR", path, 1);
+
+    char lv2path[(PATH_MAX + 256) * 2] = {};
+    std::strncat(lv2path, path, pathlen);
+    std::strcat(lv2path, "/plugins:");
+
+    // TODO fetch user docs dir
+    std::memcpy(path + pathlen, "/data", 6);
+
+    // std::strcat(path, "/MOD App");
+    mkdir(path, 0777);
+    setenv("MOD_DATA_DIR", path, 1);
+
+    std::strcat(lv2path, path);
+    std::strcat(lv2path, "/lv2");
+    setenv("LV2_PATH", lv2path, 1);
+
+    std::strcat(path, "/user-files");
+    mkdir(path, 0777);
+    user_files_dir = path;
+    
+    struct sigaction sig = {};
+    sig.sa_handler = signal;
+    sig.sa_flags   = SA_RESTART;
+    sigemptyset(&sig.sa_mask);
+    sigaction(SIGTERM, &sig, nullptr);
+    sigaction(SIGINT, &sig, nullptr);
    #endif
 
     app.setQuitOnLastWindowClosed(false);

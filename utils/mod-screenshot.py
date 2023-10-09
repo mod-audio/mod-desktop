@@ -23,7 +23,7 @@ options = {
   "zip_include_packages": ["*"],
   "zip_exclude_packages": ["PIL","modtools"],
   "replace_paths": [["*",f".{s}lib{s}"]],
-  "build_exe": f".{s}build",
+  "build_exe": f".{s}build-screenshot",
   "optimize": True,
 }
 

@@ -55,7 +55,7 @@ TARGETS = \
 	build/jack/mod-host$(SO_EXT) \
 	build/jack/mod-midi-broadcaster$(SO_EXT) \
 	build/jack/mod-midi-merger$(SO_EXT) \
-	build/lib/libmod_utils$(SO_EXT) \
+	build-ui/lib/libmod_utils$(SO_EXT) \
 	build/default.pedalboard \
 	build/html \
 	build/mod \
@@ -87,6 +87,9 @@ else
 TARGETS += build/libjack.so.0
 TARGETS += build/libjackserver.so.0
 TARGETS += build/jack/jack_alsa.so
+TARGETS += build/jack/jack_alsarawmidi.so
+TARGETS += build/jack/jack_portaudio.so
+TARGETS += build/mod-app
 endif
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -203,6 +206,9 @@ all: $(TARGETS)
 clean:
 	$(MAKE) clean -C mod-host
 	$(MAKE) clean -C mod-ui/utils
+	$(MAKE) clean -C systray
+	rm -rf mod-midi-merger/build
+	rm -rf build
 
 plugins: $(PLUGINS)
 
@@ -296,8 +302,8 @@ build/jack/mod-midi-merger$(SO_EXT): mod-midi-merger/build/mod-midi-merger$(SO_E
 	@mkdir -p build/jack
 	ln -sf $(abspath $<) $@
 
-build/lib/libmod_utils$(SO_EXT): mod-ui/utils/libmod_utils.so
-	@mkdir -p build/lib
+build-ui/lib/libmod_utils$(SO_EXT): mod-ui/utils/libmod_utils.so
+	@mkdir -p build-ui/lib
 	ln -sf $(abspath $<) $@
 
 build/mod-app$(APP_EXT): systray/mod-app$(APP_EXT)
@@ -330,17 +336,40 @@ build/jack/jack-session.conf: utils/jack-session.conf
 	@mkdir -p build/jack
 	ln -sf $(abspath $<) $@
 
-build/mod-screenshot$(APP_EXT): utils/mod-screenshot.py $(BOOTSTRAP_FILES)
+# ---------------------------------------------------------------------------------------------------------------------
+
+build/mod-screenshot$(APP_EXT): build-screenshot/mod-screenshot$(APP_EXT)
+	ln -sf $(abspath $<) $@
+
+mod-screenshot$(APP_EXT): utils/mod-screenshot.py $(BOOTSTRAP_FILES)
 	./utils/run.sh $(PAWPAW_TARGET) python3 utils/mod-screenshot.py build_exe
 	touch $@
 
-build/mod-ui$(APP_EXT): utils/mod-ui.py utils/mod-ui-wrapper.py $(BOOTSTRAP_FILES)
-	rm -f build/libpython3.8.dll
+# ---------------------------------------------------------------------------------------------------------------------
+
+build/mod-ui$(APP_EXT): build-ui/mod-ui$(APP_EXT)
+	ln -sf $(abspath $<) $@
+
+build/lib: build-ui/lib
+	ln -sf $(abspath $<) $@
+
+build-ui/lib: build-ui/mod-ui$(APP_EXT)
+	touch $@
+
+build-ui/mod-ui$(APP_EXT): utils/mod-ui.py utils/mod-ui-wrapper.py $(BOOTSTRAP_FILES)
+# 	rm -f build/libpython3.8.dll
 	./utils/run.sh $(PAWPAW_TARGET) python3 utils/mod-ui.py build_exe
 	touch $@
 
+mod-ui/utils/libmod_utils.so: $(BOOTSTRAP_FILES) mod-ui/utils/utils.h mod-ui/utils/utils_jack.cpp mod-ui/utils/utils_lilv.cpp
+	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) -C mod-ui/utils
+
+# ---------------------------------------------------------------------------------------------------------------------
+
 mod-host/mod-host.so: $(BOOTSTRAP_FILES)
 	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) SKIP_READLINE=1 SKIP_FFTW335=1 -C mod-host
+
+# ---------------------------------------------------------------------------------------------------------------------
 
 mod-midi-merger/build/mod-midi-broadcaster$(SO_EXT): mod-midi-merger/build/mod-midi-merger-standalone$(APP_EXT)
 	touch $@
@@ -354,8 +383,7 @@ mod-midi-merger/build/mod-midi-merger-standalone$(APP_EXT): mod-midi-merger/buil
 mod-midi-merger/build/Makefile: $(BOOTSTRAP_FILES)
 	./utils/run.sh $(PAWPAW_TARGET) cmake -S mod-midi-merger -B mod-midi-merger/build
 
-mod-ui/utils/libmod_utils.so: $(BOOTSTRAP_FILES) mod-ui/utils/utils.h mod-ui/utils/utils_jack.cpp mod-ui/utils/utils_lilv.cpp
-	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) -C mod-ui/utils
+# ---------------------------------------------------------------------------------------------------------------------
 
 systray/mod-app$(APP_EXT): systray/main.cpp systray/mod-app.hpp
 	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) -C systray

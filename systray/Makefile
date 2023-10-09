@@ -40,12 +40,15 @@ TARGET = mod-app.app/Contents/MacOS/mod-app
 else ifeq ($(WINDOWS),true)
 TARGET = mod-app.exe
 EXTRAS = Qt5Core.dll Qt5Gui.dll Qt5Svg.dll Qt5Widgets.dll
-CXXFLAGS += $(shell pkg-config --cflags portaudio-2.0)
-LDFLAGS  += $(shell pkg-config --libs portaudio-2.0)
 LDFLAGS  += -Wl,-subsystem,windows
 WINDRES   = $(subst gcc,windres,$(CC))
 else
 TARGET = mod-app
+endif
+
+ifneq ($(MACOS),true)
+CXXFLAGS += $(shell pkg-config --cflags portaudio-2.0)
+LDFLAGS  += $(shell pkg-config --libs portaudio-2.0)
 endif
 
 ifeq ($(shell pkg-config --exists Qt5Core Qt5Gui Qt5Svg Qt5Widgets && echo true)$(WINDOWS),truefalse)

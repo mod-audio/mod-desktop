@@ -21,6 +21,9 @@ export JACK_DRIVER_DIR=$(pwd)/build/jack
 export LV2_PATH=$(pwd)/build/plugins
 # export MOD_LOG=1
 
+export JACK_NO_AUDIO_RESERVATION=1
+export JACK_NO_START_SERVER=1
+
 # ---------------------------------------------------------------------------------------------------------------------
 # run command
 
@@ -40,7 +43,8 @@ JACKD+=" -P 'Built-in'"
 elif [ "${target}" = "win64" ]; then
 JACKD+=" -X winmme -d portaudio -d 'ASIO::WineASIO Driver'"
 else
-JACKD+=" -d alsa"
+# -X alsarawmidi
+JACKD+=" -d portaudio -d 'ALSA::pulse'"
 fi
 
 JACKD+=" -r 48000 -p 128"
