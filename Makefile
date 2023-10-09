@@ -5,7 +5,9 @@ VERSION = 0.0.1
 CC ?= gcc
 TARGET_MACHINE := $(shell $(CC) -dumpmachine)
 
-ifeq ($(PAWPAW_TARGET),macos-universal-10.15)
+ifeq ($(PAWPAW_TARGET),macos)
+MACOS = true
+else ifeq ($(PAWPAW_TARGET),macos-universal-10.15)
 MACOS = true
 else ifeq ($(PAWPAW_TARGET),wasm)
 WASM = true
@@ -47,27 +49,43 @@ BOOTSTRAP_FILES = \
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-TARGETS = \
-	build/jackd$(APP_EXT) \
-	build/mod-screenshot$(APP_EXT) \
-	build/mod-ui$(APP_EXT) \
-	build/jack/jack-session.conf \
-	build/jack/mod-host$(SO_EXT) \
-	build/jack/mod-midi-broadcaster$(SO_EXT) \
-	build/jack/mod-midi-merger$(SO_EXT) \
-	build-ui/lib/libmod_utils$(SO_EXT) \
-	build/default.pedalboard \
-	build/html \
-	build/mod \
-	build/modtools
+TARGETS = build-ui/lib/libmod_utils$(SO_EXT)
 
 ifeq ($(MACOS),true)
-TARGETS += build/libjack.0.dylib
-TARGETS += build/libjackserver.0.dylib
-TARGETS += build/jack/jack_coreaudio.so
-TARGETS += build/jack/jack_coremidi.so
-TARGETS += build/mod-app.app
-else ifeq ($(WINDOWS),true)
+TARGETS += build/mod-app.app/Contents/Frameworks/QtCore.framework
+TARGETS += build/mod-app.app/Contents/Frameworks/QtGui.framework
+TARGETS += build/mod-app.app/Contents/Frameworks/QtSvg.framework
+TARGETS += build/mod-app.app/Contents/Frameworks/QtWidgets.framework
+TARGETS += build/mod-app.app/Contents/MacOS/libjack.0.dylib
+TARGETS += build/mod-app.app/Contents/MacOS/libjackserver.0.dylib
+TARGETS += build/mod-app.app/Contents/MacOS/jackd
+TARGETS += build/mod-app.app/Contents/MacOS/jack/jack-session.conf
+TARGETS += build/mod-app.app/Contents/MacOS/jack/jack_coreaudio.so
+TARGETS += build/mod-app.app/Contents/MacOS/jack/jack_coremidi.so
+TARGETS += build/mod-app.app/Contents/MacOS/jack/mod-host.so
+TARGETS += build/mod-app.app/Contents/MacOS/jack/mod-midi-broadcaster.so
+TARGETS += build/mod-app.app/Contents/MacOS/jack/mod-midi-merger.so
+TARGETS += build/mod-app.app/Contents/MacOS/mod-app
+TARGETS += build/mod-app.app/Contents/MacOS/mod-screenshot
+TARGETS += build/mod-app.app/Contents/MacOS/mod-ui
+TARGETS += build/mod-app.app/Contents/MacOS/mod
+TARGETS += build/mod-app.app/Contents/MacOS/modtools
+TARGETS += build/mod-app.app/Contents/Resources/default.pedalboard
+TARGETS += build/mod-app.app/Contents/Resources/html
+else
+TARGETS += build/jackd$(APP_EXT)
+TARGETS += build/jack/jack-session.conf
+TARGETS += build/jack/mod-host$(SO_EXT)
+TARGETS += build/jack/mod-midi-broadcaster$(SO_EXT)
+TARGETS += build/jack/mod-midi-merger$(SO_EXT)
+TARGETS += build/mod-app$(APP_EXT)
+TARGETS += build/mod-screenshot$(APP_EXT)
+TARGETS += build/mod-ui$(APP_EXT)
+TARGETS += build/default.pedalboard
+TARGETS += build/html
+TARGETS += build/mod
+TARGETS += build/modtools
+ifeq ($(WINDOWS),true)
 TARGETS += build/libjack64.dll
 TARGETS += build/libjackserver64.dll
 TARGETS += build/libpython3.8.dll
@@ -89,13 +107,15 @@ TARGETS += build/libjackserver.so.0
 TARGETS += build/jack/jack_alsa.so
 TARGETS += build/jack/jack_alsarawmidi.so
 TARGETS += build/jack/jack_portaudio.so
-TARGETS += build/mod-app
+endif
 endif
 
 # ---------------------------------------------------------------------------------------------------------------------
 
 # FIXME *.so extension
+ifneq ($(MACOS),true)
 BUNDLES  = abGate.lv2
+endif
 BUNDLES += artyfx.lv2
 BUNDLES += carla-files.lv2
 ifneq ($(MACOS),true)
@@ -250,6 +270,10 @@ build/jackd$(APP_EXT): $(PAWPAW_PREFIX)/bin/jackd$(APP_EXT)
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
 
+build/jack/jack-session.conf: utils/jack-session.conf
+	@mkdir -p build/jack
+	ln -sf $(abspath $<) $@
+
 build/Qt5%.dll: $(PAWPAW_PREFIX)/bin/Qt5%.dll
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
@@ -306,14 +330,6 @@ build-ui/lib/libmod_utils$(SO_EXT): mod-ui/utils/libmod_utils.so
 	@mkdir -p build-ui/lib
 	ln -sf $(abspath $<) $@
 
-build/mod-app$(APP_EXT): systray/mod-app$(APP_EXT)
-	@mkdir -p build
-	ln -sf $(abspath $<) $@
-
-build/mod-app.app: systray/mod-app$(APP_EXT)
-	@mkdir -p build
-	ln -sf $(abspath $<) $@
-
 build/default.pedalboard: mod-ui/default.pedalboard
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
@@ -332,22 +348,88 @@ build/modtools: mod-ui/modtools
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-build/jack/jack-session.conf: utils/jack-session.conf
-	@mkdir -p build/jack
+build/mod-app.app/Contents/Frameworks/Qt%.framework: $(PAWPAW_PREFIX)/lib/Qt%.framework
+	@mkdir -p build/mod-app.app/Contents/Frameworks
+	ln -sf $(abspath $<) $@
+
+build/mod-app.app/Contents/MacOS/mod-app: systray/mod-app
+	@mkdir -p build/mod-app.app/Contents/MacOS
+	install_name_tool -change "@rpath/QtCore.framework/Versions/5/QtCore" "@executable_path/../Frameworks/QtCore.framework/Versions/5/QtCore" $<
+	install_name_tool -change "@rpath/QtGui.framework/Versions/5/QtGui" "@executable_path/../Frameworks/QtGui.framework/Versions/5/QtGui" $<
+	install_name_tool -change "@rpath/QtSvg.framework/Versions/5/QtSvg" "@executable_path/../Frameworks/QtSvg.framework/Versions/5/QtSvg" $<
+	install_name_tool -change "@rpath/QtWidgets.framework/Versions/5/QtWidgets" "@executable_path/../Frameworks/QtWidgets.framework/Versions/5/QtWidgets" $<
+	ln -sf $(abspath $<) $@
+
+build/mod-app.app/Contents/MacOS/jackd: $(PAWPAW_PREFIX)/bin/jackd$(APP_EXT)
+	@mkdir -p build/mod-app.app/Contents/MacOS
+	ln -sf $(abspath $<) $@
+
+build/mod-app.app/Contents/MacOS/lib: build-ui/lib
+	@mkdir -p build/mod-app.app/Contents/MacOS/
+	ln -sf $(abspath $<) $@
+
+build/mod-app.app/Contents/MacOS/libjack%: $(PAWPAW_PREFIX)/lib/libjack%
+	@mkdir -p build/mod-app.app/Contents/MacOS
+	ln -sf $(abspath $<) $@
+
+build/mod-app.app/Contents/MacOS/jack/jack-session.conf: utils/jack-session.conf
+	@mkdir -p build/mod-app.app/Contents/MacOS/jack
+	ln -sf $(abspath $<) $@
+
+build/mod-app.app/Contents/MacOS/jack/jack_%.so: $(PAWPAW_PREFIX)/lib/jack/jack_%.so
+	@mkdir -p build/mod-app.app/Contents/MacOS/jack
+	ln -sf $(abspath $<) $@
+
+build/mod-app.app/Contents/MacOS/jack/mod-host.so: mod-host/mod-host.so
+	@mkdir -p build/mod-app.app/Contents/MacOS/jack
+	ln -sf $(abspath $<) $@
+
+build/mod-app.app/Contents/MacOS/jack/mod-midi-broadcaster.so: mod-midi-merger/build/mod-midi-broadcaster.so
+	@mkdir -p build/mod-app.app/Contents/MacOS/jack
+	ln -sf $(abspath $<) $@
+
+build/mod-app.app/Contents/MacOS/jack/mod-midi-merger.so: mod-midi-merger/build/mod-midi-merger.so
+	@mkdir -p build/mod-app.app/Contents/MacOS/jack
+	ln -sf $(abspath $<) $@
+
+build/mod-app.app/Contents/MacOS/mod-screenshot: build-screenshot/mod-screenshot
+	@mkdir -p build/mod-app.app/Contents/MacOS
+	ln -sf $(abspath $<) $@
+
+build/mod-app.app/Contents/MacOS/mod-ui: build-ui/mod-ui
+	@mkdir -p build/mod-app.app/Contents/MacOS
+	ln -sf $(abspath $<) $@
+
+build/mod-app.app/Contents/MacOS/mod: mod-ui/mod
+	@mkdir -p build/mod-app.app/Contents/MacOS/
+	ln -sf $(abspath $<) $@
+
+build/mod-app.app/Contents/MacOS/modtools: mod-ui/modtools
+	@mkdir -p build/mod-app.app/Contents/MacOS/
+	ln -sf $(abspath $<) $@
+
+build/mod-app.app/Contents/Resources/default.pedalboard: mod-ui/default.pedalboard
+	@mkdir -p build/mod-app.app/Contents/Resources
+	ln -sf $(abspath $<) $@
+
+build/mod-app.app/Contents/Resources/html: mod-ui/html
+	@mkdir -p build/mod-app.app/Contents/Resources
 	ln -sf $(abspath $<) $@
 
 # ---------------------------------------------------------------------------------------------------------------------
 
 build/mod-screenshot$(APP_EXT): build-screenshot/mod-screenshot$(APP_EXT)
+	@mkdir -p build
 	ln -sf $(abspath $<) $@
 
-mod-screenshot$(APP_EXT): utils/mod-screenshot.py $(BOOTSTRAP_FILES)
+build-screenshot/mod-screenshot$(APP_EXT): utils/mod-screenshot.py $(BOOTSTRAP_FILES)
 	./utils/run.sh $(PAWPAW_TARGET) python3 utils/mod-screenshot.py build_exe
 	touch $@
 
 # ---------------------------------------------------------------------------------------------------------------------
 
 build/mod-ui$(APP_EXT): build-ui/mod-ui$(APP_EXT)
+	@mkdir -p build
 	ln -sf $(abspath $<) $@
 
 build/lib: build-ui/lib

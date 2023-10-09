@@ -535,6 +535,7 @@ private slots:
         }
         else
        #endif
+        if (! devName.isEmpty())
         {
             arguments.append("-d");
             arguments.append(devName);

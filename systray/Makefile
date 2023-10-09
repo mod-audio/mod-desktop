@@ -35,9 +35,7 @@ PAWPAW_PREFIX = $(PAWPAW_DIR)/targets/$(PAWPAW_TARGET)
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-ifeq ($(MACOS),true)
-TARGET = mod-app.app/Contents/MacOS/mod-app
-else ifeq ($(WINDOWS),true)
+ifeq ($(WINDOWS),true)
 TARGET = mod-app.exe
 EXTRAS = Qt5Core.dll Qt5Gui.dll Qt5Svg.dll Qt5Widgets.dll
 LDFLAGS  += -Wl,-subsystem,windows
