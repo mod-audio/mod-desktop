@@ -165,7 +165,33 @@ public:
        #endif
 
        #ifdef Q_OS_MAC
-        // TODO
+        const AudioObjectPropertyAddress propAddr = {
+            .mElement   = kAudioObjectPropertyElementWildcard,
+            .mScope     = kAudioObjectPropertyScopeGlobal,
+            .mSelector  = kAudioHardwarePropertyDevices,
+        };
+        uint32_t outPropDataSize = 0;
+        if (AudioObjectGetPropertyDataSize(kAudioObjectSystemObject, &propAddr, 0, nullptr, &outPropDataSize) == kAudioHardwareNoError)
+        {
+			const uint32_t numDevices = outPropDataSize / sizeof(AudioObjectID);
+
+            AudioObjectID* const deviceIDs = new AudioObjectID[numDevices];
+
+            if (AudioObjectGetPropertyData(kAudioObjectSystemObject, &propAddr, 0, nullptr, &outPropDataSize, deviceIDs) == kAudioHardwareNoError)
+            {
+                for (uint32_t i = 0; i < numDevices; ++i)
+                {
+                }
+            }
+
+            printf("-------------------------------------------------------- AudioObjectGetPropertyDataSize %u\n", numDevices);
+
+            delete[] deviceIDs;
+        }
+        else
+        {
+            printf("-------------------------------------------------------- AudioObjectGetPropertyDataSize error\n");
+        }
        #else
         if (Pa_Initialize() == paNoError)
         {
@@ -656,11 +682,9 @@ private slots:
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
         switch (reason)
         {
-        case QSystemTrayIcon::Trigger:
         case QSystemTrayIcon::DoubleClick:
-            setVisible(!isVisible());
-            break;
         case QSystemTrayIcon::MiddleClick:
+            setVisible(!isVisible());
             break;
         default:
             break;

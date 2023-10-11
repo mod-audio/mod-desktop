@@ -70,6 +70,12 @@ TARGETS += build/mod-app.app/Contents/MacOS/mod-screenshot
 TARGETS += build/mod-app.app/Contents/MacOS/mod-ui
 TARGETS += build/mod-app.app/Contents/MacOS/mod
 TARGETS += build/mod-app.app/Contents/MacOS/modtools
+TARGETS += build/mod-app.app/Contents/PlugIns/bearer/libqgenericbearer.dylib
+TARGETS += build/mod-app.app/Contents/PlugIns/generic/libqtuiotouchplugin.dylib
+TARGETS += build/mod-app.app/Contents/PlugIns/iconengines/libqsvgicon.dylib
+TARGETS += build/mod-app.app/Contents/PlugIns/imageformats/libqsvg.dylib
+TARGETS += build/mod-app.app/Contents/PlugIns/platforms/libqcocoa.dylib
+TARGETS += build/mod-app.app/Contents/PlugIns/styles/libqmacstyle.dylib
 TARGETS += build/mod-app.app/Contents/Resources/default.pedalboard
 TARGETS += build/mod-app.app/Contents/Resources/html
 else
@@ -201,14 +207,18 @@ ifneq ($(MACOS),true)
 BUNDLES += rt-neural-generic.lv2
 endif
 # FIXME *.so extension
+ifneq ($(MACOS),true)
 BUNDLES += tinygain.lv2
+endif
 BUNDLES += wolf-shaper.lv2
 
 # TODO check
+ifneq ($(MACOS),true)
 BUNDLES += Harmless.lv2
 BUNDLES += Larynx.lv2
 BUNDLES += Modulay.lv2
 BUNDLES += Shiroverb.lv2
+endif
 
 
 # TODO build fails
@@ -354,11 +364,7 @@ build/mod-app.app/Contents/Frameworks/Qt%.framework: $(PAWPAW_PREFIX)/lib/Qt%.fr
 
 build/mod-app.app/Contents/MacOS/mod-app: systray/mod-app
 	@mkdir -p build/mod-app.app/Contents/MacOS
-	install_name_tool -change "@rpath/QtCore.framework/Versions/5/QtCore" "@executable_path/../Frameworks/QtCore.framework/Versions/5/QtCore" $<
-	install_name_tool -change "@rpath/QtGui.framework/Versions/5/QtGui" "@executable_path/../Frameworks/QtGui.framework/Versions/5/QtGui" $<
-	install_name_tool -change "@rpath/QtSvg.framework/Versions/5/QtSvg" "@executable_path/../Frameworks/QtSvg.framework/Versions/5/QtSvg" $<
-	install_name_tool -change "@rpath/QtWidgets.framework/Versions/5/QtWidgets" "@executable_path/../Frameworks/QtWidgets.framework/Versions/5/QtWidgets" $<
-	ln -sf $(abspath $<) $@
+	cp -v $(abspath $<) $@
 
 build/mod-app.app/Contents/MacOS/jackd: $(PAWPAW_PREFIX)/bin/jackd$(APP_EXT)
 	@mkdir -p build/mod-app.app/Contents/MacOS
@@ -406,6 +412,30 @@ build/mod-app.app/Contents/MacOS/mod: mod-ui/mod
 
 build/mod-app.app/Contents/MacOS/modtools: mod-ui/modtools
 	@mkdir -p build/mod-app.app/Contents/MacOS/
+	ln -sf $(abspath $<) $@
+
+build/mod-app.app/Contents/PlugIns/bearer/libq%.dylib: $(PAWPAW_PREFIX)/lib/qt5/plugins/bearer/libq%.dylib
+	@mkdir -p build/mod-app.app/Contents/PlugIns/bearer
+	ln -sf $(abspath $<) $@
+
+build/mod-app.app/Contents/PlugIns/generic/libq%.dylib: $(PAWPAW_PREFIX)/lib/qt5/plugins/generic/libq%.dylib
+	@mkdir -p build/mod-app.app/Contents/PlugIns/generic
+	ln -sf $(abspath $<) $@
+
+build/mod-app.app/Contents/PlugIns/iconengines/libq%.dylib: $(PAWPAW_PREFIX)/lib/qt5/plugins/iconengines/libq%.dylib
+	@mkdir -p build/mod-app.app/Contents/PlugIns/iconengines
+	ln -sf $(abspath $<) $@
+
+build/mod-app.app/Contents/PlugIns/imageformats/libq%.dylib: $(PAWPAW_PREFIX)/lib/qt5/plugins/imageformats/libq%.dylib
+	@mkdir -p build/mod-app.app/Contents/PlugIns/imageformats
+	ln -sf $(abspath $<) $@
+
+build/mod-app.app/Contents/PlugIns/platforms/libq%.dylib: $(PAWPAW_PREFIX)/lib/qt5/plugins/platforms/libq%.dylib
+	@mkdir -p build/mod-app.app/Contents/PlugIns/platforms
+	ln -sf $(abspath $<) $@
+
+build/mod-app.app/Contents/PlugIns/styles/libq%.dylib: $(PAWPAW_PREFIX)/lib/qt5/plugins/styles/libq%.dylib
+	@mkdir -p build/mod-app.app/Contents/PlugIns/styles
 	ln -sf $(abspath $<) $@
 
 build/mod-app.app/Contents/Resources/default.pedalboard: mod-ui/default.pedalboard

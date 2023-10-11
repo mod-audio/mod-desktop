@@ -44,7 +44,9 @@ else
 TARGET = mod-app
 endif
 
-ifneq ($(MACOS),true)
+ifeq ($(MACOS),true)
+LDFLAGS  += -framework CoreAudio
+else
 CXXFLAGS += $(shell pkg-config --cflags portaudio-2.0)
 LDFLAGS  += $(shell pkg-config --libs portaudio-2.0)
 endif
@@ -80,6 +82,12 @@ clean:
 $(TARGET): $(OBJS)
 	@$(shell mkdir -p $(@D))
 	$(CXX) $^ $(LDFLAGS) $(QT5_LIBS) -o $@
+ifeq ($(MACOS),true)
+	install_name_tool -change "@rpath/QtCore.framework/Versions/5/QtCore" "@executable_path/../Frameworks/QtCore.framework/Versions/5/QtCore" $@
+	install_name_tool -change "@rpath/QtGui.framework/Versions/5/QtGui" "@executable_path/../Frameworks/QtGui.framework/Versions/5/QtGui" $@
+	install_name_tool -change "@rpath/QtSvg.framework/Versions/5/QtSvg" "@executable_path/../Frameworks/QtSvg.framework/Versions/5/QtSvg" $@
+	install_name_tool -change "@rpath/QtWidgets.framework/Versions/5/QtWidgets" "@executable_path/../Frameworks/QtWidgets.framework/Versions/5/QtWidgets" $@
+endif
 
 main.cpp.o: main.cpp mod-app.hpp qrc_mod-app.hpp ui_mod-app.hpp
 	$(CXX) $< $(CXXFLAGS) $(QT5_FLAGS) -c -o $@
