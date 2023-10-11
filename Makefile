@@ -276,6 +276,10 @@ win64-plugins:
 
 # ---------------------------------------------------------------------------------------------------------------------
 
+build/mod-app$(APP_EXT): systray/mod-app$(APP_EXT)
+	@mkdir -p build
+	ln -sf $(abspath $<) $@
+
 build/jackd$(APP_EXT): $(PAWPAW_PREFIX)/bin/jackd$(APP_EXT)
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
