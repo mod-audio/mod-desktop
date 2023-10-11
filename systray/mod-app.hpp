@@ -77,9 +77,13 @@ class AppWindow : public QMainWindow
     bool successfullyStarted = false;
     int timerId = 0;
 
-   #ifdef Q_OS_WIN
-    QStringList matchingWasapiInputDevices;
-   #endif
+    struct DeviceInfo {
+        QString uidMain;
+        QString uidInput;
+        bool canInput = false;
+        bool canOutput = false;
+    };
+    QList<DeviceInfo> devices;
 
 public:
     AppWindow(const QString& cwd)
@@ -165,22 +169,48 @@ public:
        #endif
 
        #ifdef Q_OS_MAC
-        const AudioObjectPropertyAddress propAddr = {
+        constexpr const AudioObjectPropertyAddress propDevices = {
             .mElement   = kAudioObjectPropertyElementWildcard,
             .mScope     = kAudioObjectPropertyScopeGlobal,
             .mSelector  = kAudioHardwarePropertyDevices,
         };
+        constexpr const AudioObjectPropertyAddress propInputStreams = {
+            .mElement   = kAudioObjectPropertyElementMaster,
+            .mScope     = kAudioDevicePropertyScopeInput,
+            .mSelector  = kAudioDevicePropertyStreams,
+        };
+        constexpr const AudioObjectPropertyAddress propOutputStreams = {
+            .mElement   = kAudioObjectPropertyElementMaster,
+            .mScope     = kAudioDevicePropertyScopeOutput,
+            .mSelector  = kAudioDevicePropertyStreams,
+        };
         uint32_t outPropDataSize = 0;
-        if (AudioObjectGetPropertyDataSize(kAudioObjectSystemObject, &propAddr, 0, nullptr, &outPropDataSize) == kAudioHardwareNoError)
+        if (AudioObjectGetPropertyDataSize(kAudioObjectSystemObject, &propDevices, 0, nullptr, &outPropDataSize) == kAudioHardwareNoError)
         {
 			const uint32_t numDevices = outPropDataSize / sizeof(AudioObjectID);
 
             AudioObjectID* const deviceIDs = new AudioObjectID[numDevices];
 
-            if (AudioObjectGetPropertyData(kAudioObjectSystemObject, &propAddr, 0, nullptr, &outPropDataSize, deviceIDs) == kAudioHardwareNoError)
+            if (AudioObjectGetPropertyData(kAudioObjectSystemObject, &propDevices, 0, nullptr, &outPropDataSize, deviceIDs) == kAudioHardwareNoError)
             {
                 for (uint32_t i = 0; i < numDevices; ++i)
                 {
+                    DeviceInfo devInfo = {
+                        QString::number(deviceIDs[i]), {},
+                        false,
+                        false
+                    };
+
+                    outPropDataSize = 0;
+                    if (AudioObjectGetPropertyDataSize(deviceIDs[i], &propInputStreams, 0, nullptr, &outPropDataSize) == kAudioHardwareNoError && outPropDataSize != 0)
+                        devInfo.canInput = true;
+
+                    outPropDataSize = 0;
+                    if (AudioObjectGetPropertyDataSize(deviceIDs[i], &propOutputStreams, 0, nullptr, &outPropDataSize) == kAudioHardwareNoError && outPropDataSize != 0)
+                        devInfo.canOutput = true;
+
+                    ui.cb_device->addItem(devInfo.uidMain);
+                    devices.append(devInfo);
                 }
             }
 
@@ -229,10 +259,10 @@ public:
 
                 if (devInfo->maxOutputChannels == 0)
                 {
-                   #ifdef Q_OS_WIN
                     if (devInfo->maxInputChannels == 0)
                         continue;
 
+                   #ifdef Q_OS_WIN
                     if (hostApiName == "Windows WASAPI")
                         matchingInputDevName = devName;
                     else
@@ -247,14 +277,18 @@ public:
                     continue;
                #endif
 
-                ui.cb_device->addItem(hostApiName + "::" + devName);
-
-               #ifdef Q_OS_WIN
-                matchingWasapiInputDevices.append(devInfo->maxInputChannels == 0 && !matchingInputDevName.isEmpty()
+                const QString uidMain(hostApiName + "::" + devName);
+                const QString uidInput(devInfo->maxInputChannels == 0 && !matchingInputDevName.isEmpty()
                     ? hostApiName + "::" + matchingInputDevName
                     : "");
-               #endif
                 matchingInputDevName.clear();
+
+                ui.cb_device->addItem(fullName);
+                devices.append({
+                    uidMain, uidInput,
+                    devInfo->maxInputChannels > 0,
+                    devInfo->maxInputChannels > 0 || !uidInput.isEmpty()
+                });
             }
 
             Pa_Terminate();
@@ -504,7 +538,12 @@ private slots:
         writeMidiChannelsToProfile(ui.sp_midi_pb->value(), ui.sp_midi_ss->value());
 
         const bool midiEnabled = ui.gb_midi->isChecked();
-        const QString devName(ui.cb_device->currentText());
+        const int deviceIndex = ui.cb_device->currentIndex();
+
+        if (deviceIndex < 0 || deviceIndex >= devices.size())
+            return;
+
+        const DeviceInfo& devInfo(devices[deviceIndex]);
 
         QStringList arguments = {
             "-R",
@@ -542,29 +581,34 @@ private slots:
         arguments.append("-p");
         arguments.append(ui.cb_buffersize->currentIndex() == 0 ? "128" : "256");
 
-       #ifdef Q_OS_WIN
-        const QString& inputDev(matchingWasapiInputDevices[ui.cb_device->currentIndex()]);
 
-        // WASAPI forced duplex
-        if (! inputDev.isEmpty())
+        // forced duplex
+        if (! devInfo.uidInput.isEmpty())
         {
             arguments.append("-P");
-            arguments.append(devName);
+            arguments.append(devInfo.uidMain);
             arguments.append("-C");
-            arguments.append(inputDev);
-        }
-        // WASAPI playback only mode
-        else if (devName.startsWith("Windows WASAPI::"))
-        {
-            arguments.append("-P");
-            arguments.append(devName);
+            arguments.append(devInfo.uidInput);
         }
         else
-       #endif
-        if (! devName.isEmpty())
         {
-            arguments.append("-d");
-            arguments.append(devName);
+            if (devInfo.canInput && devInfo.canOutput)
+            {
+                // regular device duplex mode
+                arguments.append("-d");
+            }
+            else if (devInfo.canInput)
+            {
+                // capture only
+                arguments.append("-C");
+            }
+            else
+            {
+                // playback only
+                arguments.append("-P");
+            }
+
+            arguments.append(devInfo.uidMain);
         }
 
        #if 0 // !(defined(Q_OS_WIN) || defined(Q_OS_MAC))
