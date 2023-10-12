@@ -333,7 +333,7 @@ public:
                     : "");
                 matchingInputDevName.clear();
 
-                ui.cb_device->addItem(fullName);
+                ui.cb_device->addItem(uidMain);
                 devices.append({
                     uidMain, uidInput,
                     devInfo->maxInputChannels > 0,
