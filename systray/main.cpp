@@ -12,6 +12,7 @@
 static const WCHAR* user_files_dir = nullptr;
 #else
 #include <dlfcn.h>
+#include <pwd.h>
 #include <signal.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -93,7 +94,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-   #ifdef _WIN32
+  #ifdef _WIN32
     WCHAR path[MAX_PATH + 256] = {};
 
     GetModuleFileNameW(GetModuleHandleW(nullptr), path, sizeof(path)/sizeof(path[0]));
@@ -121,7 +122,7 @@ int main(int argc, char* argv[])
     std::wcscat(path, L"\\user-files");
     _wmkdir(path);
     user_files_dir = path;
-   #else
+  #else
     char path[PATH_MAX + 256] = {};
 
     Dl_info info = {};
@@ -140,12 +141,26 @@ int main(int argc, char* argv[])
 
     char lv2path[(PATH_MAX + 256) * 2] = {};
     std::strncat(lv2path, path, pathlen);
+   #ifdef __APPLE__
+    std::strcat(lv2path, "/../PlugIns/LV2:");
+   #else
     std::strcat(lv2path, "/plugins:");
+   #endif
 
+    if (const char* const home = getenv("HOME"))
+        std::strncpy(path, home, sizeof(path));
+    else if (struct passwd* const pwd = getpwuid(getuid()))
+        std::strncpy(path, pwd->pw_dir, sizeof(path));
+    else
+        return 1;
+
+   #ifdef __APPLE__
+    std::strcat(path, "/Documents/MOD App");
+   #else
     // TODO fetch user docs dir
     std::memcpy(path + pathlen, "/data", 6);
+   #endif
 
-    // std::strcat(path, "/MOD App");
     mkdir(path, 0777);
     setenv("MOD_DATA_DIR", path, 1);
 
@@ -163,7 +178,7 @@ int main(int argc, char* argv[])
     sigemptyset(&sig.sa_mask);
     sigaction(SIGTERM, &sig, nullptr);
     sigaction(SIGINT, &sig, nullptr);
-   #endif
+  #endif
 
     app.setQuitOnLastWindowClosed(false);
 

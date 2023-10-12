@@ -52,10 +52,14 @@ BOOTSTRAP_FILES = \
 TARGETS = build-ui/lib/libmod_utils$(SO_EXT)
 
 ifeq ($(MACOS),true)
+TARGETS += build/mod-app.app/Contents/Info.plist
 TARGETS += build/mod-app.app/Contents/Frameworks/QtCore.framework
 TARGETS += build/mod-app.app/Contents/Frameworks/QtGui.framework
+TARGETS += build/mod-app.app/Contents/Frameworks/QtOpenGL.framework
+TARGETS += build/mod-app.app/Contents/Frameworks/QtPrintSupport.framework
 TARGETS += build/mod-app.app/Contents/Frameworks/QtSvg.framework
 TARGETS += build/mod-app.app/Contents/Frameworks/QtWidgets.framework
+TARGETS += build/mod-app.app/Contents/MacOS/lib
 TARGETS += build/mod-app.app/Contents/MacOS/libjack.0.dylib
 TARGETS += build/mod-app.app/Contents/MacOS/libjackserver.0.dylib
 TARGETS += build/mod-app.app/Contents/MacOS/jackd
@@ -70,14 +74,15 @@ TARGETS += build/mod-app.app/Contents/MacOS/mod-screenshot
 TARGETS += build/mod-app.app/Contents/MacOS/mod-ui
 TARGETS += build/mod-app.app/Contents/MacOS/mod
 TARGETS += build/mod-app.app/Contents/MacOS/modtools
-TARGETS += build/mod-app.app/Contents/PlugIns/bearer/libqgenericbearer.dylib
 TARGETS += build/mod-app.app/Contents/PlugIns/generic/libqtuiotouchplugin.dylib
 TARGETS += build/mod-app.app/Contents/PlugIns/iconengines/libqsvgicon.dylib
 TARGETS += build/mod-app.app/Contents/PlugIns/imageformats/libqsvg.dylib
+TARGETS += build/mod-app.app/Contents/PlugIns/LV2
 TARGETS += build/mod-app.app/Contents/PlugIns/platforms/libqcocoa.dylib
 TARGETS += build/mod-app.app/Contents/PlugIns/styles/libqmacstyle.dylib
 TARGETS += build/mod-app.app/Contents/Resources/default.pedalboard
 TARGETS += build/mod-app.app/Contents/Resources/html
+TARGETS += build/mod-app.app/Contents/Resources/mod-logo.icns
 else
 TARGETS += build/jackd$(APP_EXT)
 TARGETS += build/jack/jack-session.conf
@@ -101,7 +106,6 @@ TARGETS += build/Qt5Core.dll
 TARGETS += build/Qt5Gui.dll
 TARGETS += build/Qt5Svg.dll
 TARGETS += build/Qt5Widgets.dll
-TARGETS += build/bearer/qgenericbearer.dll
 TARGETS += build/generic/qtuiotouchplugin.dll
 TARGETS += build/iconengines/qsvgicon.dll
 TARGETS += build/imageformats/qsvg.dll
@@ -118,20 +122,17 @@ endif
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-# FIXME *.so extension
-ifneq ($(MACOS),true)
 BUNDLES  = abGate.lv2
-endif
 BUNDLES += artyfx.lv2
-BUNDLES += carla-files.lv2
 ifneq ($(MACOS),true)
+# FIXME crashes on load
+BUNDLES += carla-files.lv2
+endif
 BUNDLES += DragonflyEarlyReflections.lv2
 BUNDLES += DragonflyHallReverb.lv2
 BUNDLES += DragonflyPlateReverb.lv2
 BUNDLES += DragonflyRoomReverb.lv2
-# FIXME *.so extension
 BUNDLES += fil4.lv2
-endif
 BUNDLES += Black_Pearl_4A.lv2
 BUNDLES += Black_Pearl_4B.lv2
 BUNDLES += Black_Pearl_5.lv2
@@ -159,20 +160,13 @@ ifneq ($(MACOS),true)
 # BUNDLES += fomp.lv2
 endif
 BUNDLES += Kars.lv2
-ifneq ($(MACOS),true)
-# FIXME *.so extension
 BUNDLES += midifilter.lv2
-endif
 BUNDLES += midigen.lv2
-# FIXME *.so extension
 BUNDLES += mod-bpf.lv2
 BUNDLES += MOD-CabinetLoader.lv2
 BUNDLES += MOD-ConvolutionLoader.lv2
-# FIXME *.so extension
 BUNDLES += mod-gain.lv2
-# FIXME *.so extension
 BUNDLES += mod-gain2x2.lv2
-# FIXME *.so extension
 BUNDLES += mod-hpf.lv2
 BUNDLES += mod-mda-BeatBox.lv2
 BUNDLES += mod-mda-Degrade.lv2
@@ -189,37 +183,29 @@ BUNDLES += mod-mda-Shepard.lv2
 BUNDLES += mod-mda-SubSynth.lv2
 BUNDLES += mod-mda-ThruZero.lv2
 BUNDLES += mod-mda-Vocoder.lv2
-ifneq ($(MACOS),true)
-# FIXME *.so extension
 BUNDLES += modmeter.lv2
-# FIXME *.so extension
+ifneq ($(MACOS),true)
+# FIXME fails to build: implicit declaration of function '__atomic_store_4'
 BUNDLES += modspectre.lv2
 endif
 BUNDLES += MVerb.lv2
 BUNDLES += Nekobi.lv2
 BUNDLES += neural_amp_modeler.lv2
 ifneq ($(MACOS),true)
+# FIXME fails to build: implicit declaration of function 'basename'
 BUNDLES += notes.lv2
 endif
 BUNDLES += PingPongPan.lv2
-ifneq ($(MACOS),true)
 # FIXME plugin binary missing (win32 RUNTIME vs LIBRARY)
 BUNDLES += rt-neural-generic.lv2
-endif
-# FIXME *.so extension
-ifneq ($(MACOS),true)
 BUNDLES += tinygain.lv2
-endif
 BUNDLES += wolf-shaper.lv2
 
 # TODO check
-ifneq ($(MACOS),true)
 BUNDLES += Harmless.lv2
 BUNDLES += Larynx.lv2
 BUNDLES += Modulay.lv2
 BUNDLES += Shiroverb.lv2
-endif
-
 
 # TODO build fails
 # BUNDLES += mod-ams.lv2
@@ -292,10 +278,6 @@ build/Qt5%.dll: $(PAWPAW_PREFIX)/bin/Qt5%.dll
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
 
-build/bearer/q%.dll: $(PAWPAW_PREFIX)/lib/qt5/plugins/bearer/q%.dll
-	@mkdir -p build/bearer
-	ln -sf $(abspath $<) $@
-
 build/generic/q%.dll: $(PAWPAW_PREFIX)/lib/qt5/plugins/generic/q%.dll
 	@mkdir -p build/generic
 	ln -sf $(abspath $<) $@
@@ -362,6 +344,10 @@ build/modtools: mod-ui/modtools
 
 # ---------------------------------------------------------------------------------------------------------------------
 
+build/mod-app.app/Contents/Info.plist: utils/Info.plist
+	@mkdir -p build/mod-app.app/Contents
+	ln -sf $(abspath $<) $@
+
 build/mod-app.app/Contents/Frameworks/Qt%.framework: $(PAWPAW_PREFIX)/lib/Qt%.framework
 	@mkdir -p build/mod-app.app/Contents/Frameworks
 	ln -sf $(abspath $<) $@
@@ -375,7 +361,7 @@ build/mod-app.app/Contents/MacOS/jackd: $(PAWPAW_PREFIX)/bin/jackd$(APP_EXT)
 	ln -sf $(abspath $<) $@
 
 build/mod-app.app/Contents/MacOS/lib: build-ui/lib
-	@mkdir -p build/mod-app.app/Contents/MacOS/
+	@mkdir -p build/mod-app.app/Contents/MacOS
 	ln -sf $(abspath $<) $@
 
 build/mod-app.app/Contents/MacOS/libjack%: $(PAWPAW_PREFIX)/lib/libjack%
@@ -418,10 +404,6 @@ build/mod-app.app/Contents/MacOS/modtools: mod-ui/modtools
 	@mkdir -p build/mod-app.app/Contents/MacOS/
 	ln -sf $(abspath $<) $@
 
-build/mod-app.app/Contents/PlugIns/bearer/libq%.dylib: $(PAWPAW_PREFIX)/lib/qt5/plugins/bearer/libq%.dylib
-	@mkdir -p build/mod-app.app/Contents/PlugIns/bearer
-	ln -sf $(abspath $<) $@
-
 build/mod-app.app/Contents/PlugIns/generic/libq%.dylib: $(PAWPAW_PREFIX)/lib/qt5/plugins/generic/libq%.dylib
 	@mkdir -p build/mod-app.app/Contents/PlugIns/generic
 	ln -sf $(abspath $<) $@
@@ -432,6 +414,11 @@ build/mod-app.app/Contents/PlugIns/iconengines/libq%.dylib: $(PAWPAW_PREFIX)/lib
 
 build/mod-app.app/Contents/PlugIns/imageformats/libq%.dylib: $(PAWPAW_PREFIX)/lib/qt5/plugins/imageformats/libq%.dylib
 	@mkdir -p build/mod-app.app/Contents/PlugIns/imageformats
+	ln -sf $(abspath $<) $@
+
+build/mod-app.app/Contents/PlugIns/LV2: build/plugins
+	@mkdir -p build/mod-app.app/Contents/PlugIns
+	@mkdir -p build/plugins
 	ln -sf $(abspath $<) $@
 
 build/mod-app.app/Contents/PlugIns/platforms/libq%.dylib: $(PAWPAW_PREFIX)/lib/qt5/plugins/platforms/libq%.dylib
@@ -447,6 +434,10 @@ build/mod-app.app/Contents/Resources/default.pedalboard: mod-ui/default.pedalboa
 	ln -sf $(abspath $<) $@
 
 build/mod-app.app/Contents/Resources/html: mod-ui/html
+	@mkdir -p build/mod-app.app/Contents/Resources
+	ln -sf $(abspath $<) $@
+
+build/mod-app.app/Contents/Resources/mod-logo.icns: systray/mod-logo.icns
 	@mkdir -p build/mod-app.app/Contents/Resources
 	ln -sf $(abspath $<) $@
 
@@ -506,9 +497,14 @@ systray/mod-app$(APP_EXT): systray/main.cpp systray/mod-app.hpp
 
 # ---------------------------------------------------------------------------------------------------------------------
 
+.KEEP: $(BUNDLES:%=$(PAWPAW_PREFIX)/lib/lv2/%/manifest.ttl)
+
 build/plugins/%: $(PAWPAW_PREFIX)/lib/lv2/%/manifest.ttl
 	@mkdir -p build/plugins
-	ln -sf $(subst /manifest.ttl,,$(abspath $<)) $@
+	rm -f $@
+	ln -s $(subst /manifest.ttl,,$(abspath $<)) $@
+	touch $(PAWPAW_PREFIX)/lib/lv2/$*/manifest.ttl
+	touch $@
 
 $(PAWPAW_PREFIX)/lib/lv2/abGate.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) abgate

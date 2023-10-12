@@ -12,7 +12,7 @@ DefaultDirName={commonpf64}\MOD App
 DisableDirPage=yes
 DisableWelcomePage=no
 LicenseFile=..\LICENSE
-OutputBaseFilename=mod-app-win64-{#VERSION}-installer
+OutputBaseFilename=mod-app-{#VERSION}-win64-installer
 OutputDir=..
 UsePreviousAppDir=no
 

@@ -17,7 +17,6 @@ fi
 # ---------------------------------------------------------------------------------------------------------------------
 # set up env
 
-export JACK_DRIVER_DIR=$(pwd)/build/jack
 export LV2_PATH=$(pwd)/build/plugins
 # export MOD_LOG=1
 
@@ -27,27 +26,39 @@ export JACK_NO_START_SERVER=1
 # ---------------------------------------------------------------------------------------------------------------------
 # run command
 
-JACKD="./build/jackd"
+if [ "${target}" = "macos-universal-10.15" ]; then
+    export JACK_DRIVER_DIR="$(pwd)/build/mod-app.app/Contents/MacOS/jack"
+    JACKD="./build/mod-app.app/Contents/MacOS/jackd"
+else
+    export JACK_DRIVER_DIR="$(pwd)/build/jack"
+    JACKD="./build/jackd"
+fi
 
 if [ "${target}" = "win64" ]; then
-JACKD+=".exe"
-EXE_WRAPPER="wine"
+    JACKD+=".exe"
+    EXE_WRAPPER="wine"
 fi
+# EXE_WRAPPER="lldb -- "
 
-JACKD+=" -C utils/jack-session.conf -R -S"
+JACKD+=" -R -S -C utils/jack-session.conf"
 
 if [ "${target}" = "macos-universal-10.15" ]; then
-# JACKD+=" -X coremidi"
-JACKD+=" -d coreaudio"
-JACKD+=" -P 'Built-in'"
+    # JACKD+=" -X coremidi"
+    JACKD+=" -d coreaudio"
+    JACKD+=" -P 'Built-in'"
 elif [ "${target}" = "win64" ]; then
-JACKD+=" -X winmme -d portaudio -d 'ASIO::WineASIO Driver'"
+    JACKD+=" -X winmme"
+    JACKD+=" -d portaudio"
+    JACKD+=" -d 'ASIO::WineASIO Driver'"
 else
-# -X alsarawmidi
-JACKD+=" -d portaudio -d 'ALSA::pulse'"
+    # -X alsarawmidi
+    JACKD+=" -d portaudio"
+    JACKD+=" -d 'ALSA::pulse'"
 fi
 
-JACKD+=" -r 48000 -p 128"
+JACKD+=" -r 48000"
+JACKD+=" -p 256"
+# JACKD+=" -p 8192"
 
 exec ${EXE_WRAPPER} ${JACKD}
 

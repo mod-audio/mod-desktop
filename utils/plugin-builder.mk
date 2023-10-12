@@ -49,6 +49,8 @@ github = https://github.com/$(1)/$(2)/archive/$(3)
 PKG = $(call UPPERCASE,$(call sanitize,$(pkgname)))
 $(PKG)_PKGDIR = $(CURDIR)/mod-plugin-builder/plugins/package/$(pkgname)
 
+RENAME_EXTENSION = $(foreach f,$(2)$(3)$(4)$(5)$(6)$(7)$(8)$(9)$(10)$(11)$(12)$(13)$(14)$(15)$(16)$(17)$(18)$(19),mv $(f) $(subst .so,.$(1),$(f));) echo
+
 BR2_TARGET_OPTIMIZATION =
 
 MAKE1 = make -j1
@@ -72,19 +74,15 @@ TARGET_LDFLAGS = $(LDFLAGS)
 TARGET_DIR = $(PAWPAW_PREFIX)
 
 ifeq ($(MACOS),true)
-libtoolize = glibtoolize
-else
-libtoolize = libtoolize
-endif
-
-ifeq ($(MACOS),true)
 STRIP = true
 else ifeq ($(WINDOWS),true)
 BR2_SKIP_LTO = y
 endif
 
 ifneq ($(TOOLCHAIN_PREFIX),)
-BR2_EXTRA_CONFIGURE_OPTS = --host=$(TOOLCHAIN_PREFIX) ac_cv_build=$(shell uname -m)-linux-gnu ac_cv_host=$(TOOLCHAIN_PREFIX)
+BR2_EXTRA_CONFIGURE_OPTS  = --host=$(TOOLCHAIN_PREFIX)
+BR2_EXTRA_CONFIGURE_OPTS += ac_cv_host=$(TOOLCHAIN_PREFIX)
+BR2_EXTRA_CONFIGURE_OPTS += ac_cv_build=$(shell uname -m)-linux-gnu
 endif
 
 define generic-package
@@ -172,10 +170,12 @@ all: $(STAMP_PINSTALLED)
 $(STAMP_PINSTALLED): $(STAMP_INSTALLED)
 	$(call $($(PKG)_POST_INSTALL_TARGET_HOOKS))
 ifeq ($(MACOS),true)
-	$(foreach b,$($(PKG)_BUNDLES),sed -i -e 's|lv2:binary <\([_a-zA-Z0-9-]*\)\.so>|lv2:binary <\1\.dylib>|g' $(PAWPAW_PREFIX)/usr/lib/lv2/$(b)/manifest.ttl;)
+	$(foreach b,$($(PKG)_BUNDLES),sed -i 's|lv2:binary <\([_a-zA-Z0-9-]*\)\.so>|lv2:binary <\1\.dylib>|g' $(PAWPAW_PREFIX)/usr/lib/lv2/$(b)/manifest.ttl;)
+	$(foreach b,$($(PKG)_BUNDLES),$(call RENAME_EXTENSION,dylib,$(wildcard $(PAWPAW_PREFIX)/usr/lib/lv2/$(b)/*.so));)
 else ifeq ($(WINDOWS),true)
-	$(foreach b,$($(PKG)_BUNDLES),sed -i -e 's|lv2:binary <\([_a-zA-Z0-9-]*\)\.so>|lv2:binary <\1\.dll>|g' $(PAWPAW_PREFIX)/usr/lib/lv2/$(b)/manifest.ttl;)
+	$(foreach b,$($(PKG)_BUNDLES),sed -i 's|lv2:binary <\([_a-zA-Z0-9-]*\)\.so>|lv2:binary <\1\.dll>|g' $(PAWPAW_PREFIX)/usr/lib/lv2/$(b)/manifest.ttl;)
 	$(foreach b,$($(PKG)_BUNDLES),rm -f $(PAWPAW_PREFIX)/usr/lib/lv2/$(b)/*.dll.a;)
+	$(foreach b,$($(PKG)_BUNDLES),$(call RENAME_EXTENSION,dll,$(wildcard $(PAWPAW_PREFIX)/usr/lib/lv2/$(b)/*.so));)
 endif
 	touch $@
 
@@ -186,17 +186,17 @@ $(STAMP_INSTALLED): $(STAMP_BUILT)
 $(STAMP_BUILT): $(STAMP_CONFIGURED)
 ifeq ($(MACOS),true)
 	$(foreach p,$(wildcard $($(PKG)_BUILDDIR)/Makefile $($(PKG)_BUILDDIR)/*/makefile),\
-		sed -i -e 's/-Wl,--gc-sections//g' $(p);)
+		sed -i 's/-Wl,--gc-sections//g' $(p);)
 	$(foreach p,$(wildcard $($(PKG)_BUILDDIR)/Makefile),\
-		sed -i -e 's/-Wl,--as-needed//g' $(p);)
+		sed -i 's/-Wl,--as-needed//g' $(p);)
 	$(foreach p,$(wildcard $($(PKG)_BUILDDIR)/*/makefile),\
-		sed -i -e 's/-Wl,--no-undefined//g' $(p);)
+		sed -i 's/-Wl,--no-undefined//g' $(p);)
 	$(foreach p,$(wildcard $($(PKG)_BUILDDIR)/*/makefile),\
-		sed -i -e 's/-Wl,--exclude-libs,ALL//g' $(p);)
+		sed -i 's/-Wl,--exclude-libs,ALL//g' $(p);)
 	$(foreach p,$(wildcard $($(PKG)_BUILDDIR)/*/makefile),\
-		sed -i -e 's/-Wl,-z,relro,-z,now//g' $(p);)
+		sed -i 's/-Wl,-z,relro,-z,now//g' $(p);)
 	$(foreach p,$(wildcard $($(PKG)_BUILDDIR)/*/makefile),\
-		sed -i -e 's/-Wl,-z,noexecstack//g' $(p);)
+		sed -i 's/-Wl,-z,noexecstack//g' $(p);)
 endif
 	$($(PKG)_BUILD_CMDS)
 	touch $@
@@ -205,7 +205,7 @@ $(STAMP_CONFIGURED): $(STAMP_PATCHED)
 ifeq ($($(PKG)_AUTORECONF),YES)
 	(cd $($(PKG)_BUILDDIR) && \
 		aclocal --force && \
-		$(libtoolize) --force --automake --copy && \
+		libtoolize --force --automake --copy && \
 		autoheader --force && \
 		autoconf --force && \
 		automake -a --copy \
@@ -229,7 +229,7 @@ ifeq ($($(PKG)_SITE_METHOD),git)
 	git clone '$($(PKG)_SITE)' '$(PAWPAW_TMPDIR)/$(PAWPAW_TMPNAME)' && \
 	git -C '$(PAWPAW_TMPDIR)/$(PAWPAW_TMPNAME)' checkout '$($(PKG)_VERSION)' && \
 	touch '$(PAWPAW_TMPDIR)/$(PAWPAW_TMPNAME)/.gitmodules' && \
-	sed -i -e 's|git://github.com/|https://github.com/|g' '$(PAWPAW_TMPDIR)/$(PAWPAW_TMPNAME)/.gitmodules' && \
+	sed -i 's|git://github.com/|https://github.com/|g' '$(PAWPAW_TMPDIR)/$(PAWPAW_TMPNAME)/.gitmodules' && \
 	git -C '$(PAWPAW_TMPDIR)/$(PAWPAW_TMPNAME)' submodule update --recursive --init && \
 	tar --exclude='.git' -czf '$($(PKG)_DLFILE)' -C '$(PAWPAW_TMPDIR)' '$(PAWPAW_TMPNAME)'
 	rm -rf '$(PAWPAW_TMPDIR)'

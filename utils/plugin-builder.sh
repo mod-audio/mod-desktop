@@ -15,6 +15,11 @@ if [ -z "${target}" ] || [ -z "${plugin}" ]; then
     exit 1
 fi
 
+if [ ! -e mod-plugin-builder ]; then
+    echo "missing mod-plugin-builder"
+    exit 1
+fi
+
 # ---------------------------------------------------------------------------------------------------------------------
 # import env
 
@@ -30,9 +35,8 @@ export PAWPAW_DOWNLOADDIR
 export PAWPAW_PREFIX
 export TOOLCHAIN_PREFIX
 
-if [ ! -e mod-plugin-builder ]; then
-    echo "missing mod-plugin-builder"
-    exit 1
+if [ "${MACOS}" -eq 1 ]; then
+    export PATH="${PAWPAW_PREFIX}-host/bin:${PATH}"
 fi
 
 make -f utils/plugin-builder.mk pkgname="${plugin}" ${MAKE_ARGS} PREFIX=/usr WITH_LTO=false VERBOSE=1

@@ -778,7 +778,11 @@ private slots:
         {
         case QSystemTrayIcon::DoubleClick:
         case QSystemTrayIcon::MiddleClick:
+           #ifdef Q_OS_MAC
+            show();
+           #else
             setVisible(!isVisible());
+           #endif
             break;
         default:
             break;
