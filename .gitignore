@@ -1,7 +1,9 @@
 /build/
 /build-screenshot/
 /build-ui/
+.DS_Store
 *.dll
+*.dmg
 *.exe
 *.o
 *.tar.gz
