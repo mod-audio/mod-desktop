@@ -416,10 +416,10 @@ build/mod-app.app/Contents/PlugIns/imageformats/libq%.dylib: $(PAWPAW_PREFIX)/li
 	@mkdir -p build/mod-app.app/Contents/PlugIns/imageformats
 	ln -sf $(abspath $<) $@
 
-build/mod-app.app/Contents/PlugIns/LV2: build/plugins
+build/mod-app.app/Contents/PlugIns/LV2:
 	@mkdir -p build/mod-app.app/Contents/PlugIns
 	@mkdir -p build/plugins
-	ln -sf $(abspath $<) $@
+	ln -sf $(abspath build/plugins) $@
 
 build/mod-app.app/Contents/PlugIns/platforms/libq%.dylib: $(PAWPAW_PREFIX)/lib/qt5/plugins/platforms/libq%.dylib
 	@mkdir -p build/mod-app.app/Contents/PlugIns/platforms
