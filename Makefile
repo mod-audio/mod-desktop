@@ -1,6 +1,6 @@
 #!/usr/bin/make -f
 
-VERSION = 0.0.1
+VERSION = 0.0.2
 
 CC ?= gcc
 TARGET_MACHINE := $(shell $(CC) -dumpmachine)
@@ -124,10 +124,7 @@ endif
 
 BUNDLES  = abGate.lv2
 BUNDLES += artyfx.lv2
-ifneq ($(MACOS),true)
-# FIXME crashes on load
 BUNDLES += carla-files.lv2
-endif
 BUNDLES += DragonflyEarlyReflections.lv2
 BUNDLES += DragonflyHallReverb.lv2
 BUNDLES += DragonflyPlateReverb.lv2
@@ -155,10 +152,8 @@ BUNDLES += FluidSynthLeads.lv2
 BUNDLES += FluidSynthPads.lv2
 BUNDLES += Red_Zeppelin_4.lv2
 BUNDLES += Red_Zeppelin_5.lv2
-ifneq ($(MACOS),true)
 # FIXME needs python2
 # BUNDLES += fomp.lv2
-endif
 BUNDLES += Kars.lv2
 BUNDLES += midifilter.lv2
 BUNDLES += midigen.lv2
@@ -184,24 +179,19 @@ BUNDLES += mod-mda-SubSynth.lv2
 BUNDLES += mod-mda-ThruZero.lv2
 BUNDLES += mod-mda-Vocoder.lv2
 BUNDLES += modmeter.lv2
-ifneq ($(MACOS),true)
 # FIXME fails to build: implicit declaration of function '__atomic_store_4'
 BUNDLES += modspectre.lv2
-endif
 BUNDLES += MVerb.lv2
 BUNDLES += Nekobi.lv2
 BUNDLES += neural_amp_modeler.lv2
-ifneq ($(MACOS),true)
 # FIXME fails to build: implicit declaration of function 'basename'
 BUNDLES += notes.lv2
-endif
 BUNDLES += PingPongPan.lv2
 # FIXME plugin binary missing (win32 RUNTIME vs LIBRARY)
 BUNDLES += rt-neural-generic.lv2
 BUNDLES += tinygain.lv2
 BUNDLES += wolf-shaper.lv2
 
-# TODO check
 BUNDLES += Harmless.lv2
 BUNDLES += Larynx.lv2
 BUNDLES += Modulay.lv2

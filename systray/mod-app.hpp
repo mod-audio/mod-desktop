@@ -632,7 +632,7 @@ private slots:
         arguments.append(ui.cb_buffersize->currentIndex() == 0 ? "128" : "256");
 
 
-        // forced duplex
+        // duplex with separate input device
         if (! devInfo.uidInput.isEmpty())
         {
             arguments.append("-P");
@@ -640,24 +640,26 @@ private slots:
             arguments.append("-C");
             arguments.append(devInfo.uidInput);
         }
+        // regular duplex
+        else if (devInfo.canInput && devInfo.canOutput)
+        {
+            arguments.append("-d");
+            arguments.append(devInfo.uidMain);
+            arguments.append("-P");
+            arguments.append(devInfo.uidMain);
+            arguments.append("-C");
+            arguments.append(devInfo.uidMain);
+        }
+        // capture only
+        else if (devInfo.canInput)
+        {
+            arguments.append("-C");
+            arguments.append(devInfo.uidMain);
+        }
+        // playback only
         else
         {
-            if (devInfo.canInput && devInfo.canOutput)
-            {
-                // regular device duplex mode
-                arguments.append("-d");
-            }
-            else if (devInfo.canInput)
-            {
-                // capture only
-                arguments.append("-C");
-            }
-            else
-            {
-                // playback only
-                arguments.append("-P");
-            }
-
+            arguments.append("-P");
             arguments.append(devInfo.uidMain);
         }
 
