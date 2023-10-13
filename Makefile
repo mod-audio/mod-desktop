@@ -187,6 +187,7 @@ BUNDLES += modspectre.lv2
 BUNDLES += MVerb.lv2
 BUNDLES += Nekobi.lv2
 BUNDLES += neural_amp_modeler.lv2
+BUNDLES += neuralrecord.lv2
 # FIXME fails to build: implicit declaration of function 'basename'
 BUNDLES += notes.lv2
 BUNDLES += PingPongPan.lv2
@@ -567,6 +568,9 @@ $(PAWPAW_PREFIX)/lib/lv2/modspectre.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
 
 $(PAWPAW_PREFIX)/lib/lv2/neural_amp_modeler.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) neural-amp-modeler-lv2
+
+$(PAWPAW_PREFIX)/lib/lv2/neuralrecord.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
+	./utils/plugin-builder.sh $(PAWPAW_TARGET) neuralrecord
 
 $(PAWPAW_PREFIX)/lib/lv2/notes.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
 	./utils/plugin-builder.sh $(PAWPAW_TARGET) notes-lv2

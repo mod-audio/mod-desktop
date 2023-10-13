@@ -643,12 +643,15 @@ private slots:
         // regular duplex
         else if (devInfo.canInput && devInfo.canOutput)
         {
-            arguments.append("-d");
-            arguments.append(devInfo.uidMain);
+           #if defined(Q_OS_MAC) || defined(Q_OS_WIN)
             arguments.append("-P");
             arguments.append(devInfo.uidMain);
             arguments.append("-C");
             arguments.append(devInfo.uidMain);
+           #else
+            arguments.append("-d");
+            arguments.append(devInfo.uidMain);
+           #endif
         }
         // capture only
         else if (devInfo.canInput)
