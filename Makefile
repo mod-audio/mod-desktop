@@ -124,7 +124,10 @@ endif
 
 BUNDLES  = abGate.lv2
 BUNDLES += artyfx.lv2
+ifneq ($(MACOS),true)
+# FIXME crashes on load
 BUNDLES += carla-files.lv2
+endif
 BUNDLES += DragonflyEarlyReflections.lv2
 BUNDLES += DragonflyHallReverb.lv2
 BUNDLES += DragonflyPlateReverb.lv2
