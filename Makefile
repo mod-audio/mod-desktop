@@ -94,6 +94,7 @@ TARGETS += build/mod-screenshot$(APP_EXT)
 TARGETS += build/mod-ui$(APP_EXT)
 TARGETS += build/default.pedalboard
 TARGETS += build/html
+TARGETS += build/lib
 TARGETS += build/mod
 TARGETS += build/modtools
 ifeq ($(WINDOWS),true)

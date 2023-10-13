@@ -14,7 +14,7 @@ Feedback and testing is very much appreciated, make sure to report issues you fi
 
 Current known issues:
 
-- MIDI support is incomplete, likely to not work yet
+- MIDI support is incomplete (crashes on Windows, "Separate" MIDI mode not implemented yet)
 - Pedalboard save fails to create screenshot/thumbnail
 - Handling of Windows filepaths is not always correct (differences between POSIX vs Windows path separators)
 - jackd.exe (through mod-host) asks for public network permissions which are not needed
