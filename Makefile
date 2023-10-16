@@ -2,6 +2,9 @@
 
 VERSION = 0.0.2
 
+# ---------------------------------------------------------------------------------------------------------------------
+# Auto-detect build target
+
 CC ?= gcc
 TARGET_MACHINE := $(shell $(CC) -dumpmachine)
 
@@ -31,6 +34,9 @@ $(error unknown target, cannot continue)
 endif
 endif
 
+# ---------------------------------------------------------------------------------------------------------------------
+# Set binary file extensions as needed by JACK
+
 ifeq ($(WINDOWS),true)
 APP_EXT = .exe
 SO_EXT = .dll
@@ -40,14 +46,34 @@ SO_EXT = .so
 endif
 
 # ---------------------------------------------------------------------------------------------------------------------
+# utilities
 
-PAWPAW_DIR = ~/PawPawBuilds
-PAWPAW_PREFIX = $(PAWPAW_DIR)/targets/$(PAWPAW_TARGET)
+# function to convert project name into buildroot var name
+BUILDROOT_VAR = $(shell echo $(1) | tr a-z A-Z | tr - _)
 
-BOOTSTRAP_FILES = \
-	$(PAWPAW_PREFIX)/bin/cxfreeze
+# function to convert project name into stamp filename
+PLUGIN_STAMP = build-plugin-stamps/$(1),$($(call BUILDROOT_VAR,$(1))_VERSION)
+
+# makefile helpers
+BLANK =
+COMMA = ,
+SPACE = $(BLANK) $(BLANK)
 
 # ---------------------------------------------------------------------------------------------------------------------
+# Set PawPaw environment, matching PawPaw/setup/env.sh
+
+PAWPAW_DIR = $(HOME)/PawPawBuilds
+PAWPAW_BUILDDIR = $(PAWPAW_DIR)/builds/$(PAWPAW_TARGET)
+PAWPAW_PREFIX = $(PAWPAW_DIR)/targets/$(PAWPAW_TARGET)
+
+# ---------------------------------------------------------------------------------------------------------------------
+# List of files created by PawPaw bootstrap, to ensure we have run it at least once
+
+BOOTSTRAP_FILES  = $(PAWPAW_PREFIX)/bin/cxfreeze
+BOOTSTRAP_FILES += $(PAWPAW_PREFIX)/bin/jackd
+
+# ---------------------------------------------------------------------------------------------------------------------
+# List of files for mod-app packaging, often symlinks to the real files
 
 TARGETS = build-ui/lib/libmod_utils$(SO_EXT)
 
@@ -59,9 +85,6 @@ TARGETS += build/mod-app.app/Contents/Frameworks/QtOpenGL.framework
 TARGETS += build/mod-app.app/Contents/Frameworks/QtPrintSupport.framework
 TARGETS += build/mod-app.app/Contents/Frameworks/QtSvg.framework
 TARGETS += build/mod-app.app/Contents/Frameworks/QtWidgets.framework
-TARGETS += build/mod-app.app/Contents/MacOS/lib
-TARGETS += build/mod-app.app/Contents/MacOS/libjack.0.dylib
-TARGETS += build/mod-app.app/Contents/MacOS/libjackserver.0.dylib
 TARGETS += build/mod-app.app/Contents/MacOS/jackd
 TARGETS += build/mod-app.app/Contents/MacOS/jack/jack-session.conf
 TARGETS += build/mod-app.app/Contents/MacOS/jack/jack_coreaudio.so
@@ -69,6 +92,9 @@ TARGETS += build/mod-app.app/Contents/MacOS/jack/jack_coremidi.so
 TARGETS += build/mod-app.app/Contents/MacOS/jack/mod-host.so
 TARGETS += build/mod-app.app/Contents/MacOS/jack/mod-midi-broadcaster.so
 TARGETS += build/mod-app.app/Contents/MacOS/jack/mod-midi-merger.so
+TARGETS += build/mod-app.app/Contents/MacOS/lib
+TARGETS += build/mod-app.app/Contents/MacOS/libjack.0.dylib
+TARGETS += build/mod-app.app/Contents/MacOS/libjackserver.0.dylib
 TARGETS += build/mod-app.app/Contents/MacOS/mod-app
 TARGETS += build/mod-app.app/Contents/MacOS/mod-screenshot
 TARGETS += build/mod-app.app/Contents/MacOS/mod-ui
@@ -84,25 +110,25 @@ TARGETS += build/mod-app.app/Contents/Resources/default.pedalboard
 TARGETS += build/mod-app.app/Contents/Resources/html
 TARGETS += build/mod-app.app/Contents/Resources/mod-logo.icns
 else
+TARGETS += build/default.pedalboard
+TARGETS += build/html
 TARGETS += build/jackd$(APP_EXT)
 TARGETS += build/jack/jack-session.conf
 TARGETS += build/jack/mod-host$(SO_EXT)
 TARGETS += build/jack/mod-midi-broadcaster$(SO_EXT)
 TARGETS += build/jack/mod-midi-merger$(SO_EXT)
+TARGETS += build/lib
 TARGETS += build/mod-app$(APP_EXT)
 TARGETS += build/mod-screenshot$(APP_EXT)
 TARGETS += build/mod-ui$(APP_EXT)
-TARGETS += build/default.pedalboard
-TARGETS += build/html
-TARGETS += build/lib
 TARGETS += build/mod
 TARGETS += build/modtools
 ifeq ($(WINDOWS),true)
+TARGETS += build/jack/jack_portaudio.dll
+TARGETS += build/jack/jack_winmme.dll
 TARGETS += build/libjack64.dll
 TARGETS += build/libjackserver64.dll
 TARGETS += build/libpython3.8.dll
-TARGETS += build/jack/jack_portaudio.dll
-TARGETS += build/jack/jack_winmme.dll
 TARGETS += build/Qt5Core.dll
 TARGETS += build/Qt5Gui.dll
 TARGETS += build/Qt5Svg.dll
@@ -113,102 +139,68 @@ TARGETS += build/imageformats/qsvg.dll
 TARGETS += build/platforms/qwindows.dll
 TARGETS += build/styles/qwindowsvistastyle.dll
 else
-TARGETS += build/libjack.so.0
-TARGETS += build/libjackserver.so.0
 TARGETS += build/jack/jack_alsa.so
 TARGETS += build/jack/jack_alsarawmidi.so
 TARGETS += build/jack/jack_portaudio.so
+TARGETS += build/libjack.so.0
+TARGETS += build/libjackserver.so.0
 endif
 endif
 
 # ---------------------------------------------------------------------------------------------------------------------
+# Set up plugins to build and ship inside mod-app
 
-BUNDLES  = abGate.lv2
-BUNDLES += artyfx.lv2
-ifneq ($(MACOS),true)
-# FIXME crashes on load
-BUNDLES += carla-files.lv2
-endif
-BUNDLES += DragonflyEarlyReflections.lv2
-BUNDLES += DragonflyHallReverb.lv2
-BUNDLES += DragonflyPlateReverb.lv2
-BUNDLES += DragonflyRoomReverb.lv2
-BUNDLES += fil4.lv2
-BUNDLES += Black_Pearl_4A.lv2
-BUNDLES += Black_Pearl_4B.lv2
-BUNDLES += Black_Pearl_5.lv2
-BUNDLES += FluidBass.lv2
-BUNDLES += FluidBrass.lv2
-BUNDLES += FluidChromPerc.lv2
-BUNDLES += FluidDrums.lv2
-BUNDLES += FluidEnsemble.lv2
-BUNDLES += FluidEthnic.lv2
-BUNDLES += FluidGuitars.lv2
-BUNDLES += FluidOrgans.lv2
-BUNDLES += FluidPercussion.lv2
-BUNDLES += FluidPianos.lv2
-BUNDLES += FluidPipes.lv2
-BUNDLES += FluidReeds.lv2
-BUNDLES += FluidSoundFX.lv2
-BUNDLES += FluidStrings.lv2
-BUNDLES += FluidSynthFX.lv2
-BUNDLES += FluidSynthLeads.lv2
-BUNDLES += FluidSynthPads.lv2
-BUNDLES += Red_Zeppelin_4.lv2
-BUNDLES += Red_Zeppelin_5.lv2
-# FIXME needs python2
-# BUNDLES += fomp.lv2
-BUNDLES += Kars.lv2
-BUNDLES += midifilter.lv2
-BUNDLES += midigen.lv2
-BUNDLES += mod-bpf.lv2
-BUNDLES += MOD-CabinetLoader.lv2
-BUNDLES += MOD-ConvolutionLoader.lv2
-BUNDLES += mod-gain.lv2
-BUNDLES += mod-gain2x2.lv2
-BUNDLES += mod-hpf.lv2
-BUNDLES += mod-mda-BeatBox.lv2
-BUNDLES += mod-mda-Degrade.lv2
-BUNDLES += mod-mda-Detune.lv2
-BUNDLES += mod-mda-DX10.lv2
-BUNDLES += mod-mda-EPiano.lv2
-BUNDLES += mod-mda-JX10.lv2
-BUNDLES += mod-mda-Leslie.lv2
-BUNDLES += mod-mda-Piano.lv2
-BUNDLES += mod-mda-RePsycho.lv2
-BUNDLES += mod-mda-RingMod.lv2
-BUNDLES += mod-mda-RoundPan.lv2
-BUNDLES += mod-mda-Shepard.lv2
-BUNDLES += mod-mda-SubSynth.lv2
-BUNDLES += mod-mda-ThruZero.lv2
-BUNDLES += mod-mda-Vocoder.lv2
-BUNDLES += modmeter.lv2
-# FIXME fails to build: implicit declaration of function '__atomic_store_4'
-BUNDLES += modspectre.lv2
-BUNDLES += MVerb.lv2
-BUNDLES += Nekobi.lv2
-BUNDLES += neural_amp_modeler.lv2
-BUNDLES += neuralrecord.lv2
-# FIXME fails to build: implicit declaration of function 'basename'
-BUNDLES += notes.lv2
-BUNDLES += PingPongPan.lv2
+# List of plugin projects to build
+PLUGINS  = abgate
+PLUGINS += artyfx
+PLUGINS += dpf-plugins
+PLUGINS += dragonfly-reverb
+PLUGINS += fluidplug
+PLUGINS += mod-convolution-loader
+PLUGINS += mod-mda-lv2
+PLUGINS += mod-utilities
+PLUGINS += modmeter
+PLUGINS += neural-amp-modeler-lv2
+PLUGINS += neuralrecord
+PLUGINS += shiro-plugins
+PLUGINS += wolf-shaper
+PLUGINS += x42-fil4
+PLUGINS += x42-midifilter
+PLUGINS += x42-midigen
+PLUGINS += x42-tinygain
+
 # FIXME plugin binary missing (win32 RUNTIME vs LIBRARY)
-BUNDLES += rt-neural-generic.lv2
-BUNDLES += tinygain.lv2
-BUNDLES += wolf-shaper.lv2
+PLUGINS += aidadsp-lv2
+# FIXME crashes on load on macOS
+PLUGINS += carla-plugins
+# FIXME needs python2
+# PLUGINS += fomp
+# FIXME fails to build: implicit declaration of function '__atomic_store_4'
+PLUGINS += modspectre
+# FIXME fails to build: implicit declaration of function 'basename'
+PLUGINS += notes-lv2
 
-BUNDLES += Harmless.lv2
-BUNDLES += Larynx.lv2
-BUNDLES += Modulay.lv2
-BUNDLES += Shiroverb.lv2
+# include plugin projects for version and bundle list
+include $(foreach PLUGIN,$(PLUGINS),mod-plugin-builder/plugins/package/$(PLUGIN)/$(PLUGIN).mk)
 
-# TODO build fails
-# BUNDLES += mod-ams.lv2
-# BUNDLES += mod-cv-control.lv2
-# BUNDLES += sooperlooper.lv2
-# BUNDLES += sooperlooper-2x2.lv2
+# list of unwanted bundles (for a variety of reasons)
+UNWANTED_BUNDLES  = mod-bypass.lv2
+UNWANTED_BUNDLES += mod-crossover2.lv2
+UNWANTED_BUNDLES += mod-crossover3.lv2
+UNWANTED_BUNDLES += mod-mda-Ambience.lv2
+UNWANTED_BUNDLES += mod-mda-DubDelay.lv2
+UNWANTED_BUNDLES += mod-mda-Overdrive.lv2
+UNWANTED_BUNDLES += mod-switchbox2.lv2
+UNWANTED_BUNDLES += mod-toggleswitch4.lv2
+UNWANTED_BUNDLES += switchbox_1-2_st.lv2
+UNWANTED_BUNDLES += switchbox_2-1_st.lv2
+UNWANTED_BUNDLES += switchbox_2-1.lv2
 
-PLUGINS = $(BUNDLES:%=build/plugins/%)
+# list of known good bundles
+BUNDLES = $(filter-out $(UNWANTED_BUNDLES),$(foreach PLUGIN,$(PLUGINS),$($(call BUILDROOT_VAR,$(PLUGIN))_BUNDLES)))
+
+# add plugins to build target
+TARGETS += $(foreach PLUGIN,$(PLUGINS),$(call PLUGIN_STAMP,$(PLUGIN)))
 
 # ---------------------------------------------------------------------------------------------------------------------
 
@@ -220,6 +212,9 @@ clean:
 	$(MAKE) clean -C systray
 	rm -rf mod-midi-merger/build
 	rm -rf build
+	rm -rf build-plugin-stamps
+	rm -rf build-screenshot
+	rm -rf build-ui
 
 plugins: $(PLUGINS)
 
@@ -257,84 +252,8 @@ win64-plugins:
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-build/mod-app$(APP_EXT): systray/mod-app$(APP_EXT)
-	@mkdir -p build
-	ln -sf $(abspath $<) $@
-
-build/jackd$(APP_EXT): $(PAWPAW_PREFIX)/bin/jackd$(APP_EXT)
-	@mkdir -p build
-	ln -sf $(abspath $<) $@
-
-build/jack/jack-session.conf: utils/jack-session.conf
-	@mkdir -p build/jack
-	ln -sf $(abspath $<) $@
-
-build/Qt5%.dll: $(PAWPAW_PREFIX)/bin/Qt5%.dll
-	@mkdir -p build
-	ln -sf $(abspath $<) $@
-
-build/generic/q%.dll: $(PAWPAW_PREFIX)/lib/qt5/plugins/generic/q%.dll
-	@mkdir -p build/generic
-	ln -sf $(abspath $<) $@
-
-build/iconengines/q%.dll: $(PAWPAW_PREFIX)/lib/qt5/plugins/iconengines/q%.dll
-	@mkdir -p build/iconengines
-	ln -sf $(abspath $<) $@
-
-build/imageformats/q%.dll: $(PAWPAW_PREFIX)/lib/qt5/plugins/imageformats/q%.dll
-	@mkdir -p build/imageformats
-	ln -sf $(abspath $<) $@
-
-build/platforms/q%.dll: $(PAWPAW_PREFIX)/lib/qt5/plugins/platforms/q%.dll
-	@mkdir -p build/platforms
-	ln -sf $(abspath $<) $@
-
-build/styles/q%.dll: $(PAWPAW_PREFIX)/lib/qt5/plugins/styles/q%.dll
-	@mkdir -p build/styles
-	ln -sf $(abspath $<) $@
-
-build/libjack%: $(PAWPAW_PREFIX)/lib/libjack%
-	@mkdir -p build
-	ln -sf $(abspath $<) $@
-
-build/libpython%: $(PAWPAW_PREFIX)/bin/libpython%
-	@mkdir -p build
-	ln -sf $(abspath $<) $@
-
-build/jack/jack_%: $(PAWPAW_PREFIX)/lib/jack/jack_%
-	@mkdir -p build/jack
-	ln -sf $(abspath $<) $@
-
-build/jack/mod-host$(SO_EXT): mod-host/mod-host.so
-	@mkdir -p build/jack
-	ln -sf $(abspath $<) $@
-
-build/jack/mod-midi-broadcaster$(SO_EXT): mod-midi-merger/build/mod-midi-broadcaster$(SO_EXT)
-	@mkdir -p build/jack
-	ln -sf $(abspath $<) $@
-
-build/jack/mod-midi-merger$(SO_EXT): mod-midi-merger/build/mod-midi-merger$(SO_EXT)
-	@mkdir -p build/jack
-	ln -sf $(abspath $<) $@
-
 build-ui/lib/libmod_utils$(SO_EXT): mod-ui/utils/libmod_utils.so
 	@mkdir -p build-ui/lib
-	ln -sf $(abspath $<) $@
-
-build/default.pedalboard: mod-ui/default.pedalboard
-	@mkdir -p build
-	ln -sf $(abspath $<) $@
-
-build/html: mod-ui/html
-	@mkdir -p build
-	ln -sf $(abspath $<) $@
-
-build/mod: mod-ui/mod
-	@mkdir -p build
-	ln -sf $(abspath $<) $@
-
-build/modtools: mod-ui/modtools
-	@mkdir -p build
 	ln -sf $(abspath $<) $@
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -347,19 +266,7 @@ build/mod-app.app/Contents/Frameworks/Qt%.framework: $(PAWPAW_PREFIX)/lib/Qt%.fr
 	@mkdir -p build/mod-app.app/Contents/Frameworks
 	ln -sf $(abspath $<) $@
 
-build/mod-app.app/Contents/MacOS/mod-app: systray/mod-app
-	@mkdir -p build/mod-app.app/Contents/MacOS
-	cp -v $(abspath $<) $@
-
 build/mod-app.app/Contents/MacOS/jackd: $(PAWPAW_PREFIX)/bin/jackd$(APP_EXT)
-	@mkdir -p build/mod-app.app/Contents/MacOS
-	ln -sf $(abspath $<) $@
-
-build/mod-app.app/Contents/MacOS/lib: build-ui/lib
-	@mkdir -p build/mod-app.app/Contents/MacOS
-	ln -sf $(abspath $<) $@
-
-build/mod-app.app/Contents/MacOS/libjack%: $(PAWPAW_PREFIX)/lib/libjack%
 	@mkdir -p build/mod-app.app/Contents/MacOS
 	ln -sf $(abspath $<) $@
 
@@ -382,6 +289,18 @@ build/mod-app.app/Contents/MacOS/jack/mod-midi-broadcaster.so: mod-midi-merger/b
 build/mod-app.app/Contents/MacOS/jack/mod-midi-merger.so: mod-midi-merger/build/mod-midi-merger.so
 	@mkdir -p build/mod-app.app/Contents/MacOS/jack
 	ln -sf $(abspath $<) $@
+
+build/mod-app.app/Contents/MacOS/lib: build-ui/lib
+	@mkdir -p build/mod-app.app/Contents/MacOS
+	ln -sf $(abspath $<) $@
+
+build/mod-app.app/Contents/MacOS/libjack%: $(PAWPAW_PREFIX)/lib/libjack%
+	@mkdir -p build/mod-app.app/Contents/MacOS
+	ln -sf $(abspath $<) $@
+
+build/mod-app.app/Contents/MacOS/mod-app: systray/mod-app
+	@mkdir -p build/mod-app.app/Contents/MacOS
+	cp -v $(abspath $<) $@
 
 build/mod-app.app/Contents/MacOS/mod-screenshot: build-screenshot/mod-screenshot
 	@mkdir -p build/mod-app.app/Contents/MacOS
@@ -438,22 +357,102 @@ build/mod-app.app/Contents/Resources/mod-logo.icns: systray/mod-logo.icns
 
 # ---------------------------------------------------------------------------------------------------------------------
 
+build/default.pedalboard: mod-ui/default.pedalboard
+	@mkdir -p build
+	ln -sf $(abspath $<) $@
+
+build/html: mod-ui/html
+	@mkdir -p build
+	ln -sf $(abspath $<) $@
+
+build/jackd$(APP_EXT): $(PAWPAW_PREFIX)/bin/jackd$(APP_EXT)
+	@mkdir -p build
+	ln -sf $(abspath $<) $@
+
+build/jack/jack-session.conf: utils/jack-session.conf
+	@mkdir -p build/jack
+	ln -sf $(abspath $<) $@
+
+build/jack/mod-host$(SO_EXT): mod-host/mod-host.so
+	@mkdir -p build/jack
+	ln -sf $(abspath $<) $@
+
+build/jack/mod-midi-broadcaster$(SO_EXT): mod-midi-merger/build/mod-midi-broadcaster$(SO_EXT)
+	@mkdir -p build/jack
+	ln -sf $(abspath $<) $@
+
+build/jack/mod-midi-merger$(SO_EXT): mod-midi-merger/build/mod-midi-merger$(SO_EXT)
+	@mkdir -p build/jack
+	ln -sf $(abspath $<) $@
+
+build/lib: build-ui/lib
+	ln -sf $(abspath $<) $@
+
+build/mod-app$(APP_EXT): systray/mod-app$(APP_EXT)
+	@mkdir -p build
+	ln -sf $(abspath $<) $@
+
+build/mod-ui$(APP_EXT): build-ui/mod-ui$(APP_EXT)
+	@mkdir -p build
+	ln -sf $(abspath $<) $@
+
 build/mod-screenshot$(APP_EXT): build-screenshot/mod-screenshot$(APP_EXT)
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
+
+build/mod: mod-ui/mod
+	@mkdir -p build
+	ln -sf $(abspath $<) $@
+
+build/modtools: mod-ui/modtools
+	@mkdir -p build
+	ln -sf $(abspath $<) $@
+
+# ---------------------------------------------------------------------------------------------------------------------
+
+build/jack/jack_%: $(PAWPAW_PREFIX)/lib/jack/jack_%
+	@mkdir -p build/jack
+	ln -sf $(abspath $<) $@
+
+build/libjack%: $(PAWPAW_PREFIX)/lib/libjack%
+	@mkdir -p build
+	ln -sf $(abspath $<) $@
+
+build/libpython%: $(PAWPAW_PREFIX)/bin/libpython%
+	@mkdir -p build
+	ln -sf $(abspath $<) $@
+
+build/Qt5%.dll: $(PAWPAW_PREFIX)/bin/Qt5%.dll
+	@mkdir -p build
+	ln -sf $(abspath $<) $@
+
+build/generic/q%.dll: $(PAWPAW_PREFIX)/lib/qt5/plugins/generic/q%.dll
+	@mkdir -p build/generic
+	ln -sf $(abspath $<) $@
+
+build/iconengines/q%.dll: $(PAWPAW_PREFIX)/lib/qt5/plugins/iconengines/q%.dll
+	@mkdir -p build/iconengines
+	ln -sf $(abspath $<) $@
+
+build/imageformats/q%.dll: $(PAWPAW_PREFIX)/lib/qt5/plugins/imageformats/q%.dll
+	@mkdir -p build/imageformats
+	ln -sf $(abspath $<) $@
+
+build/platforms/q%.dll: $(PAWPAW_PREFIX)/lib/qt5/plugins/platforms/q%.dll
+	@mkdir -p build/platforms
+	ln -sf $(abspath $<) $@
+
+build/styles/q%.dll: $(PAWPAW_PREFIX)/lib/qt5/plugins/styles/q%.dll
+	@mkdir -p build/styles
+	ln -sf $(abspath $<) $@
+
+# ---------------------------------------------------------------------------------------------------------------------
 
 build-screenshot/mod-screenshot$(APP_EXT): utils/mod-screenshot.py $(BOOTSTRAP_FILES)
 	./utils/run.sh $(PAWPAW_TARGET) python3 utils/mod-screenshot.py build_exe
 	touch $@
 
 # ---------------------------------------------------------------------------------------------------------------------
-
-build/mod-ui$(APP_EXT): build-ui/mod-ui$(APP_EXT)
-	@mkdir -p build
-	ln -sf $(abspath $<) $@
-
-build/lib: build-ui/lib
-	ln -sf $(abspath $<) $@
 
 build-ui/lib: build-ui/mod-ui$(APP_EXT)
 	touch $@
@@ -492,128 +491,19 @@ systray/mod-app$(APP_EXT): systray/main.cpp systray/mod-app.hpp
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-.KEEP: $(BUNDLES:%=$(PAWPAW_PREFIX)/lib/lv2/%/manifest.ttl)
-
-build/plugins/%: $(PAWPAW_PREFIX)/lib/lv2/%/manifest.ttl
+define BUILD_PLUGIN
 	@mkdir -p build/plugins
-	rm -f $@
-	ln -s $(subst /manifest.ttl,,$(abspath $<)) $@
-	touch $(PAWPAW_PREFIX)/lib/lv2/$*/manifest.ttl
+	./utils/plugin-builder.sh $(PAWPAW_TARGET) $(1)
+	$(foreach BUNDLE,$(filter $(BUNDLES),$($(call BUILDROOT_VAR,$(1))_BUNDLES)),\
+		rm -f build/plugins/$(BUNDLE);\
+		ln -s $(abspath $(PAWPAW_PREFIX)/lib/lv2/$(BUNDLE)) build/plugins/$(BUNDLE);\
+	)
+endef
+
+build-plugin-stamps/%: $(BOOTSTRAP_FILES)
+	@mkdir -p build-plugin-stamps
+	$(call BUILD_PLUGIN,$(firstword $(subst $(COMMA), ,$*)))
 	touch $@
-
-$(PAWPAW_PREFIX)/lib/lv2/abGate.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) abgate
-
-$(PAWPAW_PREFIX)/lib/lv2/rt-neural-generic.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) aidadsp-lv2
-
-$(PAWPAW_PREFIX)/lib/lv2/artyfx.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) artyfx
-
-$(PAWPAW_PREFIX)/lib/lv2/carla-files.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) carla-plugins
-
-$(PAWPAW_PREFIX)/lib/lv2/Kars.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) dpf-plugins
-
-$(PAWPAW_PREFIX)/lib/lv2/MVerb.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) dpf-plugins
-
-$(PAWPAW_PREFIX)/lib/lv2/Nekobi.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) dpf-plugins
-
-$(PAWPAW_PREFIX)/lib/lv2/PingPongPan.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) dpf-plugins
-
-$(PAWPAW_PREFIX)/lib/lv2/Dragonfly%/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) dragonfly-reverb
-
-$(PAWPAW_PREFIX)/lib/lv2/Black_Pearl_%/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) fluidplug
-
-$(PAWPAW_PREFIX)/lib/lv2/Fluid%/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) fluidplug
-
-$(PAWPAW_PREFIX)/lib/lv2/Red_Zeppelin_%/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) fluidplug
-
-$(PAWPAW_PREFIX)/lib/lv2/fomp.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) fomp
-
-$(PAWPAW_PREFIX)/lib/lv2/MOD-CabinetLoader.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) mod-convolution-loader
-
-$(PAWPAW_PREFIX)/lib/lv2/MOD-ConvolutionLoader.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) mod-convolution-loader
-
-$(PAWPAW_PREFIX)/lib/lv2/mod-mda-%/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) mod-mda-lv2
-
-$(PAWPAW_PREFIX)/lib/lv2/mod-bpf.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) mod-utilities
-
-$(PAWPAW_PREFIX)/lib/lv2/mod-hpf.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) mod-utilities
-
-$(PAWPAW_PREFIX)/lib/lv2/mod-gain.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) mod-utilities
-
-$(PAWPAW_PREFIX)/lib/lv2/mod-gain2x2.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) mod-utilities
-
-$(PAWPAW_PREFIX)/lib/lv2/modmeter.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) modmeter
-
-$(PAWPAW_PREFIX)/lib/lv2/modspectre.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) modspectre
-
-$(PAWPAW_PREFIX)/lib/lv2/neural_amp_modeler.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) neural-amp-modeler-lv2
-
-$(PAWPAW_PREFIX)/lib/lv2/neuralrecord.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) neuralrecord
-
-$(PAWPAW_PREFIX)/lib/lv2/notes.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) notes-lv2
-
-$(PAWPAW_PREFIX)/lib/lv2/fil4.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) x42-fil4
-
-$(PAWPAW_PREFIX)/lib/lv2/midifilter.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) x42-midifilter
-
-$(PAWPAW_PREFIX)/lib/lv2/midigen.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) x42-midigen
-
-$(PAWPAW_PREFIX)/lib/lv2/Harmless.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) shiro-plugins
-
-$(PAWPAW_PREFIX)/lib/lv2/Larynx.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) shiro-plugins
-
-$(PAWPAW_PREFIX)/lib/lv2/Modulay.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) shiro-plugins
-
-$(PAWPAW_PREFIX)/lib/lv2/Shiroverb.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) shiro-plugins
-
-$(PAWPAW_PREFIX)/lib/lv2/sooperlooper.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) sooperlooper-lv2
-
-$(PAWPAW_PREFIX)/lib/lv2/sooperlooper-2x2.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) sooperlooper-lv2
-
-$(PAWPAW_PREFIX)/lib/lv2/tinygain.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) x42-tinygain
-
-$(PAWPAW_PREFIX)/lib/lv2/wolf-shaper.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) wolf-shaper
-
-$(PAWPAW_PREFIX)/lib/lv2/mod-ams.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) mod-ams-lv2
-
-$(PAWPAW_PREFIX)/lib/lv2/mod-cv-control.lv2/manifest.ttl: $(BOOTSTRAP_FILES)
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) mod-cv-plugins
 
 # ---------------------------------------------------------------------------------------------------------------------
 

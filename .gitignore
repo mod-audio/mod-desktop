@@ -1,4 +1,5 @@
 /build/
+/build-plugin-stamps/
 /build-screenshot/
 /build-ui/
 .DS_Store
