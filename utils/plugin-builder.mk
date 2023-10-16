@@ -186,17 +186,17 @@ $(STAMP_INSTALLED): $(STAMP_BUILT)
 $(STAMP_BUILT): $(STAMP_CONFIGURED)
 ifeq ($(MACOS),true)
 	$(foreach p,$(wildcard $($(PKG)_BUILDDIR)/Makefile $($(PKG)_BUILDDIR)/*/makefile),\
-		sed -i 's/-Wl,--gc-sections//g' $(p);)
+		sed -i -e 's/-Wl,--gc-sections//g' $(p);)
 	$(foreach p,$(wildcard $($(PKG)_BUILDDIR)/Makefile),\
-		sed -i 's/-Wl,--as-needed//g' $(p);)
+		sed -i -e 's/-Wl,--as-needed//g' $(p);)
 	$(foreach p,$(wildcard $($(PKG)_BUILDDIR)/*/makefile),\
-		sed -i 's/-Wl,--no-undefined//g' $(p);)
+		sed -i -e 's/-Wl,--no-undefined//g' $(p);)
 	$(foreach p,$(wildcard $($(PKG)_BUILDDIR)/*/makefile),\
-		sed -i 's/-Wl,--exclude-libs,ALL//g' $(p);)
+		sed -i -e 's/-Wl,--exclude-libs,ALL//g' $(p);)
 	$(foreach p,$(wildcard $($(PKG)_BUILDDIR)/*/makefile),\
-		sed -i 's/-Wl,-z,relro,-z,now//g' $(p);)
+		sed -i -e 's/-Wl,-z,relro,-z,now//g' $(p);)
 	$(foreach p,$(wildcard $($(PKG)_BUILDDIR)/*/makefile),\
-		sed -i 's/-Wl,-z,noexecstack//g' $(p);)
+		sed -i -e 's/-Wl,-z,noexecstack//g' $(p);)
 endif
 	$($(PKG)_BUILD_CMDS)
 	touch $@
