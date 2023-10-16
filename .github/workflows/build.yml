@@ -23,14 +23,10 @@ jobs:
       - name: Set sha8
         run: |
           echo "SHA8=$(echo ${{ github.sha }} | cut -c1-8)" >> $GITHUB_ENV
-      - name: Fix GitHub's mess
-        run: |
-          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
-          sudo dpkg --add-architecture i386
-          sudo apt-get update -qq
       - name: Set up dependencies
         run: |
-          sudo apt-get install -yqq --allow-downgrades libqt5svg5-dev meson
+          sudo apt-get update -qq
+          sudo apt-get install -yqq --allow-downgrades libasound2-dev libdbus-1-dev libglib2.0-dev libpcre3-dev libqt5svg5-dev libxcb1-dev libxcursor-dev libxext-dev libxfixes-dev libxrandr-dev libxrender-dev meson uuid-dev
       - name: Build dependencies
         run: |
           ./PawPaw/bootstrap-mod.sh linux-x86_64 && ./PawPaw/.cleanup.sh linux-x86_64
