@@ -1,0 +1,9 @@
+[Desktop Entry]
+Categories=AudioVideo;X-AudioEditing;Qt;
+Exec=bash -c '$(dirname "%k")/mod-app.run'
+GenericName=MOD Desktop App
+Icon=audio
+Name=MOD App
+Terminal=false
+Type=Application
+Version=1.0

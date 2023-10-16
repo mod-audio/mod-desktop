@@ -127,7 +127,16 @@ int main(int argc, char* argv[])
 
     Dl_info info = {};
     dladdr((void*)main, &info);
-    std::strncpy(path, info.dli_fname, sizeof(path));
+
+    if (info.dli_fname[0] == '.')
+    {
+        getcwd(path, sizeof(path));
+        std::strcat(path, info.dli_fname + 1);
+    }
+    else
+    {
+        std::strncpy(path, info.dli_fname, sizeof(path));
+    }
 
     if (char* const c = strrchr(path, '/'))
         *c = 0;
@@ -158,7 +167,7 @@ int main(int argc, char* argv[])
     std::strcat(path, "/Documents/MOD App");
    #else
     // TODO fetch user docs dir
-    std::memcpy(path + pathlen, "/data", 6);
+    std::strcat(path, "/Documents/MOD App");
    #endif
 
     mkdir(path, 0777);

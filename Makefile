@@ -157,7 +157,6 @@ PLUGINS += dpf-plugins
 PLUGINS += dragonfly-reverb
 PLUGINS += fluidplug
 PLUGINS += mod-convolution-loader
-PLUGINS += mod-mda-lv2
 PLUGINS += mod-utilities
 PLUGINS += modmeter
 PLUGINS += neural-amp-modeler-lv2
@@ -175,6 +174,8 @@ PLUGINS += aidadsp-lv2
 PLUGINS += carla-plugins
 # FIXME needs python2
 # PLUGINS += fomp
+# FIXME needs tweaks for waf/python3 path
+# PLUGINS += mod-mda-lv2
 # FIXME fails to build: implicit declaration of function '__atomic_store_4'
 PLUGINS += modspectre
 # FIXME fails to build: implicit declaration of function 'basename'
@@ -463,7 +464,7 @@ build-ui/mod-ui$(APP_EXT): utils/mod-ui.py utils/mod-ui-wrapper.py $(BOOTSTRAP_F
 	touch $@
 
 mod-ui/utils/libmod_utils.so: $(BOOTSTRAP_FILES) mod-ui/utils/utils.h mod-ui/utils/utils_jack.cpp mod-ui/utils/utils_lilv.cpp
-	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) -C mod-ui/utils
+	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) MODAPP=1 -C mod-ui/utils
 
 # ---------------------------------------------------------------------------------------------------------------------
 

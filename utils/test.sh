@@ -59,6 +59,7 @@ fi
 JACKD+=" -r 48000"
 JACKD+=" -p 256"
 # JACKD+=" -p 8192"
+# JACKD+=" -h"
 
 exec ${EXE_WRAPPER} ${JACKD}
 

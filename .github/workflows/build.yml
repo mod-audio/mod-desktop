@@ -3,10 +3,54 @@ name: build
 on: [push, pull_request]
 
 env:
-  CACHE_VERSION: 2
+  CACHE_VERSION: 3
   PAWPAW_SKIP_LTO: 1
 
 jobs:
+  linux-x86_64:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Set up cache
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/PawPawBuilds
+          key: linux-x86_64-v${{ env.CACHE_VERSION }}
+      - name: Set sha8
+        run: |
+          echo "SHA8=$(echo ${{ github.sha }} | cut -c1-8)" >> $GITHUB_ENV
+      - name: Fix GitHub's mess
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo dpkg --add-architecture i386
+          sudo apt-get update -qq
+      - name: Set up dependencies
+        run: |
+          sudo apt-get install -yqq --allow-downgrades libqt5svg5-dev meson
+      - name: Build dependencies
+        run: |
+          ./PawPaw/bootstrap-mod.sh linux-x86_64 && ./PawPaw/.cleanup.sh linux-x86_64
+      - name: Build
+        if: steps.cache.outputs.cache-hit == 'true'
+        run: |
+          make PAWPAW_TARGET=linux-x86_64
+      - name: Pack
+        if: steps.cache.outputs.cache-hit == 'true'
+        run: |
+          mkdir mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64
+          mv build mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64/mod-app
+          cp utils/mod-app.desktop utils/mod-app.run mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64/
+          tar chJf mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64.tar.xz mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ github.event.repository.name }}-win64-${{ github.event.pull_request.number || env.SHA8 }}
+          path: |
+            *.tar.xz
+
   macos:
     runs-on: macos-11
     steps:
@@ -21,8 +65,8 @@ jobs:
             ~/PawPawBuilds
           key: macos-v${{ env.CACHE_VERSION }}
       - name: Set sha8
-        id: slug
-        run: echo "::set-output name=sha8::$(echo ${{ github.sha }} | cut -c1-8)"
+        run: |
+          echo "SHA8=$(echo ${{ github.sha }} | cut -c1-8)" >> $GITHUB_ENV
       - name: Set up dependencies
         run: |
           brew install meson
@@ -36,13 +80,13 @@ jobs:
       - name: Pack
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
-          mv build mod-app-macOS-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}
-          tar chzf mod-app-macOS-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}.tar.gz mod-app-macOS-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}
+          ./utils/macos-dmg.sh
+          mv mod-app-*.dmg mod-app-${{ github.event.pull_request.number || env.SHA8 }}-macOS.dmg
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ github.event.repository.name }}-macOS-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}
+          name: ${{ github.event.repository.name }}-macOS-${{ github.event.pull_request.number || env.SHA8 }}
           path: |
-            *.tar.gz
+            *.dmg
 
   windows:
     runs-on: ubuntu-22.04
@@ -58,8 +102,8 @@ jobs:
             ~/PawPawBuilds
           key: win64-v${{ env.CACHE_VERSION }}
       - name: Set sha8
-        id: slug
-        run: echo "::set-output name=sha8::$(echo ${{ github.sha }} | cut -c1-8)"
+        run: |
+          echo "SHA8=$(echo ${{ github.sha }} | cut -c1-8)" >> $GITHUB_ENV
       - name: Fix GitHub's mess
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
@@ -78,10 +122,10 @@ jobs:
       - name: Pack
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
-          mv build mod-app-win64-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}
-          zip -r -9 mod-app-win64-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}.zip mod-app-win64-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}
+          ./utils/win64-installer.sh
+          mv mod-app-*.exe mod-app-${{ github.event.pull_request.number || env.SHA8 }}-win64.exe
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ github.event.repository.name }}-win64-${{ github.event.pull_request.number || steps.slug.outputs.sha8 }}
+          name: ${{ github.event.repository.name }}-win64-${{ github.event.pull_request.number || env.SHA8 }}
           path: |
-            *.zip
+            *.exe

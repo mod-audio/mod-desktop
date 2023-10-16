@@ -604,6 +604,8 @@ private slots:
            #else
             "./jack/jack-session.conf",
            #endif
+            "-n",
+            "mod-app",
         };
 
         if (midiEnabled)
@@ -666,12 +668,19 @@ private slots:
             arguments.append(devInfo.uidMain);
         }
 
-       #if 0 // !(defined(Q_OS_WIN) || defined(Q_OS_MAC))
+       #if !(defined(Q_OS_WIN) || defined(Q_OS_MAC))
+        if (devInfo.uidMain == "ALSA::pulse")
+        {
+            arguments.append("-c");
+            arguments.append("2");
+        }
+        /*
         if (! midiEnabled)
         {
             arguments.append("-X");
             arguments.append("seqmidi");
         }
+        */
        #endif
 
         processHost.setArguments(arguments);
