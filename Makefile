@@ -171,15 +171,21 @@ PLUGINS += x42-tinygain
 # FIXME plugin binary missing (win32 RUNTIME vs LIBRARY)
 PLUGINS += aidadsp-lv2
 # FIXME crashes on load on macOS
+ifneq ($(MACOS),true)
 PLUGINS += carla-plugins
+endif
 # FIXME needs python2
 # PLUGINS += fomp
 # FIXME needs tweaks for waf/python3 path
 # PLUGINS += mod-mda-lv2
 # FIXME fails to build: implicit declaration of function '__atomic_store_4'
+ifneq ($(MACOS),true)
 PLUGINS += modspectre
+endif
 # FIXME fails to build: implicit declaration of function 'basename'
+ifneq ($(MACOS),true)
 PLUGINS += notes-lv2
+endif
 
 # include plugin projects for version and bundle list
 include $(foreach PLUGIN,$(PLUGINS),mod-plugin-builder/plugins/package/$(PLUGIN)/$(PLUGIN).mk)
