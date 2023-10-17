@@ -291,9 +291,10 @@ build/mod-app.app/Contents/MacOS/jack/mod-midi-merger.so: mod-midi-merger/build/
 	@mkdir -p build/mod-app.app/Contents/MacOS/jack
 	ln -sf $(abspath $<) $@
 
-build/mod-app.app/Contents/MacOS/lib: build-ui/lib
+build/mod-app.app/Contents/MacOS/lib: build-ui/mod-ui$(APP_EXT)
 	@mkdir -p build/mod-app.app/Contents/MacOS
-	ln -sf $(abspath $<) $@
+	rm -f $@
+	ln -sf $(abspath build-ui/lib) $@
 
 build/mod-app.app/Contents/MacOS/libjack%: $(PAWPAW_PREFIX)/lib/libjack%
 	@mkdir -p build/mod-app.app/Contents/MacOS
@@ -307,7 +308,7 @@ build/mod-app.app/Contents/MacOS/mod-screenshot: build-screenshot/mod-screenshot
 	@mkdir -p build/mod-app.app/Contents/MacOS
 	ln -sf $(abspath $<) $@
 
-build/mod-app.app/Contents/MacOS/mod-ui: build-ui/mod-ui
+build/mod-app.app/Contents/MacOS/mod-ui: build-ui/mod-ui$(APP_EXT)
 	@mkdir -p build/mod-app.app/Contents/MacOS
 	ln -sf $(abspath $<) $@
 
@@ -386,8 +387,9 @@ build/jack/mod-midi-merger$(SO_EXT): mod-midi-merger/build/mod-midi-merger$(SO_E
 	@mkdir -p build/jack
 	ln -sf $(abspath $<) $@
 
-build/lib: build-ui/lib
-	ln -sf $(abspath $<) $@
+build/lib: build-ui/mod-ui$(APP_EXT)
+	rm -f $@
+	ln -sf $(abspath build-ui/lib) $@
 
 build/mod-app$(APP_EXT): systray/mod-app$(APP_EXT)
 	@mkdir -p build
@@ -454,9 +456,6 @@ build-screenshot/mod-screenshot$(APP_EXT): utils/mod-screenshot.py $(BOOTSTRAP_F
 	touch $@
 
 # ---------------------------------------------------------------------------------------------------------------------
-
-build-ui/lib: build-ui/mod-ui$(APP_EXT)
-	touch $@
 
 build-ui/mod-ui$(APP_EXT): utils/mod-ui.py utils/mod-ui-wrapper.py $(BOOTSTRAP_FILES)
 # 	rm -f build/libpython3.8.dll

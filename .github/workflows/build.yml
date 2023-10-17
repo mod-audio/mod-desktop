@@ -26,7 +26,7 @@ jobs:
       - name: Set up dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -yqq --allow-downgrades gperf libasound2-dev libdbus-1-dev libgl1-mesa-dev libglib2.0-dev libpcre3-dev libqt5svg5-dev libxcb1-dev libxcursor-dev libxext-dev libxfixes-dev libxrandr-dev libxrender-dev meson uuid-dev
+          sudo apt-get install -yqq --allow-downgrades gperf libasound2-dev libdbus-1-dev libgl1-mesa-dev libglib2.0-dev libpcre3-dev libqt5svg5-dev libxcb1-dev libxcursor-dev libxext-dev libxfixes-dev libxrandr-dev libxrender-dev meson qtbase5-dev qtbase5-dev-tools uuid-dev
       - name: Build dependencies
         run: |
           ./PawPaw/bootstrap-mod.sh linux-x86_64 && ./PawPaw/.cleanup.sh linux-x86_64
