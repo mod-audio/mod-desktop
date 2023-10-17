@@ -16,8 +16,8 @@ rm -rf mod-ui/modtools/__pycache__
 rm -rf build/dmg
 mkdir build/dmg
 
-cp -rL build/mod-app.app build/dmg/
-cp utils/macos-readme.txt build/dmg/README.txt
+gcp -rL build/mod-app.app build/dmg/
+gcp utils/macos-readme.txt build/dmg/README.txt
 
 pushd build/dmg/mod-app.app/Contents
 
