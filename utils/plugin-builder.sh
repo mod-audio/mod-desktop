@@ -36,7 +36,7 @@ export PAWPAW_PREFIX
 export TOOLCHAIN_PREFIX
 
 if [ "${MACOS}" -eq 1 ]; then
-    export PATH="${PAWPAW_PREFIX}-host/bin:${PATH}"
+    export PATH="${PAWPAW_PREFIX}-host/bin:/usr/local/opt/coreutils/bin:${PATH}"
 fi
 
 make -f utils/plugin-builder.mk pkgname="${plugin}" ${MAKE_ARGS} PREFIX=/usr WITH_LTO=false VERBOSE=1
