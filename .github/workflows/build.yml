@@ -65,7 +65,7 @@ jobs:
           echo "SHA8=$(echo ${{ github.sha }} | cut -c1-8)" >> $GITHUB_ENV
       - name: Set up dependencies
         run: |
-          brew install autoconf automake cmake gawk gnu-sed make meson
+          brew install autoconf automake cmake coreutils gawk gnu-sed make meson
       - name: Build dependencies
         run: |
           ./PawPaw/bootstrap-mod.sh macos-universal-10.15 && ./PawPaw/.cleanup.sh macos-universal-10.15
