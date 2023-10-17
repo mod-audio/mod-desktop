@@ -1,15 +1,15 @@
 [submodule "mod-host"]
 	path = mod-host
-	url = git@github.com:moddevices/mod-host.git
+	url = https://github.com/moddevices/mod-host.git
 [submodule "mod-ui"]
 	path = mod-ui
-	url = git@github.com:moddevices/mod-ui.git
+	url = https://github.com/moddevices/mod-ui.git
 [submodule "mod-midi-merger"]
 	path = mod-midi-merger
-	url = git@github.com:moddevices/mod-midi-merger.git
+	url = https://github.com/moddevices/mod-midi-merger.git
 [submodule "mod-plugin-builder"]
 	path = mod-plugin-builder
-	url = git@github.com:moddevices/mod-plugin-builder.git
+	url = https://github.com/moddevices/mod-plugin-builder.git
 [submodule "PawPaw"]
 	path = PawPaw
-	url = git@github.com:DISTRHO/PawPaw.git
+	url = https://github.com/DISTRHO/PawPaw.git
