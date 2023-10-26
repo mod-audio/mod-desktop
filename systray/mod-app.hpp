@@ -598,27 +598,37 @@ private slots:
         QStringList arguments = {
             "-R",
             "-S",
-            "-C",
-           #ifdef Q_OS_WIN
-            ".\\jack\\jack-session.conf",
-           #else
-            "./jack/jack-session.conf",
-           #endif
             "-n",
             "mod-app",
+           #if defined(Q_OS_MAC)
+            "-C",
+            "./jack/jack-session.conf",
+           #elif defined(Q_OS_WIN)
+            "-C",
+            ".\\jack\\jack-session.conf",
+           #endif
         };
 
         if (midiEnabled)
         {
+           #if defined(Q_OS_MAC)
             arguments.append("-X");
-           #if defined(Q_OS_WIN)
-            arguments.append("winmme");
-           #elif defined(Q_OS_MAC)
             arguments.append("coremidi");
+           #elif defined(Q_OS_WIN)
+            arguments.append("-X");
+            arguments.append("winmme");
            #else
-            arguments.append("alsarawmidi");
+            arguments.append("-C");
+            arguments.append("./jack/jack-session-alsamidi.conf");
            #endif
         }
+       #if !(defined(Q_OS_MAC) || defined(Q_OS_WIN))
+        else
+        {
+            arguments.append("-C");
+            arguments.append("./jack/jack-session.conf");
+        }
+       #endif
 
         arguments.append("-d");
        #ifdef Q_OS_MAC

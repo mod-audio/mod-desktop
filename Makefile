@@ -113,7 +113,6 @@ else
 TARGETS += build/default.pedalboard
 TARGETS += build/html
 TARGETS += build/jackd$(APP_EXT)
-TARGETS += build/jack/jack-session.conf
 TARGETS += build/jack/mod-host$(SO_EXT)
 TARGETS += build/jack/mod-midi-broadcaster$(SO_EXT)
 TARGETS += build/jack/mod-midi-merger$(SO_EXT)
@@ -126,6 +125,7 @@ TARGETS += build/modtools
 ifeq ($(WINDOWS),true)
 TARGETS += build/jack/jack_portaudio.dll
 TARGETS += build/jack/jack_winmme.dll
+TARGETS += build/jack/jack-session.conf
 TARGETS += build/libjack64.dll
 TARGETS += build/libjackserver64.dll
 TARGETS += build/libpython3.8.dll
@@ -139,9 +139,10 @@ TARGETS += build/imageformats/qsvg.dll
 TARGETS += build/platforms/qwindows.dll
 TARGETS += build/styles/qwindowsvistastyle.dll
 else
+TARGETS += build/jack/alsa_midi.so
 TARGETS += build/jack/jack_alsa.so
-TARGETS += build/jack/jack_alsarawmidi.so
 TARGETS += build/jack/jack_portaudio.so
+TARGETS += build/jack/jack-session-alsamidi.conf
 TARGETS += build/libjack.so.0
 TARGETS += build/libjackserver.so.0
 endif
@@ -377,7 +378,7 @@ build/jackd$(APP_EXT): $(PAWPAW_PREFIX)/bin/jackd$(APP_EXT)
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
 
-build/jack/jack-session.conf: utils/jack-session.conf
+build/jack/%.conf: utils/%.conf
 	@mkdir -p build/jack
 	ln -sf $(abspath $<) $@
 
@@ -418,6 +419,10 @@ build/modtools: mod-ui/modtools
 	ln -sf $(abspath $<) $@
 
 # ---------------------------------------------------------------------------------------------------------------------
+
+build/jack/alsa_midi.so: $(PAWPAW_PREFIX)/lib/jack/alsa_midi.so
+	@mkdir -p build/jack
+	ln -sf $(abspath $<) $@
 
 build/jack/jack_%: $(PAWPAW_PREFIX)/lib/jack/jack_%
 	@mkdir -p build/jack
@@ -514,6 +519,9 @@ build-plugin-stamps/%: $(BOOTSTRAP_FILES)
 # ---------------------------------------------------------------------------------------------------------------------
 
 $(PAWPAW_PREFIX)/bin/%:
+	./PawPaw/bootstrap-mod.sh $(PAWPAW_TARGET)
+
+$(PAWPAW_PREFIX)/lib/jack/alsa_midi.so:
 	./PawPaw/bootstrap-mod.sh $(PAWPAW_TARGET)
 
 $(PAWPAW_PREFIX)/lib/lib%:
