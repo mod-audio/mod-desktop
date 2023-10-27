@@ -16,18 +16,34 @@ function convert_path() {
 if [ -e mod-ui.exe ]; then
     source ../PawPaw/local.env win64
     PATH_SEP=';'
+elif [ -e mod-app.app ]; then
+    source ../PawPaw/local.env macos-universal-10.15
+    export LD_LIBRARY_PATH="${PAWPAW_PREFIX}/lib"
+    PATH_SEP=':'
 else
     source ../PawPaw/local.env linux
-    export LD_LIBRARY_PATH="$(pwd):${PAWPAW_PREFIX}/lib"
+    export LD_LIBRARY_PATH="${PAWPAW_PREFIX}/lib"
     PATH_SEP=':'
 fi
 
-DOCS_DIR=$(xdg-user-dir DOCUMENTS)
+if [ -e mod-app.app ]; then
+    DOCS_DIR=~/Documents
+else
+    DOCS_DIR=$(xdg-user-dir DOCUMENTS)
+fi
+
 PYTHON="${EXE_WRAPPER} ${PAWPAW_PREFIX}/bin/python3${APP_EXT}"
 
-export LV2_PATH="$(convert_path $(pwd)/plugins)${PATH_SEP}$(convert_path ${DOCS_DIR}/MOD App/lv2)"
+if [ -e mod-app.app ]; then
+    LV2_PATH="$(convert_path $(pwd)/mod-app.app/Contents/PlugIns/LV2)"
+else
+    LV2_PATH="$(convert_path $(pwd)/plugins)"
+fi
+LV2_PATH+="${PATH_SEP}$(convert_path ${DOCS_DIR}/MOD App/lv2)"
+export LV2_PATH
 
 export MOD_APP=1
+export MOD_DATA_DIR="$(convert_path ${DOCS_DIR}/MOD App)"
 export MOD_DEV_ENVIRONMENT=0
 export MOD_DEVICE_HOST_PORT=18182
 export MOD_DEVICE_WEBSERVER_PORT=18181
@@ -40,19 +56,19 @@ export MOD_USER_PLUGINS_DIR="$(convert_path ${DOCS_DIR}/MOD App/lv2)"
 export JACK_NO_AUDIO_RESERVATION=1
 export JACK_NO_START_SERVER=1
 
-mkdir -p "${DOCS_DIR}/MOD App/user-files/Audio Loops"
-mkdir -p "${DOCS_DIR}/MOD App/user-files/Audio Recordings"
-mkdir -p "${DOCS_DIR}/MOD App/user-files/Audio Samples"
-mkdir -p "${DOCS_DIR}/MOD App/user-files/Audio Tracks"
-mkdir -p "${DOCS_DIR}/MOD App/user-files/MIDI Clips"
-mkdir -p "${DOCS_DIR}/MOD App/user-files/MIDI Songs"
-mkdir -p "${DOCS_DIR}/MOD App/user-files/Reverb IRs"
-mkdir -p "${DOCS_DIR}/MOD App/user-files/Speaker Cabinets IRs"
-mkdir -p "${DOCS_DIR}/MOD App/user-files/Hydrogen Drumkits"
-mkdir -p "${DOCS_DIR}/MOD App/user-files/SF2 Instruments"
-mkdir -p "${DOCS_DIR}/MOD App/user-files/SFZ Instruments"
-mkdir -p "${DOCS_DIR}/MOD App/user-files/Aida DSP Models"
-mkdir -p "${DOCS_DIR}/MOD App/user-files/NAM Models"
+mkdir -p "${MOD_USER_FILES_DIR}/Audio Loops"
+mkdir -p "${MOD_USER_FILES_DIR}/Audio Recordings"
+mkdir -p "${MOD_USER_FILES_DIR}/Audio Samples"
+mkdir -p "${MOD_USER_FILES_DIR}/Audio Tracks"
+mkdir -p "${MOD_USER_FILES_DIR}/MIDI Clips"
+mkdir -p "${MOD_USER_FILES_DIR}/MIDI Songs"
+mkdir -p "${MOD_USER_FILES_DIR}/Reverb IRs"
+mkdir -p "${MOD_USER_FILES_DIR}/Speaker Cabinets IRs"
+mkdir -p "${MOD_USER_FILES_DIR}/Hydrogen Drumkits"
+mkdir -p "${MOD_USER_FILES_DIR}/SF2 Instruments"
+mkdir -p "${MOD_USER_FILES_DIR}/SFZ Instruments"
+mkdir -p "${MOD_USER_FILES_DIR}/Aida DSP Models"
+mkdir -p "${MOD_USER_FILES_DIR}/NAM Models"
 
 cd ../mod-ui
 

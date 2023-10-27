@@ -12,7 +12,11 @@ function convert_path() {
     fi
 }
 
-DOCS_DIR=$(xdg-user-dir DOCUMENTS)
+if [ -e mod-app.app ]; then
+    DOCS_DIR=~/Documents
+else
+    DOCS_DIR=$(xdg-user-dir DOCUMENTS)
+fi
 
 if [ -e jackd.exe ]; then
     JACKD="wine jackd.exe"
@@ -21,6 +25,16 @@ if [ -e jackd.exe ]; then
     JACK_DRIVER_OPTS=""
     JACK_SESSION="-C ./jack/jack-session.conf -X winmme"
     PATH_SEP=';'
+elif [ -e mod-app.app ]; then
+    JACKD="./mod-app.app/Contents/MacOS/jackd"
+    JACK_DRIVER="coreaudio"
+    JACK_DRIVER_DEVICE="-D"
+    JACK_DRIVER_OPTS=""
+    JACK_SESSION="-C ./mod-app.app/Contents/MacOS/jack/jack-session.conf -X coremidi"
+    PATH_SEP=':'
+    export LD_BIND_NOW=1
+    export LD_LIBRARY_PATH="${PAWPAW_PREFIX}/lib"
+    export JACK_DRIVER_DIR="$(pwd)/mod-app.app/Contents/MacOS/jack"
 else
     JACKD="./jackd"
     JACK_DRIVER="portaudio"
@@ -29,11 +43,18 @@ else
     JACK_SESSION="-C ./jack/jack-session-alsamidi.conf"
     PATH_SEP=':'
     export LD_BIND_NOW=1
-    export LD_LIBRARY_PATH="$(pwd):${PAWPAW_PREFIX}/lib"
+    export LD_LIBRARY_PATH="${PAWPAW_PREFIX}/lib"
     export JACK_DRIVER_DIR="$(pwd)/jack"
 fi
 
-export LV2_PATH="$(convert_path $(pwd)/plugins)${PATH_SEP}$(convert_path ${DOCS_DIR}/MOD App/lv2)"
+if [ -e mod-app.app ]; then
+    LV2_PATH="$(convert_path $(pwd)/mod-app.app/Contents/PlugIns/LV2)"
+else
+    LV2_PATH="$(convert_path $(pwd)/plugins)"
+fi
+LV2_PATH+="${PATH_SEP}$(convert_path ${DOCS_DIR}/MOD App/lv2)"
+export LV2_PATH
+
 export MOD_KEYS_PATH="$(convert_path ${DOCS_DIR}/MOD App/keys)"
 
 export JACK_NO_AUDIO_RESERVATION=1
