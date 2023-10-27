@@ -5,7 +5,6 @@ cd "$(dirname $0)/../../build"
 DOCS_DIR=$(xdg-user-dir DOCUMENTS)
 
 export LANG=en_US.UTF-8
-export LD_LIBRARY_PATH="$(pwd)"
 export LV2_PATH="$(pwd)/plugins:${DOCS_DIR}/MOD App/lv2"
 
 export JACK_NO_AUDIO_RESERVATION=1

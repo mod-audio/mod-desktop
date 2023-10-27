@@ -1,20 +1,45 @@
-#!/bin/sh
+#!/bin/bash
 
 cd "$(dirname $0)/../../build"
 
+export LANG=en_US.UTF-8
+
+function convert_path() {
+    if [ -e jackd.exe ]; then
+        echo "Z:\\$(echo ${@} | tr '/' '\\')"
+    else
+        echo ${@}
+    fi
+}
+
 DOCS_DIR=$(xdg-user-dir DOCUMENTS)
 
-export LANG=en_US.UTF-8
-export LD_BIND_NOW=1
-export LD_LIBRARY_PATH="$(pwd)"
-export JACK_DRIVER_DIR="$(pwd)/jack"
-export LV2_PATH="$(pwd)/plugins:${DOCS_DIR}/MOD App/lv2"
+if [ -e jackd.exe ]; then
+    JACKD="wine jackd.exe"
+    JACK_DRIVER="portaudio"
+    JACK_DRIVER_DEVICE="ASIO::WineASIO Driver"
+    JACK_DRIVER_OPTS=""
+    JACK_SESSION="-C ./jack/jack-session.conf -X winmme"
+    PATH_SEP=';'
+else
+    JACKD="./jackd"
+    JACK_DRIVER="portaudio"
+    JACK_DRIVER_DEVICE="ALSA::pulse"
+    JACK_DRIVER_OPTS="-c 2"
+    JACK_SESSION="-C ./jack/jack-session-alsamidi.conf"
+    PATH_SEP=':'
+    export LD_BIND_NOW=1
+    export LD_LIBRARY_PATH="$(pwd)"
+    export JACK_DRIVER_DIR="$(pwd)/jack"
+fi
+
+export LV2_PATH="$(convert_path $(pwd)/plugins)${PATH_SEP}$(convert_path ${DOCS_DIR}/MOD App/lv2)"
+export MOD_KEYS_PATH="$(convert_path ${DOCS_DIR}/MOD App/keys)"
 
 export JACK_NO_AUDIO_RESERVATION=1
 export JACK_NO_START_SERVER=1
 
-export MOD_KEYS_PATH="${DOCS_DIR}/MOD App/keys"
 # export MOD_LOG=1
 # export MOD_PLUGIN_THREAD_PRIORITY=57
 
-exec ./jackd -R -S -n mod-app -C ./jack/jack-session-alsamidi.conf -d portaudio -d 'ALSA::pulse' -r 48000 -p 256 -c 2
+exec ${JACKD} -R -S -n mod-app ${JACK_SESSION} -d ${JACK_DRIVER} -d "${JACK_DRIVER_DEVICE}" ${JACK_DRIVER_OPTS} -r 48000 -p 256
