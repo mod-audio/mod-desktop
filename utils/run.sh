@@ -30,11 +30,11 @@ source PawPaw/local.env ${target}
 
 PRE=""
 
-if [ "_${1}" = "_cmake" ] && [ "_${2}" = "_-S" ]; then
+if [ x"${1}" = x"cmake" ] && [ x"${2}" = x"-S" ]; then
     PRE="${CMAKE} -S"
     shift
     shift
-elif [ "_${1}" = "_python3" ]; then
+elif [ x"${1}" = x"python3" ]; then
     PRE="${EXE_WRAPPER} ${PAWPAW_PREFIX}/bin/python3${APP_EXT}"
     shift
 fi

@@ -2,7 +2,7 @@
 
 # set -e
 
-cd $(dirname "${0}")/..
+cd $(dirname "${0}")/../..
 
 # ---------------------------------------------------------------------------------------------------------------------
 # check target
@@ -39,6 +39,6 @@ if [ "${MACOS}" -eq 1 ]; then
     export PATH="${PAWPAW_PREFIX}-host/bin:${PATH}"
 fi
 
-make -f utils/plugin-builder.mk pkgname="${plugin}" ${MAKE_ARGS} PREFIX=/usr WITH_LTO=false VERBOSE=1
+make -f utils/plugin-builder/plugin-builder.mk pkgname="${plugin}" ${MAKE_ARGS} PREFIX=/usr WITH_LTO=false VERBOSE=1
 
 # ---------------------------------------------------------------------------------------------------------------------

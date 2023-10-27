@@ -41,7 +41,7 @@ jobs:
         run: |
           mkdir mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64
           mv build mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64/mod-app
-          cp utils/mod-app.desktop utils/mod-app.run mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64/
+          cp utils/linux/*.* mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64/
           tar chJf mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64.tar.xz mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64
       - uses: actions/upload-artifact@v3
         with:
@@ -80,7 +80,7 @@ jobs:
       - name: Pack
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
-          ./utils/macos-dmg.sh
+          ./utils/macos/macos-dmg.sh
           mv mod-app-*.dmg mod-app-${{ github.event.pull_request.number || env.SHA8 }}-macOS.dmg
       - uses: actions/upload-artifact@v3
         with:
@@ -124,7 +124,7 @@ jobs:
       - name: Pack
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
-          xvfb-run ./utils/win64-installer.sh
+          xvfb-run ./utils/win64/win64-installer.sh
           mv mod-app-*.exe mod-app-${{ github.event.pull_request.number || env.SHA8 }}-win64.exe
       - uses: actions/upload-artifact@v3
         with:

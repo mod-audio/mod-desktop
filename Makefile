@@ -378,7 +378,7 @@ build/jackd$(APP_EXT): $(PAWPAW_PREFIX)/bin/jackd$(APP_EXT)
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
 
-build/jack/%.conf: utils/%.conf
+build/jack/%.conf: utils/jack/%.conf
 	@mkdir -p build/jack
 	ln -sf $(abspath $<) $@
 
@@ -462,15 +462,14 @@ build/styles/q%.dll: $(PAWPAW_PREFIX)/lib/qt5/plugins/styles/q%.dll
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-build-screenshot/mod-screenshot$(APP_EXT): utils/mod-screenshot.py $(BOOTSTRAP_FILES)
-	./utils/run.sh $(PAWPAW_TARGET) python3 utils/mod-screenshot.py build_exe
+build-screenshot/mod-screenshot$(APP_EXT): utils/cxfreeze/mod-screenshot.py $(BOOTSTRAP_FILES)
+	./utils/run.sh $(PAWPAW_TARGET) python3 utils/cxfreeze/mod-screenshot.py build_exe
 	touch $@
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-build-ui/mod-ui$(APP_EXT): utils/mod-ui.py utils/mod-ui-wrapper.py $(BOOTSTRAP_FILES)
-# 	rm -f build/libpython3.8.dll
-	./utils/run.sh $(PAWPAW_TARGET) python3 utils/mod-ui.py build_exe
+build-ui/mod-ui$(APP_EXT): utils/cxfreeze/mod-ui.py utils/cxfreeze/mod-ui-setup.py $(BOOTSTRAP_FILES)
+	./utils/run.sh $(PAWPAW_TARGET) python3 utils/cxfreeze/mod-ui.py build_exe
 	touch $@
 
 mod-ui/utils/libmod_utils.so: $(BOOTSTRAP_FILES) mod-ui/utils/utils.h mod-ui/utils/utils_jack.cpp mod-ui/utils/utils_lilv.cpp
@@ -504,7 +503,7 @@ systray/mod-app$(APP_EXT): systray/main.cpp systray/mod-app.hpp
 
 define BUILD_PLUGIN
 	@mkdir -p build/plugins
-	./utils/plugin-builder.sh $(PAWPAW_TARGET) $(1)
+	./utils/plugin-builder/plugin-builder.sh $(PAWPAW_TARGET) $(1)
 	$(foreach BUNDLE,$(filter $(BUNDLES),$($(call BUILDROOT_VAR,$(1))_BUNDLES)),\
 		rm -f build/plugins/$(BUNDLE);\
 		ln -s $(abspath $(PAWPAW_PREFIX)/lib/lv2/$(BUNDLE)) build/plugins/$(BUNDLE);\
