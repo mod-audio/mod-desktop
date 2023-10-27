@@ -171,10 +171,7 @@ PLUGINS += x42-tinygain
 
 # FIXME plugin binary missing (win32 RUNTIME vs LIBRARY)
 PLUGINS += aidadsp-lv2
-# FIXME crashes on load on macOS
-ifneq ($(MACOS),true)
 PLUGINS += carla-plugins
-endif
 # FIXME needs python2
 # PLUGINS += fomp
 # FIXME needs tweaks for waf/python3 path
