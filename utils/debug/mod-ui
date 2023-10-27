@@ -1,0 +1,68 @@
+#!/bin/bash
+
+cd "$(dirname $0)/../../build"
+
+DOCS_DIR=$(xdg-user-dir DOCUMENTS)
+
+export LANG=en_US.UTF-8
+export LD_LIBRARY_PATH="$(pwd)"
+export LV2_PATH="$(pwd)/plugins:${DOCS_DIR}/MOD App/lv2"
+
+export JACK_NO_AUDIO_RESERVATION=1
+export JACK_NO_START_SERVER=1
+
+export MOD_APP=1
+export MOD_DEV_ENVIRONMENT=0
+export MOD_DEVICE_HOST_PORT=18182
+export MOD_DEVICE_WEBSERVER_PORT=18181
+export MOD_KEYS_PATH="${DOCS_DIR}/MOD App/keys"
+export MOD_USER_FILES_DIR="${DOCS_DIR}/MOD App/user-files"
+export MOD_USER_PEDALBOARDS_DIR="${DOCS_DIR}/MOD App/pedalboards"
+export MOD_USER_PLUGINS_DIR="${DOCS_DIR}/MOD App/lv2"
+# export MOD_LOG=2
+
+mkdir -p "${DOCS_DIR}/MOD App/user-files/Audio Loops"
+mkdir -p "${DOCS_DIR}/MOD App/user-files/Audio Recordings"
+mkdir -p "${DOCS_DIR}/MOD App/user-files/Audio Samples"
+mkdir -p "${DOCS_DIR}/MOD App/user-files/Audio Tracks"
+mkdir -p "${DOCS_DIR}/MOD App/user-files/MIDI Clips"
+mkdir -p "${DOCS_DIR}/MOD App/user-files/MIDI Songs"
+mkdir -p "${DOCS_DIR}/MOD App/user-files/Reverb IRs"
+mkdir -p "${DOCS_DIR}/MOD App/user-files/Speaker Cabinets IRs"
+mkdir -p "${DOCS_DIR}/MOD App/user-files/Hydrogen Drumkits"
+mkdir -p "${DOCS_DIR}/MOD App/user-files/SF2 Instruments"
+mkdir -p "${DOCS_DIR}/MOD App/user-files/SFZ Instruments"
+mkdir -p "${DOCS_DIR}/MOD App/user-files/Aida DSP Models"
+mkdir -p "${DOCS_DIR}/MOD App/user-files/NAM Models"
+
+cd ../mod-ui
+
+# check for pip3 tool
+if ! command -v pip3 >/dev/null; then
+    echo "pip3 tool not available, cannot continue"
+    exit 1
+fi
+
+# install virtualenv as needed
+if ! virtualenv --version 2>/dev/null; then
+    pip3 install virtualenv
+fi
+
+# activate virtualenv
+virtualenv modui-env
+source modui-env/bin/activate
+
+# install required mod-ui dependencies in virtualenv
+pip3 install -r requirements.txt --isolated --require-virtualenv
+
+# fix compatibility with python3.10+
+if [ -e modui-env/lib/python3.10/site-packages/tornado/httputil.py ]; then
+    sed -i -e 's/collections.MutableMapping/collections.abc.MutableMapping/' modui-env/lib/python3.10/site-packages/tornado/httputil.py
+elif [ -e modui-env/lib/python3.11/site-packages/tornado/httputil.py ]; then
+    sed -i -e 's/collections.MutableMapping/collections.abc.MutableMapping/' modui-env/lib/python3.11/site-packages/tornado/httputil.py
+fi
+
+export MOD_DEFAULT_PEDALBOARD="$(pwd)/default.pedalboard"
+export MOD_HTML_DIR="$(pwd)/html"
+
+exec python3 -c "from mod import webserver; webserver.run()"
