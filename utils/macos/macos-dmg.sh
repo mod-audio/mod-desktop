@@ -17,7 +17,7 @@ rm -rf build/dmg
 mkdir build/dmg
 
 gcp -rL build/mod-app.app build/dmg/
-gcp utils/macos-readme.txt build/dmg/README.txt
+gcp utils/macos/macos-readme.txt build/dmg/README.txt
 
 pushd build/dmg/mod-app.app/Contents
 
