@@ -29,7 +29,7 @@ else
     JACK_SESSION="-C ./jack/jack-session-alsamidi.conf"
     PATH_SEP=':'
     export LD_BIND_NOW=1
-    export LD_LIBRARY_PATH="$(pwd)"
+    export LD_LIBRARY_PATH="$(pwd):${PAWPAW_PREFIX}/lib"
     export JACK_DRIVER_DIR="$(pwd)/jack"
 fi
 

@@ -260,13 +260,13 @@ win64-plugins:
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-build-ui/lib/libmod_utils$(SO_EXT): mod-ui/utils/libmod_utils.so
+build-ui/lib/libmod_utils$(SO_EXT): mod-ui/utils/libmod_utils$(SO_EXT)
 	@mkdir -p build-ui/lib
 	ln -sf $(abspath $<) $@
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-build/mod-app.app/Contents/Info.plist: utils/Info.plist
+build/mod-app.app/Contents/Info.plist: utils/macos/Info.plist
 	@mkdir -p build/mod-app.app/Contents
 	ln -sf $(abspath $<) $@
 
@@ -472,7 +472,7 @@ build-ui/mod-ui$(APP_EXT): utils/cxfreeze/mod-ui.py utils/cxfreeze/mod-ui-setup.
 	./utils/run.sh $(PAWPAW_TARGET) python3 utils/cxfreeze/mod-ui.py build_exe
 	touch $@
 
-mod-ui/utils/libmod_utils.so: $(BOOTSTRAP_FILES) mod-ui/utils/utils.h mod-ui/utils/utils_jack.cpp mod-ui/utils/utils_lilv.cpp
+mod-ui/utils/libmod_utils$(SO_EXT): $(BOOTSTRAP_FILES) mod-ui/utils/utils.h mod-ui/utils/utils_jack.cpp mod-ui/utils/utils_lilv.cpp
 	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) MODAPP=1 -C mod-ui/utils
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -516,6 +516,9 @@ build-plugin-stamps/%: $(BOOTSTRAP_FILES)
 	touch $@
 
 # ---------------------------------------------------------------------------------------------------------------------
+
+bootstrap:
+	./PawPaw/bootstrap-mod.sh $(PAWPAW_TARGET)
 
 $(PAWPAW_PREFIX)/bin/%:
 	./PawPaw/bootstrap-mod.sh $(PAWPAW_TARGET)

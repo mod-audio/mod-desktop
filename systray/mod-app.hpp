@@ -163,9 +163,11 @@ public:
        #ifdef Q_OS_WIN
         SetEnvironmentVariableW(L"JACK_NO_AUDIO_RESERVATION", L"1");
         SetEnvironmentVariableW(L"JACK_NO_START_SERVER", L"1");
+        SetEnvironmentVariableW(L"PYTHONUNBUFFERED", L"1");
        #else
         setenv("JACK_NO_AUDIO_RESERVATION", "1", 1);
         setenv("JACK_NO_START_SERVER", "1", 1);
+        setenv("PYTHONUNBUFFERED", "1", 1);
        #endif
 
        #ifdef Q_OS_MAC
