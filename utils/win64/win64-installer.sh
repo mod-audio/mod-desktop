@@ -29,18 +29,18 @@ if [ ! -f "${innodir}"/drive_c/InnoSetup/ISCC.exe ]; then
 fi
 
 # generate plugins
-echo -n "" > utils/win64-plugins.iss
+echo -n "" > utils/win64/win64-plugins.iss
 IFS='
 '
 for f in $(find -L build/plugins/ -type f); do
     d=$(dirname $(echo ${f} | sed "s|build/plugins/||"))
-    echo "Source: \"..\\$(echo ${f} | tr '/' '\\')\"; DestDir: \"{app}\\plugins\\$(echo ${d} | tr '/' '\\')\"; Components: plugins; Flags: ignoreversion;" >> utils/win64-plugins.iss
+    echo "Source: \"..\\..\\$(echo ${f} | tr '/' '\\')\"; DestDir: \"{app}\\plugins\\$(echo ${d} | tr '/' '\\')\"; Components: plugins; Flags: ignoreversion;" >> utils/win64/win64-plugins.iss
 done
 
 # generate version
-echo "#define VERSION \"$(make version)\"" > utils/win64-version.iss
+echo "#define VERSION \"$(make version)\"" > utils/win64/win64-version.iss
 
 # create the installer file
-pushd "utils"
+pushd "utils/win64"
 env WINEPREFIX="${innodir}" wine "${iscc}" "win64-installer.iss"
 popd

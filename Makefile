@@ -278,7 +278,7 @@ build/mod-app.app/Contents/MacOS/jackd: $(PAWPAW_PREFIX)/bin/jackd$(APP_EXT)
 	@mkdir -p build/mod-app.app/Contents/MacOS
 	ln -sf $(abspath $<) $@
 
-build/mod-app.app/Contents/MacOS/jack/jack-session.conf: utils/jack-session.conf
+build/mod-app.app/Contents/MacOS/jack/jack-session.conf: utils/jack/jack-session.conf
 	@mkdir -p build/mod-app.app/Contents/MacOS/jack
 	ln -sf $(abspath $<) $@
 
