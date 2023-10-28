@@ -26,6 +26,7 @@ os.environ['MOD_DEFAULT_PEDALBOARD'] = os.path.join(resdir, 'default.pedalboard'
 os.environ['MOD_DEV_ENVIRONMENT'] = '0'
 os.environ['MOD_DEVICE_HOST_PORT'] = '18182'
 os.environ['MOD_DEVICE_WEBSERVER_PORT'] = '18181'
+os.environ['MOD_HARDWARE_DESC_FILE'] = os.path.join(resdir, 'mod-hardware-descriptor.json')
 os.environ['MOD_HTML_DIR'] = os.path.join(resdir, 'html')
 os.environ['MOD_IMAGE_VERSION_PATH'] = os.path.join(resdir, 'VERSION')
 os.environ['MOD_KEYS_PATH'] = os.path.join(DATA_DIR, 'keys')

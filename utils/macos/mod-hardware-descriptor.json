@@ -1,0 +1,6 @@
+{
+  "name": "MOD App",
+  "platform": "desktop",
+  "architecture": "universal",
+  "bin-compat": "macos-universal"
+}

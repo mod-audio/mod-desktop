@@ -1,0 +1,6 @@
+{
+  "name": "MOD App",
+  "platform": "desktop",
+  "architecture": "x64_64",
+  "bin-compat": "win64"
+}

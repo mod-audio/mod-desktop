@@ -47,6 +47,7 @@ export MOD_DATA_DIR="$(convert_path ${DOCS_DIR}/MOD App)"
 export MOD_DEV_ENVIRONMENT=0
 export MOD_DEVICE_HOST_PORT=18182
 export MOD_DEVICE_WEBSERVER_PORT=18181
+export MOD_HARDWARE_DESC_FILE="$(convert_path $(pwd)/mod-hardware-descriptor.json)"
 export MOD_KEYS_PATH="$(convert_path ${DOCS_DIR}/MOD App/keys)"
 export MOD_USER_FILES_DIR="$(convert_path ${DOCS_DIR}/MOD App/user-files)"
 export MOD_USER_PEDALBOARDS_DIR="$(convert_path ${DOCS_DIR}/MOD App/pedalboards)"

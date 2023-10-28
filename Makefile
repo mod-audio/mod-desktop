@@ -108,6 +108,7 @@ TARGETS += build/mod-app.app/Contents/PlugIns/platforms/libqcocoa.dylib
 TARGETS += build/mod-app.app/Contents/PlugIns/styles/libqmacstyle.dylib
 TARGETS += build/mod-app.app/Contents/Resources/default.pedalboard
 TARGETS += build/mod-app.app/Contents/Resources/html
+TARGETS += build/mod-app.app/Contents/Resources/mod-hardware-descriptor.json
 TARGETS += build/mod-app.app/Contents/Resources/mod-logo.icns
 TARGETS += build/mod-app.app/Contents/Resources/VERSION
 else
@@ -124,6 +125,7 @@ TARGETS += build/mod-screenshot$(APP_EXT)
 TARGETS += build/mod-ui$(APP_EXT)
 TARGETS += build/mod
 TARGETS += build/modtools
+TARGETS += build/mod-hardware-descriptor.json
 TARGETS += build/VERSION
 ifeq ($(WINDOWS),true)
 TARGETS += build/jack/jack_portaudio.dll
@@ -358,6 +360,10 @@ build/mod-app.app/Contents/Resources/html: mod-ui/html
 	@mkdir -p build/mod-app.app/Contents/Resources
 	ln -sf $(abspath $<) $@
 
+build/mod-app.app/Contents/Resources/mod-hardware-descriptor.json: utils/macos/mod-hardware-descriptor.json
+	@mkdir -p build/mod-app.app/Contents/Resources
+	ln -sf $(abspath $<) $@
+
 build/mod-app.app/Contents/Resources/mod-logo.icns: systray/mod-logo.icns
 	@mkdir -p build/mod-app.app/Contents/Resources
 	ln -sf $(abspath $<) $@
@@ -419,6 +425,16 @@ build/mod: mod-ui/mod
 build/modtools: mod-ui/modtools
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
+
+ifeq ($(WINDOWS),true)
+build/mod-hardware-descriptor.json: utils/win64/mod-hardware-descriptor.json
+	@mkdir -p build
+	ln -sf $(abspath $<) $@
+else
+build/mod-hardware-descriptor.json: utils/linux/mod-hardware-descriptor.json
+	@mkdir -p build
+	ln -sf $(abspath $<) $@
+endif
 
 build/VERSION: VERSION
 	@mkdir -p build
