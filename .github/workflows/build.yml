@@ -126,6 +126,7 @@ jobs:
         run: |
           xvfb-run ./utils/win64/win64-installer.sh
           mv mod-app-*.exe mod-app-${{ github.event.pull_request.number || env.SHA8 }}-win64.exe
+          rm -rf build/innosetup-*
           mv build mod-app-${{ github.event.pull_request.number || env.SHA8 }}-win64
           zip -r -9 mod-app-${{ github.event.pull_request.number || env.SHA8 }}-win64.zip mod-app-${{ github.event.pull_request.number || env.SHA8 }}-win64
       - uses: actions/upload-artifact@v3
