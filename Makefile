@@ -220,7 +220,7 @@ clean:
 	rm -rf build-screenshot
 	rm -rf build-ui
 
-plugins: $(PLUGINS)
+plugins: $(foreach PLUGIN,$(PLUGINS),$(call PLUGIN_STAMP,$(PLUGIN)))
 
 run: $(TARGETS)
 	./utils/test.sh $(PAWPAW_TARGET)

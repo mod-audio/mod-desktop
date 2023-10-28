@@ -56,19 +56,19 @@ export MOD_USER_PLUGINS_DIR="$(convert_path ${DOCS_DIR}/MOD App/lv2)"
 export JACK_NO_AUDIO_RESERVATION=1
 export JACK_NO_START_SERVER=1
 
-mkdir -p "${MOD_USER_FILES_DIR}/Audio Loops"
-mkdir -p "${MOD_USER_FILES_DIR}/Audio Recordings"
-mkdir -p "${MOD_USER_FILES_DIR}/Audio Samples"
-mkdir -p "${MOD_USER_FILES_DIR}/Audio Tracks"
-mkdir -p "${MOD_USER_FILES_DIR}/MIDI Clips"
-mkdir -p "${MOD_USER_FILES_DIR}/MIDI Songs"
-mkdir -p "${MOD_USER_FILES_DIR}/Reverb IRs"
-mkdir -p "${MOD_USER_FILES_DIR}/Speaker Cabinets IRs"
-mkdir -p "${MOD_USER_FILES_DIR}/Hydrogen Drumkits"
-mkdir -p "${MOD_USER_FILES_DIR}/SF2 Instruments"
-mkdir -p "${MOD_USER_FILES_DIR}/SFZ Instruments"
-mkdir -p "${MOD_USER_FILES_DIR}/Aida DSP Models"
-mkdir -p "${MOD_USER_FILES_DIR}/NAM Models"
+mkdir -p "${DOCS_DIR}/MOD App/user-files/Audio Loops"
+mkdir -p "${DOCS_DIR}/MOD App/user-files/Audio Recordings"
+mkdir -p "${DOCS_DIR}/MOD App/user-files/Audio Samples"
+mkdir -p "${DOCS_DIR}/MOD App/user-files/Audio Tracks"
+mkdir -p "${DOCS_DIR}/MOD App/user-files/MIDI Clips"
+mkdir -p "${DOCS_DIR}/MOD App/user-files/MIDI Songs"
+mkdir -p "${DOCS_DIR}/MOD App/user-files/Reverb IRs"
+mkdir -p "${DOCS_DIR}/MOD App/user-files/Speaker Cabinets IRs"
+mkdir -p "${DOCS_DIR}/MOD App/user-files/Hydrogen Drumkits"
+mkdir -p "${DOCS_DIR}/MOD App/user-files/SF2 Instruments"
+mkdir -p "${DOCS_DIR}/MOD App/user-files/SFZ Instruments"
+mkdir -p "${DOCS_DIR}/MOD App/user-files/Aida DSP Models"
+mkdir -p "${DOCS_DIR}/MOD App/user-files/NAM Models"
 
 cd ../mod-ui
 

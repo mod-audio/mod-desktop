@@ -96,26 +96,26 @@ public:
         connect(ui.b_stop, &QPushButton::clicked, this, &AppWindow::stop);
         connect(ui.b_opengui, &QPushButton::clicked, this, &AppWindow::openGui);
         connect(ui.b_openuserfiles, &QPushButton::clicked, this, &AppWindow::openUserFilesDir);
-        connect(ui.gb_logs, &QGroupBox::toggled, this, &AppWindow::showLogs);
 
         const QIcon icon(":/mod-logo.svg");
 
-        openGuiAction = new QAction(tr("&Open GUI"), this);
+        settingsAction = new QAction(tr("&Open Panel Settings"), this);
+        connect(settingsAction, &QAction::triggered, this, &QMainWindow::show);
+
+        openGuiAction = new QAction(tr("Open &Web GUI"), this);
         connect(openGuiAction, &QAction::triggered, this, &AppWindow::openGui);
 
-        openUserFilesAction = new QAction(tr("&Open User Files"), this);
+        openUserFilesAction = new QAction(tr("Open &User Files"), this);
         connect(openUserFilesAction, &QAction::triggered, this, &AppWindow::openUserFilesDir);
-
-        settingsAction = new QAction(tr("&Settings"), this);
-        connect(settingsAction, &QAction::triggered, this, &QMainWindow::show);
 
         quitAction = new QAction(tr("&Quit"), this);
         connect(quitAction, &QAction::triggered, qApp, &QCoreApplication::quit);
 
         sysmenu = new QMenu(this);
+        sysmenu->addAction(settingsAction);
+        sysmenu->addSeparator();
         sysmenu->addAction(openGuiAction);
         sysmenu->addAction(openUserFilesAction);
-        sysmenu->addAction(settingsAction);
         sysmenu->addSeparator();
         sysmenu->addAction(quitAction);
 
@@ -410,19 +410,17 @@ private:
         settings.setValue("EnableMIDI", ui.gb_midi->isChecked());
         settings.setValue("PedalboardsMidiChannel", ui.sp_midi_pb->value());
         settings.setValue("SnapshotsMidiChannel", ui.sp_midi_ss->value());
-        settings.setValue("ShowLogs", ui.gb_logs->isChecked());
         settings.setValue("SuccessfullyStarted", successfullyStarted);
+        settings.setValue("VerboseLogs", ui.cb_verbose_basic->isChecked());
+        settings.setValue("VerboseLogsJack", ui.cb_verbose_jackd->isChecked());
+        settings.setValue("VerboseLogsHost", ui.cb_verbose_host->isChecked());
+        settings.setValue("VerboseLogsUI", ui.cb_verbose_ui->isChecked());
     }
 
     void loadSettings()
     {
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
         const QSettings settings;
-
-        const bool logsEnabled = settings.value("ShowLogs", false).toBool();
-        ui.gb_logs->setChecked(logsEnabled);
-        ui.tab_logs->setEnabled(logsEnabled);
-        ui.tab_logs->setVisible(logsEnabled);
 
         const QString audioDevice(settings.value("AudioDevice").toString());
         if (! audioDevice.isEmpty())
@@ -438,6 +436,11 @@ private:
         ui.gb_midi->setChecked(settings.value("EnableMIDI", false).toBool());
         ui.sp_midi_pb->setValue(settings.value("PedalboardsMidiChannel", 0).toInt());
         ui.sp_midi_pb->setValue(settings.value("SnapshotsMidiChannel", 0).toInt());
+
+        ui.cb_verbose_basic->setChecked(settings.value("VerboseLogs", false).toBool());
+        ui.cb_verbose_jackd->setChecked(settings.value("VerboseLogsJack", false).toBool());
+        ui.cb_verbose_host->setChecked(settings.value("VerboseLogsHost", false).toBool());
+        ui.cb_verbose_ui->setChecked(settings.value("VerboseLogsUI", false).toBool());
 
         successfullyStarted = settings.value("SuccessfullyStarted", false).toBool();
 
@@ -602,13 +605,6 @@ private slots:
             "-S",
             "-n",
             "mod-app",
-           #if defined(Q_OS_MAC)
-            "-C",
-            "./jack/jack-session.conf",
-           #elif defined(Q_OS_WIN)
-            "-C",
-            ".\\jack\\jack-session.conf",
-           #endif
         };
 
         if (midiEnabled)
@@ -620,17 +616,20 @@ private slots:
             arguments.append("-X");
             arguments.append("winmme");
            #else
-            arguments.append("-C");
-            arguments.append("./jack/jack-session-alsamidi.conf");
+            arguments.append("-I");
+            arguments.append("alsa_midi");
            #endif
         }
-       #if !(defined(Q_OS_MAC) || defined(Q_OS_WIN))
-        else
-        {
-            arguments.append("-C");
-            arguments.append("./jack/jack-session.conf");
-        }
+
+        arguments.append("-C");
+       #if defined(Q_OS_WIN)
+        arguments.append(".\\jack\\jack-session.conf");
+       #else
+        arguments.append("./jack/jack-session.conf");
        #endif
+
+        if (ui.cb_verbose_jackd->isChecked())
+            arguments.append("-v");
 
         arguments.append("-d");
        #ifdef Q_OS_MAC
@@ -818,24 +817,5 @@ private slots:
     void messageClicked()
     {
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
-    }
-
-    void showLogs(bool toggled)
-    {
-        printf("----------- %s %d\n", __FUNCTION__, __LINE__);
-        ui.tab_logs->setEnabled(toggled);
-        ui.tab_logs->setVisible(toggled);
-
-        if (toggled)
-        {
-            ui.tab_logs->resize(1, heightLogs);
-            resize(width(), height() + heightLogs);
-        }
-        else
-        {
-            // heightLogs = ui.tab_logs->height();
-            resize(width(), height() - heightLogs);
-            adjustSize();
-        }
     }
 };
