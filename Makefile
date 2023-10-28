@@ -153,7 +153,9 @@ endif
 
 # List of plugin projects to build
 PLUGINS  = abgate
+PLUGINS += aidadsp-lv2
 PLUGINS += artyfx
+PLUGINS += carla-plugins
 PLUGINS += dpf-plugins
 PLUGINS += dragonfly-reverb
 PLUGINS += fluidplug
@@ -169,9 +171,6 @@ PLUGINS += x42-midifilter
 PLUGINS += x42-midigen
 PLUGINS += x42-tinygain
 
-# FIXME plugin binary missing (win32 RUNTIME vs LIBRARY)
-PLUGINS += aidadsp-lv2
-PLUGINS += carla-plugins
 # FIXME needs python2
 # PLUGINS += fomp
 # FIXME needs tweaks for waf/python3 path
