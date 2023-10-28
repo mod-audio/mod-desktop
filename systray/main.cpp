@@ -50,7 +50,7 @@ void writeMidiChannelsToProfile(int pedalboard, int snapshot)
     QFile jsonFile(QString::fromWCharArray(path));
    #else
     char path[PATH_MAX + 256] = {};
-    std::strcpy(path, getenv("MOD_DATA_DIR"));
+    std::strcpy(path, std::getenv("MOD_DATA_DIR"));
     std::strcat(path, "/profile5.json");
     QFile jsonFile(QString::fromUtf8(path));
    #endif
@@ -117,7 +117,7 @@ int main(int argc, char* argv[])
 
     std::wcscat(lv2path, path);
     std::wcscat(lv2path, L"\\data\\lv2;");
-    SetEnvironmentVariableW(L"LV2_PATH", lv2path);
+    SetEnvironmentVariableW(L"MOD_LV2_PATH", lv2path);
 
     std::wcscat(path, L"\\user-files");
     _wmkdir(path);
@@ -175,7 +175,7 @@ int main(int argc, char* argv[])
 
     std::strcat(lv2path, path);
     std::strcat(lv2path, "/lv2");
-    setenv("LV2_PATH", lv2path, 1);
+    setenv("MOD_LV2_PATH", lv2path, 1);
 
     std::strcat(path, "/user-files");
     mkdir(path, 0777);
@@ -188,8 +188,6 @@ int main(int argc, char* argv[])
     sigaction(SIGTERM, &sig, nullptr);
     sigaction(SIGINT, &sig, nullptr);
   #endif
-
-    app.setQuitOnLastWindowClosed(false);
 
     AppWindow window(cwd);
     return app.exec();

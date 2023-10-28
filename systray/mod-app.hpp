@@ -23,6 +23,8 @@
 
 #ifdef Q_OS_WIN
 #include <windows.h>
+#else
+#include <cstring>
 #endif
 
 QString getUserFilesDir();
@@ -78,12 +80,12 @@ class AppWindow : public QMainWindow
     int timerId = 0;
 
     struct DeviceInfo {
-        QString uidMain;
-        QString uidInput;
+        QString uid;
         bool canInput = false;
-        bool canOutput = false;
+        bool canUseSeparateInput = false;
     };
     QList<DeviceInfo> devices;
+    QStringList inputs;
 
 public:
     AppWindow(const QString& cwd)
@@ -96,6 +98,7 @@ public:
         connect(ui.b_stop, &QPushButton::clicked, this, &AppWindow::stop);
         connect(ui.b_opengui, &QPushButton::clicked, this, &AppWindow::openGui);
         connect(ui.b_openuserfiles, &QPushButton::clicked, this, &AppWindow::openUserFilesDir);
+        connect(ui.cb_device, &QComboBox::currentTextChanged, this, &AppWindow::updateDeviceDetails);
 
         const QIcon icon(":/mod-logo.svg");
 
@@ -170,6 +173,8 @@ public:
         setenv("PYTHONUNBUFFERED", "1", 1);
        #endif
 
+        ui.cb_device->blockSignals(true);
+
        #ifdef Q_OS_MAC
         constexpr const AudioObjectPropertyAddress propDevices = {
             .mElement  = kAudioObjectPropertyElementMaster,
@@ -204,7 +209,7 @@ public:
         uint32_t outPropDataSize = 0;
         if (AudioObjectGetPropertyDataSize(kAudioObjectSystemObject, &propDevices, 0, nullptr, &outPropDataSize) == kAudioHardwareNoError)
         {
-			const uint32_t numDevices = outPropDataSize / sizeof(AudioObjectID);
+            const uint32_t numDevices = outPropDataSize / sizeof(AudioObjectID);
 
             AudioObjectID* const deviceIDs = new AudioObjectID[numDevices];
 
@@ -214,7 +219,7 @@ public:
                 outPropDataSize = sizeof(deviceID);
                 if (AudioObjectGetPropertyData(kAudioObjectSystemObject, &propDefaultOutDevice, 0, nullptr, &outPropDataSize, &deviceID) == kAudioHardwareNoError && deviceID != kAudioDeviceUnknown)
                 {
-                    DeviceInfo devInfo = { QString::number(deviceID), {}, false, true };
+                    DeviceInfo devInfo = { QString::number(deviceID), false, false };
 
                     outPropDataSize = 0;
                     if (AudioObjectGetPropertyDataSize(deviceID, &propInputStreams, 0, nullptr, &outPropDataSize) == kAudioHardwareNoError && outPropDataSize != 0)
@@ -226,10 +231,7 @@ public:
                         deviceID = kAudioDeviceUnknown;
                         outPropDataSize = sizeof(deviceID);
                         if (AudioObjectGetPropertyData(kAudioObjectSystemObject, &propDefaultInDevice, 0, nullptr, &outPropDataSize, &deviceID) == kAudioHardwareNoError && deviceID != kAudioDeviceUnknown)
-                        {
-                            devInfo.uidInput = QString::number(deviceID);
                             devInfo.canInput = true;
-                        }
                     }
 
                     ui.cb_device->addItem("Default");
@@ -240,7 +242,7 @@ public:
                 {
                     deviceID = deviceIDs[i];
 
-                    DeviceInfo devInfo = { QString::number(deviceID), {}, false, false };
+                    DeviceInfo devInfo = { QString::number(deviceID), false, true };
                     QString devName;
 
                     CFStringRef devNameCF = {};
@@ -248,21 +250,22 @@ public:
                     if (AudioObjectGetPropertyData(deviceID, &propDeviceName, 0, nullptr, &outPropDataSize, &devNameCF) == kAudioHardwareNoError)
                         devName = QString::fromCFString(devNameCF);
                     else
-                        devName = devInfo.uidMain;
+                        devName = devInfo.uid;
 
                     outPropDataSize = 0;
                     if (AudioObjectGetPropertyDataSize(deviceID, &propInputStreams, 0, nullptr, &outPropDataSize) == kAudioHardwareNoError && outPropDataSize != 0)
+                    {
                         devInfo.canInput = true;
+                        ui.cb_input->addItem(devName);
+                        inputs.append(QString::number(deviceID));
+                    }
 
                     outPropDataSize = 0;
                     if (AudioObjectGetPropertyDataSize(deviceID, &propOutputStreams, 0, nullptr, &outPropDataSize) == kAudioHardwareNoError && outPropDataSize != 0)
-                        devInfo.canOutput = true;
-
-                    // TODO separate out vs in combo-boxes
-                    if (! devInfo.canOutput) continue;
-
-                    ui.cb_device->addItem(devName);
-                    devices.append(devInfo);
+                    {
+                        ui.cb_device->addItem(devName);
+                        devices.append(devInfo);
+                    }
                 }
             }
 
@@ -281,7 +284,6 @@ public:
 
             QStringList apis;
             apis.reserve(numHostApis);
-            QString matchingInputDevName;
 
             for (PaHostApiIndex i = 0; i < numHostApis; ++i)
                 apis.push_back(Pa_GetHostApiInfo(i)->name);
@@ -295,57 +297,49 @@ public:
 
                #ifdef Q_OS_WIN
                 if (hostApiName != "ASIO" && hostApiName != "Windows WASAPI")
-                {
-                    matchingInputDevName.clear();
                     continue;
-                }
-
-                if (hostApiName == "Windows WASAPI")
-                {
-                    printf("DEBUG WASAPI %d %s %d %d\n",
-                           i, devInfo->name, devInfo->maxInputChannels, devInfo->maxOutputChannels);
-                }
                #endif
 
                 const QString devName(QString::fromUtf8(devInfo->name));
 
-                if (devInfo->maxOutputChannels == 0)
-                {
-                    if (devInfo->maxInputChannels == 0)
-                        continue;
-
-                   #ifdef Q_OS_WIN
-                    if (hostApiName == "Windows WASAPI")
-                        matchingInputDevName = devName;
-                    else
-                        matchingInputDevName.clear();
-                   #endif
-
+                if (devInfo->maxOutputChannels == 0 && devInfo->maxInputChannels == 0)
                     continue;
-                }
 
                #ifndef Q_OS_WIN
-                if (devName.contains("Loopback: PCM") || (devName != "pulse" && ! devName.contains("hw:")))
+                if (devName.contains("Loopback: PCM") || (devName != "pulse" && devName != "system" && ! devName.contains("hw:")))
                     continue;
                #endif
 
-                const QString uidMain(hostApiName + "::" + devName);
-                const QString uidInput(devInfo->maxInputChannels == 0 && !matchingInputDevName.isEmpty()
-                    ? hostApiName + "::" + matchingInputDevName
-                    : "");
-                matchingInputDevName.clear();
+               #ifdef Q_OS_WIN
+                const bool canUseSeparateInput = hostApiName == "Windows WASAPI";
+               #else
+                const bool canUseSeparateInput = devName != "pulse" && devName != "system";
+               #endif
 
-                ui.cb_device->addItem(uidMain);
-                devices.append({
-                    uidMain, uidInput,
-                    devInfo->maxInputChannels > 0,
-                    devInfo->maxInputChannels > 0 || !uidInput.isEmpty()
-                });
+                const QString uid(hostApiName + "::" + devName);
+
+                if (devInfo->maxInputChannels > 0 && canUseSeparateInput)
+                {
+                    ui.cb_input->addItem(uid);
+                    inputs.append(uid);
+                }
+
+                if (devInfo->maxOutputChannels > 0)
+                {
+                    ui.cb_device->addItem(hostApiName == "JACK" ? "JACK" : uid);
+                    devices.append({
+                        uid,
+                        devInfo->maxInputChannels > 0,
+                        canUseSeparateInput
+                    });
+                }
             }
 
             Pa_Terminate();
         }
        #endif
+
+        ui.cb_device->blockSignals(false);
 
         if (ui.cb_device->count())
             ui.b_start->setEnabled(true);
@@ -358,7 +352,7 @@ protected:
     {
         saveSettings();
 
-        if (event->spontaneous() && isVisible() && systray->isVisible())
+        if (event->spontaneous() && isVisible() && systray->isVisible() && ui.cb_systray->isChecked())
         {
             QMessageBox::information(this, tr("Systray"),
                                      tr("The program will keep running in the "
@@ -370,7 +364,8 @@ protected:
         }
         else
         {
-            close();
+            systray->hide();
+            QMainWindow::closeEvent(event);
         }
     }
 
@@ -404,10 +399,11 @@ private:
         QSettings settings;
         settings.setValue("FirstRun", false);
         settings.setValue("AutoStart", ui.cb_autostart->isChecked());
+        settings.setValue("CloseToSystray", ui.cb_systray->isChecked());
         settings.setValue("Geometry", saveGeometry());
         settings.setValue("AudioDevice", ui.cb_device->currentText());
         settings.setValue("AudioBufferSize", ui.cb_buffersize->currentText());
-        settings.setValue("EnableMIDI", ui.gb_midi->isChecked());
+        settings.setValue("EnableMIDI", ui.cb_midi->isChecked());
         settings.setValue("PedalboardsMidiChannel", ui.sp_midi_pb->value());
         settings.setValue("SnapshotsMidiChannel", ui.sp_midi_ss->value());
         settings.setValue("SuccessfullyStarted", successfullyStarted);
@@ -427,17 +423,36 @@ private:
         {
             const int index = ui.cb_device->findText(audioDevice);
             if (index >= 0)
+            {
+                ui.cb_device->blockSignals(true);
                 ui.cb_device->setCurrentIndex(index);
+                ui.cb_device->blockSignals(false);
+            }
+        }
+        updateDeviceDetails();
+
+        const QString bufferSize(settings.value("AudioBufferSize", "128").toString());
+        if (QStringList{"64","128","256"}.contains(bufferSize))
+        {
+            const int index = ui.cb_buffersize->findText(bufferSize);
+            if (index >= 0)
+                ui.cb_buffersize->setCurrentIndex(index);
+        }
+        else
+        {
+            ui.cb_buffersize->setCurrentIndex(1);
         }
 
-        ui.cb_buffersize->setCurrentIndex(settings.value("AudioBufferSize", "128").toString() == "256" ? 1 : 0);
+        const bool closeToSystray = settings.value("CloseToSystray", true).toBool();
+        ui.cb_systray->setChecked(closeToSystray);
+
         ui.cb_autostart->setChecked(settings.value("AutoStart", false).toBool());
 
-        ui.gb_midi->setChecked(settings.value("EnableMIDI", false).toBool());
+        ui.cb_midi->setChecked(settings.value("EnableMIDI", true).toBool());
         ui.sp_midi_pb->setValue(settings.value("PedalboardsMidiChannel", 0).toInt());
         ui.sp_midi_pb->setValue(settings.value("SnapshotsMidiChannel", 0).toInt());
 
-        ui.cb_verbose_basic->setChecked(settings.value("VerboseLogs", false).toBool());
+        ui.cb_verbose_basic->setChecked(settings.value("VerboseLogs", true).toBool());
         ui.cb_verbose_jackd->setChecked(settings.value("VerboseLogsJack", false).toBool());
         ui.cb_verbose_host->setChecked(settings.value("VerboseLogsHost", false).toBool());
         ui.cb_verbose_ui->setChecked(settings.value("VerboseLogsUI", false).toBool());
@@ -462,16 +477,28 @@ private:
         QTimer::singleShot(1, systray, &QSystemTrayIcon::show);
     }
 
+    void setStarting()
+    {
+        printf("----------- %s %d\n", __FUNCTION__, __LINE__);
+        startingHost = true;
+        ui.b_start->setEnabled(false);
+        ui.b_stop->setEnabled(true);
+        ui.cb_device->setEnabled(false);
+        ui.cb_buffersize->setEnabled(false);
+        ui.cb_input->setEnabled(false);
+        ui.l_device->setEnabled(false);
+        ui.l_buffersize->setEnabled(false);
+        ui.l_input->setEnabled(false);
+        ui.w_device_io_mode->setEnabled(false);
+        ui.gb_midi->setEnabled(false);
+        ui.gb_lv2->setEnabled(false);
+    }
+
     void setRunning()
     {
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
         successfullyStarted = true;
-        ui.cb_device->setEnabled(false);
-        ui.cb_buffersize->setEnabled(false);
-        ui.b_start->setEnabled(false);
-        ui.b_stop->setEnabled(true);
         ui.b_opengui->setEnabled(true);
-        ui.gb_midi->setEnabled(true);
         systray->setToolTip(tr("MOD App: Running"));
         systray->showMessage(tr("MOD App"), tr("Running"), QSystemTrayIcon::Information);
     }
@@ -479,13 +506,83 @@ private:
     void setStopped()
     {
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
-        ui.cb_device->setEnabled(true);
-        ui.cb_buffersize->setEnabled(true);
         ui.b_start->setEnabled(true);
         ui.b_stop->setEnabled(false);
         ui.b_opengui->setEnabled(false);
+        ui.cb_device->setEnabled(true);
+        ui.cb_buffersize->setEnabled(true);
+        ui.l_device->setEnabled(true);
+        ui.l_buffersize->setEnabled(true);
+        if (ui.cb_input->count() > 0 && ui.rb_device_separate->isChecked())
+        {
+            ui.cb_input->setEnabled(true);
+            ui.l_input->setEnabled(true);
+        }
+        ui.w_device_io_mode->setEnabled(true);
         ui.gb_midi->setEnabled(true);
+        ui.gb_lv2->setEnabled(true);
         systray->setToolTip(tr("MOD App: Stopped"));
+    }
+
+    QString getLV2Path() const
+    {
+       #ifdef _WIN32
+        WCHAR path[MAX_PATH + 256] = {};
+        DWORD pathlen = GetEnvironmentVariableW(L"MOD_LV2_PATH", path, sizeof(path)/sizeof(path[0]));
+        DWORD pathmax = pathlen;
+       #else
+        char path[PATH_MAX + 256] = {};
+        std::strcpy(path, std::getenv("MOD_LV2_PATH"));
+       #endif
+
+        if (ui.cb_lv2_all_plugins->isChecked())
+        {
+           #if defined(__APPLE__)
+            std::strcat(path, ":~/Library/Audio/Plug-Ins/LV2:/Library/Audio/Plug-Ins/LV2");
+           #elif defined(_WIN32)
+            pathlen = GetEnvironmentVariableW(L"LOCALAPPDATA", path + pathmax + 1, sizeof(path)/sizeof(path[0]) - pathmax - 1);
+            if (pathlen == pathmax)
+                pathlen = GetEnvironmentVariableW(L"APPDATA", path + pathmax + 1, sizeof(path)/sizeof(path[0]) - pathmax - 1);
+            if (pathlen != pathmax)
+            {
+                path[pathmax] = L';';
+                pathmax += pathlen;
+                path[pathmax++] = L'\\';
+                path[pathmax++] = L'L';
+                path[pathmax++] = L'V';
+                path[pathmax++] = L'2';
+                path[pathmax] = 0;
+            }
+
+            pathlen = GetEnvironmentVariableW(L"COMMONPROGRAMFILES", path + pathmax + 1, sizeof(path)/sizeof(path[0]) - pathmax - 1);
+            if (pathlen != pathmax)
+            {
+                path[pathmax] = L';';
+                pathmax += pathlen;
+                path[pathmax++] = L'\\';
+                path[pathmax++] = L'L';
+                path[pathmax++] = L'V';
+                path[pathmax++] = L'2';
+                path[pathmax] = 0;
+            }
+           #else
+            if (const char* const env = std::getenv("LV2_PATH"))
+            {
+                std::strcat(path, ":");
+                std::strcat(path, env);
+            }
+            else
+            {
+                std::strcat(path, ":~/.lv2:/usr/local/lib/lv2:/usr/lib/lv2");
+            }
+           #endif
+        }
+
+       #ifdef _WIN32
+        return QString::fromWCharArray(path);
+       #else
+        return QString::fromUtf8(path);
+       #endif
     }
 
     QString getProcessErrorAsString(QProcess::ProcessError error)
@@ -524,7 +621,23 @@ private:
         {
             startingHost = false;
             startingUI = true;
-            QTimer::singleShot(1000, &processUI, &AppProcess::startSlot);
+
+            QProcessEnvironment env(QProcessEnvironment::systemEnvironment());
+
+            env.insert("LV2_PATH", getLV2Path());
+
+            if (ui.cb_verbose_ui->isChecked() && ui.cb_verbose_ui->isEnabled())
+                env.insert("MOD_LOG", "2");
+            else if (ui.cb_verbose_basic->isChecked())
+                env.insert("MOD_LOG", "1");
+            else
+                env.insert("MOD_LOG", "0");
+            
+            if (ui.cb_lv2_all_cv->isChecked())
+                env.insert("MOD_UI_ALLOW_REGULAR_CV", "1");
+
+            processUI.setProcessEnvironment(env);
+            processUI.start();
         }
     }
 
@@ -592,7 +705,7 @@ private slots:
 
         writeMidiChannelsToProfile(ui.sp_midi_pb->value(), ui.sp_midi_ss->value());
 
-        const bool midiEnabled = ui.gb_midi->isChecked();
+        const bool midiEnabled = ui.cb_midi->isChecked();
         const int deviceIndex = ui.cb_device->currentIndex();
 
         if (deviceIndex < 0 || deviceIndex >= devices.size())
@@ -615,20 +728,19 @@ private slots:
            #elif defined(Q_OS_WIN)
             arguments.append("-X");
             arguments.append("winmme");
-           #else
-            arguments.append("-I");
-            arguments.append("alsa_midi");
            #endif
         }
 
         arguments.append("-C");
        #if defined(Q_OS_WIN)
         arguments.append(".\\jack\\jack-session.conf");
-       #else
+       #elif defined(Q_OS_MAC)
         arguments.append("./jack/jack-session.conf");
+       #else
+        arguments.append(midiEnabled ? "./jack/jack-session-alsamidi.conf" : "./jack/jack-session.conf");
        #endif
 
-        if (ui.cb_verbose_jackd->isChecked())
+        if (ui.cb_verbose_jackd->isChecked() && ui.cb_verbose_jackd->isEnabled())
             arguments.append("-v");
 
         arguments.append("-d");
@@ -642,66 +754,58 @@ private slots:
         arguments.append("48000");
 
         arguments.append("-p");
-        arguments.append(ui.cb_buffersize->currentIndex() == 0 ? "128" : "256");
+        arguments.append(ui.cb_buffersize->currentText());
 
-
-        // duplex with separate input device
-        if (! devInfo.uidInput.isEmpty())
-        {
-            arguments.append("-P");
-            arguments.append(devInfo.uidMain);
-            arguments.append("-C");
-            arguments.append(devInfo.uidInput);
-        }
         // regular duplex
-        else if (devInfo.canInput && devInfo.canOutput)
+        if (ui.rb_device_duplex->isChecked())
         {
-           #if defined(Q_OS_MAC) || defined(Q_OS_WIN)
-            arguments.append("-P");
-            arguments.append(devInfo.uidMain);
-            arguments.append("-C");
-            arguments.append(devInfo.uidMain);
-           #else
             arguments.append("-d");
-            arguments.append(devInfo.uidMain);
-           #endif
+            arguments.append(devInfo.uid);
         }
-        // capture only
-        else if (devInfo.canInput)
+        // split duplex
+        else if (ui.rb_device_separate->isChecked())
         {
+            arguments.append("-P");
+            arguments.append(devInfo.uid);
             arguments.append("-C");
-            arguments.append(devInfo.uidMain);
+            arguments.append(inputs[ui.cb_input->currentIndex()]);
         }
         // playback only
         else
         {
             arguments.append("-P");
-            arguments.append(devInfo.uidMain);
+            arguments.append(devInfo.uid);
         }
 
        #if !(defined(Q_OS_WIN) || defined(Q_OS_MAC))
-        if (devInfo.uidMain == "ALSA::pulse")
+        if (devInfo.uid == "ALSA::pulse")
         {
             arguments.append("-c");
             arguments.append("2");
         }
-        /*
-        if (! midiEnabled)
-        {
-            arguments.append("-X");
-            arguments.append("seqmidi");
-        }
-        */
        #endif
 
         processHost.setArguments(arguments);
 
+        {
+            QProcessEnvironment env(QProcessEnvironment::systemEnvironment());
+
+            env.insert("JACK_NO_AUDIO_RESERVATION", "1");
+            env.insert("JACK_NO_START_SERVER", "1");
+            env.insert("LV2_PATH", getLV2Path());
+
+            if (ui.cb_verbose_host->isChecked() && ui.cb_verbose_host->isEnabled())
+                env.insert("MOD_LOG", "1");
+            else
+                env.insert("MOD_LOG", "0");
+
+            processHost.setProcessEnvironment(env);
+        }
+
         ui.text_host->appendPlainText("Starting jackd using:");
         ui.text_host->appendPlainText(arguments.join(" "));
 
-        ui.b_start->setEnabled(false);
-
-        startingHost = true;
+        setStarting();
         processHost.start();
     }
 
@@ -726,6 +830,37 @@ private slots:
     {
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
         QDesktopServices::openUrl(QUrl::fromLocalFile(getUserFilesDir()));
+    }
+
+    void updateDeviceDetails()
+    {
+        const int deviceIndex = ui.cb_device->currentIndex();
+        printf("----------- %s %d | %d %d\n", __FUNCTION__, __LINE__, deviceIndex, (int)devices.size());
+
+        if (deviceIndex < 0 || deviceIndex >= devices.size())
+            return;
+
+        const DeviceInfo& devInfo(devices[deviceIndex]);
+
+        const bool old = ui.w_device_io_mode->isEnabled();
+        ui.w_device_io_mode->setEnabled(true);
+
+        ui.rb_device_duplex->setEnabled(devInfo.canInput);
+        ui.rb_device_separate->setEnabled(devInfo.canUseSeparateInput);
+        ui.rb_device_noinput->setEnabled(true);
+
+        if (! (ui.rb_device_duplex->isChecked() || ui.rb_device_separate->isChecked() || ui.rb_device_noinput->isChecked()))
+            ui.rb_device_duplex->setChecked(true);
+        else if (devInfo.canInput && ! devInfo.canUseSeparateInput)
+            ui.rb_device_duplex->setChecked(true);
+
+        if (ui.rb_device_duplex->isChecked() && ! ui.rb_device_duplex->isEnabled())
+            ui.rb_device_separate->setChecked(true);
+
+        if (ui.rb_device_separate->isChecked() && ! ui.rb_device_separate->isEnabled())
+            ui.rb_device_noinput->setChecked(true);
+
+        ui.w_device_io_mode->setEnabled(old);
     }
 
     void hostStartError(QProcess::ProcessError error)

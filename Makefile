@@ -113,6 +113,7 @@ else
 TARGETS += build/default.pedalboard
 TARGETS += build/html
 TARGETS += build/jackd$(APP_EXT)
+TARGETS += build/jack/jack-session.conf
 TARGETS += build/jack/mod-host$(SO_EXT)
 TARGETS += build/jack/mod-midi-broadcaster$(SO_EXT)
 TARGETS += build/jack/mod-midi-merger$(SO_EXT)
@@ -125,7 +126,6 @@ TARGETS += build/modtools
 ifeq ($(WINDOWS),true)
 TARGETS += build/jack/jack_portaudio.dll
 TARGETS += build/jack/jack_winmme.dll
-TARGETS += build/jack/jack-session.conf
 TARGETS += build/libjack64.dll
 TARGETS += build/libjackserver64.dll
 TARGETS += build/libpython3.8.dll
@@ -492,7 +492,7 @@ mod-midi-merger/build/Makefile: $(BOOTSTRAP_FILES)
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-systray/mod-app$(APP_EXT): systray/main.cpp systray/mod-app.hpp
+systray/mod-app$(APP_EXT): systray/main.cpp systray/mod-app.hpp systray/mod-app.ui
 	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) -C systray
 
 # ---------------------------------------------------------------------------------------------------------------------

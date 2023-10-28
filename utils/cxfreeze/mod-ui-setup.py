@@ -21,7 +21,6 @@ else:
     lv2dir = os.path.join(ROOT, 'plugins')
     resdir = ROOT
 
-os.environ['LV2_PATH'] = os.path.join(DATA_DIR, 'lv2') + os.path.pathsep + lv2dir
 os.environ['MOD_APP'] = '1'
 os.environ['MOD_DEFAULT_PEDALBOARD'] = os.path.join(resdir, 'default.pedalboard')
 os.environ['MOD_DEV_ENVIRONMENT'] = '0'
