@@ -8,7 +8,11 @@
 #include <QtCore/QJsonObject>
 
 #ifdef _WIN32
+#include <dwmapi.h>
 #include <shlobj.h>
+#include <QtWidgets/QStyleFactory>
+#define PRE_20H1_DWMWA_USE_IMMERSIVE_DARK_MODE 19
+#define DWMWA_USE_IMMERSIVE_DARK_MODE 20
 static const WCHAR* user_files_dir = nullptr;
 #else
 #include <dlfcn.h>
@@ -122,6 +126,77 @@ int main(int argc, char* argv[])
     std::wcscat(path, L"\\user-files");
     _wmkdir(path);
     user_files_dir = path;
+
+    const BOOL darkMode = QSettings(
+        "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+        QSettings::NativeFormat).value("AppsUseLightTheme", 1).toInt() == 0;
+
+    if (darkMode)
+    {
+        QPalette palette;
+        palette.setColor(QPalette::Disabled, QPalette::Window, QColor(40,40,40));
+        palette.setColor(QPalette::Active,   QPalette::Window, QColor(45,45,45));
+        palette.setColor(QPalette::Inactive, QPalette::Window, QColor(45,45,45));
+        palette.setColor(QPalette::Disabled, QPalette::WindowText, QColor(83, 83, 83));
+        palette.setColor(QPalette::Active,   QPalette::WindowText, QColor(240, 240, 240));
+        palette.setColor(QPalette::Inactive, QPalette::WindowText, QColor(240, 240, 240));
+        palette.setColor(QPalette::Disabled, QPalette::Base, QColor(6, 6, 6));
+        palette.setColor(QPalette::Active,   QPalette::Base, QColor(7, 7, 7));
+        palette.setColor(QPalette::Inactive, QPalette::Base, QColor(7, 7, 7));
+        palette.setColor(QPalette::Disabled, QPalette::AlternateBase, QColor(12, 12, 12));
+        palette.setColor(QPalette::Active,   QPalette::AlternateBase, QColor(14, 14, 14));
+        palette.setColor(QPalette::Inactive, QPalette::AlternateBase, QColor(14, 14, 14));
+        palette.setColor(QPalette::Disabled, QPalette::ToolTipBase, QColor(4, 4, 4));
+        palette.setColor(QPalette::Active,   QPalette::ToolTipBase, QColor(4, 4, 4));
+        palette.setColor(QPalette::Inactive, QPalette::ToolTipBase, QColor(4, 4, 4));
+        palette.setColor(QPalette::Disabled, QPalette::ToolTipText, QColor(230, 230, 230));
+        palette.setColor(QPalette::Active,   QPalette::ToolTipText, QColor(230, 230, 230));
+        palette.setColor(QPalette::Inactive, QPalette::ToolTipText, QColor(230, 230, 230));
+        palette.setColor(QPalette::Disabled, QPalette::Text, QColor(74, 74, 74));
+        palette.setColor(QPalette::Active,   QPalette::Text, QColor(230, 230, 230));
+        palette.setColor(QPalette::Inactive, QPalette::Text, QColor(230, 230, 230));
+        palette.setColor(QPalette::Disabled, QPalette::Button, QColor(24, 24, 24));
+        palette.setColor(QPalette::Active,   QPalette::Button, QColor(28, 28, 28));
+        palette.setColor(QPalette::Inactive, QPalette::Button, QColor(28, 28, 28));
+        palette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(90, 90, 90));
+        palette.setColor(QPalette::Active,   QPalette::ButtonText, QColor(240, 240, 240));
+        palette.setColor(QPalette::Inactive, QPalette::ButtonText, QColor(240, 240, 240));
+        palette.setColor(QPalette::Disabled, QPalette::BrightText, QColor(255, 255, 255));
+        palette.setColor(QPalette::Active,   QPalette::BrightText, QColor(255, 255, 255));
+        palette.setColor(QPalette::Inactive, QPalette::BrightText, QColor(255, 255, 255));
+        palette.setColor(QPalette::Disabled, QPalette::Light, QColor(191, 191, 191));
+        palette.setColor(QPalette::Active,   QPalette::Light, QColor(191, 191, 191));
+        palette.setColor(QPalette::Inactive, QPalette::Light, QColor(191, 191, 191));
+        palette.setColor(QPalette::Disabled, QPalette::Midlight, QColor(155, 155, 155));
+        palette.setColor(QPalette::Active,   QPalette::Midlight, QColor(155, 155, 155));
+        palette.setColor(QPalette::Inactive, QPalette::Midlight, QColor(155, 155, 155));
+        palette.setColor(QPalette::Disabled, QPalette::Dark, QColor(129, 129, 129));
+        palette.setColor(QPalette::Active,   QPalette::Dark, QColor(129, 129, 129));
+        palette.setColor(QPalette::Inactive, QPalette::Dark, QColor(129, 129, 129));
+        palette.setColor(QPalette::Disabled, QPalette::Mid, QColor(94, 94, 94));
+        palette.setColor(QPalette::Active,   QPalette::Mid, QColor(94, 94, 94));
+        palette.setColor(QPalette::Inactive, QPalette::Mid, QColor(94, 94, 94));
+        palette.setColor(QPalette::Disabled, QPalette::Shadow, QColor(155, 155, 155));
+        palette.setColor(QPalette::Active,   QPalette::Shadow, QColor(155, 155, 155));
+        palette.setColor(QPalette::Inactive, QPalette::Shadow, QColor(155, 155, 155));
+        palette.setColor(QPalette::Disabled, QPalette::Highlight, QColor(14, 14, 14));
+        palette.setColor(QPalette::Active,   QPalette::Highlight, QColor(60, 60, 60));
+        palette.setColor(QPalette::Inactive, QPalette::Highlight, QColor(34, 34, 34));
+        palette.setColor(QPalette::Disabled, QPalette::HighlightedText, QColor(83, 83, 83));
+        palette.setColor(QPalette::Active,   QPalette::HighlightedText, QColor(255, 255, 255));
+        palette.setColor(QPalette::Inactive, QPalette::HighlightedText, QColor(240, 240, 240));
+        palette.setColor(QPalette::Disabled, QPalette::Link, QColor(34, 34, 74));
+        palette.setColor(QPalette::Active,   QPalette::Link, QColor(100, 100, 230));
+        palette.setColor(QPalette::Inactive, QPalette::Link, QColor(100, 100, 230));
+        palette.setColor(QPalette::Disabled, QPalette::LinkVisited, QColor(74, 34, 74));
+        palette.setColor(QPalette::Active,   QPalette::LinkVisited, QColor(230, 100, 230));
+        palette.setColor(QPalette::Inactive, QPalette::LinkVisited, QColor(230, 100, 230));
+
+        app.setStyle(QStyleFactory::create("Fusion"));
+        app.setPalette(palette);
+        // TODO check if this is ok
+        app.setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
+    }
   #else
     char path[PATH_MAX + 256] = {};
 
@@ -192,5 +267,15 @@ int main(int argc, char* argv[])
   #endif
 
     AppWindow window(cwd);
+
+   #ifdef _WIN32
+    if (darkMode)
+    {
+        const HWND hwnd = (HWND)window.winId();
+        if ((DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &darkMode, sizeof(darkMode)) != S_OK))
+            DwmSetWindowAttribute(hwnd, PRE_20H1_DWMWA_USE_IMMERSIVE_DARK_MODE, &darkMode, sizeof(darkMode));
+    }
+   #endif
+
     return app.exec();
 }

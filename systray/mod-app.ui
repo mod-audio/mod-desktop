@@ -20,6 +20,9 @@
       <property name="title">
        <string>LV2 Setup</string>
       </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
       <layout class="QHBoxLayout" name="horizontalLayout_6">
        <property name="topMargin">
         <number>4</number>
@@ -81,6 +84,9 @@
      <widget class="QGroupBox" name="gb_gui">
       <property name="title">
        <string>GUI Options</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_3">
        <property name="topMargin">
@@ -212,6 +218,11 @@
            </property>
            <item>
             <widget class="QPlainTextEdit" name="text_host">
+             <property name="font">
+              <font>
+               <family>Noto Mono</family>
+              </font>
+             </property>
              <property name="undoRedoEnabled">
               <bool>false</bool>
              </property>
@@ -250,6 +261,11 @@
            </property>
            <item>
             <widget class="QPlainTextEdit" name="text_ui">
+             <property name="font">
+              <font>
+               <family>Noto Mono</family>
+              </font>
+             </property>
              <property name="undoRedoEnabled">
               <bool>false</bool>
              </property>

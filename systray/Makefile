@@ -38,7 +38,7 @@ PAWPAW_PREFIX = $(PAWPAW_DIR)/targets/$(PAWPAW_TARGET)
 ifeq ($(WINDOWS),true)
 TARGET = mod-app.exe
 EXTRAS = Qt5Core.dll Qt5Gui.dll Qt5Svg.dll Qt5Widgets.dll
-LDFLAGS  += -Wl,-subsystem,windows
+LDFLAGS  += -Wl,-subsystem,windows -ldwmapi
 WINDRES   = $(subst gcc,windres,$(CC))
 else
 TARGET = mod-app
