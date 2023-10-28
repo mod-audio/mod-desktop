@@ -173,6 +173,8 @@ int main(int argc, char* argv[])
     mkdir(path, 0777);
     setenv("MOD_DATA_DIR", path, 1);
 
+    // TODO MOD_KEYS_PATH
+
     std::strcat(lv2path, path);
     std::strcat(lv2path, "/lv2");
     setenv("MOD_LV2_PATH", lv2path, 1);

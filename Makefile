@@ -1,6 +1,6 @@
 #!/usr/bin/make -f
 
-VERSION = 0.0.2
+VERSION = $(shell cat VERSION)
 
 # ---------------------------------------------------------------------------------------------------------------------
 # Auto-detect build target
@@ -109,6 +109,7 @@ TARGETS += build/mod-app.app/Contents/PlugIns/styles/libqmacstyle.dylib
 TARGETS += build/mod-app.app/Contents/Resources/default.pedalboard
 TARGETS += build/mod-app.app/Contents/Resources/html
 TARGETS += build/mod-app.app/Contents/Resources/mod-logo.icns
+TARGETS += build/mod-app.app/Contents/Resources/VERSION
 else
 TARGETS += build/default.pedalboard
 TARGETS += build/html
@@ -123,6 +124,7 @@ TARGETS += build/mod-screenshot$(APP_EXT)
 TARGETS += build/mod-ui$(APP_EXT)
 TARGETS += build/mod
 TARGETS += build/modtools
+TARGETS += build/VERSION
 ifeq ($(WINDOWS),true)
 TARGETS += build/jack/jack_portaudio.dll
 TARGETS += build/jack/jack_winmme.dll
@@ -360,6 +362,10 @@ build/mod-app.app/Contents/Resources/mod-logo.icns: systray/mod-logo.icns
 	@mkdir -p build/mod-app.app/Contents/Resources
 	ln -sf $(abspath $<) $@
 
+build/mod-app.app/Contents/Resources/VERSION: VERSION
+	@mkdir -p build/mod-app.app/Contents/Resources
+	ln -sf $(abspath $<) $@
+
 # ---------------------------------------------------------------------------------------------------------------------
 
 build/default.pedalboard: mod-ui/default.pedalboard
@@ -411,6 +417,10 @@ build/mod: mod-ui/mod
 	ln -sf $(abspath $<) $@
 
 build/modtools: mod-ui/modtools
+	@mkdir -p build
+	ln -sf $(abspath $<) $@
+
+build/VERSION: VERSION
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
 

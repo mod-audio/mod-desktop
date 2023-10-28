@@ -483,13 +483,7 @@ private:
         startingHost = true;
         ui.b_start->setEnabled(false);
         ui.b_stop->setEnabled(true);
-        ui.cb_device->setEnabled(false);
-        ui.cb_buffersize->setEnabled(false);
-        ui.cb_input->setEnabled(false);
-        ui.l_device->setEnabled(false);
-        ui.l_buffersize->setEnabled(false);
-        ui.l_input->setEnabled(false);
-        ui.w_device_io_mode->setEnabled(false);
+        ui.gb_audio->setEnabled(false);
         ui.gb_midi->setEnabled(false);
         ui.gb_lv2->setEnabled(false);
     }
@@ -509,16 +503,7 @@ private:
         ui.b_start->setEnabled(true);
         ui.b_stop->setEnabled(false);
         ui.b_opengui->setEnabled(false);
-        ui.cb_device->setEnabled(true);
-        ui.cb_buffersize->setEnabled(true);
-        ui.l_device->setEnabled(true);
-        ui.l_buffersize->setEnabled(true);
-        if (ui.cb_input->count() > 0 && ui.rb_device_separate->isChecked())
-        {
-            ui.cb_input->setEnabled(true);
-            ui.l_input->setEnabled(true);
-        }
-        ui.w_device_io_mode->setEnabled(true);
+        ui.gb_audio->setEnabled(true);
         ui.gb_midi->setEnabled(true);
         ui.gb_lv2->setEnabled(true);
         systray->setToolTip(tr("MOD App: Stopped"));
@@ -816,8 +801,6 @@ private slots:
 
         stopUIIfNeeded();
         stopHostIfNeeded();
-
-        ui.b_stop->setEnabled(true);
     }
 
     void openGui() const
@@ -842,9 +825,6 @@ private slots:
 
         const DeviceInfo& devInfo(devices[deviceIndex]);
 
-        const bool old = ui.w_device_io_mode->isEnabled();
-        ui.w_device_io_mode->setEnabled(true);
-
         ui.rb_device_duplex->setEnabled(devInfo.canInput);
         ui.rb_device_separate->setEnabled(devInfo.canUseSeparateInput);
         ui.rb_device_noinput->setEnabled(true);
@@ -859,8 +839,6 @@ private slots:
 
         if (ui.rb_device_separate->isChecked() && ! ui.rb_device_separate->isEnabled())
             ui.rb_device_noinput->setChecked(true);
-
-        ui.w_device_io_mode->setEnabled(old);
     }
 
     void hostStartError(QProcess::ProcessError error)
