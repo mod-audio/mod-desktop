@@ -77,7 +77,7 @@ endif
 all: $(TARGET) $(EXTRAS)
 
 clean:
-	rm -f $(TARGET) $(EXTRAS) qrc_mod-app.hpp ui_mod-app.hpp
+	rm -f $(TARGET) *.dll *.exe *.o qrc_mod-app.hpp ui_mod-app.hpp
 
 $(TARGET): $(OBJS)
 	@$(shell mkdir -p $(@D))

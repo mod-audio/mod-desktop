@@ -3,6 +3,7 @@
 cd "$(dirname $0)/../../build"
 
 export LANG=en_US.UTF-8
+export PAWPAW_SKIP_LTO=1
 
 function convert_path() {
     if [ -e jackd.exe ]; then
@@ -19,6 +20,7 @@ else
 fi
 
 if [ -e jackd.exe ]; then
+    source ../PawPaw/local.env win64
     JACKD="wine jackd.exe"
     JACK_DRIVER="portaudio"
     JACK_DRIVER_DEVICE="ASIO::WineASIO Driver"
@@ -26,6 +28,7 @@ if [ -e jackd.exe ]; then
     JACK_SESSION="-C ./jack/jack-session.conf -X winmme"
     PATH_SEP=';'
 elif [ -e mod-app.app ]; then
+    source ../PawPaw/local.env macos-universal-10.15
     JACKD="./mod-app.app/Contents/MacOS/jackd"
     JACK_DRIVER="coreaudio"
     JACK_DRIVER_DEVICE="-D"
@@ -36,6 +39,7 @@ elif [ -e mod-app.app ]; then
     export LD_LIBRARY_PATH="${PAWPAW_PREFIX}/lib"
     export JACK_DRIVER_DIR="$(pwd)/mod-app.app/Contents/MacOS/jack"
 else
+    source ../PawPaw/local.env linux
     JACKD="./jackd"
     JACK_DRIVER="portaudio"
     JACK_DRIVER_DEVICE="ALSA::pulse"

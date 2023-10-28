@@ -180,7 +180,7 @@ int main(int argc, char* argv[])
     std::strcat(path, "/user-files");
     mkdir(path, 0777);
     user_files_dir = path;
-    
+
     struct sigaction sig = {};
     sig.sa_handler = signal;
     sig.sa_flags   = SA_RESTART;
