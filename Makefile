@@ -70,7 +70,7 @@ PAWPAW_PREFIX = $(PAWPAW_DIR)/targets/$(PAWPAW_TARGET)
 # List of files created by PawPaw bootstrap, to ensure we have run it at least once
 
 BOOTSTRAP_FILES  = $(PAWPAW_PREFIX)/bin/cxfreeze
-BOOTSTRAP_FILES += $(PAWPAW_PREFIX)/bin/jackd
+BOOTSTRAP_FILES += $(PAWPAW_PREFIX)/bin/jackd$(APP_EXT)
 
 # ---------------------------------------------------------------------------------------------------------------------
 # List of files for mod-app packaging, often symlinks to the real files
@@ -163,7 +163,9 @@ PLUGINS += carla-plugins
 PLUGINS += dpf-plugins
 PLUGINS += dragonfly-reverb
 PLUGINS += fluidplug
+PLUGINS += fomp
 PLUGINS += mod-convolution-loader
+PLUGINS += mod-mda-lv2
 PLUGINS += mod-utilities
 PLUGINS += modmeter
 PLUGINS += modspectre
@@ -176,11 +178,6 @@ PLUGINS += x42-fil4
 PLUGINS += x42-midifilter
 PLUGINS += x42-midigen
 PLUGINS += x42-tinygain
-
-# FIXME needs python2
-# PLUGINS += fomp
-# FIXME needs tweaks for waf/python3 path
-PLUGINS += mod-mda-lv2
 
 # include plugin projects for version and bundle list
 include $(foreach PLUGIN,$(PLUGINS),mod-plugin-builder/plugins/package/$(PLUGIN)/$(PLUGIN).mk)
@@ -399,6 +396,7 @@ build/jack/mod-midi-merger$(SO_EXT): mod-midi-merger/build/mod-midi-merger$(SO_E
 build/lib: build-ui/mod-ui$(APP_EXT)
 	rm -f $@
 	ln -sf $(abspath build-ui/lib) $@
+	touch $@
 
 build/mod-app$(APP_EXT): systray/mod-app$(APP_EXT)
 	@mkdir -p build
@@ -506,6 +504,7 @@ mod-midi-merger/build/mod-midi-merger$(SO_EXT): mod-midi-merger/build/mod-midi-m
 
 mod-midi-merger/build/mod-midi-merger-standalone$(APP_EXT): mod-midi-merger/build/Makefile mod-midi-merger/src/*.c mod-midi-merger/src/*.h
 	./utils/run.sh $(PAWPAW_TARGET) cmake --build mod-midi-merger/build
+	touch $@
 
 mod-midi-merger/build/Makefile: $(BOOTSTRAP_FILES)
 	./utils/run.sh $(PAWPAW_TARGET) cmake -S mod-midi-merger -B mod-midi-merger/build
