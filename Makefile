@@ -71,6 +71,7 @@ PAWPAW_PREFIX = $(PAWPAW_DIR)/targets/$(PAWPAW_TARGET)
 
 BOOTSTRAP_FILES  = $(PAWPAW_PREFIX)/bin/cxfreeze
 BOOTSTRAP_FILES += $(PAWPAW_PREFIX)/bin/jackd$(APP_EXT)
+BOOTSTRAP_FILES += $(PAWPAW_PREFIX)/include/armadillo
 
 # ---------------------------------------------------------------------------------------------------------------------
 # List of files for mod-app packaging, often symlinks to the real files
@@ -159,21 +160,36 @@ endif
 PLUGINS  = abgate
 PLUGINS += aidadsp-lv2
 PLUGINS += artyfx
+PLUGINS += bolliedelay
+PLUGINS += caps-lv2
 PLUGINS += carla-plugins
 PLUGINS += die-plugins
 PLUGINS += dpf-plugins
 PLUGINS += dragonfly-reverb
 PLUGINS += fluidplug
 PLUGINS += fomp
+PLUGINS += gxquack
+PLUGINS += invada-lv2
+PLUGINS += mod-ams-lv2
+# hardcoded *.so
+PLUGINS += mod-audio-mixers
 PLUGINS += mod-convolution-loader
+PLUGINS += mod-cv-plugins
 PLUGINS += mod-distortion
 PLUGINS += mod-mda-lv2
+PLUGINS += mod-midi-utilities
+PLUGINS += mod-pitchshifter
 PLUGINS += mod-utilities
 PLUGINS += modmeter
 PLUGINS += modspectre
 PLUGINS += neural-amp-modeler-lv2
 PLUGINS += neuralrecord
 PLUGINS += notes-lv2
+PLUGINS += pitchtracking-series
+PLUGINS += screcord
+PLUGINS += setbfree
+PLUGINS += setbfree-mod
+PLUGINS += sooperlooper-lv2
 PLUGINS += shiro-plugins
 PLUGINS += tap-lv2
 PLUGINS += wolf-shaper
@@ -184,31 +200,21 @@ PLUGINS += x42-midigen
 PLUGINS += x42-stepseq
 PLUGINS += x42-tinygain
 PLUGINS += x42-xfade
+PLUGINS += zam-plugins
 
 # conflict with lv2-dev
 # PLUGINS += lv2-examples
-
-# hardcoded *.so
-# PLUGINS += mod-audio-mixers
-
-# needs armadillo
-# PLUGINS += mod-pitchshifter
 
 # include plugin projects for version and bundle list
 include $(foreach PLUGIN,$(PLUGINS),mod-plugin-builder/plugins/package/$(PLUGIN)/$(PLUGIN).mk)
 
 # list of unwanted bundles (for a variety of reasons)
-UNWANTED_BUNDLES  = mod-bypass.lv2
-UNWANTED_BUNDLES += mod-crossover2.lv2
-UNWANTED_BUNDLES += mod-crossover3.lv2
+UNWANTED_BUNDLES  = b_whirl
+UNWANTED_BUNDLES += mod-bypass.lv2
 UNWANTED_BUNDLES += mod-mda-Ambience.lv2
 UNWANTED_BUNDLES += mod-mda-DubDelay.lv2
 UNWANTED_BUNDLES += mod-mda-Overdrive.lv2
-UNWANTED_BUNDLES += mod-switchbox2.lv2
-UNWANTED_BUNDLES += mod-toggleswitch4.lv2
-UNWANTED_BUNDLES += switchbox_1-2_st.lv2
-UNWANTED_BUNDLES += switchbox_2-1_st.lv2
-UNWANTED_BUNDLES += switchbox_2-1.lv2
+UNWANTED_BUNDLES += sc_record.lv2
 UNWANTED_BUNDLES += tap-autopan.lv2
 UNWANTED_BUNDLES += tap-eqbw.lv2
 UNWANTED_BUNDLES += tap-eq.lv2
@@ -561,6 +567,9 @@ $(PAWPAW_PREFIX)/lib/jack/alsa_midi.so:
 	./PawPaw/bootstrap-mod.sh $(PAWPAW_TARGET)
 
 $(PAWPAW_PREFIX)/lib/lib%:
+	./PawPaw/bootstrap-mod.sh $(PAWPAW_TARGET)
+
+$(PAWPAW_PREFIX)/include/%:
 	./PawPaw/bootstrap-mod.sh $(PAWPAW_TARGET)
 
 # ---------------------------------------------------------------------------------------------------------------------

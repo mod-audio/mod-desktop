@@ -33,6 +33,7 @@ export CMAKE
 export PAWPAW_BUILDDIR
 export PAWPAW_DOWNLOADDIR
 export PAWPAW_PREFIX
+export TARGET_CC
 export TOOLCHAIN_PREFIX
 
 if [ "${MACOS}" -eq 1 ]; then
