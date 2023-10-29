@@ -31,12 +31,11 @@ elif [ -e mod-app.app ]; then
     source ../PawPaw/local.env macos-universal-10.15
     JACKD="./mod-app.app/Contents/MacOS/jackd"
     JACK_DRIVER="coreaudio"
-    JACK_DRIVER_DEVICE="-D"
+    JACK_DRIVER_DEVICE="BuiltInSpeakerDevice"
     JACK_DRIVER_OPTS=""
     JACK_SESSION="-C ./mod-app.app/Contents/MacOS/jack/jack-session.conf -X coremidi"
     PATH_SEP=':'
-    export LD_BIND_NOW=1
-    export LD_LIBRARY_PATH="${PAWPAW_PREFIX}/lib"
+    export DYLD_LIBRARY_PATH="${PAWPAW_PREFIX}/lib"
     export JACK_DRIVER_DIR="$(pwd)/mod-app.app/Contents/MacOS/jack"
 else
     source ../PawPaw/local.env linux
@@ -59,7 +58,7 @@ fi
 LV2_PATH+="${PATH_SEP}$(convert_path ${DOCS_DIR}/MOD App/lv2)"
 export LV2_PATH
 
-export MOD_KEYS_PATH="$(convert_path ${DOCS_DIR}/MOD App/keys)"
+export MOD_KEYS_PATH="$(convert_path ${DOCS_DIR}/MOD App/keys/)"
 
 export JACK_NO_AUDIO_RESERVATION=1
 export JACK_NO_START_SERVER=1

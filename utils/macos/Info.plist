@@ -4,6 +4,8 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
+	<key>CFBundleDisplayName</key>
+	<string>MOD App</string>
 	<key>CFBundleExecutable</key>
 	<string>mod-app</string>
 	<key>CFBundleIconFile</key>

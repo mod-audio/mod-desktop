@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
     // TODO set branding here
 
     QApplication app(argc, argv);
-    app.setApplicationName("MOD-App");
+    app.setApplicationName("MOD App");
     app.setOrganizationName("MOD Audio");
     app.setWindowIcon(QIcon(":/mod-logo.svg"));
 
@@ -99,8 +99,9 @@ int main(int argc, char* argv[])
     }
 
   #ifdef _WIN32
-    WCHAR path[MAX_PATH + 256] = {};
+    SetEnvironmentVariableW(L"LANG", L"en_US.UTF-8");
 
+    WCHAR path[MAX_PATH + 256] = {};
     GetModuleFileNameW(GetModuleHandleW(nullptr), path, sizeof(path)/sizeof(path[0]));
 
     if (wchar_t* const wcc = wcsrchr(path, '\\'))
@@ -198,6 +199,8 @@ int main(int argc, char* argv[])
         app.setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
     }
   #else
+    setenv("LANG", "en_US.UTF-8", 1);
+
     char path[PATH_MAX + 256] = {};
 
     Dl_info info = {};
@@ -224,10 +227,11 @@ int main(int argc, char* argv[])
     setenv("JACK_DRIVER_DIR", path, 1);
 
     char lv2path[(PATH_MAX + 256) * 2] = {};
-    std::strncat(lv2path, path, pathlen);
    #ifdef __APPLE__
-    std::strcat(lv2path, "/../PlugIns/LV2:");
+    std::strncpy(lv2path, path, pathlen - 5);
+    std::strcat(lv2path, "PlugIns/LV2:");
    #else
+    std::strncpy(lv2path, path, pathlen);
     std::strcat(lv2path, "/plugins:");
    #endif
 

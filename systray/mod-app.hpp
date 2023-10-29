@@ -30,6 +30,35 @@
 QString getUserFilesDir();
 void writeMidiChannelsToProfile(int pedalboard, int snapshot);
 
+#ifdef Q_OS_MAC
+static bool getDeviceAudioProperty(const AudioObjectID deviceID,
+                                   const AudioObjectPropertyAddress* const prop,
+                                   uint32_t* const size,
+                                   void* const outPtr)
+{
+    return AudioObjectGetPropertyData(deviceID, prop, 0, nullptr, size, outPtr) == kAudioHardwareNoError;
+}
+
+static bool getDeviceAudioPropertySize(const AudioObjectID deviceID,
+                                       const AudioObjectPropertyAddress* const prop,
+                                       uint32_t* const size)
+{
+    return AudioObjectGetPropertyDataSize(deviceID, prop, 0, nullptr, size) == kAudioHardwareNoError;
+}
+
+static bool getSystemAudioProperty(const AudioObjectPropertyAddress* const prop,
+                                   uint32_t* const size,
+                                   void* const outPtr)
+{
+    return getDeviceAudioProperty(kAudioObjectSystemObject, prop, size, outPtr);
+}
+
+static bool getSystemAudioPropertySize(const AudioObjectPropertyAddress* const prop, uint32_t* const size)
+{
+    return getDeviceAudioPropertySize(kAudioObjectSystemObject, prop, size);
+}
+#endif
+
 class AppProcess : public QProcess
 {
 public:
@@ -181,12 +210,12 @@ public:
             .mScope    = kAudioObjectPropertyScopeGlobal,
             .mSelector = kAudioHardwarePropertyDevices,
         };
-        constexpr const AudioObjectPropertyAddress propDefaultInDevice = {
+        constexpr const AudioObjectPropertyAddress propDefaultInputDevice = {
             .mElement  = kAudioObjectPropertyElementMaster,
             .mScope    = kAudioObjectPropertyScopeGlobal,
             .mSelector = kAudioHardwarePropertyDefaultInputDevice,
         };
-        constexpr const AudioObjectPropertyAddress propDefaultOutDevice = {
+        constexpr const AudioObjectPropertyAddress propDefaultOutputDevice = {
             .mElement  = kAudioObjectPropertyElementMaster,
             .mScope    = kAudioObjectPropertyScopeGlobal,
             .mSelector = kAudioHardwarePropertyDefaultOutputDevice,
@@ -195,6 +224,16 @@ public:
             .mElement  = kAudioObjectPropertyElementMaster,
             .mScope    = kAudioObjectPropertyScopeGlobal,
             .mSelector = kAudioDevicePropertyDeviceNameCFString,
+        };
+        constexpr const AudioObjectPropertyAddress propDeviceInputUID = {
+            .mElement  = kAudioObjectPropertyElementMaster,
+            .mScope    = kAudioDevicePropertyScopeInput,
+            .mSelector = kAudioDevicePropertyDeviceUID,
+        };
+        constexpr const AudioObjectPropertyAddress propDeviceOutputUID = {
+            .mElement  = kAudioObjectPropertyElementMaster,
+            .mScope    = kAudioDevicePropertyScopeOutput,
+            .mSelector = kAudioDevicePropertyDeviceUID,
         };
         constexpr const AudioObjectPropertyAddress propInputStreams = {
             .mElement  = kAudioObjectPropertyElementMaster,
@@ -207,22 +246,22 @@ public:
             .mSelector = kAudioDevicePropertyStreams,
         };
         uint32_t outPropDataSize = 0;
-        if (AudioObjectGetPropertyDataSize(kAudioObjectSystemObject, &propDevices, 0, nullptr, &outPropDataSize) == kAudioHardwareNoError)
+        if (getSystemAudioPropertySize(&propDevices, &outPropDataSize))
         {
             const uint32_t numDevices = outPropDataSize / sizeof(AudioObjectID);
 
             AudioObjectID* const deviceIDs = new AudioObjectID[numDevices];
 
-            if (AudioObjectGetPropertyData(kAudioObjectSystemObject, &propDevices, 0, nullptr, &outPropDataSize, deviceIDs) == kAudioHardwareNoError)
+            if (getSystemAudioProperty(&propDevices, &outPropDataSize, deviceIDs))
             {
                 AudioObjectID deviceID = kAudioDeviceUnknown;
                 outPropDataSize = sizeof(deviceID);
-                if (AudioObjectGetPropertyData(kAudioObjectSystemObject, &propDefaultOutDevice, 0, nullptr, &outPropDataSize, &deviceID) == kAudioHardwareNoError && deviceID != kAudioDeviceUnknown)
+                if (getSystemAudioProperty(&propDefaultOutputDevice, &outPropDataSize, &deviceID) && deviceID != kAudioDeviceUnknown)
                 {
-                    DeviceInfo devInfo = { QString::number(deviceID), false, false };
+                    DeviceInfo devInfo = { "Default", false, false };
 
                     outPropDataSize = 0;
-                    if (AudioObjectGetPropertyDataSize(deviceID, &propInputStreams, 0, nullptr, &outPropDataSize) == kAudioHardwareNoError && outPropDataSize != 0)
+                    if (getDeviceAudioPropertySize(deviceID, &propInputStreams, &outPropDataSize) && outPropDataSize != 0)
                     {
                         devInfo.canInput = true;
                     }
@@ -230,7 +269,7 @@ public:
                     {
                         deviceID = kAudioDeviceUnknown;
                         outPropDataSize = sizeof(deviceID);
-                        if (AudioObjectGetPropertyData(kAudioObjectSystemObject, &propDefaultInDevice, 0, nullptr, &outPropDataSize, &deviceID) == kAudioHardwareNoError && deviceID != kAudioDeviceUnknown)
+                        if (getSystemAudioProperty(&propDefaultInputDevice, &outPropDataSize, &deviceID) && deviceID != kAudioDeviceUnknown)
                             devInfo.canInput = true;
                     }
 
@@ -242,29 +281,50 @@ public:
                 {
                     deviceID = deviceIDs[i];
 
-                    DeviceInfo devInfo = { QString::number(deviceID), false, true };
+                    CFStringRef cfs = {};
+                    DeviceInfo devInfo = { {}, false, true };
                     QString devName;
 
-                    CFStringRef devNameCF = {};
-                    outPropDataSize = sizeof(devNameCF);
-                    if (AudioObjectGetPropertyData(deviceID, &propDeviceName, 0, nullptr, &outPropDataSize, &devNameCF) == kAudioHardwareNoError)
-                        devName = QString::fromCFString(devNameCF);
-                    else
-                        devName = devInfo.uid;
-
                     outPropDataSize = 0;
-                    if (AudioObjectGetPropertyDataSize(deviceID, &propInputStreams, 0, nullptr, &outPropDataSize) == kAudioHardwareNoError && outPropDataSize != 0)
-                    {
+                    if (getDeviceAudioPropertySize(deviceID, &propInputStreams, &outPropDataSize) && outPropDataSize != 0)
                         devInfo.canInput = true;
-                        ui.cb_input->addItem(devName);
-                        inputs.append(QString::number(deviceID));
-                    }
 
                     outPropDataSize = 0;
-                    if (AudioObjectGetPropertyDataSize(deviceID, &propOutputStreams, 0, nullptr, &outPropDataSize) == kAudioHardwareNoError && outPropDataSize != 0)
+                    if (getDeviceAudioPropertySize(deviceID, &propOutputStreams, &outPropDataSize) && outPropDataSize != 0)
                     {
+                        outPropDataSize = sizeof(cfs);
+                        if (getDeviceAudioProperty(deviceID, &propDeviceOutputUID, &outPropDataSize, &cfs))
+                            devInfo.uid = QString::fromCFString(cfs);
+                        else
+                            continue;
+
+                        outPropDataSize = sizeof(cfs);
+                        if (getDeviceAudioProperty(deviceID, &propDeviceName, &outPropDataSize, &cfs))
+                            devName = QString::fromCFString(cfs);
+                        else
+                            continue;
+
                         ui.cb_device->addItem(devName);
                         devices.append(devInfo);
+                    }
+
+                    if (devInfo.canInput)
+                    {
+                        outPropDataSize = sizeof(cfs);
+                        if (getDeviceAudioProperty(deviceID, &propDeviceInputUID, &outPropDataSize, &cfs))
+                            devInfo.uid = QString::fromCFString(cfs);
+                        else
+                            continue;
+
+                        outPropDataSize = sizeof(cfs);
+                        if (getDeviceAudioProperty(deviceID, &propDeviceName, &outPropDataSize, &cfs))
+                            devName = QString::fromCFString(cfs);
+                        else
+                            continue;
+
+                        devInfo.canInput = true;
+                        ui.cb_input->addItem(devName);
+                        inputs.append(devInfo.uid);
                     }
                 }
             }
@@ -744,8 +804,13 @@ private slots:
         // regular duplex
         if (ui.rb_device_duplex->isChecked())
         {
-            arguments.append("-d");
-            arguments.append(devInfo.uid);
+           #ifdef Q_OS_MAC
+            if (ui.cb_device->currentIndex() != 0)
+           #endif
+            {
+                arguments.append("-d");
+                arguments.append(devInfo.uid);
+            }
         }
         // split duplex
         else if (ui.rb_device_separate->isChecked())

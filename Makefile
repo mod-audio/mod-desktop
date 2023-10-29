@@ -510,7 +510,7 @@ mod-midi-merger/build/mod-midi-broadcaster$(SO_EXT): mod-midi-merger/build/mod-m
 mod-midi-merger/build/mod-midi-merger$(SO_EXT): mod-midi-merger/build/mod-midi-merger-standalone$(APP_EXT)
 	touch $@
 
-mod-midi-merger/build/mod-midi-merger-standalone$(APP_EXT): mod-midi-merger/build/Makefile
+mod-midi-merger/build/mod-midi-merger-standalone$(APP_EXT): mod-midi-merger/build/Makefile mod-midi-merger/src/*.c mod-midi-merger/src/*.h
 	./utils/run.sh $(PAWPAW_TARGET) cmake --build mod-midi-merger/build
 
 mod-midi-merger/build/Makefile: $(BOOTSTRAP_FILES)
