@@ -166,8 +166,10 @@ PLUGINS += fluidplug
 PLUGINS += mod-convolution-loader
 PLUGINS += mod-utilities
 PLUGINS += modmeter
+PLUGINS += modspectre
 PLUGINS += neural-amp-modeler-lv2
 PLUGINS += neuralrecord
+PLUGINS += notes-lv2
 PLUGINS += shiro-plugins
 PLUGINS += wolf-shaper
 PLUGINS += x42-fil4
@@ -178,15 +180,7 @@ PLUGINS += x42-tinygain
 # FIXME needs python2
 # PLUGINS += fomp
 # FIXME needs tweaks for waf/python3 path
-# PLUGINS += mod-mda-lv2
-# FIXME fails to build: implicit declaration of function '__atomic_store_4'
-ifneq ($(MACOS),true)
-PLUGINS += modspectre
-endif
-# FIXME fails to build: implicit declaration of function 'basename'
-ifneq ($(MACOS),true)
-PLUGINS += notes-lv2
-endif
+PLUGINS += mod-mda-lv2
 
 # include plugin projects for version and bundle list
 include $(foreach PLUGIN,$(PLUGINS),mod-plugin-builder/plugins/package/$(PLUGIN)/$(PLUGIN).mk)
