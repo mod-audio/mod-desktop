@@ -171,7 +171,6 @@ PLUGINS += fomp
 PLUGINS += gxquack
 PLUGINS += invada-lv2
 PLUGINS += mod-ams-lv2
-# hardcoded *.so
 PLUGINS += mod-audio-mixers
 PLUGINS += mod-convolution-loader
 PLUGINS += mod-cv-plugins
@@ -209,15 +208,25 @@ PLUGINS += zam-plugins
 include $(foreach PLUGIN,$(PLUGINS),mod-plugin-builder/plugins/package/$(PLUGIN)/$(PLUGIN).mk)
 
 # list of unwanted bundles (for a variety of reasons)
-UNWANTED_BUNDLES  = b_whirl
+UNWANTED_BUNDLES  = artyfx-bitta.lv2
+UNWANTED_BUNDLES += b_whirl
+UNWANTED_BUNDLES += mod-2voices.lv2
 UNWANTED_BUNDLES += mod-bypass.lv2
+UNWANTED_BUNDLES += mod-caps-AmpVTS.lv2
+UNWANTED_BUNDLES += mod-caps-CabinetIV.lv2
+UNWANTED_BUNDLES += mod-caps-CEO.lv2
+UNWANTED_BUNDLES += mod-harmonizercs.lv2
 UNWANTED_BUNDLES += mod-mda-Ambience.lv2
+UNWANTED_BUNDLES += mod-mda-Degrade.lv2
 UNWANTED_BUNDLES += mod-mda-DubDelay.lv2
 UNWANTED_BUNDLES += mod-mda-Overdrive.lv2
 UNWANTED_BUNDLES += sc_record.lv2
 UNWANTED_BUNDLES += tap-autopan.lv2
+UNWANTED_BUNDLES += tap-dynamics.lv2
+UNWANTED_BUNDLES += tap-dynamics-st.lv2
 UNWANTED_BUNDLES += tap-eqbw.lv2
 UNWANTED_BUNDLES += tap-eq.lv2
+UNWANTED_BUNDLES += tap-reverb.lv2
 UNWANTED_BUNDLES += tap-sigmoid.lv2
 
 # list of known good bundles
