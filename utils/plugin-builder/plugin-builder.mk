@@ -51,6 +51,7 @@ $(PKG)_PKGDIR = $(CURDIR)/mod-plugin-builder/plugins/package/$(pkgname)
 
 RENAME_EXTENSION = $(foreach f,$(2)$(3)$(4)$(5)$(6)$(7)$(8)$(9)$(10)$(11)$(12)$(13)$(14)$(15)$(16)$(17)$(18)$(19),mv $(f) $(subst .so,.$(1),$(f));) echo
 
+BR2_PAWPAW = y
 BR2_SKIP_LTO = y
 BR2_TARGET_OPTIMIZATION =
 
@@ -73,6 +74,10 @@ TARGET_CXXFLAGS = $(CXXFLAGS)
 TARGET_LDFLAGS = $(LDFLAGS)
 
 TARGET_DIR = $(PAWPAW_PREFIX)
+
+ifneq ($(MACOS)$(WINDOWS),true)
+TARGET_MAKE_ENV = env LD_LIBRARY_PATH="$(PAWPAW_PREFIX)/usr/lib"
+endif
 
 ifeq ($(MACOS),true)
 STRIP = true

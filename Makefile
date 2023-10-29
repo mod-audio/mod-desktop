@@ -160,11 +160,13 @@ PLUGINS  = abgate
 PLUGINS += aidadsp-lv2
 PLUGINS += artyfx
 PLUGINS += carla-plugins
+PLUGINS += die-plugins
 PLUGINS += dpf-plugins
 PLUGINS += dragonfly-reverb
 PLUGINS += fluidplug
 PLUGINS += fomp
 PLUGINS += mod-convolution-loader
+PLUGINS += mod-distortion
 PLUGINS += mod-mda-lv2
 PLUGINS += mod-utilities
 PLUGINS += modmeter
@@ -173,11 +175,24 @@ PLUGINS += neural-amp-modeler-lv2
 PLUGINS += neuralrecord
 PLUGINS += notes-lv2
 PLUGINS += shiro-plugins
+PLUGINS += tap-lv2
 PLUGINS += wolf-shaper
+PLUGINS += x42-fat1
 PLUGINS += x42-fil4
 PLUGINS += x42-midifilter
 PLUGINS += x42-midigen
+PLUGINS += x42-stepseq
 PLUGINS += x42-tinygain
+PLUGINS += x42-xfade
+
+# conflict with lv2-dev
+# PLUGINS += lv2-examples
+
+# hardcoded *.so
+# PLUGINS += mod-audio-mixers
+
+# needs armadillo
+# PLUGINS += mod-pitchshifter
 
 # include plugin projects for version and bundle list
 include $(foreach PLUGIN,$(PLUGINS),mod-plugin-builder/plugins/package/$(PLUGIN)/$(PLUGIN).mk)
@@ -194,6 +209,10 @@ UNWANTED_BUNDLES += mod-toggleswitch4.lv2
 UNWANTED_BUNDLES += switchbox_1-2_st.lv2
 UNWANTED_BUNDLES += switchbox_2-1_st.lv2
 UNWANTED_BUNDLES += switchbox_2-1.lv2
+UNWANTED_BUNDLES += tap-autopan.lv2
+UNWANTED_BUNDLES += tap-eqbw.lv2
+UNWANTED_BUNDLES += tap-eq.lv2
+UNWANTED_BUNDLES += tap-sigmoid.lv2
 
 # list of known good bundles
 BUNDLES = $(filter-out $(UNWANTED_BUNDLES),$(foreach PLUGIN,$(PLUGINS),$($(call BUILDROOT_VAR,$(PLUGIN))_BUNDLES)))
