@@ -4,6 +4,7 @@ cd "$(dirname $0)/../../build"
 
 export LANG=en_US.UTF-8
 export PAWPAW_SKIP_LTO=1
+export PAWPAW_QUIET=1
 
 function convert_path() {
     if [ -e jackd.exe ]; then

@@ -23,6 +23,7 @@ shift
 # import env
 
 export PAWPAW_SKIP_LTO=1
+export PAWPAW_QUIET=1
 source PawPaw/local.env ${target}
 
 # ---------------------------------------------------------------------------------------------------------------------

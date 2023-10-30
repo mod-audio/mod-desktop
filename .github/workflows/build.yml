@@ -36,6 +36,10 @@ jobs:
           make PAWPAW_TARGET=linux-x86_64
           # FIXME needs to run twice for now
           make PAWPAW_TARGET=linux-x86_64
+      - name: Validate plugins
+        if: steps.cache.outputs.cache-hit == 'true'
+        run: |
+          ./utils/plugin-builder/validate-plugins.sh
       - name: Pack
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
@@ -77,6 +81,10 @@ jobs:
           make PAWPAW_TARGET=macos-universal-10.15
           # FIXME needs to run twice for now
           make PAWPAW_TARGET=macos-universal-10.15
+      - name: Validate plugins
+        if: steps.cache.outputs.cache-hit == 'true'
+        run: |
+          ./utils/plugin-builder/validate-plugins.sh
       - name: Pack
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
@@ -121,6 +129,10 @@ jobs:
           make PAWPAW_TARGET=win64
           # FIXME needs to run twice for now
           make PAWPAW_TARGET=win64
+      - name: Validate plugins
+        if: steps.cache.outputs.cache-hit == 'true'
+        run: |
+          ./utils/plugin-builder/validate-plugins.sh
       - name: Pack
         if: steps.cache.outputs.cache-hit == 'true'
         run: |

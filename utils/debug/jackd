@@ -4,6 +4,7 @@ cd "$(dirname $0)/../../build"
 
 export LANG=en_US.UTF-8
 export PAWPAW_SKIP_LTO=1
+export PAWPAW_QUIET=1
 
 function convert_path() {
     if [ -e jackd.exe ]; then
@@ -59,6 +60,7 @@ LV2_PATH+="${PATH_SEP}$(convert_path ${DOCS_DIR}/MOD App/lv2)"
 export LV2_PATH
 
 export MOD_KEYS_PATH="$(convert_path ${DOCS_DIR}/MOD App/keys/)"
+export MOD_USER_FILES_DIR="$(convert_path ${DOCS_DIR}/MOD App/user-files)"
 
 export JACK_NO_AUDIO_RESERVATION=1
 export JACK_NO_START_SERVER=1

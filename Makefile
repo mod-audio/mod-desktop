@@ -530,7 +530,7 @@ mod-ui/utils/libmod_utils$(SO_EXT): $(BOOTSTRAP_FILES) mod-ui/utils/utils.h mod-
 # ---------------------------------------------------------------------------------------------------------------------
 
 mod-host/mod-host.so: $(BOOTSTRAP_FILES)
-	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) SKIP_READLINE=1 SKIP_FFTW335=1 -C mod-host
+	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) MODAPP=1 SKIP_READLINE=1 SKIP_FFTW335=1 -C mod-host
 
 # ---------------------------------------------------------------------------------------------------------------------
 
