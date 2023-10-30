@@ -43,7 +43,7 @@ set -e
 PLUGINS=($(${EXE_WRAPPER} "${PAWPAW_PREFIX}/lib/carla/carla-discovery-native${APP_EXT}" lv2 ":all" 2>/dev/null | tr -dC '[:print:]\n' | awk 'sub("carla-discovery::label::","")'))
 
 for p in ${PLUGINS[@]}; do
-    uri=$(echo ${p} | cut -d "${OS_SEP}" -f 2)
+    uri=$(echo ${p} | cut -d "${OS_SEP}" -f 2-)
     echo "Testing ${uri}..."
     ${EXE_WRAPPER} "${PAWPAW_PREFIX}/lib/carla/carla-bridge-native${APP_EXT}" lv2 "" "${uri}" 1>/dev/null
 done
