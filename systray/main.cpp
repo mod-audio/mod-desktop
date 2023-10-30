@@ -126,6 +126,7 @@ int main(int argc, char* argv[])
 
     std::wcscat(path, L"\\user-files");
     _wmkdir(path);
+    SetEnvironmentVariableW(L"MOD_USER_FILES_DIR", path);
     user_files_dir = path;
 
     const BOOL darkMode = QSettings(
@@ -260,6 +261,7 @@ int main(int argc, char* argv[])
 
     std::strcat(path, "/user-files");
     mkdir(path, 0777);
+    setenv("MOD_USER_FILES_DIR", path, 1);
     user_files_dir = path;
 
     struct sigaction sig = {};

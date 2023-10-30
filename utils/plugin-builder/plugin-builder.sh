@@ -29,6 +29,9 @@ source PawPaw/local.env "${target}"
 
 # ---------------------------------------------------------------------------------------------------------------------
 
+export CFLAGS+="-D__MOD_DEVICES__ -D_MOD_DESKTOP"
+export CXXFLAGS+="-D__MOD_DEVICES__ -D_MOD_DESKTOP"
+
 export CMAKE
 export PAWPAW_BUILDDIR
 export PAWPAW_DOWNLOADDIR

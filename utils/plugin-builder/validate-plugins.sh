@@ -16,14 +16,17 @@ function convert_path() {
 
 if [ -e mod-ui.exe ]; then
     source ../PawPaw/local.env win64
+    DOCS_DIR=$(xdg-user-dir DOCUMENTS)
     LV2_PATH="$(convert_path $(pwd)/plugins)"
     OS_SEP="\\"
 elif [ -e mod-app.app ]; then
     source ../PawPaw/local.env macos-universal-10.15
+    DOCS_DIR=~/Documents
     LV2_PATH="$(pwd)/mod-app.app/Contents/PlugIns/LV2"
     OS_SEP='/'
 else
     source ../PawPaw/local.env linux
+    DOCS_DIR=$(xdg-user-dir DOCUMENTS)
     LV2_PATH="$(pwd)/plugins"
     OS_SEP='/'
 fi
@@ -37,6 +40,9 @@ export MOD_USER_FILES_DIR="$(convert_path ${DOCS_DIR}/MOD App/user-files)"
 export WINEDEBUG=-all
 
 set -e
+
+mkdir -p "${DOCS_DIR}/MOD App/keys"
+mkdir -p "${DOCS_DIR}/MOD App/user-files/Audio Recordings"
 
 PLUGINS=($(${EXE_WRAPPER} "${PAWPAW_PREFIX}/lib/carla/carla-discovery-native${APP_EXT}" lv2 ":all" 2>/dev/null | tr -dC '[:print:]\n' | awk 'sub("carla-discovery::label::","")'))
 

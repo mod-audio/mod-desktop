@@ -68,6 +68,9 @@ export JACK_NO_START_SERVER=1
 # export MOD_LOG=1
 # export MOD_PLUGIN_THREAD_PRIORITY=57
 
+mkdir -p "${DOCS_DIR}/MOD App/keys"
+mkdir -p "${DOCS_DIR}/MOD App/user-files/Audio Recordings"
+
 # DEBUG="lldb --"
 
 echo ${JACKD} -R -S -n mod-app ${JACK_SESSION} -d ${JACK_DRIVER} -d \"${JACK_DRIVER_DEVICE}\" ${JACK_DRIVER_OPTS} -r 48000 -p 256
