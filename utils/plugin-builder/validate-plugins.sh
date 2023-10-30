@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# set -eE
-
 cd "$(dirname $0)/../../build"
 
 export LANG=en_US.UTF-8
@@ -26,7 +24,7 @@ elif [ -e mod-app.app ]; then
     OS_SEP='/'
 else
     source ../PawPaw/local.env linux
-    LV2_PATH="$(pwd)/mod-app.app/Contents/PlugIns/LV2"
+    LV2_PATH="$(pwd)/plugins"
     OS_SEP='/'
 fi
 
