@@ -44,6 +44,10 @@ set -e
 mkdir -p "${DOCS_DIR}/MOD App/keys"
 mkdir -p "${DOCS_DIR}/MOD App/user-files/Audio Recordings"
 
+if [ -z "${EXE_WRAPPER}" ] && [ -n "${VALGRIND}" ] && [ "${VALGRIND}" -eq 1 ]; then
+    EXE_WRAPPER="valgrind --leak-check=full --track-origins=yes --keep-debuginfo=yes --suppressions=../mod-plugin-builder/plugins-dep/valgrind-libdl.supp"
+fi
+
 PLUGINS=($(${EXE_WRAPPER} "${PAWPAW_PREFIX}/lib/carla/carla-discovery-native${APP_EXT}" lv2 ":all" 2>/dev/null | tr -dC '[:print:]\n' | awk 'sub("carla-discovery::label::","")'))
 
 for p in ${PLUGINS[@]}; do
