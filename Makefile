@@ -182,16 +182,13 @@ PLUGINS += mod-utilities
 PLUGINS += modmeter
 PLUGINS += modspectre
 PLUGINS += neural-amp-modeler-lv2
-# crashes on linux https://github.com/moddevices/mod-app/actions/runs/6706080665/job/18221839411
-# PLUGINS += neuralrecord
+PLUGINS += neuralrecord
 PLUGINS += notes-lv2
 PLUGINS += pitchtracking-series
-# crashes on macos https://github.com/moddevices/mod-app/actions/runs/6704709957/job/18217658003
-# PLUGINS += screcord
+PLUGINS += screcord
 PLUGINS += setbfree
 PLUGINS += setbfree-mod
-# crashes on linux https://github.com/moddevices/mod-app/actions/runs/6704709957/job/18217657747
-# PLUGINS += sooperlooper-lv2
+PLUGINS += sooperlooper-lv2
 PLUGINS += shiro-plugins
 PLUGINS += tap-lv2
 PLUGINS += wolf-shaper
