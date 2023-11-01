@@ -184,10 +184,11 @@ PLUGINS += mod-utilities
 PLUGINS += modmeter
 PLUGINS += modspectre
 PLUGINS += neural-amp-modeler-lv2
-PLUGINS += neuralrecord
+# crashing linux https://github.com/moddevices/mod-app/actions/runs/6721112608/job/18266110663
+# PLUGINS += neuralrecord
 PLUGINS += notes-lv2
 PLUGINS += pitchtracking-series
-# crashing macos https://github.com/moddevices/mod-app/actions/runs/6718888228/job/18259448918
+# crashing linux https://github.com/moddevices/mod-app/actions/runs/6718888228/job/18259448918
 # crashing macos https://github.com/moddevices/mod-app/actions/runs/6718888228/job/18259448741
 # PLUGINS += screcord
 PLUGINS += setbfree
