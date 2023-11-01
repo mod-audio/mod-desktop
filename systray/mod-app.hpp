@@ -520,7 +520,7 @@ private:
         ui.sp_midi_pb->setValue(settings.value("PedalboardsMidiChannel", 0).toInt());
         ui.sp_midi_pb->setValue(settings.value("SnapshotsMidiChannel", 0).toInt());
 
-        const bool verboseLogs = settings.value("VerboseLogs", true).toBool();
+        const bool verboseLogs = settings.value("VerboseLogs", false).toBool();
         ui.gb_logs->setVisible(verboseLogs);
         ui.cb_verbose_basic->setChecked(verboseLogs);
         ui.cb_verbose_jackd->setChecked(settings.value("VerboseLogsJack", false).toBool());
