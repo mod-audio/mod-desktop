@@ -22,13 +22,13 @@ else:
 options = {
   "zip_include_packages": ["*"],
   "zip_exclude_packages": ["PIL","modtools"],
-  "replace_paths": [["*",f".{s}lib{s}"]],
+  "replace_paths": [["*",f".{s}lib-screenshot{s}"]],
   "build_exe": f".{s}build-screenshot",
   "optimize": True,
 }
 
 exe_options = {
-  "script": f".{s}mod-ui{s}modtools{s}pedalboard.py",
+  "script": f".{s}utils{s}cxfreeze{s}mod-screenshot-setup.py",
   "copyright": "Copyright (C) 2023 MOD Audio UG",
   "targetName": f"mod-screenshot{exe}",
 }

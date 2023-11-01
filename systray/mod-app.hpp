@@ -97,8 +97,6 @@ class AppWindow : public QMainWindow
     QMenu* sysmenu = nullptr;
     QSystemTrayIcon* systray = nullptr;
 
-    int heightLogs = 100;
-
     AppProcess processHost;
     AppProcess processUI;
     bool startingHost = false;
@@ -123,11 +121,17 @@ public:
     {
         ui.setupUi(this);
 
+        ui.gb_audio->setup(ui.tb_audio);
+        ui.gb_midi->setup(ui.tb_midi);
+        ui.gb_lv2->setup(ui.tb_lv2);
+        ui.gb_gui->setup(ui.tb_gui);
+
         connect(ui.b_start, &QPushButton::clicked, this, &AppWindow::start);
         connect(ui.b_stop, &QPushButton::clicked, this, &AppWindow::stop);
         connect(ui.b_opengui, &QPushButton::clicked, this, &AppWindow::openGui);
         connect(ui.b_openuserfiles, &QPushButton::clicked, this, &AppWindow::openUserFilesDir);
         connect(ui.cb_device, &QComboBox::currentTextChanged, this, &AppWindow::updateDeviceDetails);
+        connect(ui.cb_verbose_basic, &QCheckBox::toggled, this, &AppWindow::showLogs);
 
         const QIcon icon(":/mod-logo.svg");
 
@@ -467,6 +471,10 @@ private:
         settings.setValue("PedalboardsMidiChannel", ui.sp_midi_pb->value());
         settings.setValue("SnapshotsMidiChannel", ui.sp_midi_ss->value());
         settings.setValue("SuccessfullyStarted", successfullyStarted);
+        settings.setValue("ExpandedOptionsAudio", ui.tb_audio->isChecked());
+        settings.setValue("ExpandedOptionsMIDI", ui.tb_midi->isChecked());
+        settings.setValue("ExpandedOptionsLV2", ui.tb_lv2->isChecked());
+        settings.setValue("ExpandedOptionsGUI", ui.tb_gui->isChecked());
         settings.setValue("VerboseLogs", ui.cb_verbose_basic->isChecked());
         settings.setValue("VerboseLogsJack", ui.cb_verbose_jackd->isChecked());
         settings.setValue("VerboseLogsHost", ui.cb_verbose_host->isChecked());
@@ -512,17 +520,24 @@ private:
         ui.sp_midi_pb->setValue(settings.value("PedalboardsMidiChannel", 0).toInt());
         ui.sp_midi_pb->setValue(settings.value("SnapshotsMidiChannel", 0).toInt());
 
-        ui.cb_verbose_basic->setChecked(settings.value("VerboseLogs", true).toBool());
+        const bool verboseLogs = settings.value("VerboseLogs", true).toBool();
+        ui.gb_logs->setVisible(verboseLogs);
+        ui.cb_verbose_basic->setChecked(verboseLogs);
         ui.cb_verbose_jackd->setChecked(settings.value("VerboseLogsJack", false).toBool());
         ui.cb_verbose_host->setChecked(settings.value("VerboseLogsHost", false).toBool());
         ui.cb_verbose_ui->setChecked(settings.value("VerboseLogsUI", false).toBool());
 
-        successfullyStarted = settings.value("SuccessfullyStarted", false).toBool();
+        ui.gb_audio->setCheckedInit(settings.value("ExpandedOptionsAudio", false).toBool());
+        ui.gb_midi->setCheckedInit(settings.value("ExpandedOptionsMIDI", false).toBool());
+        ui.gb_lv2->setCheckedInit(settings.value("ExpandedOptionsLV2", false).toBool());
+        ui.gb_gui->setCheckedInit(settings.value("ExpandedOptionsGUI", false).toBool());
 
-        adjustSize();
+        successfullyStarted = settings.value("SuccessfullyStarted", false).toBool();
 
         if (settings.contains("Geometry"))
             restoreGeometry(settings.value("Geometry").toByteArray());
+        else
+            adjustSize();
 
         if (settings.value("FirstRun", true).toBool() || !ui.cb_autostart->isChecked() || !successfullyStarted)
         {
@@ -880,6 +895,19 @@ private slots:
         QDesktopServices::openUrl(QUrl::fromLocalFile(getUserFilesDir()));
     }
 
+    void showLogs(const bool show)
+    {
+        if (show)
+        {
+            ui.gb_logs->show();
+        }
+        else
+        {
+            ui.gb_logs->hide();
+            adjustSize();
+        }
+    }
+
     void updateDeviceDetails()
     {
         const int deviceIndex = ui.cb_device->currentIndex();
@@ -980,7 +1008,7 @@ private slots:
         switch (reason)
         {
         case QSystemTrayIcon::DoubleClick:
-        case QSystemTrayIcon::MiddleClick:
+        case QSystemTrayIcon::Trigger:
            #ifdef Q_OS_MAC
             show();
            #else

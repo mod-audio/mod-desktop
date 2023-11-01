@@ -76,7 +76,7 @@ BOOTSTRAP_FILES += $(PAWPAW_PREFIX)/include/armadillo
 # ---------------------------------------------------------------------------------------------------------------------
 # List of files for mod-app packaging, often symlinks to the real files
 
-TARGETS = build-ui/lib/libmod_utils$(SO_EXT)
+TARGETS = build/lib-ui/libmod_utils$(SO_EXT)
 
 ifeq ($(MACOS),true)
 TARGETS += build/mod-app.app/Contents/Info.plist
@@ -93,9 +93,10 @@ TARGETS += build/mod-app.app/Contents/MacOS/jack/jack_coremidi.so
 TARGETS += build/mod-app.app/Contents/MacOS/jack/mod-host.so
 TARGETS += build/mod-app.app/Contents/MacOS/jack/mod-midi-broadcaster.so
 TARGETS += build/mod-app.app/Contents/MacOS/jack/mod-midi-merger.so
-TARGETS += build/mod-app.app/Contents/MacOS/lib
 TARGETS += build/mod-app.app/Contents/MacOS/libjack.0.dylib
 TARGETS += build/mod-app.app/Contents/MacOS/libjackserver.0.dylib
+TARGETS += build/mod-app.app/Contents/MacOS/lib-screenshot/library.zip
+TARGETS += build/mod-app.app/Contents/MacOS/lib-ui/library.zip
 TARGETS += build/mod-app.app/Contents/MacOS/mod-app
 TARGETS += build/mod-app.app/Contents/MacOS/mod-screenshot
 TARGETS += build/mod-app.app/Contents/MacOS/mod-ui
@@ -120,7 +121,8 @@ TARGETS += build/jack/jack-session.conf
 TARGETS += build/jack/mod-host$(SO_EXT)
 TARGETS += build/jack/mod-midi-broadcaster$(SO_EXT)
 TARGETS += build/jack/mod-midi-merger$(SO_EXT)
-TARGETS += build/lib
+TARGETS += build/lib-screenshot/library.zip
+TARGETS += build/lib-ui/library.zip
 TARGETS += build/mod-app$(APP_EXT)
 TARGETS += build/mod-screenshot$(APP_EXT)
 TARGETS += build/mod-ui$(APP_EXT)
@@ -185,7 +187,9 @@ PLUGINS += neural-amp-modeler-lv2
 PLUGINS += neuralrecord
 PLUGINS += notes-lv2
 PLUGINS += pitchtracking-series
-PLUGINS += screcord
+# crashing macos https://github.com/moddevices/mod-app/actions/runs/6718888228/job/18259448918
+# crashing macos https://github.com/moddevices/mod-app/actions/runs/6718888228/job/18259448741
+# PLUGINS += screcord
 PLUGINS += setbfree
 PLUGINS += setbfree-mod
 PLUGINS += sooperlooper-lv2
@@ -289,9 +293,9 @@ win64-plugins:
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-build-ui/lib/libmod_utils$(SO_EXT): mod-ui/utils/libmod_utils$(SO_EXT)
-	@mkdir -p build-ui/lib
+build/lib-ui/libmod_utils$(SO_EXT): mod-ui/utils/libmod_utils$(SO_EXT) build/lib-ui/library.zip
 	ln -sf $(abspath $<) $@
+	touch $@
 
 # ---------------------------------------------------------------------------------------------------------------------
 
@@ -327,14 +331,19 @@ build/mod-app.app/Contents/MacOS/jack/mod-midi-merger.so: mod-midi-merger/build/
 	@mkdir -p build/mod-app.app/Contents/MacOS/jack
 	ln -sf $(abspath $<) $@
 
-build/mod-app.app/Contents/MacOS/lib: build-ui/mod-ui$(APP_EXT)
-	@mkdir -p build/mod-app.app/Contents/MacOS
-	rm -f $@
-	ln -sf $(abspath build-ui/lib) $@
-
 build/mod-app.app/Contents/MacOS/libjack%: $(PAWPAW_PREFIX)/lib/libjack%
 	@mkdir -p build/mod-app.app/Contents/MacOS
 	ln -sf $(abspath $<) $@
+
+build/mod-app.app/Contents/MacOS/lib-ui/library.zip: build-ui/mod-ui$(APP_EXT)
+	@mkdir -p build
+	ln -sf $(abspath build-ui/lib) build/mod-app.app/Contents/MacOS/lib-ui
+	touch $@
+
+build/mod-app.app/Contents/MacOS/lib-screenshot/library.zip: build-screenshot/mod-screenshot$(APP_EXT)
+	@mkdir -p build
+	ln -sf $(abspath build-screenshot/lib) build/mod-app.app/Contents/MacOS/lib-screenshot
+	touch $@
 
 build/mod-app.app/Contents/MacOS/mod-app: systray/mod-app
 	@mkdir -p build/mod-app.app/Contents/MacOS
@@ -480,6 +489,16 @@ build/jack/jack_%: $(PAWPAW_PREFIX)/lib/jack/jack_%
 	@mkdir -p build/jack
 	ln -sf $(abspath $<) $@
 
+build/lib-ui/library.zip: build-ui/mod-ui$(APP_EXT)
+	@mkdir -p build
+	ln -sf $(abspath build-ui/lib) build/lib-ui
+	touch $@
+
+build/lib-screenshot/library.zip: build-screenshot/mod-screenshot$(APP_EXT)
+	@mkdir -p build
+	ln -sf $(abspath build-screenshot/lib) build/lib-screenshot
+	touch $@
+
 build/libjack%: $(PAWPAW_PREFIX)/lib/libjack%
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
@@ -514,7 +533,7 @@ build/styles/q%.dll: $(PAWPAW_PREFIX)/lib/qt5/plugins/styles/q%.dll
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-build-screenshot/mod-screenshot$(APP_EXT): utils/cxfreeze/mod-screenshot.py $(BOOTSTRAP_FILES)
+build-screenshot/mod-screenshot$(APP_EXT): utils/cxfreeze/mod-screenshot.py utils/cxfreeze/mod-screenshot-setup.py $(BOOTSTRAP_FILES)
 	./utils/run.sh $(PAWPAW_TARGET) python3 utils/cxfreeze/mod-screenshot.py build_exe
 	touch $@
 
@@ -549,7 +568,7 @@ mod-midi-merger/build/Makefile: $(BOOTSTRAP_FILES)
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-systray/mod-app$(APP_EXT): systray/main.cpp systray/mod-app.hpp systray/mod-app.ui
+systray/mod-app$(APP_EXT): systray/main.cpp systray/mod-app.hpp systray/mod-app.ui systray/widgets.hpp
 	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) -C systray
 
 # ---------------------------------------------------------------------------------------------------------------------

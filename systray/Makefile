@@ -3,7 +3,7 @@
 CC ?= gcc
 CXX ?= g++
 
-CXXFLAGS += -fPIC -std=gnu++14
+CXXFLAGS += -fPIC -std=gnu++14 -I.
 
 TARGET_MACHINE := $(shell $(CC) -dumpmachine)
 
@@ -89,7 +89,7 @@ ifeq ($(MACOS),true)
 	install_name_tool -change "@rpath/QtWidgets.framework/Versions/5/QtWidgets" "@executable_path/../Frameworks/QtWidgets.framework/QtWidgets" $@
 endif
 
-main.cpp.o: main.cpp mod-app.hpp qrc_mod-app.hpp ui_mod-app.hpp
+main.cpp.o: main.cpp mod-app.hpp qrc_mod-app.hpp ui_mod-app.hpp widgets.hpp
 	$(CXX) $< $(CXXFLAGS) $(QT5_FLAGS) -c -o $@
 
 mod-app.rc.o: mod-app.rc mod-logo.ico
