@@ -44,7 +44,7 @@ Source: "..\..\build\imageformats\q*.dll"; DestDir: "{app}\imageformats"; Flags:
 Source: "..\..\build\platforms\q*.dll"; DestDir: "{app}\platforms"; Flags: ignoreversion;
 Source: "..\..\build\styles\q*.dll"; DestDir: "{app}\styles"; Flags: ignoreversion;
 ; mod-ui + python
-Source: "..\..\build\mod-screenshot.exe"; DestDir: "{app}"; Flags: ignoreversion;
+Source: "..\..\build\mod-pedalboard.exe"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "..\..\build\mod-ui.exe"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "..\..\build\libpython3.8.dll"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "..\..\build\default.pedalboard\manifest.ttl"; DestDir: "{app}\default.pedalboard"; Flags: ignoreversion;
