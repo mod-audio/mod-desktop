@@ -1,7 +1,5 @@
 /build/
-/build-plugin-stamps/
-/build-screenshot/
-/build-ui/
+/build-*/
 .DS_Store
 *.dll
 *.dmg
