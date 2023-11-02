@@ -21,21 +21,21 @@ else:
 
 options = {
   "zip_include_packages": ["*"],
-  "zip_exclude_packages": ["PIL","modtools"],
-  "replace_paths": [["*",f".{s}lib-screenshot{s}"]],
-  "build_exe": f".{s}build-screenshot",
+  "zip_exclude_packages": ["PIL","mod","modtools"],
+  "replace_paths": [["*",f".{s}lib{s}"]],
+  "build_exe": f".{s}build-pedalboard",
   "optimize": True,
 }
 
 exe_options = {
-  "script": f".{s}utils{s}cxfreeze{s}mod-screenshot-setup.py",
+  "script": f".{s}utils{s}cxfreeze{s}mod-pedalboard-setup.py",
   "copyright": "Copyright (C) 2023 MOD Audio UG",
-  "targetName": f"mod-screenshot{exe}",
+  "targetName": f"mod-pedalboard{exe}",
 }
 
-setup(name = "mod-screenshot",
+setup(name = "mod-pedalboard",
       version = "0.0.0",
-      description = "MOD Pedalboard screenshot",
+      description = "MOD Pedalboard tools",
       options = {"build_exe": options},
       executables = [Executable(**exe_options)])
 

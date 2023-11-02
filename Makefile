@@ -76,7 +76,7 @@ BOOTSTRAP_FILES += $(PAWPAW_PREFIX)/include/armadillo
 # ---------------------------------------------------------------------------------------------------------------------
 # List of files for mod-app packaging, often symlinks to the real files
 
-TARGETS = build/lib-ui/libmod_utils$(SO_EXT)
+TARGETS = build-ui/lib/libmod_utils$(SO_EXT)
 
 ifeq ($(MACOS),true)
 TARGETS += build/mod-app.app/Contents/Info.plist
@@ -95,10 +95,9 @@ TARGETS += build/mod-app.app/Contents/MacOS/jack/mod-midi-broadcaster.so
 TARGETS += build/mod-app.app/Contents/MacOS/jack/mod-midi-merger.so
 TARGETS += build/mod-app.app/Contents/MacOS/libjack.0.dylib
 TARGETS += build/mod-app.app/Contents/MacOS/libjackserver.0.dylib
-TARGETS += build/mod-app.app/Contents/MacOS/lib-screenshot/library.zip
-TARGETS += build/mod-app.app/Contents/MacOS/lib-ui/library.zip
+TARGETS += build/mod-app.app/Contents/MacOS/lib/library.zip
 TARGETS += build/mod-app.app/Contents/MacOS/mod-app
-TARGETS += build/mod-app.app/Contents/MacOS/mod-screenshot
+TARGETS += build/mod-app.app/Contents/MacOS/mod-pedalboard
 TARGETS += build/mod-app.app/Contents/MacOS/mod-ui
 TARGETS += build/mod-app.app/Contents/MacOS/mod
 TARGETS += build/mod-app.app/Contents/MacOS/modtools
@@ -121,10 +120,9 @@ TARGETS += build/jack/jack-session.conf
 TARGETS += build/jack/mod-host$(SO_EXT)
 TARGETS += build/jack/mod-midi-broadcaster$(SO_EXT)
 TARGETS += build/jack/mod-midi-merger$(SO_EXT)
-TARGETS += build/lib-screenshot/library.zip
-TARGETS += build/lib-ui/library.zip
+TARGETS += build/lib/library.zip
 TARGETS += build/mod-app$(APP_EXT)
-TARGETS += build/mod-screenshot$(APP_EXT)
+TARGETS += build/mod-pedalboard$(APP_EXT)
 TARGETS += build/mod-ui$(APP_EXT)
 TARGETS += build/mod
 TARGETS += build/modtools
@@ -255,7 +253,7 @@ clean:
 	rm -rf mod-midi-merger/build
 	rm -rf build
 	rm -rf build-plugin-stamps
-	rm -rf build-screenshot
+	rm -rf build-pedalboard
 	rm -rf build-ui
 
 plugins: $(foreach PLUGIN,$(PLUGINS),$(call PLUGIN_STAMP,$(PLUGIN)))
@@ -294,7 +292,7 @@ win64-plugins:
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-build/lib-ui/libmod_utils$(SO_EXT): mod-ui/utils/libmod_utils$(SO_EXT) build/lib-ui/library.zip
+build-ui/lib/libmod_utils$(SO_EXT): mod-ui/utils/libmod_utils$(SO_EXT) build/lib/library.zip
 	ln -sf $(abspath $<) $@
 	touch $@
 
@@ -308,7 +306,7 @@ build/mod-app.app/Contents/Frameworks/Qt%.framework: $(PAWPAW_PREFIX)/lib/Qt%.fr
 	@mkdir -p build/mod-app.app/Contents/Frameworks
 	ln -sf $(abspath $<) $@
 
-build/mod-app.app/Contents/MacOS/jackd: $(PAWPAW_PREFIX)/bin/jackd$(APP_EXT)
+build/mod-app.app/Contents/MacOS/jackd: $(PAWPAW_PREFIX)/bin/jackd
 	@mkdir -p build/mod-app.app/Contents/MacOS
 	ln -sf $(abspath $<) $@
 
@@ -336,25 +334,20 @@ build/mod-app.app/Contents/MacOS/libjack%: $(PAWPAW_PREFIX)/lib/libjack%
 	@mkdir -p build/mod-app.app/Contents/MacOS
 	ln -sf $(abspath $<) $@
 
-build/mod-app.app/Contents/MacOS/lib-ui/library.zip: build-ui/mod-ui$(APP_EXT)
+build/mod-app.app/Contents/MacOS/lib/library.zip: build-pedalboard/mod-pedalboard build-ui/mod-ui
 	@mkdir -p build
-	ln -sf $(abspath build-ui/lib) build/mod-app.app/Contents/MacOS/lib-ui
-	touch $@
-
-build/mod-app.app/Contents/MacOS/lib-screenshot/library.zip: build-screenshot/mod-screenshot$(APP_EXT)
-	@mkdir -p build
-	ln -sf $(abspath build-screenshot/lib) build/mod-app.app/Contents/MacOS/lib-screenshot
+	ln -sf $(abspath build-ui/lib) build/mod-app.app/Contents/MacOS/lib
 	touch $@
 
 build/mod-app.app/Contents/MacOS/mod-app: systray/mod-app
 	@mkdir -p build/mod-app.app/Contents/MacOS
 	cp -v $(abspath $<) $@
 
-build/mod-app.app/Contents/MacOS/mod-screenshot: build-screenshot/mod-screenshot
+build/mod-app.app/Contents/MacOS/mod-pedalboard: build-pedalboard/mod-pedalboard
 	@mkdir -p build/mod-app.app/Contents/MacOS
 	ln -sf $(abspath $<) $@
 
-build/mod-app.app/Contents/MacOS/mod-ui: build-ui/mod-ui$(APP_EXT)
+build/mod-app.app/Contents/MacOS/mod-ui: build-ui/mod-ui
 	@mkdir -p build/mod-app.app/Contents/MacOS
 	ln -sf $(abspath $<) $@
 
@@ -441,20 +434,21 @@ build/jack/mod-midi-merger$(SO_EXT): mod-midi-merger/build/mod-midi-merger$(SO_E
 	@mkdir -p build/jack
 	ln -sf $(abspath $<) $@
 
-build/lib: build-ui/mod-ui$(APP_EXT)
-	rm -f $@
-	ln -sf $(abspath build-ui/lib) $@
+build/lib/library.zip: build-pedalboard/mod-pedalboard$(APP_EXT) build-ui/mod-ui$(APP_EXT)
+	@mkdir -p build
+	rm -f build/lib
+	ln -sf $(abspath build-ui/lib) build/lib
 	touch $@
 
 build/mod-app$(APP_EXT): systray/mod-app$(APP_EXT)
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
 
-build/mod-ui$(APP_EXT): build-ui/mod-ui$(APP_EXT)
+build/mod-pedalboard$(APP_EXT): build-pedalboard/mod-pedalboard$(APP_EXT)
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
 
-build/mod-screenshot$(APP_EXT): build-screenshot/mod-screenshot$(APP_EXT)
+build/mod-ui$(APP_EXT): build-ui/mod-ui$(APP_EXT)
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
 
@@ -490,16 +484,6 @@ build/jack/jack_%: $(PAWPAW_PREFIX)/lib/jack/jack_%
 	@mkdir -p build/jack
 	ln -sf $(abspath $<) $@
 
-build/lib-ui/library.zip: build-ui/mod-ui$(APP_EXT)
-	@mkdir -p build
-	ln -sf $(abspath build-ui/lib) build/lib-ui
-	touch $@
-
-build/lib-screenshot/library.zip: build-screenshot/mod-screenshot$(APP_EXT)
-	@mkdir -p build
-	ln -sf $(abspath build-screenshot/lib) build/lib-screenshot
-	touch $@
-
 build/libjack%: $(PAWPAW_PREFIX)/lib/libjack%
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
@@ -534,14 +518,24 @@ build/styles/q%.dll: $(PAWPAW_PREFIX)/lib/qt5/plugins/styles/q%.dll
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-build-screenshot/mod-screenshot$(APP_EXT): utils/cxfreeze/mod-screenshot.py utils/cxfreeze/mod-screenshot-setup.py $(BOOTSTRAP_FILES)
-	./utils/run.sh $(PAWPAW_TARGET) python3 utils/cxfreeze/mod-screenshot.py build_exe
+ifeq ($(WINDOWS),true)
+PYNSEP = '-'
+else
+PYNSEP = '_'
+endif
+
+build-pedalboard/mod-pedalboard$(APP_EXT): utils/cxfreeze/mod-pedalboard.py utils/cxfreeze/mod-pedalboard-setup.py $(BOOTSTRAP_FILES)
+	./utils/run.sh $(PAWPAW_TARGET) python3 utils/cxfreeze/mod-pedalboard.py build_exe
+	rm -rf build-pedalboard/lib/PyQt5
+	unzip -o build-pedalboard/lib/library.zip mod$(PYNSEP)pedalboard__init__.pyc mod$(PYNSEP)pedalboard__main__.pyc -d build-pedalboard
 	touch $@
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-build-ui/mod-ui$(APP_EXT): utils/cxfreeze/mod-ui.py utils/cxfreeze/mod-ui-setup.py $(BOOTSTRAP_FILES)
+build-ui/mod-ui$(APP_EXT): utils/cxfreeze/mod-ui.py utils/cxfreeze/mod-ui-setup.py build-pedalboard/mod-pedalboard$(APP_EXT)
 	./utils/run.sh $(PAWPAW_TARGET) python3 utils/cxfreeze/mod-ui.py build_exe
+	rm -rf build-ui/lib/PyQt5
+	zip -j build-ui/lib/library.zip build-pedalboard/mod$(PYNSEP)pedalboard__init__.pyc build-pedalboard/mod$(PYNSEP)pedalboard__main__.pyc
 	touch $@
 
 mod-ui/utils/libmod_utils$(SO_EXT): $(BOOTSTRAP_FILES) mod-ui/utils/utils.h mod-ui/utils/utils_jack.cpp mod-ui/utils/utils_lilv.cpp

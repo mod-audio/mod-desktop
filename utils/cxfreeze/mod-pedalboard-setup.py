@@ -6,6 +6,7 @@
 import os
 import sys
 import json
+import aggdraw
 import PIL
 
 ROOT = os.path.abspath(os.path.dirname(sys.argv[0]))

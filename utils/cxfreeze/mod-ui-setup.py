@@ -7,10 +7,12 @@ import os
 import sys
 import json
 import uuid
+import aggdraw
+import PIL
 from tornado import gen, iostream, web, websocket
 
 ROOT = os.path.abspath(os.path.dirname(sys.argv[0]))
-DATA_DIR = os.getenv('MOD_DATA_DIR')
+DATA_DIR = os.getenv('MOD_DATA_DIR', os.path.join(ROOT, 'data'))
 
 sys.path = [ROOT] + sys.path
 

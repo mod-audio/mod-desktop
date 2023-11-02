@@ -51,6 +51,10 @@ CXXFLAGS += $(shell pkg-config --cflags portaudio-2.0)
 LDFLAGS  += $(shell pkg-config --libs portaudio-2.0)
 endif
 
+ifneq ($(MACOS)$(WINDOWS),true)
+LDFLAGS += -ldl
+endif
+
 ifeq ($(shell pkg-config --exists Qt5Core Qt5Gui Qt5Svg Qt5Widgets && echo true)$(WINDOWS),truefalse)
 QT5_HOSTBINS = $(shell pkg-config --variable=host_bins Qt5Core)
 QT5_FLAGS    = $(shell pkg-config --cflags Qt5Core Qt5Gui Qt5Svg Qt5Widgets)

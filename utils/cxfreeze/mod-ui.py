@@ -21,8 +21,8 @@ else:
 
 options = {
   "zip_include_packages": ["*"],
-  "zip_exclude_packages": ["mod","modtools"],
-  "replace_paths": [["*",f".{s}lib-ui{s}"]],
+  "zip_exclude_packages": ["PIL","mod","modtools","PyQt5"],
+  "replace_paths": [["*",f".{s}lib{s}"]],
   "build_exe": f".{s}build-ui",
   "optimize": True,
 }
