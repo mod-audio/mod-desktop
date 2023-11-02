@@ -1,5 +1,4 @@
 #!/bin/sh
 
 cd "$(dirname $0)/mod-app"
-export LD_LIBRARY_PATH="$(pwd)"
 exec "$(pwd)/mod-app"
