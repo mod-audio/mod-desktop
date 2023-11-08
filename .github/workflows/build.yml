@@ -3,7 +3,7 @@ name: build
 on: [push, pull_request]
 
 env:
-  CACHE_VERSION: 4
+  CACHE_VERSION: 5
   PAWPAW_SKIP_LTO: 1
 
 jobs:
