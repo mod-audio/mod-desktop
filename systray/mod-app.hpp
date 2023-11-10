@@ -128,6 +128,7 @@ public:
     {
         ui.setupUi(this);
 
+        ui.l_version->setText(VERSION);
         ui.gb_audio->setup(ui.tb_audio);
         ui.gb_midi->setup(ui.tb_midi);
         ui.gb_lv2->setup(ui.tb_lv2);

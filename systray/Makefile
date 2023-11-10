@@ -3,7 +3,7 @@
 CC ?= gcc
 CXX ?= g++
 
-CXXFLAGS += -fPIC -std=gnu++14 -I.
+CXXFLAGS += -fPIC -std=gnu++14 -I. -DVERSION='"$(shell cat ../VERSION)"'
 
 TARGET_MACHINE := $(shell $(CC) -dumpmachine)
 
