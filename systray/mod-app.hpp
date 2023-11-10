@@ -111,6 +111,13 @@ class AppWindow : public QMainWindow
         bool canInput = false;
         bool canUseSeparateInput = false;
     };
+
+    enum DeviceInputMode {
+        kDeviceModeDuplex = 0,
+        kDeviceModeSeparated,
+        kDeviceModeNoInput,
+    };
+
     QList<DeviceInfo> devices;
     QStringList inputs;
 
@@ -466,6 +473,7 @@ private:
         settings.setValue("CloseToSystray", ui.cb_systray->isChecked());
         settings.setValue("Geometry", saveGeometry());
         settings.setValue("AudioDevice", ui.cb_device->currentText());
+        settings.setValue("AudioInputDevice", ui.cb_input->currentText());
         settings.setValue("AudioBufferSize", ui.cb_buffersize->currentText());
         settings.setValue("EnableMIDI", ui.cb_midi->isChecked());
         settings.setValue("PedalboardsMidiChannel", ui.sp_midi_pb->value());
@@ -479,6 +487,11 @@ private:
         settings.setValue("VerboseLogsJack", ui.cb_verbose_jackd->isChecked());
         settings.setValue("VerboseLogsHost", ui.cb_verbose_host->isChecked());
         settings.setValue("VerboseLogsUI", ui.cb_verbose_ui->isChecked());
+
+        settings.setValue("AudioInputMode",
+                          static_cast<int>(ui.rb_device_separate->isChecked() ? kDeviceModeSeparated :
+                                           ui.rb_device_noinput->isChecked() ? kDeviceModeNoInput :
+                                           kDeviceModeDuplex));
     }
 
     void loadSettings()
@@ -497,6 +510,31 @@ private:
                 ui.cb_device->blockSignals(false);
             }
         }
+
+        const QString audioInputDevice(settings.value("AudioInputDevice").toString());
+        if (! audioInputDevice.isEmpty())
+        {
+            const int index = ui.cb_input->findText(audioInputDevice);
+            if (index >= 0)
+                ui.cb_input->setCurrentIndex(index);
+        }
+
+        switch (settings.value("AudioInputMode", kDeviceModeDuplex).toInt())
+        {
+        case kDeviceModeSeparated:
+            ui.rb_device_separate->setEnabled(true);
+            ui.rb_device_separate->setChecked(true);
+            break;
+        case kDeviceModeNoInput:
+            ui.rb_device_noinput->setEnabled(true);
+            ui.rb_device_noinput->setChecked(true);
+            break;
+        default:
+            ui.rb_device_duplex->setEnabled(true);
+            ui.rb_device_duplex->setChecked(true);
+            break;
+        }
+
         updateDeviceDetails();
 
         const QString bufferSize(settings.value("AudioBufferSize", "128").toString());
@@ -931,8 +969,6 @@ private slots:
         ui.rb_device_noinput->setEnabled(true);
 
         if (! (ui.rb_device_duplex->isChecked() || ui.rb_device_separate->isChecked() || ui.rb_device_noinput->isChecked()))
-            ui.rb_device_duplex->setChecked(true);
-        else if (devInfo.canInput && ! devInfo.canUseSeparateInput)
             ui.rb_device_duplex->setChecked(true);
 
         if (ui.rb_device_duplex->isChecked() && ! ui.rb_device_duplex->isEnabled())
