@@ -549,7 +549,15 @@ private:
             QTimer::singleShot(100, this, &AppWindow::start);
         }
 
-        QTimer::singleShot(1, systray, &QSystemTrayIcon::show);
+        if (QSystemTrayIcon::isSystemTrayAvailable())
+        {
+            QTimer::singleShot(1, systray, &QSystemTrayIcon::show);
+        }
+        else
+        {
+            ui.cb_systray->setChecked(false);
+            ui.cb_systray->hide();
+        }
     }
 
     void setStarting()

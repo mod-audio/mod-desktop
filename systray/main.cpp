@@ -93,11 +93,6 @@ int main(int argc, char* argv[])
     app.setOrganizationName("MOD Audio");
     app.setWindowIcon(QIcon(":/mod-logo.svg"));
 
-    if (! QSystemTrayIcon::isSystemTrayAvailable())
-    {
-        return 1;
-    }
-
   #ifdef _WIN32
     SetEnvironmentVariableW(L"LANG", L"en_US.UTF-8");
 
