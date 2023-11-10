@@ -52,6 +52,15 @@ jobs:
           name: mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64
           path: |
             *.tar.xz
+      - uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          files: |
+            *.tar.xz
 
   macos:
     runs-on: macos-11
@@ -94,6 +103,15 @@ jobs:
         with:
           name: mod-app-${{ github.event.pull_request.number || env.SHA8 }}-macOS
           path: |
+            *.dmg
+      - uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          files: |
             *.dmg
 
   win64:
@@ -147,3 +165,12 @@ jobs:
           path: |
             *.exe
             *.zip
+      - uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          files: |
+            *.exe
