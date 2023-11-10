@@ -137,6 +137,7 @@ Source: "..\..\build\html\resources\pedals\*.css"; DestDir: "{app}\html\resource
 Source: "..\..\build\html\resources\pedals\*.png"; DestDir: "{app}\html\resources\pedals"; Flags: ignoreversion;
 Source: "..\..\build\html\resources\templates\*.html"; DestDir: "{app}\html\resources\templates"; Flags: ignoreversion;
 Source: "..\..\build\lib\*.*"; DestDir: "{app}\lib"; Flags: ignoreversion;
+Source: "..\..\build\lib\PIL\*.*"; DestDir: "{app}\lib\PIL"; Flags: ignoreversion;
 Source: "..\..\build\mod\*.py"; DestDir: "{app}\mod"; Flags: ignoreversion;
 Source: "..\..\build\mod\communication\*.py"; DestDir: "{app}\mod\communication"; Flags: ignoreversion;
 Source: "..\..\build\modtools\*.py"; DestDir: "{app}\modtools"; Flags: ignoreversion;
