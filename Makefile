@@ -272,20 +272,36 @@ macos:
 macos-app:
 	./utils/run.sh macos-universal-10.15 $(MAKE) -C systray
 
+macos-bootstrap:
+	./PawPaw/bootstrap-mod.sh macos-universal-10.15
+
 macos-plugins:
 	$(MAKE) PAWPAW_TARGET=macos-universal-10.15 plugins
+
+# ---------------------------------------------------------------------------------------------------------------------
 
 wasm:
 	$(MAKE) PAWPAW_TARGET=wasm
 
+wasm-app:
+	./utils/run.sh wasm $(MAKE) -C systray
+
+wasm-bootstrap:
+	./PawPaw/bootstrap-mod.sh wasm
+
 wasm-plugins:
 	$(MAKE) PAWPAW_TARGET=wasm plugins
+
+# ---------------------------------------------------------------------------------------------------------------------
 
 win64:
 	$(MAKE) PAWPAW_TARGET=win64
 
 win64-app:
 	./utils/run.sh win64 $(MAKE) -C systray
+
+win64-bootstrap:
+	./PawPaw/bootstrap-mod.sh win64
 
 win64-plugins:
 	$(MAKE) PAWPAW_TARGET=win64 plugins
