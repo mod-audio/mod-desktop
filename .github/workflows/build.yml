@@ -3,7 +3,9 @@ name: build
 on: [push, pull_request]
 
 env:
-  CACHE_VERSION: 7
+  CACHE_VERSION_LINUX: 8
+  CACHE_VERSION_MACOS: 7
+  CACHE_VERSION_WIN64: 7
   PAWPAW_SKIP_LTO: 1
 
 jobs:
@@ -19,7 +21,7 @@ jobs:
         with:
           path: |
             ~/PawPawBuilds
-          key: linux-x86_64-v${{ env.CACHE_VERSION }}
+          key: linux-x86_64-v${{ env.CACHE_VERSION_LINUX }}
       - name: Set sha8
         run: |
           echo "SHA8=$(echo ${{ github.sha }} | cut -c1-8)" >> $GITHUB_ENV
@@ -76,7 +78,7 @@ jobs:
         with:
           path: |
             ~/PawPawBuilds
-          key: macos-v${{ env.CACHE_VERSION }}
+          key: macos-v${{ env.CACHE_VERSION_MACOS }}
       - name: Set sha8
         run: |
           echo "SHA8=$(echo ${{ github.sha }} | cut -c1-8)" >> $GITHUB_ENV
@@ -130,7 +132,7 @@ jobs:
         with:
           path: |
             ~/PawPawBuilds
-          key: win64-v${{ env.CACHE_VERSION }}
+          key: win64-v${{ env.CACHE_VERSION_WIN64 }}
       - name: Set sha8
         run: |
           echo "SHA8=$(echo ${{ github.sha }} | cut -c1-8)" >> $GITHUB_ENV
