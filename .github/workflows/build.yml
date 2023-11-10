@@ -3,7 +3,7 @@ name: build
 on: [push, pull_request]
 
 env:
-  CACHE_VERSION: 5
+  CACHE_VERSION: 6
   PAWPAW_SKIP_LTO: 1
 
 jobs:
@@ -40,12 +40,14 @@ jobs:
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
           ./utils/plugin-builder/validate-plugins.sh
+          # FIXME dirty carla leaves temp folders around
+          rm -rf *.tmp
       - name: Pack
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
           mkdir mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64
           mv build mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64/mod-app
-          cp utils/linux/*.* mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64/
+          cp utils/linux/mod-app.* mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64/
           tar chJf mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64.tar.xz mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64
       - uses: actions/upload-artifact@v3
         with:
@@ -94,6 +96,8 @@ jobs:
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
           ./utils/plugin-builder/validate-plugins.sh
+          # FIXME dirty carla leaves temp folders around
+          rm -rf *.tmp
       - name: Pack
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
@@ -151,6 +155,8 @@ jobs:
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
           ./utils/plugin-builder/validate-plugins.sh
+          # FIXME dirty carla leaves temp folders around
+          rm -rf *.tmp
       - name: Pack
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
