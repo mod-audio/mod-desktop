@@ -2,6 +2,7 @@
 
 CC ?= gcc
 CXX ?= g++
+PKG_CONFIG ?= pkg-config
 
 CXXFLAGS += -fPIC -std=gnu++14 -I. -DVERSION='"$(shell cat ../VERSION)"'
 
@@ -47,20 +48,20 @@ endif
 ifeq ($(MACOS),true)
 LDFLAGS  += -framework CoreAudio
 else
-CXXFLAGS += $(shell pkg-config --cflags portaudio-2.0)
-LDFLAGS  += $(shell pkg-config --libs portaudio-2.0)
+CXXFLAGS += $(shell $(PKG_CONFIG) --cflags portaudio-2.0)
+LDFLAGS  += $(shell $(PKG_CONFIG) --libs portaudio-2.0)
 endif
 
 ifneq ($(MACOS)$(WINDOWS),true)
 LDFLAGS += -ldl
 endif
 
-ifeq ($(shell pkg-config --exists Qt5Core Qt5Gui Qt5Svg Qt5Widgets && echo true)$(WINDOWS),truefalse)
-QT5_HOSTBINS = $(shell pkg-config --variable=host_bins Qt5Core)
-QT5_FLAGS    = $(shell pkg-config --cflags Qt5Core Qt5Gui Qt5Svg Qt5Widgets)
-QT5_LIBS     = $(shell pkg-config --libs Qt5Core Qt5Gui Qt5Svg Qt5Widgets)
+ifeq ($(shell $(PKG_CONFIG) --exists Qt5Core Qt5Gui Qt5Svg Qt5Widgets && echo true)$(WINDOWS),truefalse)
+QT5_HOSTBINS = $(shell $(PKG_CONFIG) --variable=host_bins Qt5Core)
+QT5_FLAGS    = $(shell $(PKG_CONFIG) --cflags Qt5Core Qt5Gui Qt5Svg Qt5Widgets)
+QT5_LIBS     = $(shell $(PKG_CONFIG) --libs Qt5Core Qt5Gui Qt5Svg Qt5Widgets)
 else
-QT5_PREFIX   = $(shell pkg-config --variable=prefix Qt5OpenGLExtensions)
+QT5_PREFIX   = $(shell $(PKG_CONFIG) --variable=prefix Qt5OpenGLExtensions)
 QT5_HOSTBINS = $(QT5_PREFIX)/bin
 QT5_FLAGS    = -DQT_CORE_LIB -DQT_GUI_LIB -DQT_SVG_LIB -DQT_WIDGETS_LIB -I$(QT5_PREFIX)/include/qt5
 ifeq ($(MACOS),true)
