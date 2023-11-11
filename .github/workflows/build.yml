@@ -3,7 +3,7 @@ name: build
 on: [push, pull_request]
 
 env:
-  CACHE_VERSION_LINUX: 8
+  CACHE_VERSION_LINUX: 9
   CACHE_VERSION_MACOS: 7
   CACHE_VERSION_WIN64: 7
   PAWPAW_SKIP_LTO: 1
