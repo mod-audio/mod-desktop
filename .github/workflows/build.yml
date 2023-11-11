@@ -3,9 +3,9 @@ name: build
 on: [push, pull_request]
 
 env:
-  CACHE_VERSION_LINUX: 9
+  CACHE_VERSION_LINUX: 10
   CACHE_VERSION_MACOS: 7
-  CACHE_VERSION_WIN64: 7
+  CACHE_VERSION_WIN64: 8
   PAWPAW_SKIP_LTO: 1
 
 jobs:
@@ -28,7 +28,7 @@ jobs:
       - name: Set up dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -yqq --allow-downgrades gperf libasound2-dev libdbus-1-dev libgl1-mesa-dev libglib2.0-dev libjack-jackd2-dev libpcre3-dev libqt5svg5-dev libxcb1-dev libxcursor-dev libxext-dev libxfixes-dev libxrandr-dev libxrender-dev meson qtbase5-dev qtbase5-dev-tools uuid-dev xdg-user-dirs
+          sudo apt-get install -yqq --allow-downgrades gperf libasound2-dev libdbus-1-dev libgl1-mesa-dev libglib2.0-dev libpcre3-dev libqt5svg5-dev libxcb1-dev libxcursor-dev libxext-dev libxfixes-dev libxrandr-dev libxrender-dev meson qtbase5-dev qtbase5-dev-tools uuid-dev xdg-user-dirs
       - name: Build dependencies
         run: |
           ./PawPaw/bootstrap-mod.sh linux-x86_64 && ./PawPaw/.cleanup.sh linux-x86_64
