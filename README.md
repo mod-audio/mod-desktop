@@ -27,9 +27,6 @@ MOD App only has builds for Windows 64bit for now, find them in the [releases se
 
 ## Development
 
-For now we are still setting things up, specially in regards of having everything automated and building through GitHub Actions.
-Then macOS related handling is still needed, but for now focus is on Windows just to get 1 platform working well enough to be usable.
-
 If you want to contribute, here are a few items where help would be appreciated:
 
 - Debugging and fixing Windows specific issues within mod-ui (*)
@@ -40,7 +37,6 @@ If you want to contribute, here are a few items where help would be appreciated:
 Also help in these areas, but they are much more involved:
 - Create a JACK-API-compatible node-based audio graph, to be used for eventually running "mod-app as a plugin" (there are a few opensource libs for this already, like the one included in miniaudio)
 - Custom [jack-router](https://github.com/jackaudio/jack-router) build targetting MOD App (TBD how to best package jack2 within mod-app)
-- Fix jack2 winmme MIDI handling, as per [jack2#931](https://github.com/jackaudio/jack2/issues/931)
 
 ## License
 
