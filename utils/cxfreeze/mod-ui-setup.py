@@ -59,7 +59,7 @@ os.makedirs(os.path.join(DATA_DIR, 'user-files', 'NAM Models'), exist_ok=True)
 
 # fake device setup
 os.makedirs(os.path.join(DATA_DIR, 'device'), exist_ok=True)
-#os.environ['MOD_API_KEY'] = os.path.join(resdir, 'mod_api_key.pub')
+#os.environ['MOD_API_KEY'] = os.path.join(resdir, '..', 'mod_api_key.pub')
 os.environ['MOD_DEVICE_KEY'] = os.path.join(DATA_DIR, 'device', 'rsa')
 os.environ['MOD_DEVICE_TAG'] = os.path.join(DATA_DIR, 'device', 'tag')
 os.environ['MOD_DEVICE_UID'] = os.path.join(DATA_DIR, 'device', 'uid')
