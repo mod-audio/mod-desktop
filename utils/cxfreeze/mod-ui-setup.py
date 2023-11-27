@@ -10,6 +10,10 @@ import uuid
 import aggdraw
 import PIL
 from tornado import gen, iostream, web, websocket
+from Cryptodome.Cipher import PKCS1_OAEP, AES
+from Cryptodome.Hash import SHA1
+from Cryptodome.PublicKey import RSA
+from Cryptodome.Signature import pkcs1_15 as PKCS1_v1_5
 
 ROOT = os.path.abspath(os.path.dirname(sys.argv[0]))
 DATA_DIR = os.getenv('MOD_DATA_DIR', os.path.join(ROOT, 'data'))
@@ -52,6 +56,34 @@ os.makedirs(os.path.join(DATA_DIR, 'user-files', 'SF2 Instruments'), exist_ok=Tr
 os.makedirs(os.path.join(DATA_DIR, 'user-files', 'SFZ Instruments'), exist_ok=True)
 os.makedirs(os.path.join(DATA_DIR, 'user-files', 'Aida DSP Models'), exist_ok=True)
 os.makedirs(os.path.join(DATA_DIR, 'user-files', 'NAM Models'), exist_ok=True)
+
+# fake device setup
+os.makedirs(os.path.join(DATA_DIR, 'device'), exist_ok=True)
+#os.environ['MOD_API_KEY'] = os.path.join(resdir, 'mod_api_key.pub')
+os.environ['MOD_DEVICE_KEY'] = os.path.join(DATA_DIR, 'device', 'rsa')
+os.environ['MOD_DEVICE_TAG'] = os.path.join(DATA_DIR, 'device', 'tag')
+os.environ['MOD_DEVICE_UID'] = os.path.join(DATA_DIR, 'device', 'uid')
+
+from datetime import datetime
+from random import randint
+
+if not os.path.isfile(os.environ['MOD_DEVICE_TAG']):
+    with open(os.environ['MOD_DEVICE_TAG'], 'w') as fh:
+        tag = 'MDS-{0}-0-00-000-{1}'.format(datetime.utcnow().strftime('%Y%m%d'), randint(9000, 9999))
+        fh.write(tag)
+if not os.path.isfile(os.environ['MOD_DEVICE_UID']):
+    with open(os.environ['MOD_DEVICE_UID'], 'w') as fh:
+        uid = ':'.join(['{0}{1}'.format(randint(0, 9), randint(0, 9)) for i in range(0, 16)])
+        fh.write(uid)
+if not os.path.isfile(os.environ['MOD_DEVICE_KEY']):
+    try:
+        key = RSA.generate(2048)
+        with open(os.environ['MOD_DEVICE_KEY'], 'wb') as fh:
+            fh.write(key.exportKey('PEM'))
+        with open(os.environ['MOD_DEVICE_KEY'] + '.pub', 'wb') as fh:
+            fh.write(key.publickey().exportKey('PEM'))
+    except Exception as ex:
+        print('Can\'t create a device key: {0}'.format(ex))
 
 # import webserver after setting up environment
 from mod import webserver
