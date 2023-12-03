@@ -529,7 +529,8 @@ public:
 
                 if (devInfo->maxOutputChannels > 0)
                 {
-                    ui.cb_device->addItem(hostApiName == "JACK" ? "JACK / PipeWire" : uid);
+                    ui.cb_device->addItem(hostApiName == "JACK" || hostApiName == "JACK Audio Connection Kit"
+                                          ? "JACK / PipeWire" : uid);
                     devices.append({
                         uid,
                         devInfo->maxInputChannels > 0,

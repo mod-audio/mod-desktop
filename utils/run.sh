@@ -24,7 +24,7 @@ shift
 
 export PAWPAW_SKIP_LTO=1
 export PAWPAW_QUIET=1
-source PawPaw/local.env ${target}
+source src/PawPaw/local.env ${target}
 
 # ---------------------------------------------------------------------------------------------------------------------
 # expand alias if needed

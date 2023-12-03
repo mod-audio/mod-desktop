@@ -4,7 +4,7 @@ CC ?= gcc
 CXX ?= g++
 PKG_CONFIG ?= pkg-config
 
-CXXFLAGS += -fPIC -std=gnu++14 -I. -DVERSION='"$(shell cat ../VERSION)"'
+CXXFLAGS += -fPIC -std=gnu++14 -I. -DVERSION='"$(shell cat ../../VERSION)"'
 
 TARGET_MACHINE := $(shell $(CC) -dumpmachine)
 

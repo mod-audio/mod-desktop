@@ -47,7 +47,7 @@ github = https://github.com/$(1)/$(2)/archive/$(3)
 # custom for PawPaw
 
 PKG = $(call UPPERCASE,$(call sanitize,$(pkgname)))
-$(PKG)_PKGDIR = $(CURDIR)/mod-plugin-builder/plugins/package/$(pkgname)
+$(PKG)_PKGDIR = $(CURDIR)/src/mod-plugin-builder/plugins/package/$(pkgname)
 
 RENAME_EXTENSION = $(foreach f,$(2)$(3)$(4)$(5)$(6)$(7)$(8)$(9)$(10)$(11)$(12)$(13)$(14)$(15)$(16)$(17)$(18)$(19),mv $(f) $(subst .so,.$(1),$(f));) echo
 
@@ -145,7 +145,7 @@ endif
 
 endef
 
-include $(CURDIR)/mod-plugin-builder/plugins/package/$(pkgname)/$(pkgname).mk
+include $(CURDIR)/src/mod-plugin-builder/plugins/package/$(pkgname)/$(pkgname).mk
 
 $(PKG)_DLVERSION = $(call sanitize,$(strip $($(PKG)_VERSION)))
 $(PKG)_BUILDDIR = $(PAWPAW_BUILDDIR)/$(pkgname)-$($(PKG)_DLVERSION)

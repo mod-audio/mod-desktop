@@ -15,8 +15,8 @@ if [ -z "${target}" ] || [ -z "${plugin}" ]; then
     exit 1
 fi
 
-if [ ! -e mod-plugin-builder ]; then
-    echo "missing mod-plugin-builder"
+if [ ! -e src/mod-plugin-builder ]; then
+    echo "missing src/mod-plugin-builder"
     exit 1
 fi
 
@@ -25,7 +25,7 @@ fi
 
 export PAWPAW_SKIP_LTO=1
 export PAWPAW_QUIET=1
-source PawPaw/local.env "${target}"
+source src/PawPaw/local.env "${target}"
 
 # ---------------------------------------------------------------------------------------------------------------------
 

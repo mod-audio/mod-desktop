@@ -134,6 +134,7 @@ TARGETS += build/jack/jack_winmme.dll
 TARGETS += build/libjack64.dll
 TARGETS += build/libjackserver64.dll
 TARGETS += build/libpython3.8.dll
+TARGETS += build/mod-app-asio.dll
 TARGETS += build/Qt5Core.dll
 TARGETS += build/Qt5Gui.dll
 TARGETS += build/Qt5Svg.dll
@@ -208,7 +209,7 @@ PLUGINS += zam-plugins
 # PLUGINS += lv2-examples
 
 # include plugin projects for version and bundle list
-include $(foreach PLUGIN,$(PLUGINS),mod-plugin-builder/plugins/package/$(PLUGIN)/$(PLUGIN).mk)
+include $(foreach PLUGIN,$(PLUGINS),src/mod-plugin-builder/plugins/package/$(PLUGIN)/$(PLUGIN).mk)
 
 # list of unwanted bundles (for a variety of reasons)
 UNWANTED_BUNDLES  = artyfx-bitta.lv2
@@ -247,10 +248,10 @@ TARGETS += $(foreach PLUGIN,$(PLUGINS),$(call PLUGIN_STAMP,$(PLUGIN)))
 all: $(TARGETS)
 
 clean:
-	$(MAKE) clean -C mod-host
-	$(MAKE) clean -C mod-ui/utils
-	$(MAKE) clean -C systray
-	rm -rf mod-midi-merger/build
+	$(MAKE) clean -C src/mod-host
+	$(MAKE) clean -C src/mod-ui/utils
+	$(MAKE) clean -C src/systray
+	rm -rf src/mod-midi-merger/build
 	rm -rf build
 	rm -rf build-plugin-stamps
 	rm -rf build-pedalboard
@@ -270,10 +271,10 @@ macos:
 	$(MAKE) PAWPAW_TARGET=macos-universal-10.15
 
 macos-app:
-	./utils/run.sh macos-universal-10.15 $(MAKE) -C systray
+	./utils/run.sh macos-universal-10.15 $(MAKE) -C src/systray
 
 macos-bootstrap:
-	./PawPaw/bootstrap-mod.sh macos-universal-10.15
+	./src/PawPaw/bootstrap-mod.sh macos-universal-10.15
 
 macos-plugins:
 	$(MAKE) PAWPAW_TARGET=macos-universal-10.15 plugins
@@ -284,10 +285,10 @@ wasm:
 	$(MAKE) PAWPAW_TARGET=wasm
 
 wasm-app:
-	./utils/run.sh wasm $(MAKE) -C systray
+	./utils/run.sh wasm $(MAKE) -C src/systray
 
 wasm-bootstrap:
-	./PawPaw/bootstrap-mod.sh wasm
+	./src/PawPaw/bootstrap-mod.sh wasm
 
 wasm-plugins:
 	$(MAKE) PAWPAW_TARGET=wasm plugins
@@ -298,17 +299,17 @@ win64:
 	$(MAKE) PAWPAW_TARGET=win64
 
 win64-app:
-	./utils/run.sh win64 $(MAKE) -C systray
+	./utils/run.sh win64 $(MAKE) -C src/systray
 
 win64-bootstrap:
-	./PawPaw/bootstrap-mod.sh win64
+	./src/PawPaw/bootstrap-mod.sh win64
 
 win64-plugins:
 	$(MAKE) PAWPAW_TARGET=win64 plugins
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-build-ui/lib/libmod_utils$(SO_EXT): mod-ui/utils/libmod_utils$(SO_EXT) build/lib/library.zip
+build-ui/lib/libmod_utils$(SO_EXT): src/mod-ui/utils/libmod_utils$(SO_EXT) build/lib/library.zip
 	ln -sf $(abspath $<) $@
 	touch $@
 
@@ -334,15 +335,15 @@ build/mod-app.app/Contents/MacOS/jack/jack_%.so: $(PAWPAW_PREFIX)/lib/jack/jack_
 	@mkdir -p build/mod-app.app/Contents/MacOS/jack
 	ln -sf $(abspath $<) $@
 
-build/mod-app.app/Contents/MacOS/jack/mod-host.so: mod-host/mod-host.so
+build/mod-app.app/Contents/MacOS/jack/mod-host.so: src/mod-host/mod-host.so
 	@mkdir -p build/mod-app.app/Contents/MacOS/jack
 	ln -sf $(abspath $<) $@
 
-build/mod-app.app/Contents/MacOS/jack/mod-midi-broadcaster.so: mod-midi-merger/build/mod-midi-broadcaster.so
+build/mod-app.app/Contents/MacOS/jack/mod-midi-broadcaster.so: build-midi-merger/mod-midi-broadcaster.so
 	@mkdir -p build/mod-app.app/Contents/MacOS/jack
 	ln -sf $(abspath $<) $@
 
-build/mod-app.app/Contents/MacOS/jack/mod-midi-merger.so: mod-midi-merger/build/mod-midi-merger.so
+build/mod-app.app/Contents/MacOS/jack/mod-midi-merger.so: build-midi-merger/mod-midi-merger.so
 	@mkdir -p build/mod-app.app/Contents/MacOS/jack
 	ln -sf $(abspath $<) $@
 
@@ -355,7 +356,7 @@ build/mod-app.app/Contents/MacOS/lib/library.zip: build-pedalboard/mod-pedalboar
 	ln -sf $(abspath build-ui/lib) build/mod-app.app/Contents/MacOS/lib
 	touch $@
 
-build/mod-app.app/Contents/MacOS/mod-app: systray/mod-app
+build/mod-app.app/Contents/MacOS/mod-app: src/systray/mod-app
 	@mkdir -p build/mod-app.app/Contents/MacOS
 	cp -v $(abspath $<) $@
 
@@ -363,15 +364,15 @@ build/mod-app.app/Contents/MacOS/mod-pedalboard: build-pedalboard/mod-pedalboard
 	@mkdir -p build/mod-app.app/Contents/MacOS
 	ln -sf $(abspath $<) $@
 
-build/mod-app.app/Contents/MacOS/mod-ui: build-ui/mod-ui
+build/mod-app.app/Contents/MacOS/mod-ui: src/build-ui/mod-ui
 	@mkdir -p build/mod-app.app/Contents/MacOS
 	ln -sf $(abspath $<) $@
 
-build/mod-app.app/Contents/MacOS/mod: mod-ui/mod
+build/mod-app.app/Contents/MacOS/mod: src/mod-ui/mod
 	@mkdir -p build/mod-app.app/Contents/MacOS/
 	ln -sf $(abspath $<) $@
 
-build/mod-app.app/Contents/MacOS/modtools: mod-ui/modtools
+build/mod-app.app/Contents/MacOS/modtools: src/mod-ui/modtools
 	@mkdir -p build/mod-app.app/Contents/MacOS/
 	ln -sf $(abspath $<) $@
 
@@ -400,11 +401,11 @@ build/mod-app.app/Contents/PlugIns/styles/libq%.dylib: $(PAWPAW_PREFIX)/lib/qt5/
 	@mkdir -p build/mod-app.app/Contents/PlugIns/styles
 	ln -sf $(abspath $<) $@
 
-build/mod-app.app/Contents/Resources/default.pedalboard: mod-ui/default.pedalboard
+build/mod-app.app/Contents/Resources/default.pedalboard: src/mod-ui/default.pedalboard
 	@mkdir -p build/mod-app.app/Contents/Resources
 	ln -sf $(abspath $<) $@
 
-build/mod-app.app/Contents/Resources/html: mod-ui/html
+build/mod-app.app/Contents/Resources/html: src/mod-ui/html
 	@mkdir -p build/mod-app.app/Contents/Resources
 	ln -sf $(abspath $<) $@
 
@@ -412,7 +413,7 @@ build/mod-app.app/Contents/Resources/mod-hardware-descriptor.json: utils/macos/m
 	@mkdir -p build/mod-app.app/Contents/Resources
 	ln -sf $(abspath $<) $@
 
-build/mod-app.app/Contents/Resources/mod-logo.icns: systray/mod-logo.icns
+build/mod-app.app/Contents/Resources/mod-logo.icns: src/systray/mod-logo.icns
 	@mkdir -p build/mod-app.app/Contents/Resources
 	ln -sf $(abspath $<) $@
 
@@ -422,11 +423,11 @@ build/mod-app.app/Contents/Resources/VERSION: VERSION
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-build/default.pedalboard: mod-ui/default.pedalboard
+build/default.pedalboard: src/mod-ui/default.pedalboard
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
 
-build/html: mod-ui/html
+build/html: src/mod-ui/html
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
 
@@ -438,15 +439,15 @@ build/jack/%.conf: utils/jack/%.conf
 	@mkdir -p build/jack
 	ln -sf $(abspath $<) $@
 
-build/jack/mod-host$(SO_EXT): mod-host/mod-host.so
+build/jack/mod-host$(SO_EXT): src/mod-host/mod-host.so
 	@mkdir -p build/jack
 	ln -sf $(abspath $<) $@
 
-build/jack/mod-midi-broadcaster$(SO_EXT): mod-midi-merger/build/mod-midi-broadcaster$(SO_EXT)
+build/jack/mod-midi-broadcaster$(SO_EXT): build-midi-merger/mod-midi-broadcaster$(SO_EXT)
 	@mkdir -p build/jack
 	ln -sf $(abspath $<) $@
 
-build/jack/mod-midi-merger$(SO_EXT): mod-midi-merger/build/mod-midi-merger$(SO_EXT)
+build/jack/mod-midi-merger$(SO_EXT): build-midi-merger/mod-midi-merger$(SO_EXT)
 	@mkdir -p build/jack
 	ln -sf $(abspath $<) $@
 
@@ -456,7 +457,7 @@ build/lib/library.zip: build-pedalboard/mod-pedalboard$(APP_EXT) build-ui/mod-ui
 	ln -sf $(abspath build-ui/lib) build/lib
 	touch $@
 
-build/mod-app$(APP_EXT): systray/mod-app$(APP_EXT)
+build/mod-app$(APP_EXT): src/systray/mod-app$(APP_EXT)
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
 
@@ -468,11 +469,11 @@ build/mod-ui$(APP_EXT): build-ui/mod-ui$(APP_EXT)
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
 
-build/mod: mod-ui/mod
+build/mod: src/mod-ui/mod
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
 
-build/modtools: mod-ui/modtools
+build/modtools: src/mod-ui/modtools
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
 
@@ -505,6 +506,10 @@ build/libjack%: $(PAWPAW_PREFIX)/lib/libjack%
 	ln -sf $(abspath $<) $@
 
 build/libpython%: $(PAWPAW_PREFIX)/bin/libpython%
+	@mkdir -p build
+	ln -sf $(abspath $<) $@
+
+build/mod-app-asio.dll: src/mod-app-asio/mod-app-asio.dll
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
 
@@ -554,33 +559,36 @@ build-ui/mod-ui$(APP_EXT): utils/cxfreeze/mod-ui.py utils/cxfreeze/mod-ui-setup.
 	zip -j build-ui/lib/library.zip build-pedalboard/mod$(PYNSEP)pedalboard__init__.pyc build-pedalboard/mod$(PYNSEP)pedalboard__main__.pyc
 	touch $@
 
-mod-ui/utils/libmod_utils$(SO_EXT): $(BOOTSTRAP_FILES) mod-ui/utils/utils.h mod-ui/utils/utils_jack.cpp mod-ui/utils/utils_lilv.cpp
-	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) MODAPP=1 -C mod-ui/utils
+src/mod-ui/utils/libmod_utils$(SO_EXT): $(BOOTSTRAP_FILES) src/mod-ui/utils/utils.h src/mod-ui/utils/utils_jack.cpp src/mod-ui/utils/utils_lilv.cpp
+	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) MODAPP=1 -C src/mod-ui/utils
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-mod-host/mod-host.so: mod-host/src/*.c mod-host/src/*.h mod-host/src/monitor/*.c mod-host/src/monitor/*.h $(BOOTSTRAP_FILES)
-	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) MODAPP=1 SKIP_READLINE=1 SKIP_FFTW335=1 -C mod-host
+src/mod-host/mod-host.so: src/mod-host/src/*.c src/mod-host/src/*.h src/mod-host/src/monitor/*.c src/mod-host/src/monitor/*.h $(BOOTSTRAP_FILES)
+	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) MODAPP=1 SKIP_READLINE=1 SKIP_FFTW335=1 -C src/mod-host
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-mod-midi-merger/build/mod-midi-broadcaster$(SO_EXT): mod-midi-merger/build/mod-midi-merger-standalone$(APP_EXT)
+build-midi-merger/mod-midi-broadcaster$(SO_EXT): build-midi-merger/mod-midi-merger-standalone$(APP_EXT)
 	touch $@
 
-mod-midi-merger/build/mod-midi-merger$(SO_EXT): mod-midi-merger/build/mod-midi-merger-standalone$(APP_EXT)
+build-midi-merger/mod-midi-merger$(SO_EXT): build-midi-merger/mod-midi-merger-standalone$(APP_EXT)
 	touch $@
 
-mod-midi-merger/build/mod-midi-merger-standalone$(APP_EXT): mod-midi-merger/build/Makefile mod-midi-merger/src/*.c mod-midi-merger/src/*.h
-	./utils/run.sh $(PAWPAW_TARGET) cmake --build mod-midi-merger/build
+build-midi-merger/mod-midi-merger-standalone$(APP_EXT): build-midi-merger/Makefile src/mod-midi-merger/src/*.c src/mod-midi-merger/src/*.h
+	./utils/run.sh $(PAWPAW_TARGET) cmake --build build-midi-merger
 	touch $@
 
-mod-midi-merger/build/Makefile: $(BOOTSTRAP_FILES)
-	./utils/run.sh $(PAWPAW_TARGET) cmake -S mod-midi-merger -B mod-midi-merger/build
+build-midi-merger/Makefile: $(BOOTSTRAP_FILES)
+	./utils/run.sh $(PAWPAW_TARGET) cmake -S src/mod-midi-merger -B build-midi-merger
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-systray/mod-app$(APP_EXT): systray/main.cpp systray/mod-app.hpp systray/mod-app.ui systray/widgets.hpp
-	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) -C systray
+src/mod-app-asio/mod-app-asio.dll: src/mod-app-asio/*.c
+	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) -C src/mod-app-asio
+
+src/systray/mod-app$(APP_EXT): src/systray/main.cpp src/systray/mod-app.hpp src/systray/mod-app.ui src/systray/widgets.hpp
+	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) -C src/systray
 
 # ---------------------------------------------------------------------------------------------------------------------
 

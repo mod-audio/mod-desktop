@@ -141,6 +141,8 @@ Source: "..\..\build\lib\PIL\*.*"; DestDir: "{app}\lib\PIL"; Flags: ignoreversio
 Source: "..\..\build\mod\*.py"; DestDir: "{app}\mod"; Flags: ignoreversion;
 Source: "..\..\build\mod\communication\*.py"; DestDir: "{app}\mod\communication"; Flags: ignoreversion;
 Source: "..\..\build\modtools\*.py"; DestDir: "{app}\modtools"; Flags: ignoreversion;
+; asio driver
+Source: "..\..\build\mod-app-asio.dll"; DestDir: "{win}"; Flags: ignoreversion regserver 64bit;
 ; plugins
 #include "win64-plugins.iss"
 

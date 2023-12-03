@@ -1,15 +1,18 @@
-[submodule "mod-host"]
-	path = mod-host
+[submodule "src/mod-app-asio"]
+	path = src/mod-app-asio
+	url = https://github.com/wineasio/wineasio.git
+[submodule "src/mod-host"]
+	path = src/mod-host
 	url = https://github.com/moddevices/mod-host.git
-[submodule "mod-ui"]
-	path = mod-ui
-	url = https://github.com/moddevices/mod-ui.git
-[submodule "mod-midi-merger"]
-	path = mod-midi-merger
+[submodule "src/mod-midi-merger"]
+	path = src/mod-midi-merger
 	url = https://github.com/moddevices/mod-midi-merger.git
-[submodule "mod-plugin-builder"]
-	path = mod-plugin-builder
+[submodule "src/mod-plugin-builder"]
+	path = src/mod-plugin-builder
 	url = https://github.com/moddevices/mod-plugin-builder.git
-[submodule "PawPaw"]
-	path = PawPaw
+[submodule "src/mod-ui"]
+	path = src/mod-ui
+	url = https://github.com/moddevices/mod-ui.git
+[submodule "src/PawPaw"]
+	path = src/PawPaw
 	url = https://github.com/DISTRHO/PawPaw.git
