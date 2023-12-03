@@ -15,14 +15,14 @@ function convert_path() {
 }
 
 if [ -e mod-ui.exe ]; then
-    source ../PawPaw/local.env win64
+    source ../src/PawPaw/local.env win64
     PATH_SEP=';'
 elif [ -e mod-app.app ]; then
-    source ../PawPaw/local.env macos-universal-10.15
+    source ../src/PawPaw/local.env macos-universal-10.15
     export DYLD_LIBRARY_PATH="${PAWPAW_PREFIX}/lib"
     PATH_SEP=':'
 else
-    source ../PawPaw/local.env linux
+    source ../src/PawPaw/local.env linux
     export LD_LIBRARY_PATH="${PAWPAW_PREFIX}/lib"
     PATH_SEP=':'
 fi
@@ -71,14 +71,11 @@ mkdir -p "${DOCS_DIR}/MOD App/user-files/SFZ Instruments"
 mkdir -p "${DOCS_DIR}/MOD App/user-files/Aida DSP Models"
 mkdir -p "${DOCS_DIR}/MOD App/user-files/NAM Models"
 
-cd ../mod-ui
-
-if [ -e ../build/mod-ui.exe ]; then
-    rm -f utils/libjack64.dll
-    ln -s $(realpath ../build/libjack64.dll) utils/libjack64.dll
-fi
+cd ../src/mod-ui
 
 export MOD_DEFAULT_PEDALBOARD="$(convert_path $(pwd)/default.pedalboard)"
 export MOD_HTML_DIR="$(convert_path $(pwd)/html)"
+
+echo "Starting webserver using http://localhost:${MOD_DEVICE_WEBSERVER_PORT}/..."
 
 exec ${PYTHON} -c "from mod import webserver; webserver.run()"

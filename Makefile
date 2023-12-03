@@ -251,8 +251,8 @@ clean:
 	$(MAKE) clean -C src/mod-host
 	$(MAKE) clean -C src/mod-ui/utils
 	$(MAKE) clean -C src/systray
-	rm -rf src/mod-midi-merger/build
 	rm -rf build
+	rm -rf build-midi-merger
 	rm -rf build-plugin-stamps
 	rm -rf build-pedalboard
 	rm -rf build-ui
@@ -587,7 +587,7 @@ build-midi-merger/Makefile: $(BOOTSTRAP_FILES)
 src/mod-app-asio/mod-app-asio.dll: src/mod-app-asio/*.c
 	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) -C src/mod-app-asio
 
-src/systray/mod-app$(APP_EXT): src/systray/main.cpp src/systray/mod-app.hpp src/systray/mod-app.ui src/systray/widgets.hpp
+src/systray/mod-app$(APP_EXT): src/systray/main.cpp src/systray/mod-app.hpp src/systray/mod-app.qrc src/systray/mod-app.ui src/systray/widgets.hpp
 	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) -C src/systray
 
 # ---------------------------------------------------------------------------------------------------------------------

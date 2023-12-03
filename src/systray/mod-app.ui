@@ -57,7 +57,7 @@
             <string notr="true"/>
            </property>
            <property name="pixmap">
-            <pixmap resource="mod-app.qrc">:/mod-logo.svg</pixmap>
+            <pixmap resource="mod-app.qrc">:/res/mod-logo.svg</pixmap>
            </property>
            <property name="scaledContents">
             <bool>true</bool>

@@ -1,2 +1,2 @@
-id ICON "mod-logo.ico"
-401 ICON "mod-logo.ico"
+id ICON "../../res/mod-logo.ico"
+401 ICON "../../res/mod-logo.ico"

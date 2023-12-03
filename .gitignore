@@ -9,6 +9,6 @@
 *.zip
 qrc_*.hpp
 ui_*.hpp
-/systray/mod-app
+/src/systray/mod-app
 /utils/win64-plugins.iss
 /utils/win64-version.iss

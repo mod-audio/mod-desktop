@@ -1,5 +1,5 @@
 <RCC version="1.0">
     <qresource prefix="/">
-        <file>mod-logo.svg</file>
+        <file>../../res/mod-logo.svg</file>
     </qresource>
 </RCC>

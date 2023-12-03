@@ -24,7 +24,7 @@ Name: plugins; Description: "LV2 plugins"; Types: normal; Flags: fixed;
 
 [Files]
 ; icon
-Source: "..\..\src\systray\mod-logo.ico"; DestDir: "{app}"; Flags: ignoreversion;
+Source: "..\..\res\mod-logo.ico"; DestDir: "{app}"; Flags: ignoreversion;
 ; jack + mod-host
 Source: "..\..\build\jackd.exe"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "..\..\build\libjack64.dll"; DestDir: "{app}"; Flags: ignoreversion;
@@ -137,6 +137,7 @@ Source: "..\..\build\html\resources\pedals\*.css"; DestDir: "{app}\html\resource
 Source: "..\..\build\html\resources\pedals\*.png"; DestDir: "{app}\html\resources\pedals"; Flags: ignoreversion;
 Source: "..\..\build\html\resources\templates\*.html"; DestDir: "{app}\html\resources\templates"; Flags: ignoreversion;
 Source: "..\..\build\lib\*.*"; DestDir: "{app}\lib"; Flags: ignoreversion;
+Source: "..\..\build\lib\Cryptodome\*.*"; DestDir: "{app}\lib\Cryptodome"; Flags: ignoreversion;
 Source: "..\..\build\lib\PIL\*.*"; DestDir: "{app}\lib\PIL"; Flags: ignoreversion;
 Source: "..\..\build\mod\*.py"; DestDir: "{app}\mod"; Flags: ignoreversion;
 Source: "..\..\build\mod\communication\*.py"; DestDir: "{app}\mod\communication"; Flags: ignoreversion;

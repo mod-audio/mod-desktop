@@ -95,6 +95,8 @@ $(TARGET): $(OBJS)
 ifeq ($(MACOS),true)
 	install_name_tool -change "@rpath/QtCore.framework/Versions/5/QtCore" "@executable_path/../Frameworks/QtCore.framework/QtCore" $@
 	install_name_tool -change "@rpath/QtGui.framework/Versions/5/QtGui" "@executable_path/../Frameworks/QtGui.framework/QtGui" $@
+	install_name_tool -change "@rpath/QtOpenGL.framework/Versions/5/QtOpenGL" "@executable_path/../Frameworks/QtOpenGL.framework/QtOpenGL" $@
+	install_name_tool -change "@rpath/QtPrintSupport.framework/Versions/5/QtPrintSupport" "@executable_path/../Frameworks/QtPrintSupport.framework/QtPrintSupport" $@
 	install_name_tool -change "@rpath/QtSvg.framework/Versions/5/QtSvg" "@executable_path/../Frameworks/QtSvg.framework/QtSvg" $@
 	install_name_tool -change "@rpath/QtWidgets.framework/Versions/5/QtWidgets" "@executable_path/../Frameworks/QtWidgets.framework/QtWidgets" $@
 endif
@@ -102,7 +104,7 @@ endif
 main.cpp.o: main.cpp mod-app.hpp qrc_mod-app.hpp ui_mod-app.hpp widgets.hpp
 	$(CXX) $< $(CXXFLAGS) $(QT5_FLAGS) -c -o $@
 
-mod-app.rc.o: mod-app.rc mod-logo.ico
+mod-app.rc.o: mod-app.rc
 	$(WINDRES) $< -O coff -o $@
 
 qrc_mod-app.hpp: mod-app.qrc
