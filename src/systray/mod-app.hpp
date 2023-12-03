@@ -127,6 +127,10 @@ class AppWindow : public QMainWindow
     bool successfullyStarted = false;
     int timerId = 0;
 
+   #ifdef Q_OS_WIN
+    HANDLE openEvent = nullptr;
+   #endif
+
     struct DeviceInfo {
         QString uid;
         bool canInput = false;
@@ -216,11 +220,20 @@ public:
         connect(&processUI, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this, &AppWindow::uiFinished);
 
         timerId = startTimer(500);
+
+       #ifdef Q_OS_WIN
+        openEvent = ::CreateEventA(nullptr, false, false, "Global\\mod-app-open");
+       #endif
     }
 
     ~AppWindow()
     {
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
+
+       #ifdef Q_OS_WIN
+        if (openEvent != nullptr)
+            CloseHandle(openEvent);
+       #endif
 
         close();
     }
@@ -588,6 +601,17 @@ protected:
     {
         if (timerId != 0 && event->timerId() == timerId)
         {
+           #ifdef Q_OS_WIN
+            if (openEvent != nullptr)
+            {
+                if (WaitForSingleObject(openEvent, 0) == WAIT_OBJECT_0)
+                {
+                    show();
+                    activateWindow();
+                }
+            }
+           #endif
+
             if (startingHost || stoppingHost || processHost.state() != QProcess::NotRunning)
                 readHostLog();
 
