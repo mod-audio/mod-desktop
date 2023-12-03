@@ -351,7 +351,7 @@ build/mod-app.app/Contents/MacOS/libjack%: $(PAWPAW_PREFIX)/lib/libjack%
 	@mkdir -p build/mod-app.app/Contents/MacOS
 	ln -sf $(abspath $<) $@
 
-build/mod-app.app/Contents/MacOS/lib/library.zip: build-pedalboard/mod-pedalboard build-ui/mod-ui
+build/mod-app.app/Contents/MacOS/lib/library.zip: build-pedalboard/mod-pedalboard$(APP_EXT) build-ui/mod-ui$(APP_EXT)
 	@mkdir -p build
 	ln -sf $(abspath build-ui/lib) build/mod-app.app/Contents/MacOS/lib
 	touch $@
@@ -360,11 +360,11 @@ build/mod-app.app/Contents/MacOS/mod-app: src/systray/mod-app
 	@mkdir -p build/mod-app.app/Contents/MacOS
 	cp -v $(abspath $<) $@
 
-build/mod-app.app/Contents/MacOS/mod-pedalboard: build-pedalboard/mod-pedalboard
+build/mod-app.app/Contents/MacOS/mod-pedalboard: build-pedalboard/mod-pedalboard$(APP_EXT)
 	@mkdir -p build/mod-app.app/Contents/MacOS
 	ln -sf $(abspath $<) $@
 
-build/mod-app.app/Contents/MacOS/mod-ui: src/build-ui/mod-ui
+build/mod-app.app/Contents/MacOS/mod-ui: build-ui/mod-ui$(APP_EXT)
 	@mkdir -p build/mod-app.app/Contents/MacOS
 	ln -sf $(abspath $<) $@
 

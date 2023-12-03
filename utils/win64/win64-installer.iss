@@ -24,7 +24,7 @@ Name: plugins; Description: "LV2 plugins"; Types: normal; Flags: fixed;
 
 [Files]
 ; icon
-Source: "..\..\systray\mod-logo.ico"; DestDir: "{app}"; Flags: ignoreversion;
+Source: "..\..\src\systray\mod-logo.ico"; DestDir: "{app}"; Flags: ignoreversion;
 ; jack + mod-host
 Source: "..\..\build\jackd.exe"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "..\..\build\libjack64.dll"; DestDir: "{app}"; Flags: ignoreversion;
