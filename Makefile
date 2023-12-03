@@ -413,7 +413,7 @@ build/mod-app.app/Contents/Resources/mod-hardware-descriptor.json: utils/macos/m
 	@mkdir -p build/mod-app.app/Contents/Resources
 	ln -sf $(abspath $<) $@
 
-build/mod-app.app/Contents/Resources/mod-logo.icns: src/systray/mod-logo.icns
+build/mod-app.app/Contents/Resources/mod-logo.icns: res/mod-logo.icns
 	@mkdir -p build/mod-app.app/Contents/Resources
 	ln -sf $(abspath $<) $@
 
