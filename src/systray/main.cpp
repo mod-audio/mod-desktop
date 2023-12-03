@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
     QApplication app(argc, argv);
     app.setApplicationName("MOD App");
     app.setOrganizationName("MOD Audio");
-    app.setWindowIcon(QIcon(":/mod-logo.svg"));
+    app.setWindowIcon(QIcon(":/res/mod-logo.svg"));
 
   #ifdef _WIN32
     SetEnvironmentVariableW(L"LANG", L"en_US.UTF-8");

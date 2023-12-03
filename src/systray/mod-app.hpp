@@ -162,7 +162,7 @@ public:
         connect(ui.cb_device, &QComboBox::currentTextChanged, this, &AppWindow::updateDeviceDetails);
         connect(ui.cb_verbose_basic, &QCheckBox::toggled, this, &AppWindow::showLogs);
 
-        const QIcon icon(":/mod-logo.svg");
+        const QIcon icon(":/res/mod-logo.svg");
 
         settingsAction = new QAction(tr("&Open Panel Settings"), this);
         connect(settingsAction, &QAction::triggered, this, &QMainWindow::show);
@@ -187,7 +187,7 @@ public:
         systray = new QSystemTrayIcon(icon, this);
         systray->setContextMenu(sysmenu);
        #ifndef Q_OS_WIN
-        systray->setIcon(QPixmap(":/mod-logo.svg"));
+        systray->setIcon(QPixmap(":/res/mod-logo.svg"));
        #endif
         connect(systray, &QSystemTrayIcon::messageClicked, this, &AppWindow::messageClicked);
         connect(systray, &QSystemTrayIcon::activated, this, &AppWindow::iconActivated);
@@ -500,15 +500,22 @@ public:
                 const PaDeviceInfo* const devInfo = Pa_GetDeviceInfo(i);
                 const QString& hostApiName(apis[devInfo->hostApi]);
 
+                const QString devName(QString::fromUtf8(devInfo->name));
+
                #if defined(Q_OS_LINUX)
                 if (hostApiName == "ALSA")
                     continue;
                #elif defined(Q_OS_WIN)
-                if (hostApiName != "ASIO" && hostApiName != "Windows WASAPI")
+                if (hostApiName == "ASIO")
+                {
+                    if (devName == "JackRouter" || devName == "MOD App")
+                        continue;
+                }
+                else if (hostApiName != "Windows WASAPI")
+                {
                     continue;
+                }
                #endif
-
-                const QString devName(QString::fromUtf8(devInfo->name));
 
                 if (devInfo->maxOutputChannels == 0 && devInfo->maxInputChannels == 0)
                     continue;
@@ -923,6 +930,8 @@ private:
             stoppingHost = true;
             processHost.terminate();
         }
+
+        printf("----------- %s %d\n", __FUNCTION__, __LINE__);
     }
 
 private slots:
