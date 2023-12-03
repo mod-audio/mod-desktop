@@ -48,8 +48,7 @@ Source: "..\..\build\mod-pedalboard.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\build\mod-ui.exe"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "..\..\build\libpython3.8.dll"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "..\..\build\default.pedalboard\manifest.ttl"; DestDir: "{app}\default.pedalboard"; Flags: ignoreversion;
-Source: "..\..\build\default.pedalboard\screenshot.png"; DestDir: "{app}\default.pedalboard"; Flags: ignoreversion;
-Source: "..\..\build\default.pedalboard\thumbnail.png"; DestDir: "{app}\default.pedalboard"; Flags: ignoreversion;
+Source: "..\..\build\default.pedalboard\*.png"; DestDir: "{app}\default.pedalboard"; Flags: ignoreversion;
 Source: "..\..\build\html\*.html"; DestDir: "{app}\html"; Flags: ignoreversion;
 Source: "..\..\build\html\favicon.ico"; DestDir: "{app}\html"; Flags: ignoreversion;
 Source: "..\..\build\html\css\*.css"; DestDir: "{app}\html\css"; Flags: ignoreversion;
@@ -138,12 +137,24 @@ Source: "..\..\build\html\resources\pedals\*.png"; DestDir: "{app}\html\resource
 Source: "..\..\build\html\resources\templates\*.html"; DestDir: "{app}\html\resources\templates"; Flags: ignoreversion;
 Source: "..\..\build\lib\*.*"; DestDir: "{app}\lib"; Flags: ignoreversion;
 Source: "..\..\build\lib\Cryptodome\*.*"; DestDir: "{app}\lib\Cryptodome"; Flags: ignoreversion;
+Source: "..\..\build\lib\Cryptodome\Cipher\*.*"; DestDir: "{app}\lib\Cryptodome\Cipher"; Flags: ignoreversion;
+Source: "..\..\build\lib\Cryptodome\Hash\*.*"; DestDir: "{app}\lib\Cryptodome\Hash"; Flags: ignoreversion;
+Source: "..\..\build\lib\Cryptodome\IO\*.*"; DestDir: "{app}\lib\Cryptodome\IO"; Flags: ignoreversion;
+Source: "..\..\build\lib\Cryptodome\Math\*.*"; DestDir: "{app}\lib\Cryptodome\Math"; Flags: ignoreversion;
+Source: "..\..\build\lib\Cryptodome\Protocol\*.*"; DestDir: "{app}\lib\Cryptodome\Protocol"; Flags: ignoreversion;
+Source: "..\..\build\lib\Cryptodome\PublicKey\*.*"; DestDir: "{app}\lib\Cryptodome\PublicKey"; Flags: ignoreversion;
+Source: "..\..\build\lib\Cryptodome\Random\*.*"; DestDir: "{app}\lib\Cryptodome\Random"; Flags: ignoreversion;
+Source: "..\..\build\lib\Cryptodome\Signature\*.*"; DestDir: "{app}\lib\Cryptodome\Signature"; Flags: ignoreversion;
+Source: "..\..\build\lib\Cryptodome\Util\*.*"; DestDir: "{app}\lib\Cryptodome\Util"; Flags: ignoreversion;
 Source: "..\..\build\lib\PIL\*.*"; DestDir: "{app}\lib\PIL"; Flags: ignoreversion;
 Source: "..\..\build\mod\*.py"; DestDir: "{app}\mod"; Flags: ignoreversion;
 Source: "..\..\build\mod\communication\*.py"; DestDir: "{app}\mod\communication"; Flags: ignoreversion;
 Source: "..\..\build\modtools\*.py"; DestDir: "{app}\modtools"; Flags: ignoreversion;
 ; asio driver
 Source: "..\..\build\mod-app-asio.dll"; DestDir: "{win}"; Flags: ignoreversion regserver 64bit;
+; misc
+Source: "..\..\build\mod-hardware-descriptor.json"; DestDir: "{app}"; Flags: ignoreversion;
+Source: "..\..\build\VERSION"; DestDir: "{app}"; Flags: ignoreversion;
 ; plugins
 #include "win64-plugins.iss"
 
