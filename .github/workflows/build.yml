@@ -3,9 +3,9 @@ name: build
 on: [push, pull_request]
 
 env:
-  CACHE_VERSION_LINUX: 11
+  CACHE_VERSION_LINUX: 12
   CACHE_VERSION_MACOS: 11
-  CACHE_VERSION_WIN64: 11
+  CACHE_VERSION_WIN64: 12
   PAWPAW_SKIP_LTO: 1
 
 jobs:

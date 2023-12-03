@@ -20,7 +20,6 @@ fi
 export LV2_PATH=$(pwd)/build/plugins
 # export MOD_LOG=1
 
-export JACK_NO_AUDIO_RESERVATION=1
 export JACK_NO_START_SERVER=1
 
 # ---------------------------------------------------------------------------------------------------------------------

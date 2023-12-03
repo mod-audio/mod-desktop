@@ -45,6 +45,11 @@ else
 TARGET = mod-app
 endif
 
+ifeq ($(LINUX),true)
+CXXFLAGS += $(shell $(PKG_CONFIG) --cflags alsa)
+LDFLAGS  += $(shell $(PKG_CONFIG) --libs alsa)
+endif
+
 ifeq ($(MACOS),true)
 LDFLAGS  += -framework CoreAudio
 else

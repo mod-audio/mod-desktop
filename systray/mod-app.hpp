@@ -14,6 +14,10 @@
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QSystemTrayIcon>
 
+#ifdef Q_OS_LINUX
+#include <alsa/asoundlib.h>
+#endif
+
 #ifdef Q_OS_MAC
 #include <CoreAudio/CoreAudio.h>
 #include <CoreFoundation/CFString.h>
@@ -58,6 +62,23 @@ static bool getSystemAudioPropertySize(const AudioObjectPropertyAddress* const p
     return getDeviceAudioPropertySize(kAudioObjectSystemObject, prop, size);
 }
 #endif
+
+static bool isdigit(const char* const s)
+{
+    const size_t len = strlen(s);
+
+    if (len == 0)
+        return false;
+
+    for (size_t i=0; i<len; ++i)
+    {
+        if (std::isdigit(s[i]))
+            continue;
+        return false;
+    }
+
+    return true;
+}
 
 class AppProcess : public QProcess
 {
@@ -205,18 +226,128 @@ public:
         printf("--------------------------------------------------------\n");
 
        #ifdef Q_OS_WIN
-        SetEnvironmentVariableW(L"JACK_NO_AUDIO_RESERVATION", L"1");
         SetEnvironmentVariableW(L"JACK_NO_START_SERVER", L"1");
         SetEnvironmentVariableW(L"PYTHONUNBUFFERED", L"1");
        #else
-        setenv("JACK_NO_AUDIO_RESERVATION", "1", 1);
         setenv("JACK_NO_START_SERVER", "1", 1);
         setenv("PYTHONUNBUFFERED", "1", 1);
        #endif
 
         ui.cb_device->blockSignals(true);
 
-       #ifdef Q_OS_MAC
+       #if defined(Q_OS_LINUX)
+        {
+            char hwcard[32];
+            char reserve[32];
+
+            snd_ctl_t* ctl = nullptr;
+            snd_ctl_card_info_t* cardinfo = nullptr;
+            snd_pcm_info_t* pcminfo = nullptr;
+            snd_ctl_card_info_alloca(&cardinfo);
+            snd_pcm_info_alloca(&pcminfo);
+
+            for (int card = -1; snd_card_next(&card) == 0 && card >= 0;)
+            {
+                snprintf(hwcard, sizeof(hwcard), "hw:%i", card);
+
+                if (snd_ctl_open(&ctl, hwcard, SND_CTL_NONBLOCK) < 0)
+                    continue;
+
+                if (snd_ctl_card_info(ctl, cardinfo) >= 0)
+                {
+                    const char* cardId = snd_ctl_card_info_get_id(cardinfo);
+                    const char* cardName = snd_ctl_card_info_get_name(cardinfo);
+
+                    if (cardName != nullptr && *cardName != '\0')
+                    {
+                        if (std::strcmp(cardName, "Dummy") == 0 ||
+                            std::strcmp(cardName, "Loopback") == 0)
+                        {
+                            snd_ctl_close(ctl);
+                            continue;
+                        }
+                    }
+
+                    if (cardId == nullptr || ::isdigit(cardId))
+                    {
+                        snprintf(reserve, sizeof(reserve), "%d", card);
+                        cardId = reserve;
+                    }
+
+                    if (cardName == nullptr || *cardName == '\0')
+                        cardName = cardId;
+
+                    for (int device = -1; snd_ctl_pcm_next_device(ctl, &device) == 0 && device >= 0;)
+                    {
+                        snd_pcm_info_set_device(pcminfo, device);
+
+                        for (int subDevice = 0, nbSubDevice = 1; subDevice < nbSubDevice; ++subDevice)
+                        {
+                            snd_pcm_info_set_subdevice(pcminfo, subDevice);
+
+                            snd_pcm_info_set_stream(pcminfo, SND_PCM_STREAM_CAPTURE);
+                            const bool isInput = (snd_ctl_pcm_info(ctl, pcminfo) >= 0);
+
+                            snd_pcm_info_set_stream(pcminfo, SND_PCM_STREAM_PLAYBACK);
+                            const bool isOutput = (snd_ctl_pcm_info(ctl, pcminfo) >= 0);
+
+                            if (! (isInput || isOutput))
+                                continue;
+
+                            if (nbSubDevice == 1)
+                                nbSubDevice = snd_pcm_info_get_subdevices_count(pcminfo);
+
+                            QString strid(QString::fromUtf8(hwcard));
+                            QString strname(QString::fromUtf8(cardName));
+
+                            strid += ",";
+                            strid += QString::number(device);
+
+                            if (const char* const pcmName = snd_pcm_info_get_name(pcminfo))
+                            {
+                                if (pcmName[0] != '\0')
+                                {
+                                    strname += ", ";
+                                    strname += QString::fromUtf8(pcmName);
+                                }
+                            }
+
+                            if (nbSubDevice != 1)
+                            {
+                                strid += ",";
+                                strid += QString::number(subDevice);
+                                strname += " {";
+                                strname += QString::fromUtf8(snd_pcm_info_get_subdevice_name(pcminfo));
+                                strname += "}";
+                            }
+
+                            strname += " (";
+                            strname += strid;
+                            strname += ")";
+
+                            if (isInput)
+                            {
+                                ui.cb_input->addItem(strname);
+                                inputs.append(strid);
+                            }
+
+                            if (isOutput)
+                            {
+                                ui.cb_device->addItem(strname);
+                                devices.append({
+                                    strid,
+                                    isInput,
+                                    true
+                                });
+                            }
+                        }
+                    }
+                }
+
+                snd_ctl_close(ctl);
+            }
+        }
+       #elif defined(Q_OS_MAC)
         constexpr const AudioObjectPropertyAddress propDevices = {
             .mElement  = kAudioObjectPropertyElementMaster,
             .mScope    = kAudioObjectPropertyScopeGlobal,
@@ -349,7 +480,9 @@ public:
         {
             printf("-------------------------------------------------------- AudioObjectGetPropertyDataSize error\n");
         }
-       #else
+       #endif
+
+       #ifndef Q_OS_MAC
         if (Pa_Initialize() == paNoError)
         {
             const PaHostApiIndex numHostApis = Pa_GetHostApiCount();
@@ -367,7 +500,10 @@ public:
                 const PaDeviceInfo* const devInfo = Pa_GetDeviceInfo(i);
                 const QString& hostApiName(apis[devInfo->hostApi]);
 
-               #ifdef Q_OS_WIN
+               #if defined(Q_OS_LINUX)
+                if (hostApiName == "ALSA")
+                    continue;
+               #elif defined(Q_OS_WIN)
                 if (hostApiName != "ASIO" && hostApiName != "Windows WASAPI")
                     continue;
                #endif
@@ -377,15 +513,10 @@ public:
                 if (devInfo->maxOutputChannels == 0 && devInfo->maxInputChannels == 0)
                     continue;
 
-               #ifndef Q_OS_WIN
-                if (devName.contains("Loopback: PCM") || (devName != "pulse" && devName != "system" && ! devName.contains("hw:")))
-                    continue;
-               #endif
-
                #ifdef Q_OS_WIN
                 const bool canUseSeparateInput = hostApiName == "Windows WASAPI";
                #else
-                const bool canUseSeparateInput = devName != "pulse" && devName != "system";
+                const bool canUseSeparateInput = false;
                #endif
 
                 const QString uid(hostApiName + "::" + devName);
@@ -398,7 +529,7 @@ public:
 
                 if (devInfo->maxOutputChannels > 0)
                 {
-                    ui.cb_device->addItem(hostApiName == "JACK" ? "JACK" : uid);
+                    ui.cb_device->addItem(hostApiName == "JACK" ? "JACK / PipeWire" : uid);
                     devices.append({
                         uid,
                         devInfo->maxInputChannels > 0,
@@ -739,7 +870,7 @@ private:
                 env.insert("MOD_LOG", "1");
             else
                 env.insert("MOD_LOG", "0");
-            
+
             if (ui.cb_lv2_all_cv->isChecked())
                 env.insert("MOD_UI_ALLOW_REGULAR_CV", "1");
 
@@ -839,19 +970,21 @@ private slots:
         }
 
         arguments.append("-C");
-       #if defined(Q_OS_WIN)
-        arguments.append(".\\jack\\jack-session.conf");
-       #elif defined(Q_OS_MAC)
-        arguments.append("./jack/jack-session.conf");
-       #else
+       #if defined(Q_OS_LINUX)
         arguments.append(midiEnabled ? "./jack/jack-session-alsamidi.conf" : "./jack/jack-session.conf");
+       #elif defined(Q_OS_WIN)
+        arguments.append(".\\jack\\jack-session.conf");
+       #else
+        arguments.append("./jack/jack-session.conf");
        #endif
 
         if (ui.cb_verbose_jackd->isChecked() && ui.cb_verbose_jackd->isEnabled())
             arguments.append("-v");
 
         arguments.append("-d");
-       #ifdef Q_OS_MAC
+       #if defined(Q_OS_LINUX)
+        arguments.append(devInfo.uid.startsWith("hw:") ? "alsa" : "portaudio");
+       #elif defined(Q_OS_MAC)
         arguments.append("coreaudio");
        #else
         arguments.append("portaudio");
@@ -889,20 +1022,11 @@ private slots:
             arguments.append(devInfo.uid);
         }
 
-       #if !(defined(Q_OS_WIN) || defined(Q_OS_MAC))
-        if (devInfo.uid == "ALSA::pulse")
-        {
-            arguments.append("-c");
-            arguments.append("2");
-        }
-       #endif
-
         processHost.setArguments(arguments);
 
         {
             QProcessEnvironment env(QProcessEnvironment::systemEnvironment());
 
-            env.insert("JACK_NO_AUDIO_RESERVATION", "1");
             env.insert("JACK_NO_START_SERVER", "1");
             env.insert("LV2_PATH", getLV2Path());
 

@@ -55,7 +55,6 @@ export MOD_USER_PEDALBOARDS_DIR="$(convert_path ${DOCS_DIR}/MOD App/pedalboards)
 export MOD_USER_PLUGINS_DIR="$(convert_path ${DOCS_DIR}/MOD App/lv2)"
 # export MOD_LOG=2
 
-export JACK_NO_AUDIO_RESERVATION=1
 export JACK_NO_START_SERVER=1
 
 mkdir -p "${DOCS_DIR}/MOD App/user-files/Audio Loops"

@@ -62,7 +62,6 @@ export LV2_PATH
 export MOD_KEYS_PATH="$(convert_path ${DOCS_DIR}/MOD App/keys/)"
 export MOD_USER_FILES_DIR="$(convert_path ${DOCS_DIR}/MOD App/user-files)"
 
-export JACK_NO_AUDIO_RESERVATION=1
 export JACK_NO_START_SERVER=1
 
 # export MOD_LOG=1
