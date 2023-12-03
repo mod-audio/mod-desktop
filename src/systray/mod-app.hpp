@@ -155,6 +155,10 @@ public:
         ui.gb_lv2->setup(ui.tb_lv2);
         ui.gb_gui->setup(ui.tb_gui);
 
+       #ifdef Q_OS_LINUX
+        ui.l_midi_warn->hide();
+       #endif
+
         connect(ui.b_start, &QPushButton::clicked, this, &AppWindow::start);
         connect(ui.b_stop, &QPushButton::clicked, this, &AppWindow::stop);
         connect(ui.b_opengui, &QPushButton::clicked, this, &AppWindow::openGui);
