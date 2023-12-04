@@ -609,18 +609,18 @@ build-plugin-stamps/%: $(BOOTSTRAP_FILES)
 # ---------------------------------------------------------------------------------------------------------------------
 
 bootstrap:
-	./PawPaw/bootstrap-mod.sh $(PAWPAW_TARGET)
+	./src/PawPaw/bootstrap-mod.sh $(PAWPAW_TARGET)
 
 $(PAWPAW_PREFIX)/bin/%:
-	./PawPaw/bootstrap-mod.sh $(PAWPAW_TARGET)
+	./src/PawPaw/bootstrap-mod.sh $(PAWPAW_TARGET)
 
 $(PAWPAW_PREFIX)/lib/jack/alsa_midi.so:
-	./PawPaw/bootstrap-mod.sh $(PAWPAW_TARGET)
+	./src/PawPaw/bootstrap-mod.sh $(PAWPAW_TARGET)
 
 $(PAWPAW_PREFIX)/lib/lib%:
-	./PawPaw/bootstrap-mod.sh $(PAWPAW_TARGET)
+	./src/PawPaw/bootstrap-mod.sh $(PAWPAW_TARGET)
 
 $(PAWPAW_PREFIX)/include/%:
-	./PawPaw/bootstrap-mod.sh $(PAWPAW_TARGET)
+	./src/PawPaw/bootstrap-mod.sh $(PAWPAW_TARGET)
 
 # ---------------------------------------------------------------------------------------------------------------------
