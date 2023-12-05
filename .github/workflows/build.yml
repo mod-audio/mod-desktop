@@ -3,15 +3,21 @@ name: build
 on: [push, pull_request]
 
 env:
-  CACHE_VERSION_LINUX: 12
-  CACHE_VERSION_MACOS: 11
-  CACHE_VERSION_WIN64: 12
-  PAWPAW_SKIP_LTO: 1
+  CACHE_VERSION_LINUX: 2
+  CACHE_VERSION_MACOS: 2
+  CACHE_VERSION_WIN64: 2
+  DEBIAN_FRONTEND: noninteractive
+  PAWPAW_SKIP_TESTS: 1
 
 jobs:
   linux-x86_64:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
+    container:
+      # FIXME ubuntu:18.04 needs CMake 3.15
+      # FIXME ubuntu:20.04 needs meson 0.58
+      image: ubuntu:22.04
     steps:
+      - run: apt-get update -qq && apt-get install -yqq git
       - uses: actions/checkout@v3
         with:
           submodules: recursive
@@ -22,28 +28,26 @@ jobs:
           path: |
             ~/PawPawBuilds
           key: linux-x86_64-v${{ env.CACHE_VERSION_LINUX }}
-      - name: Set sha8
-        run: |
-          echo "SHA8=$(echo ${{ github.sha }} | cut -c1-8)" >> $GITHUB_ENV
       - name: Set up dependencies
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -yqq --allow-downgrades gperf libasound2-dev libdbus-1-dev libgl1-mesa-dev libglib2.0-dev libpcre3-dev libqt5svg5-dev libxcb1-dev libxcursor-dev libxext-dev libxfixes-dev libxrandr-dev libxrender-dev meson qtbase5-dev qtbase5-dev-tools uuid-dev xdg-user-dirs
+          ./src/PawPaw/.github/workflows/bootstrap-deps.sh linux-x86_64
+          apt-get install -yqq libqt5svg5-dev qtbase5-dev qtbase5-dev-tools unzip xdg-user-dirs
       - name: Build dependencies
         run: |
           ./src/PawPaw/bootstrap-mod.sh linux-x86_64 && ./src/PawPaw/.cleanup.sh linux-x86_64
       - name: Build
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
-          make PAWPAW_TARGET=linux-x86_64
-          # FIXME needs to run twice for now
-          make PAWPAW_TARGET=linux-x86_64
+          make
       - name: Validate plugins
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
           ./utils/plugin-builder/validate-plugins.sh
           # FIXME dirty carla leaves temp folders around
           rm -rf *.tmp
+      - name: Set sha8
+        run: |
+          echo "SHA8=$(echo ${{ github.sha }} | cut -c1-8)" >> $GITHUB_ENV
       - name: Pack
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
@@ -79,27 +83,25 @@ jobs:
           path: |
             ~/PawPawBuilds
           key: macos-v${{ env.CACHE_VERSION_MACOS }}
-      - name: Set sha8
-        run: |
-          echo "SHA8=$(echo ${{ github.sha }} | cut -c1-8)" >> $GITHUB_ENV
       - name: Set up dependencies
         run: |
-          brew install autoconf automake cmake coreutils gawk gnu-sed make meson
+          ./src/PawPaw/.github/workflows/bootstrap-deps.sh macos-universal-10.15
       - name: Build dependencies
         run: |
           ./src/PawPaw/bootstrap-mod.sh macos-universal-10.15 && ./src/PawPaw/.cleanup.sh macos-universal-10.15
       - name: Build
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
-          make PAWPAW_TARGET=macos-universal-10.15
-          # FIXME needs to run twice for now
-          make PAWPAW_TARGET=macos-universal-10.15
+          make macos
       - name: Validate plugins
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
           ./utils/plugin-builder/validate-plugins.sh
           # FIXME dirty carla leaves temp folders around
           rm -rf *.tmp
+      - name: Set sha8
+        run: |
+          echo "SHA8=$(echo ${{ github.sha }} | cut -c1-8)" >> $GITHUB_ENV
       - name: Pack
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
@@ -121,8 +123,12 @@ jobs:
             *.dmg
 
   win64:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
+    container:
+      # FIXME use debian:12
+      image: ubuntu:22.04
     steps:
+      - run: apt-get update -qq && apt-get install -yqq git
       - uses: actions/checkout@v3
         with:
           submodules: recursive
@@ -133,32 +139,26 @@ jobs:
           path: |
             ~/PawPawBuilds
           key: win64-v${{ env.CACHE_VERSION_WIN64 }}
-      - name: Set sha8
-        run: |
-          echo "SHA8=$(echo ${{ github.sha }} | cut -c1-8)" >> $GITHUB_ENV
-      - name: Fix GitHub's mess
-        run: |
-          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
-          sudo dpkg --add-architecture i386
-          sudo apt-get update -qq
       - name: Set up dependencies
         run: |
-          sudo apt-get install -yqq --allow-downgrades autopoint binutils-mingw-w64-x86-64 libc6:i386 libgcc-s1:i386 libstdc++6:i386 g++-mingw-w64-x86-64 gperf meson mingw-w64 wine-stable xdg-user-dirs xvfb
+          ./src/PawPaw/.github/workflows/bootstrap-deps.sh win64
+          apt-get install -yqq unzip xdg-user-dirs xvfb
       - name: Build dependencies
         run: |
           ./src/PawPaw/bootstrap-mod.sh win64 && ./src/PawPaw/.cleanup.sh win64
       - name: Build
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
-          make PAWPAW_TARGET=win64
-          # FIXME needs to run twice for now
-          make PAWPAW_TARGET=win64
+          make win64
       - name: Validate plugins
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
           ./utils/plugin-builder/validate-plugins.sh
           # FIXME dirty carla leaves temp folders around
           rm -rf *.tmp
+      - name: Set sha8
+        run: |
+          echo "SHA8=$(echo ${{ github.sha }} | cut -c1-8)" >> $GITHUB_ENV
       - name: Pack
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
