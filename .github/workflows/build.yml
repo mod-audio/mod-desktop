@@ -31,7 +31,7 @@ jobs:
       - name: Set up dependencies
         run: |
           ./src/PawPaw/.github/workflows/bootstrap-deps.sh linux-x86_64
-          apt-get install -yqq unzip wget xdg-user-dirs zip
+          apt-get install -yqq p7zip-full unzip wget xdg-user-dirs zip
       - name: Build dependencies
         run: |
           ./src/PawPaw/bootstrap-mod.sh linux-x86_64 && ./src/PawPaw/.cleanup.sh linux-x86_64
@@ -86,7 +86,7 @@ jobs:
       - name: Set up dependencies
         run: |
           ./src/PawPaw/.github/workflows/bootstrap-deps.sh macos-universal-10.15
-          brew install wget
+          brew install p7zip wget
       - name: Build dependencies
         run: |
           ./src/PawPaw/bootstrap-mod.sh macos-universal-10.15 && ./src/PawPaw/.cleanup.sh macos-universal-10.15
@@ -143,7 +143,7 @@ jobs:
       - name: Set up dependencies
         run: |
           ./src/PawPaw/.github/workflows/bootstrap-deps.sh win64
-          apt-get install -yqq unzip wget xdg-user-dirs xvfb zip
+          apt-get install -yqq p7zip-full unzip wget xdg-user-dirs xvfb zip
       - name: Build dependencies
         run: |
           ./src/PawPaw/bootstrap-mod.sh win64 && ./src/PawPaw/.cleanup.sh win64
