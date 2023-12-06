@@ -3,9 +3,9 @@ name: build
 on: [push, pull_request]
 
 env:
-  CACHE_VERSION_LINUX: 2
-  CACHE_VERSION_MACOS: 2
-  CACHE_VERSION_WIN64: 2
+  CACHE_VERSION_LINUX: 3
+  CACHE_VERSION_MACOS: 3
+  CACHE_VERSION_WIN64: 3
   DEBIAN_FRONTEND: noninteractive
   PAWPAW_SKIP_TESTS: 1
 
@@ -31,7 +31,7 @@ jobs:
       - name: Set up dependencies
         run: |
           ./src/PawPaw/.github/workflows/bootstrap-deps.sh linux-x86_64
-          apt-get install -yqq libqt5svg5-dev qtbase5-dev qtbase5-dev-tools unzip xdg-user-dirs
+          apt-get install -yqq unzip xdg-user-dirs zip
       - name: Build dependencies
         run: |
           ./src/PawPaw/bootstrap-mod.sh linux-x86_64 && ./src/PawPaw/.cleanup.sh linux-x86_64
@@ -142,7 +142,7 @@ jobs:
       - name: Set up dependencies
         run: |
           ./src/PawPaw/.github/workflows/bootstrap-deps.sh win64
-          apt-get install -yqq unzip xdg-user-dirs xvfb
+          apt-get install -yqq unzip xdg-user-dirs xvfb zip
       - name: Build dependencies
         run: |
           ./src/PawPaw/bootstrap-mod.sh win64 && ./src/PawPaw/.cleanup.sh win64

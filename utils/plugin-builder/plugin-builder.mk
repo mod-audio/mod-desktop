@@ -238,5 +238,5 @@ ifeq ($($(PKG)_SITE_METHOD),git)
 	tar --exclude='.git' -czf '$($(PKG)_DLFILE)' -C '$(PAWPAW_TMPDIR)' '$(PAWPAW_TMPNAME)'
 	rm -rf '$(PAWPAW_TMPDIR)'
 else
-	wget -O '$($(PKG)_DLFILE)' '$($(PKG)_DLSITE)'
+	curl -Lo '$($(PKG)_DLFILE)' '$($(PKG)_DLSITE)'
 endif
