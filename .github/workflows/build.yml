@@ -3,7 +3,7 @@ name: build
 on: [push, pull_request]
 
 env:
-  CACHE_VERSION_LINUX: 4
+  CACHE_VERSION_LINUX: 7
   CACHE_VERSION_MACOS: 3
   CACHE_VERSION_WIN64: 3
   DEBIAN_FRONTEND: noninteractive
@@ -15,9 +15,11 @@ jobs:
     container:
       image: ubuntu:18.04
     steps:
-      - name: Update git
+      - name: Update git and toolchain
         run: |
-          apt-get update -qq && apt-get install -yqq curl git libpcre2-8-0
+          apt-get update -qq && apt-get install -yqq --no-install-recommends curl git libpcre2-8-0 software-properties-common
+          add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          apt-get install -yqq g++-11
           curl -sLO https://launchpad.net/~kxstudio-debian/+archive/ubuntu/toolchain/+files/git_2.34.1-1ubuntu1~bpo18.04.1~ppa1_amd64.deb
           curl -sLO https://launchpad.net/~kxstudio-debian/+archive/ubuntu/toolchain/+files/git-man_2.34.1-1ubuntu1~bpo18.04.1~ppa1_all.deb
           dpkg -i *.deb
@@ -36,6 +38,8 @@ jobs:
         run: |
           ./src/PawPaw/.github/workflows/bootstrap-deps.sh linux-x86_64
           apt-get install -yqq p7zip-full unzip wget xdg-user-dirs zip
+          update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 60 --slave /usr/bin/g++ g++ /usr/bin/g++-11
+          update-alternatives --install /usr/bin/x86_64-linux-gnu-gcc x86_64-linux-gnu-gcc /usr/bin/gcc-11 60 --slave /usr/bin/x86_64-linux-gnu-g++ x86_64-linux-gnu-g++ /usr/bin/g++-11
       - name: Build dependencies
         run: |
           ./src/PawPaw/bootstrap-mod.sh linux-x86_64 && ./src/PawPaw/.cleanup.sh linux-x86_64
