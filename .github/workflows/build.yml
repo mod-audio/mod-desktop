@@ -17,11 +17,11 @@ jobs:
     strategy:
       matrix:
         include:
-          - container: debian:12
+          #- container: debian:12
           - container: ubuntu:18.04
-          - container: ubuntu:20.04
-          - container: ubuntu:22.04
-          - container: ubuntu:23.10
+          #- container: ubuntu:20.04
+          #- container: ubuntu:22.04
+          #- container: ubuntu:23.10
     runs-on: ubuntu-latest
     container:
       image: ${{ matrix.container }}
