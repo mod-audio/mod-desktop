@@ -3,27 +3,41 @@ name: build
 on: [push, pull_request]
 
 env:
-  CACHE_VERSION_LINUX: 7
-  CACHE_VERSION_MACOS: 3
-  CACHE_VERSION_WIN64: 3
+  CACHE_VERSION_LINUX: 10
+  CACHE_VERSION_MACOS: 10
+  CACHE_VERSION_WIN64: 10
   DEBIAN_FRONTEND: noninteractive
   PAWPAW_SKIP_TESTS: 1
+  RELEASE_OS_LINUX: ubuntu:18.04
+  RELEASE_OS_MAC: macos-11
+  RELEASE_OS_WIN64: ubuntu:22.04
 
 jobs:
   linux-x86_64:
+    strategy:
+      matrix:
+        include:
+          - container: debian:12
+          - container: ubuntu:18.04
+          - container: ubuntu:20.04
+          - container: ubuntu:22.04
+          - container: ubuntu:23.10
     runs-on: ubuntu-latest
     container:
-      image: ubuntu:18.04
+      image: ${{ matrix.container }}
     steps:
-      - name: Update git and toolchain
+      - name: Install git
         run: |
-          apt-get update -qq && apt-get install -yqq --no-install-recommends curl git libpcre2-8-0 software-properties-common
-          add-apt-repository -y ppa:ubuntu-toolchain-r/test
-          apt-get install -yqq g++-11
-          curl -sLO https://launchpad.net/~kxstudio-debian/+archive/ubuntu/toolchain/+files/git_2.34.1-1ubuntu1~bpo18.04.1~ppa1_amd64.deb
-          curl -sLO https://launchpad.net/~kxstudio-debian/+archive/ubuntu/toolchain/+files/git-man_2.34.1-1ubuntu1~bpo18.04.1~ppa1_all.deb
-          dpkg -i *.deb
-          rm *.deb
+          apt-get update -qq && apt-get install -yqq --no-install-recommends git
+          if [ "${{ matrix.container }}" = "ubuntu:18.04" ]; then
+            apt-get install -yqq --no-install-recommends curl libpcre2-8-0 software-properties-common
+            add-apt-repository -y ppa:ubuntu-toolchain-r/test
+            apt-get install -yqq g++-11
+            curl -sLO https://launchpad.net/~kxstudio-debian/+archive/ubuntu/toolchain/+files/git_2.34.1-1ubuntu1~bpo18.04.1~ppa1_amd64.deb
+            curl -sLO https://launchpad.net/~kxstudio-debian/+archive/ubuntu/toolchain/+files/git-man_2.34.1-1ubuntu1~bpo18.04.1~ppa1_all.deb
+            dpkg -i *.deb
+            rm *.deb
+          fi
       - uses: actions/checkout@v3
         with:
           submodules: recursive
@@ -38,17 +52,17 @@ jobs:
         run: |
           ./src/PawPaw/.github/workflows/bootstrap-deps.sh linux-x86_64
           apt-get install -yqq p7zip-full unzip wget xdg-user-dirs zip
-          update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 60 --slave /usr/bin/g++ g++ /usr/bin/g++-11
-          update-alternatives --install /usr/bin/x86_64-linux-gnu-gcc x86_64-linux-gnu-gcc /usr/bin/gcc-11 60 --slave /usr/bin/x86_64-linux-gnu-g++ x86_64-linux-gnu-g++ /usr/bin/g++-11
+          if [ "${{ matrix.container }}" = "ubuntu:18.04" ]; then
+            update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 60 --slave /usr/bin/g++ g++ /usr/bin/g++-11
+            update-alternatives --install /usr/bin/x86_64-linux-gnu-gcc x86_64-linux-gnu-gcc /usr/bin/gcc-11 60 --slave /usr/bin/x86_64-linux-gnu-g++ x86_64-linux-gnu-g++ /usr/bin/g++-11
+          fi
       - name: Build dependencies
         run: |
           ./src/PawPaw/bootstrap-mod.sh linux-x86_64 && ./src/PawPaw/.cleanup.sh linux-x86_64
       - name: Build
-        if: steps.cache.outputs.cache-hit == 'true'
         run: |
           make
       - name: Validate plugins
-        if: steps.cache.outputs.cache-hit == 'true'
         run: |
           ./utils/plugin-builder/validate-plugins.sh
           # FIXME dirty carla leaves temp folders around
@@ -57,19 +71,19 @@ jobs:
         run: |
           echo "SHA8=$(echo ${{ github.sha }} | cut -c1-8)" >> $GITHUB_ENV
       - name: Pack
-        if: steps.cache.outputs.cache-hit == 'true'
         run: |
           mkdir mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64
           mv build mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64/mod-app
           cp utils/linux/mod-app.* mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64/
           tar chJf mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64.tar.xz mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64
       - uses: actions/upload-artifact@v3
+        if: ${{ matrix.container }} == ${{ env.RELEASE_OS_LINUX }}
         with:
           name: mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64
           path: |
             *.tar.xz
       - uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
+        if: ${{ matrix.container }} == ${{ env.RELEASE_OS_LINUX }} && startsWith(github.ref, 'refs/tags/')
         with:
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
@@ -79,7 +93,12 @@ jobs:
             *.tar.xz
 
   macos:
-    runs-on: macos-11
+    strategy:
+      matrix:
+        include:
+          - os: macos-11
+          - os: macos-12
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -117,12 +136,13 @@ jobs:
           ./utils/macos/macos-dmg.sh
           mv mod-app-*.dmg mod-app-${{ github.event.pull_request.number || env.SHA8 }}-macOS.dmg
       - uses: actions/upload-artifact@v3
+        if: ${{ matrix.os }} == ${{ env.RELEASE_OS_MAC }}
         with:
           name: mod-app-${{ github.event.pull_request.number || env.SHA8 }}-macOS
           path: |
             *.dmg
       - uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
+        if: ${{ matrix.os }} == ${{ env.RELEASE_OS_MAC }} && startsWith(github.ref, 'refs/tags/')
         with:
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
@@ -132,10 +152,16 @@ jobs:
             *.dmg
 
   win64:
+    strategy:
+      matrix:
+        include:
+          # FIXME enable and use debian:12 for releases
+          #- container: debian:12
+          - container: ubuntu:22.04
+          #- container: ubuntu:23.10
     runs-on: ubuntu-latest
     container:
-      # FIXME use debian:12
-      image: ubuntu:22.04
+      image: ${{ matrix.container }}
     steps:
       - name: Update git
         run: |
@@ -179,13 +205,14 @@ jobs:
           mv build mod-app-${{ github.event.pull_request.number || env.SHA8 }}-win64
           zip -r -9 mod-app-${{ github.event.pull_request.number || env.SHA8 }}-win64.zip mod-app-${{ github.event.pull_request.number || env.SHA8 }}-win64
       - uses: actions/upload-artifact@v3
+        if: ${{ matrix.container }} == ${{ env.RELEASE_OS_WIN64 }}
         with:
           name: mod-app-${{ github.event.pull_request.number || env.SHA8 }}-win64
           path: |
             *.exe
             *.zip
       - uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
+        if: ${{ matrix.container }} == ${{ env.RELEASE_OS_WIN64 }} && startsWith(github.ref, 'refs/tags/')
         with:
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
