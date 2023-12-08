@@ -7,6 +7,7 @@ env:
   CACHE_VERSION_MACOS: 10
   CACHE_VERSION_WIN64: 10
   DEBIAN_FRONTEND: noninteractive
+  PAWPAW_SKIP_LTO: 1
   PAWPAW_SKIP_TESTS: 1
   RELEASE_OS_LINUX: ubuntu:18.04
   RELEASE_OS_MAC: macos-11
@@ -19,7 +20,7 @@ jobs:
         include:
           #- container: debian:12
           - container: ubuntu:18.04
-          #- container: ubuntu:20.04
+          - container: ubuntu:20.04
           #- container: ubuntu:22.04
           #- container: ubuntu:23.10
     runs-on: ubuntu-latest
@@ -29,15 +30,22 @@ jobs:
       - name: Install git
         run: |
           apt-get update -qq && apt-get install -yqq --no-install-recommends git
-          if [ "${{ matrix.container }}" = "ubuntu:18.04" ]; then
-            apt-get install -yqq --no-install-recommends curl libpcre2-8-0 software-properties-common
-            add-apt-repository -y ppa:ubuntu-toolchain-r/test
-            apt-get install -yqq g++-11
-            curl -sLO https://launchpad.net/~kxstudio-debian/+archive/ubuntu/toolchain/+files/git_2.34.1-1ubuntu1~bpo18.04.1~ppa1_amd64.deb
-            curl -sLO https://launchpad.net/~kxstudio-debian/+archive/ubuntu/toolchain/+files/git-man_2.34.1-1ubuntu1~bpo18.04.1~ppa1_all.deb
-            dpkg -i *.deb
-            rm *.deb
-          fi
+          case "${{ matrix.container }}" in
+            "ubuntu:18.04")
+              apt-get install -yqq curl libpcre2-8-0
+              curl -sLO https://launchpad.net/~kxstudio-debian/+archive/ubuntu/toolchain/+files/git_2.34.1-1ubuntu1~bpo18.04.1~ppa1_amd64.deb
+              curl -sLO https://launchpad.net/~kxstudio-debian/+archive/ubuntu/toolchain/+files/git-man_2.34.1-1ubuntu1~bpo18.04.1~ppa1_all.deb
+              dpkg -i *.deb
+              rm *.deb
+            ;;
+            "ubuntu:20.04")
+              apt-get install -yqq curl
+              curl -sLO https://launchpad.net/~kxstudio-debian/+archive/ubuntu/toolchain/+files/git_2.34.1-1ubuntu1~bpo20.04.1~ppa1_amd64.deb
+              curl -sLO https://launchpad.net/~kxstudio-debian/+archive/ubuntu/toolchain/+files/git-man_2.34.1-1ubuntu1~bpo20.04.1~ppa1_all.deb
+              dpkg -i *.deb
+              rm *.deb
+            ;;
+          esac
       - uses: actions/checkout@v3
         with:
           submodules: recursive
@@ -47,15 +55,11 @@ jobs:
         with:
           path: |
             ~/PawPawBuilds
-          key: linux-x86_64-v${{ env.CACHE_VERSION_LINUX }}
+          key: linux-x86_64-${{ env.PAWPAW_PACK_NAME }}-v${{ env.CACHE_VERSION_LINUX }}
       - name: Set up dependencies
         run: |
           ./src/PawPaw/.github/workflows/bootstrap-deps.sh linux-x86_64
           apt-get install -yqq p7zip-full unzip wget xdg-user-dirs zip
-          if [ "${{ matrix.container }}" = "ubuntu:18.04" ]; then
-            update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 60 --slave /usr/bin/g++ g++ /usr/bin/g++-11
-            update-alternatives --install /usr/bin/x86_64-linux-gnu-gcc x86_64-linux-gnu-gcc /usr/bin/gcc-11 60 --slave /usr/bin/x86_64-linux-gnu-g++ x86_64-linux-gnu-g++ /usr/bin/g++-11
-          fi
       - name: Build dependencies
         run: |
           ./src/PawPaw/bootstrap-mod.sh linux-x86_64 && ./src/PawPaw/.cleanup.sh linux-x86_64
@@ -77,13 +81,13 @@ jobs:
           cp utils/linux/mod-app.* mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64/
           tar chJf mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64.tar.xz mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64
       - uses: actions/upload-artifact@v3
-        if: ${{ matrix.container }} == ${{ env.RELEASE_OS_LINUX }}
+        if: ${{ matrix.container == env.RELEASE_OS_LINUX }}
         with:
           name: mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64
           path: |
             *.tar.xz
       - uses: softprops/action-gh-release@v1
-        if: ${{ matrix.container }} == ${{ env.RELEASE_OS_LINUX }} && startsWith(github.ref, 'refs/tags/')
+        if: ${{ matrix.container == env.RELEASE_OS_LINUX && startsWith(github.ref, 'refs/tags/') }}
         with:
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
@@ -109,7 +113,7 @@ jobs:
         with:
           path: |
             ~/PawPawBuilds
-          key: macos-v${{ env.CACHE_VERSION_MACOS }}
+          key: macos-${{ env.PAWPAW_PACK_NAME }}-v${{ env.CACHE_VERSION_MACOS }}
       - name: Set up dependencies
         run: |
           ./src/PawPaw/.github/workflows/bootstrap-deps.sh macos-universal-10.15
@@ -136,13 +140,13 @@ jobs:
           ./utils/macos/macos-dmg.sh
           mv mod-app-*.dmg mod-app-${{ github.event.pull_request.number || env.SHA8 }}-macOS.dmg
       - uses: actions/upload-artifact@v3
-        if: ${{ matrix.os }} == ${{ env.RELEASE_OS_MAC }}
+        if: ${{ matrix.os == env.RELEASE_OS_MAC }}
         with:
           name: mod-app-${{ github.event.pull_request.number || env.SHA8 }}-macOS
           path: |
             *.dmg
       - uses: softprops/action-gh-release@v1
-        if: ${{ matrix.os }} == ${{ env.RELEASE_OS_MAC }} && startsWith(github.ref, 'refs/tags/')
+        if: ${{ matrix.os == env.RELEASE_OS_MAC && startsWith(github.ref, 'refs/tags/') }}
         with:
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
@@ -175,7 +179,7 @@ jobs:
         with:
           path: |
             ~/PawPawBuilds
-          key: win64-v${{ env.CACHE_VERSION_WIN64 }}
+          key: win64-${{ env.PAWPAW_PACK_NAME }}-v${{ env.CACHE_VERSION_WIN64 }}
       - name: Set up dependencies
         run: |
           ./src/PawPaw/.github/workflows/bootstrap-deps.sh win64
@@ -205,14 +209,14 @@ jobs:
           mv build mod-app-${{ github.event.pull_request.number || env.SHA8 }}-win64
           zip -r -9 mod-app-${{ github.event.pull_request.number || env.SHA8 }}-win64.zip mod-app-${{ github.event.pull_request.number || env.SHA8 }}-win64
       - uses: actions/upload-artifact@v3
-        if: ${{ matrix.container }} == ${{ env.RELEASE_OS_WIN64 }}
+        if: ${{ matrix.container == env.RELEASE_OS_WIN64 }}
         with:
           name: mod-app-${{ github.event.pull_request.number || env.SHA8 }}-win64
           path: |
             *.exe
             *.zip
       - uses: softprops/action-gh-release@v1
-        if: ${{ matrix.container }} == ${{ env.RELEASE_OS_WIN64 }} && startsWith(github.ref, 'refs/tags/')
+        if: ${{ matrix.container == env.RELEASE_OS_WIN64 && startsWith(github.ref, 'refs/tags/') }}
         with:
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
