@@ -49,6 +49,10 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
+      - name: Set up dependencies
+        run: |
+          ./src/PawPaw/.github/workflows/bootstrap-deps.sh linux-x86_64
+          apt-get install -yqq p7zip-full unzip wget xdg-user-dirs zip
       - name: Set up cache
         id: cache
         uses: actions/cache@v3
@@ -56,10 +60,6 @@ jobs:
           path: |
             ~/PawPawBuilds
           key: linux-x86_64-${{ env.PAWPAW_PACK_NAME }}-v${{ env.CACHE_VERSION_LINUX }}
-      - name: Set up dependencies
-        run: |
-          ./src/PawPaw/.github/workflows/bootstrap-deps.sh linux-x86_64
-          apt-get install -yqq p7zip-full unzip wget xdg-user-dirs zip
       - name: Build dependencies
         run: |
           ./src/PawPaw/bootstrap-mod.sh linux-x86_64 && ./src/PawPaw/.cleanup.sh linux-x86_64
@@ -107,6 +107,10 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
+      - name: Set up dependencies
+        run: |
+          ./src/PawPaw/.github/workflows/bootstrap-deps.sh macos-universal-10.15
+          brew install p7zip wget
       - name: Set up cache
         id: cache
         uses: actions/cache@v3
@@ -114,10 +118,6 @@ jobs:
           path: |
             ~/PawPawBuilds
           key: macos-${{ env.PAWPAW_PACK_NAME }}-v${{ env.CACHE_VERSION_MACOS }}
-      - name: Set up dependencies
-        run: |
-          ./src/PawPaw/.github/workflows/bootstrap-deps.sh macos-universal-10.15
-          brew install p7zip wget
       - name: Build dependencies
         run: |
           ./src/PawPaw/bootstrap-mod.sh macos-universal-10.15 && ./src/PawPaw/.cleanup.sh macos-universal-10.15
@@ -173,6 +173,10 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
+      - name: Set up dependencies
+        run: |
+          ./src/PawPaw/.github/workflows/bootstrap-deps.sh win64
+          apt-get install -yqq p7zip-full unzip wget xdg-user-dirs xvfb zip
       - name: Set up cache
         id: cache
         uses: actions/cache@v3
@@ -180,10 +184,6 @@ jobs:
           path: |
             ~/PawPawBuilds
           key: win64-${{ env.PAWPAW_PACK_NAME }}-v${{ env.CACHE_VERSION_WIN64 }}
-      - name: Set up dependencies
-        run: |
-          ./src/PawPaw/.github/workflows/bootstrap-deps.sh win64
-          apt-get install -yqq p7zip-full unzip wget xdg-user-dirs xvfb zip
       - name: Build dependencies
         run: |
           ./src/PawPaw/bootstrap-mod.sh win64 && ./src/PawPaw/.cleanup.sh win64
