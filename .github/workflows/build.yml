@@ -21,7 +21,7 @@ jobs:
           #- container: debian:12
           - container: ubuntu:18.04
           - container: ubuntu:20.04
-          #- container: ubuntu:22.04
+          - container: ubuntu:22.04
           #- container: ubuntu:23.10
     runs-on: ubuntu-latest
     container:
@@ -29,17 +29,17 @@ jobs:
     steps:
       - name: Install git
         run: |
-          apt-get update -qq && apt-get install -yqq --no-install-recommends git
+          apt-get update -qq && apt-get install -yqq --no-install-recommends ca-certificates git openssl
           case "${{ matrix.container }}" in
             "ubuntu:18.04")
-              apt-get install -yqq curl libpcre2-8-0
+              apt-get install -yqq --no-install-recommends curl libpcre2-8-0
               curl -sLO https://launchpad.net/~kxstudio-debian/+archive/ubuntu/toolchain/+files/git_2.34.1-1ubuntu1~bpo18.04.1~ppa1_amd64.deb
               curl -sLO https://launchpad.net/~kxstudio-debian/+archive/ubuntu/toolchain/+files/git-man_2.34.1-1ubuntu1~bpo18.04.1~ppa1_all.deb
               dpkg -i *.deb
               rm *.deb
             ;;
             "ubuntu:20.04")
-              apt-get install -yqq curl
+              apt-get install -yqq --no-install-recommends curl
               curl -sLO https://launchpad.net/~kxstudio-debian/+archive/ubuntu/toolchain/+files/git_2.34.1-1ubuntu1~bpo20.04.1~ppa1_amd64.deb
               curl -sLO https://launchpad.net/~kxstudio-debian/+archive/ubuntu/toolchain/+files/git-man_2.34.1-1ubuntu1~bpo20.04.1~ppa1_all.deb
               dpkg -i *.deb
