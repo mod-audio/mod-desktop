@@ -14,11 +14,7 @@ Feedback and testing is very much appreciated, make sure to report issues you fi
 
 Current known issues:
 
-- MIDI support is incomplete (crashes on Windows, "Separate" MIDI mode not implemented yet)
-- Pedalboard save fails to create screenshot/thumbnail
 - Handling of Windows filepaths is not always correct (differences between POSIX vs Windows path separators)
-- jackd.exe (through mod-host) asks for public network permissions which are not needed
-- JACK is used "as-is", which assumes it is not running yet. TBD if we use a custom server name or something else
 - When mod-host crashes it will stop the UI process, instead of being automatically restarted like in MOD units
 
 ## Download
