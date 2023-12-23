@@ -18,6 +18,7 @@ jobs:
     strategy:
       matrix:
         include:
+          - container: debian:11
           #- container: debian:12
           - container: ubuntu:18.04
           - container: ubuntu:20.04
