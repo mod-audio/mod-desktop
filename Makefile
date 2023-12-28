@@ -165,7 +165,6 @@ endif
 
 # List of plugin projects to build
 PLUGINS  = abgate
-PLUGINS += aidadsp-lv2
 PLUGINS += artyfx
 PLUGINS += bolliedelay
 PLUGINS += caps-lv2
@@ -210,6 +209,11 @@ PLUGINS += x42-stepseq
 PLUGINS += x42-tinygain
 PLUGINS += x42-xfade
 PLUGINS += zam-plugins
+
+# relies on APIs only available in macOS >= 10.15
+ifneq ($(PAWPAW_TARGET),macos)
+PLUGINS += aidadsp-lv2
+endif
 
 # conflict with lv2-dev
 # PLUGINS += lv2-examples
@@ -545,7 +549,9 @@ build/styles/q%.dll: $(PAWPAW_PREFIX)/lib/qt5/plugins/styles/q%.dll
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-ifeq ($(WINDOWS),true)
+ifeq ($(PAWPAW_TARGET),macos)
+PYNSEP = '-'
+else ifeq ($(WINDOWS),true)
 PYNSEP = '-'
 else
 PYNSEP = '_'
