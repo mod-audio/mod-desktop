@@ -18,7 +18,11 @@ if [ -e mod-ui.exe ]; then
     source ../src/PawPaw/local.env win64
     PATH_SEP=';'
 elif [ -e mod-app.app ]; then
-    source ../src/PawPaw/local.env macos-universal-10.15
+    if [ "$(uname -m)" = "x86_64" ] && [ x"${1}" != x"macos-universal-10.15" ]; then
+        source ../src/PawPaw/local.env macos
+    else
+        source ../src/PawPaw/local.env macos-universal-10.15
+    fi
     export DYLD_LIBRARY_PATH="${PAWPAW_PREFIX}/lib"
     PATH_SEP=':'
 else

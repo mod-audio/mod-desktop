@@ -20,7 +20,11 @@ if [ -e mod-ui.exe ]; then
     LV2_PATH="$(convert_path $(pwd)/plugins)"
     OS_SEP="\\"
 elif [ -e mod-app.app ]; then
-    source ../PawPaw/local.env macos-universal-10.15
+    if [ "$(uname -m)" = "x86_64" ] && [ x"${1}" != x"macos-universal-10.15" ]; then
+        source ../src/PawPaw/local.env macos
+    else
+        source ../src/PawPaw/local.env macos-universal-10.15
+    fi
     DOCS_DIR=~/Documents
     LV2_PATH="$(pwd)/mod-app.app/Contents/PlugIns/LV2"
     OS_SEP='/'

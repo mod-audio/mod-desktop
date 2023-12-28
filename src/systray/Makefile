@@ -17,7 +17,11 @@ PAWPAW_TARGET = linux-$(shell uname -m)
 else ifneq (,$(findstring apple,$(TARGET_MACHINE)))
 MACOS = true
 WINDOWS = false
+ifeq ($(shell uname -m),x86_64)
+PAWPAW_TARGET = macos
+else
 PAWPAW_TARGET = macos-universal-10.15
+endif
 else ifneq (,$(findstring mingw,$(TARGET_MACHINE)))
 WINDOWS = true
 PAWPAW_TARGET = win64

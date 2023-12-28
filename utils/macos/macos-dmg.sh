@@ -7,6 +7,12 @@ if [ ! -d build ]; then
   exit
 fi
 
+if [ "$(uname -m)" = "x86_64" ] && [ x"${1}" != x"macos-universal-10.15" ]; then
+    PAWPAW_PREFIX="${HOME}/PawPawBuilds/targets/macos"
+else
+    PAWPAW_PREFIX="${HOME}/PawPawBuilds/targets/macos-universal-10.15"
+fi
+
 QTLIBS=("Core" "Gui" "OpenGL" "PrintSupport" "Svg" "Widgets")
 
 rm -rf mod-ui/mod/__pycache__
@@ -33,13 +39,13 @@ for f in $(ls Frameworks/*/Qt* PlugIns/*/libq*.dylib); do
 done
 
 for f in $(ls MacOS/lib/libmod_utils.so MacOS/libjack*.dylib); do
-    install_name_tool -change "${HOME}/PawPawBuilds/targets/macos-universal-10.15/lib/libjack.0.1.0.dylib" "@executable_path/libjack.0.dylib" "${f}"
-    install_name_tool -change "${HOME}/PawPawBuilds/targets/macos-universal-10.15/lib/libjackserver.0.1.0.dylib" "@executable_path/libjackserver.0.dylib" "${f}"
+    install_name_tool -change "${PAWPAW_PREFIX}/lib/libjack.0.1.0.dylib" "@executable_path/libjack.0.dylib" "${f}"
+    install_name_tool -change "${PAWPAW_PREFIX}/lib/libjackserver.0.1.0.dylib" "@executable_path/libjackserver.0.dylib" "${f}"
 done
 
 for f in $(ls MacOS/jackd MacOS/jack/*.so); do
-    install_name_tool -change "${HOME}/PawPawBuilds/targets/macos-universal-10.15/lib/libjack.0.1.0.dylib" "@executable_path/libjackserver.0.dylib" "${f}"
-    install_name_tool -change "${HOME}/PawPawBuilds/targets/macos-universal-10.15/lib/libjackserver.0.1.0.dylib" "@executable_path/libjackserver.0.dylib" "${f}"
+    install_name_tool -change "${PAWPAW_PREFIX}/lib/libjack.0.1.0.dylib" "@executable_path/libjackserver.0.dylib" "${f}"
+    install_name_tool -change "${PAWPAW_PREFIX}/lib/libjackserver.0.1.0.dylib" "@executable_path/libjackserver.0.dylib" "${f}"
 done
 
 popd

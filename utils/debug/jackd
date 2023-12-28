@@ -29,7 +29,11 @@ if [ -e jackd.exe ]; then
     JACK_SESSION="-C ./jack/jack-session.conf -X winmme"
     PATH_SEP=';'
 elif [ -e mod-app.app ]; then
-    source ../src/PawPaw/local.env macos-universal-10.15
+    if [ "$(uname -m)" = "x86_64" ] && [ x"${1}" != x"macos-universal-10.15" ]; then
+        source ../src/PawPaw/local.env macos
+    else
+        source ../src/PawPaw/local.env macos-universal-10.15
+    fi
     JACKD="./mod-app.app/Contents/MacOS/jackd"
     JACK_DRIVER="coreaudio"
     JACK_DRIVER_DEVICE="BuiltInSpeakerDevice"
