@@ -174,7 +174,6 @@ PLUGINS += carla-plugins
 PLUGINS += die-plugins
 PLUGINS += dpf-plugins
 PLUGINS += dragonfly-reverb
-PLUGINS += fluidplug
 PLUGINS += fomp
 PLUGINS += gxquack
 PLUGINS += invada-lv2
@@ -215,6 +214,11 @@ PLUGINS += zam-plugins
 # relies on APIs only available in macOS >= 10.15
 ifneq ($(PAWPAW_TARGET),macos)
 PLUGINS += aidadsp-lv2
+endif
+
+# issues with glib static build on non-universal builds (fails to link to -liconv)
+ifneq ($(PAWPAW_TARGET),macos)
+PLUGINS += fluidplug
 endif
 
 # conflict with lv2-dev
