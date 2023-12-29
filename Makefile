@@ -112,7 +112,9 @@ TARGETS += build/mod-app.app/Contents/PlugIns/iconengines/libqsvgicon.dylib
 TARGETS += build/mod-app.app/Contents/PlugIns/imageformats/libqsvg.dylib
 TARGETS += build/mod-app.app/Contents/PlugIns/LV2
 TARGETS += build/mod-app.app/Contents/PlugIns/platforms/libqcocoa.dylib
+ifneq ($(PAWPAW_TARGET),macos)
 TARGETS += build/mod-app.app/Contents/PlugIns/styles/libqmacstyle.dylib
+endif
 TARGETS += build/mod-app.app/Contents/Resources/default.pedalboard
 TARGETS += build/mod-app.app/Contents/Resources/html
 TARGETS += build/mod-app.app/Contents/Resources/mod-hardware-descriptor.json

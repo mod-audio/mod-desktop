@@ -102,7 +102,13 @@ jobs:
       matrix:
         include:
           - os: macos-11
+            target: macos
+          - os: macos-11
+            target: macos-universal-10.15
           - os: macos-12
+            target: macos
+          - os: macos-12
+            target: macos-universal-10.15
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
@@ -110,7 +116,7 @@ jobs:
           submodules: recursive
       - name: Set up dependencies
         run: |
-          ./src/PawPaw/.github/workflows/bootstrap-deps.sh macos-universal-10.15
+          ./src/PawPaw/.github/workflows/bootstrap-deps.sh ${{ matrix.target }}
           brew install p7zip wget
       - name: Set up cache
         id: cache
@@ -121,7 +127,7 @@ jobs:
           key: macos-${{ env.PAWPAW_PACK_NAME }}-v${{ env.CACHE_VERSION_MACOS }}
       - name: Build dependencies
         run: |
-          ./src/PawPaw/bootstrap-mod.sh macos-universal-10.15 && ./src/PawPaw/.cleanup.sh macos-universal-10.15
+          ./src/PawPaw/bootstrap-mod.sh ${{ matrix.target }} && ./src/PawPaw/.cleanup.sh ${{ matrix.target }}
       - name: Build
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
@@ -129,7 +135,7 @@ jobs:
       - name: Validate plugins
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
-          ./utils/plugin-builder/validate-plugins.sh macos-universal-10.15
+          ./utils/plugin-builder/validate-plugins.sh ${{ matrix.target }}
           # FIXME dirty carla leaves temp folders around
           rm -rf *.tmp
       - name: Set sha8
@@ -138,7 +144,7 @@ jobs:
       - name: Pack
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
-          ./utils/macos/macos-dmg.sh macos-universal-10.15
+          ./utils/macos/macos-dmg.sh ${{ matrix.target }}
           mv mod-app-*.dmg mod-app-${{ github.event.pull_request.number || env.SHA8 }}-macOS.dmg
       - uses: actions/upload-artifact@v3
         if: ${{ matrix.os == env.RELEASE_OS_MAC }}
