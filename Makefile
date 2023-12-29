@@ -188,7 +188,6 @@ PLUGINS += mod-pitchshifter
 PLUGINS += mod-utilities
 PLUGINS += modmeter
 PLUGINS += modspectre
-PLUGINS += neural-amp-modeler-lv2
 # crashing linux https://github.com/moddevices/mod-app/actions/runs/6721112608/job/18266110663
 PLUGINS += neuralrecord
 PLUGINS += notes-lv2
@@ -214,6 +213,7 @@ PLUGINS += zam-plugins
 # relies on APIs only available in macOS >= 10.15
 ifneq ($(PAWPAW_TARGET),macos)
 PLUGINS += aidadsp-lv2
+PLUGINS += neural-amp-modeler-lv2
 endif
 
 # issues with glib static build on non-universal builds (fails to link to -liconv)
