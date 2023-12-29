@@ -6,11 +6,11 @@
 
 #include <QtCore/QJsonDocument>
 #include <QtCore/QJsonObject>
+#include <QtWidgets/QStyleFactory>
 
 #ifdef _WIN32
 #include <dwmapi.h>
 #include <shlobj.h>
-#include <QtWidgets/QStyleFactory>
 #define PRE_20H1_DWMWA_USE_IMMERSIVE_DARK_MODE 19
 #define DWMWA_USE_IMMERSIVE_DARK_MODE 20
 static const WCHAR* user_files_dir = nullptr;
@@ -127,6 +127,9 @@ int main(int argc, char* argv[])
     const BOOL darkMode = QSettings(
         "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
         QSettings::NativeFormat).value("AppsUseLightTheme", 1).toInt() == 0;
+   #else
+    const bool darkMode = false;
+   #endif
 
     if (darkMode)
     {
@@ -194,7 +197,8 @@ int main(int argc, char* argv[])
         // TODO check if this is ok
         app.setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
     }
-  #else
+
+  #ifndef _WIN32
     setenv("LANG", "en_US.UTF-8", 1);
 
     char path[PATH_MAX + 256] = {};

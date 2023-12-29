@@ -555,9 +555,7 @@ build/styles/q%.dll: $(PAWPAW_PREFIX)/lib/qt5/plugins/styles/q%.dll
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-ifeq ($(PAWPAW_TARGET),macos)
-PYNSEP = '-'
-else ifeq ($(WINDOWS),true)
+ifeq ($(WINDOWS),true)
 PYNSEP = '-'
 else
 PYNSEP = '_'
