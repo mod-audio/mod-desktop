@@ -131,7 +131,7 @@ jobs:
       - name: Build
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
-          make
+          make PAWPAW_TARGET=${{ matrix.target }}
       - name: Validate plugins
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
