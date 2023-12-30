@@ -3,9 +3,9 @@ name: build
 on: [push, pull_request]
 
 env:
-  CACHE_VERSION_LINUX: 11
-  CACHE_VERSION_MACOS: 11
-  CACHE_VERSION_WIN64: 11
+  CACHE_VERSION_LINUX: 13
+  CACHE_VERSION_MACOS: 13
+  CACHE_VERSION_WIN64: 13
   DEBIAN_FRONTEND: noninteractive
   PAWPAW_SKIP_LTO: 1
   PAWPAW_SKIP_TESTS: 1
@@ -53,7 +53,12 @@ jobs:
       - name: Set up dependencies
         run: |
           ./src/PawPaw/.github/workflows/bootstrap-deps.sh linux-x86_64
-          apt-get install -yqq p7zip-full unzip wget xdg-user-dirs zip
+          if [ "${{ matrix.container }}" = "ubuntu:18.04" ]; then
+            freetypepkgname="libfreetype6-dev"
+          else
+            freetypepkgname="libfreetype-dev"
+          fi
+          apt-get install -yqq ${freetypepkgname} p7zip-full unzip wget xdg-user-dirs zip
       - name: Set up cache
         id: cache
         uses: actions/cache@v3
@@ -183,7 +188,7 @@ jobs:
       - name: Set up dependencies
         run: |
           ./src/PawPaw/.github/workflows/bootstrap-deps.sh win64
-          apt-get install -yqq p7zip-full unzip wget xdg-user-dirs xvfb zip
+          apt-get install -yqq libfreetype-dev libx11-dev libxcursor-dev libxext-dev libxrandr-dev libxrender-dev p7zip-full unzip wget xdg-user-dirs xvfb zip
       - name: Set up cache
         id: cache
         uses: actions/cache@v3

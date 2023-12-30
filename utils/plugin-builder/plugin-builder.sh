@@ -30,7 +30,7 @@ source src/PawPaw/local.env "${target}"
 # ---------------------------------------------------------------------------------------------------------------------
 
 export CFLAGS+="-D__MOD_DEVICES__ -D_MOD_DESKTOP"
-export CXXFLAGS+="-D__MOD_DEVICES__ -D_MOD_DESKTOP"
+export CXXFLAGS+="-D__MOD_DEVICES__ -D_MOD_DESKTOP -DJUCE_AUDIOPROCESSOR_NO_GUI=1"
 
 export CMAKE
 export PAWPAW_BUILDDIR

@@ -170,6 +170,10 @@ PLUGINS += artyfx
 PLUGINS += bolliedelay
 PLUGINS += caps-lv2
 PLUGINS += carla-plugins
+ifneq ($(LINUX),true)
+# crashing linux https://github.com/moddevices/mod-app/actions/runs/7367984567/job/20054758659
+PLUGINS += chow-centaur
+endif
 PLUGINS += die-plugins
 PLUGINS += dpf-plugins
 PLUGINS += dragonfly-reverb
@@ -191,6 +195,7 @@ PLUGINS += neuralrecord
 PLUGINS += neural-amp-modeler-lv2
 PLUGINS += notes-lv2
 PLUGINS += pitchtracking-series
+PLUGINS += schrammel-ojd
 # crashing linux https://github.com/moddevices/mod-app/actions/runs/6718888228/job/18259448918
 # crashing macos https://github.com/moddevices/mod-app/actions/runs/6718888228/job/18259448741
 # PLUGINS += screcord
