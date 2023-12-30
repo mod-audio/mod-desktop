@@ -3,9 +3,9 @@ name: build
 on: [push, pull_request]
 
 env:
-  CACHE_VERSION_LINUX: 10
-  CACHE_VERSION_MACOS: 10
-  CACHE_VERSION_WIN64: 10
+  CACHE_VERSION_LINUX: 11
+  CACHE_VERSION_MACOS: 11
+  CACHE_VERSION_WIN64: 11
   DEBIAN_FRONTEND: noninteractive
   PAWPAW_SKIP_LTO: 1
   PAWPAW_SKIP_TESTS: 1
@@ -102,11 +102,11 @@ jobs:
       matrix:
         include:
           - os: macos-11
-            target: macos
+            target: macos-10.15
           - os: macos-11
             target: macos-universal-10.15
           - os: macos-12
-            target: macos
+            target: macos-10.15
           - os: macos-12
             target: macos-universal-10.15
     runs-on: ${{ matrix.os }}
@@ -131,7 +131,7 @@ jobs:
       - name: Build
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
-          make macos
+          make
       - name: Validate plugins
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
@@ -147,7 +147,7 @@ jobs:
           ./utils/macos/macos-dmg.sh ${{ matrix.target }}
           mv mod-app-*.dmg mod-app-${{ github.event.pull_request.number || env.SHA8 }}-macOS.dmg
       - uses: actions/upload-artifact@v3
-        if: ${{ matrix.os == env.RELEASE_OS_MAC }}
+        if: ${{ matrix.os == env.RELEASE_OS_MAC && matrix.target == 'macos-universal-10.15' }}
         with:
           name: mod-app-${{ github.event.pull_request.number || env.SHA8 }}-macOS
           path: |

@@ -8,7 +8,7 @@ if [ ! -d build ]; then
 fi
 
 if [ "$(uname -m)" = "x86_64" ] && [ x"${1}" != x"macos-universal-10.15" ]; then
-    PAWPAW_PREFIX="${HOME}/PawPawBuilds/targets/macos"
+    PAWPAW_PREFIX="${HOME}/PawPawBuilds/targets/macos-10.15"
 else
     PAWPAW_PREFIX="${HOME}/PawPawBuilds/targets/macos-universal-10.15"
 fi

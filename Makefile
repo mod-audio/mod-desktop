@@ -8,7 +8,7 @@ VERSION = $(shell cat VERSION)
 CC ?= gcc
 TARGET_MACHINE := $(shell $(CC) -dumpmachine)
 
-ifeq ($(PAWPAW_TARGET),macos)
+ifeq ($(PAWPAW_TARGET),macos-10.15)
 MACOS = true
 else ifeq ($(PAWPAW_TARGET),macos-universal-10.15)
 MACOS = true
@@ -24,7 +24,7 @@ PAWPAW_TARGET = linux-$(shell uname -m)
 else ifneq (,$(findstring apple,$(TARGET_MACHINE)))
 MACOS = true
 ifeq ($(shell uname -m),x86_64)
-PAWPAW_TARGET = macos
+PAWPAW_TARGET = macos-10.15
 else
 PAWPAW_TARGET = macos-universal-10.15
 endif
@@ -112,9 +112,7 @@ TARGETS += build/mod-app.app/Contents/PlugIns/iconengines/libqsvgicon.dylib
 TARGETS += build/mod-app.app/Contents/PlugIns/imageformats/libqsvg.dylib
 TARGETS += build/mod-app.app/Contents/PlugIns/LV2
 TARGETS += build/mod-app.app/Contents/PlugIns/platforms/libqcocoa.dylib
-ifneq ($(PAWPAW_TARGET),macos)
 TARGETS += build/mod-app.app/Contents/PlugIns/styles/libqmacstyle.dylib
-endif
 TARGETS += build/mod-app.app/Contents/Resources/default.pedalboard
 TARGETS += build/mod-app.app/Contents/Resources/html
 TARGETS += build/mod-app.app/Contents/Resources/mod-hardware-descriptor.json
@@ -167,6 +165,7 @@ endif
 
 # List of plugin projects to build
 PLUGINS  = abgate
+PLUGINS += aidadsp-lv2
 PLUGINS += artyfx
 PLUGINS += bolliedelay
 PLUGINS += caps-lv2
@@ -188,8 +187,8 @@ PLUGINS += mod-pitchshifter
 PLUGINS += mod-utilities
 PLUGINS += modmeter
 PLUGINS += modspectre
-# crashing linux https://github.com/moddevices/mod-app/actions/runs/6721112608/job/18266110663
 PLUGINS += neuralrecord
+PLUGINS += neural-amp-modeler-lv2
 PLUGINS += notes-lv2
 PLUGINS += pitchtracking-series
 # crashing linux https://github.com/moddevices/mod-app/actions/runs/6718888228/job/18259448918
@@ -210,14 +209,8 @@ PLUGINS += x42-tinygain
 PLUGINS += x42-xfade
 PLUGINS += zam-plugins
 
-# relies on APIs only available in macOS >= 10.15
-ifneq ($(PAWPAW_TARGET),macos)
-PLUGINS += aidadsp-lv2
-PLUGINS += neural-amp-modeler-lv2
-endif
-
 # issues with glib static build on non-universal builds (fails to link to -liconv)
-ifneq ($(PAWPAW_TARGET),macos)
+ifneq ($(PAWPAW_TARGET),macos-10.15)
 PLUGINS += fluidplug
 endif
 
@@ -280,20 +273,6 @@ run: $(TARGETS)
 
 version:
 	@echo $(VERSION)
-
-# ---------------------------------------------------------------------------------------------------------------------
-
-macos:
-	$(MAKE) PAWPAW_TARGET=macos-universal-10.15
-
-macos-app:
-	./utils/run.sh macos-universal-10.15 $(MAKE) -C src/systray
-
-macos-bootstrap:
-	./src/PawPaw/bootstrap-mod.sh macos-universal-10.15
-
-macos-plugins:
-	$(MAKE) PAWPAW_TARGET=macos-universal-10.15 plugins
 
 # ---------------------------------------------------------------------------------------------------------------------
 

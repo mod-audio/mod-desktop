@@ -19,7 +19,7 @@ if [ -e mod-ui.exe ]; then
     PATH_SEP=';'
 elif [ -e mod-app.app ]; then
     if [ "$(uname -m)" = "x86_64" ] && [ x"${1}" != x"macos-universal-10.15" ]; then
-        source ../src/PawPaw/local.env macos
+        source ../src/PawPaw/local.env macos-10.15
     else
         source ../src/PawPaw/local.env macos-universal-10.15
     fi
