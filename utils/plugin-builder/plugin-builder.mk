@@ -75,8 +75,13 @@ TARGET_LDFLAGS = $(LDFLAGS)
 
 TARGET_DIR = $(PAWPAW_PREFIX)
 
+TARGET_MAKE_ENV = env
+TARGET_MAKE_ENV += CFLAGS="$(TARGET_CFLAGS)"
+TARGET_MAKE_ENV += CXXFLAGS="$(TARGET_CXXFLAGS)"
+TARGET_MAKE_ENV += LDFLAGS="$(TARGET_LDFLAGS)"
+
 ifneq ($(MACOS)$(WINDOWS),true)
-TARGET_MAKE_ENV = env LD_LIBRARY_PATH="$(PAWPAW_PREFIX)/usr/lib"
+TARGET_MAKE_ENV += LD_LIBRARY_PATH="$(PAWPAW_PREFIX)/usr/lib"
 endif
 
 ifeq ($(MACOS),true)
@@ -146,6 +151,9 @@ endif
 endef
 
 include $(CURDIR)/src/mod-plugin-builder/plugins/package/$(pkgname)/$(pkgname).mk
+
+TARGET_CFLAGS += $($(PKG)_CFLAGS)
+TARGET_CXXFLAGS += $($(PKG)_CXXFLAGS)
 
 $(PKG)_DLVERSION = $(call sanitize,$(strip $($(PKG)_VERSION)))
 $(PKG)_BUILDDIR = $(PAWPAW_BUILDDIR)/$(pkgname)-$($(PKG)_DLVERSION)
