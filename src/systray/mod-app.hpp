@@ -910,6 +910,9 @@ private:
             if (ui.cb_lv2_all_cv->isChecked())
                 env.insert("MOD_UI_ALLOW_REGULAR_CV", "1");
 
+            if (ui.cb_lv2_only_with_modgui->isChecked())
+                env.insert("MOD_UI_ONLY_SHOW_PLUGINS_WITH_MODGUI", "1");
+
             processUI.setProcessEnvironment(env);
             processUI.start();
         }

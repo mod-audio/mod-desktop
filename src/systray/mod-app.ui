@@ -741,6 +741,16 @@ Smaller buffer gives less latency but consumes more CPU, while bigger buffers ha
                  </property>
                 </widget>
                </item>
+               <item>
+                <widget class="QCheckBox" name="cb_lv2_only_with_modgui">
+                 <property name="toolTip">
+                  <string>Hide plugins that do not have a custom MODGUI</string>
+                 </property>
+                 <property name="text">
+                  <string>Only show plugins with a MODGUI</string>
+                 </property>
+                </widget>
+               </item>
               </layout>
              </item>
              <item>
