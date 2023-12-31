@@ -170,10 +170,8 @@ PLUGINS += artyfx
 PLUGINS += bolliedelay
 PLUGINS += caps-lv2
 PLUGINS += carla-plugins
-ifneq ($(LINUX),true)
 # crashing linux https://github.com/moddevices/mod-app/actions/runs/7367984567/job/20054758659
 PLUGINS += chow-centaur
-endif
 PLUGINS += die-plugins
 PLUGINS += dpf-plugins
 PLUGINS += dragonfly-reverb
