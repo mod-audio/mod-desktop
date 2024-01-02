@@ -183,7 +183,7 @@ PLUGINS += gxquack
 PLUGINS += invada-lv2
 PLUGINS += mod-ams-lv2
 # build issues https://github.com/moddevices/mod-app/actions/runs/7389134263/job/20101349808
-# PLUGINS += mod-arpeggiator
+PLUGINS += mod-arpeggiator
 PLUGINS += mod-audio-mixers
 PLUGINS += mod-convolution-loader
 PLUGINS += mod-cv-plugins
