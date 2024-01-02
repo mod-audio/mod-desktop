@@ -43,7 +43,9 @@ export MOD_KEYS_PATH="$(convert_path ${DOCS_DIR}/MOD App/keys/)"
 export MOD_USER_FILES_DIR="$(convert_path ${DOCS_DIR}/MOD App/user-files)"
 export WINEDEBUG=-all
 
-set -e
+if [ -z "${PAWPAW_DEBUG}" ] || [ "${PAWPAW_DEBUG}" -eq 0 ]; then
+    set -e
+fi
 
 mkdir -p "${DOCS_DIR}/MOD App/keys"
 mkdir -p "${DOCS_DIR}/MOD App/user-files/Audio Recordings"
