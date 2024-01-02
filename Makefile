@@ -185,6 +185,7 @@ PLUGINS += fomp
 PLUGINS += gxquack
 PLUGINS += invada-lv2
 PLUGINS += mod-ams-lv2
+PLUGINS += mod-arpeggiator
 PLUGINS += mod-audio-mixers
 PLUGINS += mod-convolution-loader
 PLUGINS += mod-cv-plugins
@@ -196,19 +197,22 @@ PLUGINS += modmeter
 PLUGINS += neuralrecord
 PLUGINS += neural-amp-modeler-lv2
 PLUGINS += notes-lv2
+PLUGINS += remaincalm-plugins
 PLUGINS += schrammel-ojd
 # crashing linux https://github.com/moddevices/mod-app/actions/runs/6718888228/job/18259448918
 # crashing macos https://github.com/moddevices/mod-app/actions/runs/6718888228/job/18259448741
 # PLUGINS += screcord
 PLUGINS += setbfree
 PLUGINS += setbfree-mod
-PLUGINS += sooperlooper-lv2
 PLUGINS += shiro-plugins
+PLUGINS += sooperlooper-lv2
 PLUGINS += tap-lv2
 PLUGINS += wolf-shaper
 PLUGINS += x42-fil4
+PLUGINS += x42-mclk
 PLUGINS += x42-midifilter
 PLUGINS += x42-midigen
+# PLUGINS += x42-mtc
 PLUGINS += x42-stepseq
 PLUGINS += x42-tinygain
 PLUGINS += x42-xfade
@@ -220,6 +224,7 @@ PLUGINS += mod-pitchshifter
 PLUGINS += modspectre
 PLUGINS += pitchtracking-series
 PLUGINS += x42-fat1
+PLUGINS += x42-tuna-lv2-labs
 endif
 
 # issues with glib static build on non-universal builds (fails to link to -liconv)
