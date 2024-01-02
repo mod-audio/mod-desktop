@@ -68,9 +68,13 @@ SPACE = $(BLANK) $(BLANK)
 # ---------------------------------------------------------------------------------------------------------------------
 # Set PawPaw environment, matching PawPaw/setup/env.sh
 
+ifeq ($(PAWPAW_DEBUG),1)
+PAWPAW_SUFFIX = -debug
+endif
+
 PAWPAW_DIR = $(HOME)/PawPawBuilds
-PAWPAW_BUILDDIR = $(PAWPAW_DIR)/builds/$(PAWPAW_TARGET)
-PAWPAW_PREFIX = $(PAWPAW_DIR)/targets/$(PAWPAW_TARGET)
+PAWPAW_BUILDDIR = $(PAWPAW_DIR)/builds/$(PAWPAW_TARGET)$(PAWPAW_SUFFIX)
+PAWPAW_PREFIX = $(PAWPAW_DIR)/targets/$(PAWPAW_TARGET)$(PAWPAW_SUFFIX)
 
 # ---------------------------------------------------------------------------------------------------------------------
 # List of files created by PawPaw bootstrap, to ensure we have run it at least once
@@ -170,8 +174,10 @@ PLUGINS += artyfx
 PLUGINS += bolliedelay
 PLUGINS += caps-lv2
 PLUGINS += carla-plugins
-# crashing linux https://github.com/moddevices/mod-app/actions/runs/7367984567/job/20054758659
+ifneq ($(LINUX),true)
+# crashing linux https://github.com/moddevices/mod-app/actions/runs/7386470509/job/20093130067
 PLUGINS += chow-centaur
+endif
 PLUGINS += die-plugins
 PLUGINS += dpf-plugins
 PLUGINS += dragonfly-reverb
@@ -185,14 +191,11 @@ PLUGINS += mod-cv-plugins
 PLUGINS += mod-distortion
 PLUGINS += mod-mda-lv2
 PLUGINS += mod-midi-utilities
-PLUGINS += mod-pitchshifter
 PLUGINS += mod-utilities
 PLUGINS += modmeter
-PLUGINS += modspectre
 PLUGINS += neuralrecord
 PLUGINS += neural-amp-modeler-lv2
 PLUGINS += notes-lv2
-PLUGINS += pitchtracking-series
 PLUGINS += schrammel-ojd
 # crashing linux https://github.com/moddevices/mod-app/actions/runs/6718888228/job/18259448918
 # crashing macos https://github.com/moddevices/mod-app/actions/runs/6718888228/job/18259448741
@@ -203,7 +206,6 @@ PLUGINS += sooperlooper-lv2
 PLUGINS += shiro-plugins
 PLUGINS += tap-lv2
 PLUGINS += wolf-shaper
-PLUGINS += x42-fat1
 PLUGINS += x42-fil4
 PLUGINS += x42-midifilter
 PLUGINS += x42-midigen
@@ -211,6 +213,14 @@ PLUGINS += x42-stepseq
 PLUGINS += x42-tinygain
 PLUGINS += x42-xfade
 PLUGINS += zam-plugins
+
+ifneq ($(PAWPAW_DEBUG),1)
+# build issues around fftw https://github.com/moddevices/mod-app/actions/runs/7386470509/job/20093128972
+PLUGINS += mod-pitchshifter
+PLUGINS += modspectre
+PLUGINS += pitchtracking-series
+PLUGINS += x42-fat1
+endif
 
 # issues with glib static build on non-universal builds (fails to link to -liconv)
 ifneq ($(PAWPAW_TARGET),macos-10.15)
