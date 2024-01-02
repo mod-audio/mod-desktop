@@ -227,7 +227,7 @@ endif
 	touch $@
 
 $(STAMP_PATCHED): $(STAMP_EXTRACTED)
-	$(foreach p,$(wildcard $($(PKG)_PKGDIR)/*.patch),patch -p1 -d '$($(PKG)_BUILDDIR)' -i $(p);)
+	$(foreach p,$(sort $(wildcard $($(PKG)_PKGDIR)/*.patch)),patch -p1 -d '$($(PKG)_BUILDDIR)' -i $(p);)
 	touch $@
 
 $(STAMP_EXTRACTED): $($(PKG)_DLFILE)
