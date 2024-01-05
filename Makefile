@@ -100,6 +100,7 @@ TARGETS += build/mod-app.app/Contents/MacOS/jackd
 TARGETS += build/mod-app.app/Contents/MacOS/jack/jack-session.conf
 TARGETS += build/mod-app.app/Contents/MacOS/jack/jack_coreaudio.so
 TARGETS += build/mod-app.app/Contents/MacOS/jack/jack_coremidi.so
+TARGETS += build/mod-app.app/Contents/MacOS/jack/jack_dummy.so
 TARGETS += build/mod-app.app/Contents/MacOS/jack/mod-host.so
 TARGETS += build/mod-app.app/Contents/MacOS/jack/mod-midi-broadcaster.so
 TARGETS += build/mod-app.app/Contents/MacOS/jack/mod-midi-merger.so
@@ -139,6 +140,7 @@ TARGETS += build/modtools
 TARGETS += build/mod-hardware-descriptor.json
 TARGETS += build/VERSION
 ifeq ($(WINDOWS),true)
+TARGETS += build/jack/jack_dummy.dll
 TARGETS += build/jack/jack_portaudio.dll
 TARGETS += build/jack/jack_winmme.dll
 TARGETS += build/libjack64.dll
@@ -157,6 +159,7 @@ TARGETS += build/styles/qwindowsvistastyle.dll
 else
 TARGETS += build/jack/alsa_midi.so
 TARGETS += build/jack/jack_alsa.so
+TARGETS += build/jack/jack_dummy.so
 TARGETS += build/jack/jack_portaudio.so
 TARGETS += build/jack/jack-session-alsamidi.conf
 TARGETS += build/libjack.so.0

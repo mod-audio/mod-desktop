@@ -24,8 +24,7 @@ if [ -e jackd.exe ]; then
     source ../src/PawPaw/local.env win64
     JACKD="wine jackd.exe"
     JACK_DRIVER="portaudio"
-    JACK_DRIVER_DEVICE="ASIO::WineASIO Driver"
-    JACK_DRIVER_OPTS=""
+    JACK_DRIVER_OPTS="-d \"ASIO::WineASIO Driver\""
     JACK_SESSION="-C ./jack/jack-session.conf -X winmme"
     PATH_SEP=';'
 elif [ -e mod-app.app ]; then
@@ -36,8 +35,7 @@ elif [ -e mod-app.app ]; then
     fi
     JACKD="./mod-app.app/Contents/MacOS/jackd"
     JACK_DRIVER="coreaudio"
-    JACK_DRIVER_DEVICE="BuiltInSpeakerDevice"
-    JACK_DRIVER_OPTS=""
+    JACK_DRIVER_OPTS="-P BuiltInSpeakerDevice"
     JACK_SESSION="-C ./mod-app.app/Contents/MacOS/jack/jack-session.conf -X coremidi"
     PATH_SEP=':'
     export DYLD_LIBRARY_PATH="${PAWPAW_PREFIX}/lib"
@@ -45,9 +43,13 @@ elif [ -e mod-app.app ]; then
 else
     source ../src/PawPaw/local.env linux
     JACKD="./jackd"
-    JACK_DRIVER="portaudio"
-    JACK_DRIVER_DEVICE="JACK::system"
-    JACK_DRIVER_OPTS=""
+    if ! jack_wait -c | grep -q "not running"; then
+        JACK_DRIVER="portaudio"
+        JACK_DRIVER_OPTS="-d JACK::system"
+    else
+        JACK_DRIVER="dummy"
+        JACK_DRIVER_OPTS=""
+    fi
     JACK_SESSION="-C ./jack/jack-session-alsamidi.conf"
     PATH_SEP=':'
     export LD_BIND_NOW=1
@@ -76,5 +78,5 @@ mkdir -p "${DOCS_DIR}/MOD App/user-files/Audio Recordings"
 
 # DEBUG="lldb --"
 
-echo ${JACKD} -R -S -n mod-app ${JACK_SESSION} -d ${JACK_DRIVER} -d \"${JACK_DRIVER_DEVICE}\" ${JACK_DRIVER_OPTS} -r 48000 -p 256
-exec ${DEBUG} ${JACKD} -R -S -n mod-app ${JACK_SESSION} -d ${JACK_DRIVER} -d "${JACK_DRIVER_DEVICE}" ${JACK_DRIVER_OPTS} -r 48000 -p 256
+echo ${JACKD} -R -S -n mod-app ${JACK_SESSION} -d ${JACK_DRIVER} ${JACK_DRIVER_OPTS} -r 48000 -p 256
+exec ${DEBUG} ${JACKD} -R -S -n mod-app ${JACK_SESSION} -d ${JACK_DRIVER} ${JACK_DRIVER_OPTS} -r 48000 -p 256
