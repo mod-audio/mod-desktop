@@ -185,7 +185,6 @@ PLUGINS += fomp
 PLUGINS += gxquack
 PLUGINS += invada-lv2
 PLUGINS += mod-ams-lv2
-# build issues https://github.com/moddevices/mod-app/actions/runs/7389134263/job/20101349808
 PLUGINS += mod-arpeggiator
 PLUGINS += mod-audio-mixers
 PLUGINS += mod-convolution-loader
@@ -200,9 +199,7 @@ PLUGINS += neural-amp-modeler-lv2
 PLUGINS += notes-lv2
 PLUGINS += remaincalm-plugins
 PLUGINS += schrammel-ojd
-# crashing linux https://github.com/moddevices/mod-app/actions/runs/6718888228/job/18259448918
-# crashing macos https://github.com/moddevices/mod-app/actions/runs/6718888228/job/18259448741
-# PLUGINS += screcord
+PLUGINS += screcord
 PLUGINS += setbfree
 PLUGINS += setbfree-mod
 PLUGINS += shiro-plugins
