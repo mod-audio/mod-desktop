@@ -19,7 +19,12 @@ Current known issues:
 
 ## Download
 
-MOD App only has builds for Windows 64bit for now, find them in the [releases section](https://github.com/moddevices/mod-app/releases).
+MOD App has builds for:
+* Linux - X86_64
+* MacOS - Universal Image
+* Windows - 64 bit
+
+You can find them in the [releases section](https://github.com/moddevices/mod-app/releases).
 
 ## Development
 
