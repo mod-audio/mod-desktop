@@ -19,7 +19,7 @@ Current known issues:
 
 ## Download
 
-Find build for Linux, Windows and MacOS in the [releases section](https://github.com/moddevices/mod-app/releases).
+Find builds for Linux, Windows and MacOS in the [releases section](https://github.com/moddevices/mod-app/releases).
 
 ## Development
 
