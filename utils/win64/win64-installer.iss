@@ -2,17 +2,17 @@
 
 [Setup]
 ArchitecturesInstallIn64BitMode=x64
-AppName=MOD App
+AppName=MOD Desktop App
 AppPublisher=MOD Audio
 AppPublisherURL=https://mod.audio/
-AppSupportURL=https://github.com/moddevices/mod-app/issues/
-AppUpdatesURL=https://github.com/moddevices/mod-app/releases/
+AppSupportURL=https://github.com/moddevices/mod-desktop-app/issues/
+AppUpdatesURL=https://github.com/moddevices/mod-desktop-app/releases/
 AppVersion={#VERSION}
-DefaultDirName={commonpf64}\MOD App
+DefaultDirName={commonpf64}\MOD Desktop App
 DisableDirPage=yes
 DisableWelcomePage=no
 LicenseFile=..\..\LICENSE
-OutputBaseFilename=mod-app-{#VERSION}-win64-installer
+OutputBaseFilename=mod-desktop-app-{#VERSION}-win64-installer
 OutputDir=..\..
 UsePreviousAppDir=no
 
@@ -35,8 +35,8 @@ Source: "..\..\build\jack\jack_winmme.dll"; DestDir: "{app}\jack"; Flags: ignore
 Source: "..\..\build\jack\mod-host.dll"; DestDir: "{app}\jack"; Flags: ignoreversion;
 Source: "..\..\build\jack\mod-midi-broadcaster.dll"; DestDir: "{app}\jack"; Flags: ignoreversion;
 Source: "..\..\build\jack\mod-midi-merger.dll"; DestDir: "{app}\jack"; Flags: ignoreversion;
-; mod-app + qt5
-Source: "..\..\build\mod-app.exe"; DestDir: "{app}"; Flags: ignoreversion;
+; mod-desktop-app + qt5
+Source: "..\..\build\mod-desktop-app.exe"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "..\..\build\Qt5*.dll"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "..\..\build\generic\q*.dll"; DestDir: "{app}\generic"; Flags: ignoreversion;
 Source: "..\..\build\iconengines\q*.dll"; DestDir: "{app}\iconengines"; Flags: ignoreversion;
@@ -151,7 +151,7 @@ Source: "..\..\build\mod\*.py"; DestDir: "{app}\mod"; Flags: ignoreversion;
 Source: "..\..\build\mod\communication\*.py"; DestDir: "{app}\mod\communication"; Flags: ignoreversion;
 Source: "..\..\build\modtools\*.py"; DestDir: "{app}\modtools"; Flags: ignoreversion;
 ; asio driver
-Source: "..\..\build\mod-app-asio.dll"; DestDir: "{win}\System32"; Flags: ignoreversion regserver 64bit;
+Source: "..\..\build\mod-desktop-app-asio.dll"; DestDir: "{win}\System32"; Flags: ignoreversion regserver 64bit;
 ; misc
 Source: "..\..\build\mod-hardware-descriptor.json"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "..\..\build\VERSION"; DestDir: "{app}"; Flags: ignoreversion;
@@ -159,4 +159,4 @@ Source: "..\..\build\VERSION"; DestDir: "{app}"; Flags: ignoreversion;
 #include "win64-plugins.iss"
 
 [Icons]
-Name: "{commonprograms}\MOD App"; Filename: "{app}\mod-app.exe"; IconFilename: "{app}\mod-logo.ico"; WorkingDir: "{app}"; Comment: "MOD Desktop App";
+Name: "{commonprograms}\MOD Desktop App"; Filename: "{app}\mod-desktop-app.exe"; IconFilename: "{app}\mod-logo.ico"; WorkingDir: "{app}"; Comment: "MOD Desktop App";

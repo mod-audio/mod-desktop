@@ -5,19 +5,19 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleDisplayName</key>
-	<string>MOD App</string>
+	<string>MOD Desktop App</string>
 	<key>CFBundleExecutable</key>
-	<string>mod-app</string>
+	<string>mod-desktop-app</string>
 	<key>CFBundleIconFile</key>
 	<string>mod-logo.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>audio.mod.app</string>
+	<string>audio.mod.desktop-app</string>
 	<key>NSHighResolutionCapable</key>
 	<true/>
 	<key>NSRequiresAquaSystemAppearance</key>
 	<false/>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>MOD App requires microphone permissions for audio input.</string>
+	<string>MOD Desktop App requires microphone permissions for audio input.</string>
 	<key>CFBundleSupportedPlatforms</key>
 	<array>
 		<string>MacOSX</string>
@@ -25,7 +25,7 @@
 	<key>LSMinimumSystemVersion</key>
 	<string>10.15</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>(C) 2023 MOD Audio UG.
+	<string>(C) 2023-2024 MOD Audio UG.
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.</string>
 </dict>
 </plist>

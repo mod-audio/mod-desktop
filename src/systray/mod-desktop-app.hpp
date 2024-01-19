@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "ui_mod-app.hpp"
+#include "ui_mod-desktop-app.hpp"
 
 #include <QtCore/QDebug>
 #include <QtCore/QProcess>
@@ -222,7 +222,7 @@ public:
         timerId = startTimer(500);
 
        #ifdef Q_OS_WIN
-        openEvent = ::CreateEventA(nullptr, false, false, "Global\\mod-app-open");
+        openEvent = ::CreateEventA(nullptr, false, false, "Global\\mod-desktop-app-open");
        #endif
     }
 
@@ -525,7 +525,7 @@ public:
                #elif defined(Q_OS_WIN)
                 if (hostApiName == "ASIO")
                 {
-                    if (devName == "JackRouter" || devName == "MOD App")
+                    if (devName == "JackRouter" || devName == "MOD Desktop App")
                         continue;
                 }
                 else if (hostApiName != "Windows WASAPI")
@@ -782,8 +782,8 @@ private:
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
         successfullyStarted = true;
         ui.b_opengui->setEnabled(true);
-        systray->setToolTip(tr("MOD App: Running"));
-        systray->showMessage(tr("MOD App"), tr("Running"), QSystemTrayIcon::Information);
+        systray->setToolTip(tr("MOD Desktop App: Running"));
+        systray->showMessage(tr("MOD Desktop App"), tr("Running"), QSystemTrayIcon::Information);
     }
 
     void setStopped()
@@ -795,7 +795,7 @@ private:
         ui.gb_audio->setEnabled(true);
         ui.gb_midi->setEnabled(true);
         ui.gb_lv2->setEnabled(true);
-        systray->setToolTip(tr("MOD App: Stopped"));
+        systray->setToolTip(tr("MOD Desktop App: Stopped"));
     }
 
     QString getLV2Path() const
@@ -996,7 +996,7 @@ private slots:
             "-R",
             "-S",
             "-n",
-            "mod-app",
+            "mod-desktop-app",
         };
 
         if (midiEnabled)

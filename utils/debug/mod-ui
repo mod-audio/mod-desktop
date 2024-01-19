@@ -17,7 +17,7 @@ function convert_path() {
 if [ -e mod-ui.exe ]; then
     source ../src/PawPaw/local.env win64
     PATH_SEP=';'
-elif [ -e mod-app.app ]; then
+elif [ -e mod-desktop-app.app ]; then
     if [ "$(uname -m)" = "x86_64" ] && [ x"${1}" != x"macos-universal-10.15" ]; then
         source ../src/PawPaw/local.env macos-10.15
     else
@@ -31,7 +31,7 @@ else
     PATH_SEP=':'
 fi
 
-if [ -e mod-app.app ]; then
+if [ -e mod-desktop-app.app ]; then
     DOCS_DIR=~/Documents
 else
     DOCS_DIR=$(xdg-user-dir DOCUMENTS)
@@ -39,41 +39,41 @@ fi
 
 PYTHON="${EXE_WRAPPER} ${PAWPAW_PREFIX}/bin/python3${APP_EXT}"
 
-if [ -e mod-app.app ]; then
-    LV2_PATH="$(convert_path $(pwd)/mod-app.app/Contents/PlugIns/LV2)"
+if [ -e mod-desktop-app.app ]; then
+    LV2_PATH="$(convert_path $(pwd)/mod-desktop-app.app/Contents/PlugIns/LV2)"
 else
     LV2_PATH="$(convert_path $(pwd)/plugins)"
 fi
-LV2_PATH+="${PATH_SEP}$(convert_path ${DOCS_DIR}/MOD App/lv2)"
+LV2_PATH+="${PATH_SEP}$(convert_path "${DOCS_DIR}/MOD Desktop App/lv2")"
 export LV2_PATH
 
 export MOD_APP=1
-export MOD_DATA_DIR="$(convert_path ${DOCS_DIR}/MOD App)"
+export MOD_DATA_DIR="$(convert_path "${DOCS_DIR}/MOD Desktop App")"
 export MOD_DEV_ENVIRONMENT=0
 export MOD_DEVICE_HOST_PORT=18182
 export MOD_DEVICE_WEBSERVER_PORT=18181
 export MOD_HARDWARE_DESC_FILE="$(convert_path $(pwd)/mod-hardware-descriptor.json)"
-export MOD_KEYS_PATH="$(convert_path ${DOCS_DIR}/MOD App/keys/)"
-export MOD_USER_FILES_DIR="$(convert_path ${DOCS_DIR}/MOD App/user-files)"
-export MOD_USER_PEDALBOARDS_DIR="$(convert_path ${DOCS_DIR}/MOD App/pedalboards)"
-export MOD_USER_PLUGINS_DIR="$(convert_path ${DOCS_DIR}/MOD App/lv2)"
+export MOD_KEYS_PATH="$(convert_path "${DOCS_DIR}/MOD Desktop App/keys/")"
+export MOD_USER_FILES_DIR="$(convert_path "${DOCS_DIR}/MOD Desktop App/user-files")"
+export MOD_USER_PEDALBOARDS_DIR="$(convert_path "${DOCS_DIR}/MOD Desktop App/pedalboards")"
+export MOD_USER_PLUGINS_DIR="$(convert_path "${DOCS_DIR}/MOD Desktop App/lv2")"
 # export MOD_LOG=2
 
 export JACK_NO_START_SERVER=1
 
-mkdir -p "${DOCS_DIR}/MOD App/user-files/Audio Loops"
-mkdir -p "${DOCS_DIR}/MOD App/user-files/Audio Recordings"
-mkdir -p "${DOCS_DIR}/MOD App/user-files/Audio Samples"
-mkdir -p "${DOCS_DIR}/MOD App/user-files/Audio Tracks"
-mkdir -p "${DOCS_DIR}/MOD App/user-files/MIDI Clips"
-mkdir -p "${DOCS_DIR}/MOD App/user-files/MIDI Songs"
-mkdir -p "${DOCS_DIR}/MOD App/user-files/Reverb IRs"
-mkdir -p "${DOCS_DIR}/MOD App/user-files/Speaker Cabinets IRs"
-mkdir -p "${DOCS_DIR}/MOD App/user-files/Hydrogen Drumkits"
-mkdir -p "${DOCS_DIR}/MOD App/user-files/SF2 Instruments"
-mkdir -p "${DOCS_DIR}/MOD App/user-files/SFZ Instruments"
-mkdir -p "${DOCS_DIR}/MOD App/user-files/Aida DSP Models"
-mkdir -p "${DOCS_DIR}/MOD App/user-files/NAM Models"
+mkdir -p "${DOCS_DIR}/MOD Desktop App/user-files/Audio Loops"
+mkdir -p "${DOCS_DIR}/MOD Desktop App/user-files/Audio Recordings"
+mkdir -p "${DOCS_DIR}/MOD Desktop App/user-files/Audio Samples"
+mkdir -p "${DOCS_DIR}/MOD Desktop App/user-files/Audio Tracks"
+mkdir -p "${DOCS_DIR}/MOD Desktop App/user-files/MIDI Clips"
+mkdir -p "${DOCS_DIR}/MOD Desktop App/user-files/MIDI Songs"
+mkdir -p "${DOCS_DIR}/MOD Desktop App/user-files/Reverb IRs"
+mkdir -p "${DOCS_DIR}/MOD Desktop App/user-files/Speaker Cabinets IRs"
+mkdir -p "${DOCS_DIR}/MOD Desktop App/user-files/Hydrogen Drumkits"
+mkdir -p "${DOCS_DIR}/MOD Desktop App/user-files/SF2 Instruments"
+mkdir -p "${DOCS_DIR}/MOD Desktop App/user-files/SFZ Instruments"
+mkdir -p "${DOCS_DIR}/MOD Desktop App/user-files/Aida DSP Models"
+mkdir -p "${DOCS_DIR}/MOD Desktop App/user-files/NAM Models"
 
 cd ../src/mod-ui
 

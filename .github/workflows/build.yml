@@ -85,14 +85,14 @@ jobs:
       - name: Pack
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
-          mkdir mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64
-          mv build mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64/mod-app
-          cp utils/linux/mod-app.* mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64/
-          tar chJf mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64.tar.xz mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64
+          mkdir mod-desktop-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64
+          mv build mod-desktop-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64/mod-desktop-app
+          cp utils/linux/mod-desktop-app.* mod-desktop-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64/
+          tar chJf mod-desktop-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64.tar.xz mod-desktop-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64
       - uses: actions/upload-artifact@v3
         if: ${{ matrix.container == env.RELEASE_OS_LINUX }}
         with:
-          name: mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64
+          name: mod-desktop-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64
           path: |
             *.tar.xz
       - uses: softprops/action-gh-release@v1
@@ -173,14 +173,14 @@ jobs:
       - name: Pack
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
-          mkdir mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64-debug
-          mv build mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64-debug/mod-app
-          cp utils/linux/mod-app.* mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64-debug/
-          tar chJf mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64-debug.tar.xz mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64-debug
+          mkdir mod-desktop-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64-debug
+          mv build mod-desktop-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64-debug/mod-desktop-app
+          cp utils/linux/mod-desktop-app.* mod-desktop-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64-debug/
+          tar chJf mod-desktop-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64-debug.tar.xz mod-desktop-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64-debug
       - uses: actions/upload-artifact@v3
         if: ${{ matrix.container == env.RELEASE_OS_LINUX }}
         with:
-          name: mod-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64-debug
+          name: mod-desktop-app-${{ github.event.pull_request.number || env.SHA8 }}-linux-x86_64-debug
           path: |
             *.tar.xz
 
@@ -236,11 +236,11 @@ jobs:
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
           ./utils/macos/macos-dmg.sh ${{ matrix.target }}
-          mv mod-app-*.dmg mod-app-${{ github.event.pull_request.number || env.SHA8 }}-macOS.dmg
+          mv mod-desktop-app-*.dmg mod-desktop-app-${{ github.event.pull_request.number || env.SHA8 }}-macOS.dmg
       - uses: actions/upload-artifact@v3
         if: ${{ matrix.os == env.RELEASE_OS_MAC && matrix.target == 'macos-universal-10.15' }}
         with:
-          name: mod-app-${{ github.event.pull_request.number || env.SHA8 }}-macOS
+          name: mod-desktop-app-${{ github.event.pull_request.number || env.SHA8 }}-macOS
           path: |
             *.dmg
       - uses: softprops/action-gh-release@v1
@@ -302,14 +302,14 @@ jobs:
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
           xvfb-run ./utils/win64/win64-installer.sh
-          mv mod-app-*.exe mod-app-${{ github.event.pull_request.number || env.SHA8 }}-win64.exe
+          mv mod-desktop-app-*.exe mod-desktop-app-${{ github.event.pull_request.number || env.SHA8 }}-win64.exe
           rm -rf build/innosetup-*
-          mv build mod-app-${{ github.event.pull_request.number || env.SHA8 }}-win64
-          zip -r -9 mod-app-${{ github.event.pull_request.number || env.SHA8 }}-win64.zip mod-app-${{ github.event.pull_request.number || env.SHA8 }}-win64
+          mv build mod-desktop-app-${{ github.event.pull_request.number || env.SHA8 }}-win64
+          zip -r -9 mod-desktop-app-${{ github.event.pull_request.number || env.SHA8 }}-win64.zip mod-desktop-app-${{ github.event.pull_request.number || env.SHA8 }}-win64
       - uses: actions/upload-artifact@v3
         if: ${{ matrix.container == env.RELEASE_OS_WIN64 }}
         with:
-          name: mod-app-${{ github.event.pull_request.number || env.SHA8 }}-win64
+          name: mod-desktop-app-${{ github.event.pull_request.number || env.SHA8 }}-win64
           path: |
             *.exe
             *.zip

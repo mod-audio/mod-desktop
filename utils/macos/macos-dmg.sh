@@ -22,10 +22,10 @@ rm -rf mod-ui/modtools/__pycache__
 rm -rf build/dmg
 mkdir build/dmg
 
-gcp -rL "build/mod-app.app" "build/dmg/MOD App.app"
+gcp -rL "build/mod-desktop-app.app" "build/dmg/MOD Desktop App.app"
 gcp utils/macos/macos-readme.txt build/dmg/README.txt
 
-pushd "build/dmg/MOD App.app/Contents"
+pushd "build/dmg/MOD Desktop App.app/Contents"
 
 rm -rf Frameworks/*/*.prl
 rm -rf Frameworks/*/Headers
@@ -50,5 +50,5 @@ done
 
 popd
 
-hdiutil create "mod-app-$(cat VERSION)-macOS.dmg" -srcfolder build/dmg -volname "MOD App" -fs HFS+ -ov
+hdiutil create "mod-desktop-app-$(cat VERSION)-macOS.dmg" -srcfolder build/dmg -volname "MOD Desktop App" -fs HFS+ -ov
 rm -rf build/dmg

@@ -38,7 +38,7 @@ os.environ['MOD_IMAGE_VERSION_PATH'] = os.path.join(resdir, 'VERSION')
 os.environ['MOD_KEYS_PATH'] = os.path.join(DATA_DIR, 'keys')
 os.environ['MOD_LOG'] = os.environ.get("MOD_LOG", '1')
 # MOD_MODEL_CPU
-os.environ['MOD_MODEL_TYPE'] = "MOD App"
+os.environ['MOD_MODEL_TYPE'] = "MOD Desktop App"
 os.environ['MOD_USER_FILES_DIR'] = os.path.join(DATA_DIR, 'user-files')
 os.environ['MOD_USER_PEDALBOARDS_DIR'] = os.path.join(DATA_DIR, 'pedalboards')
 os.environ['MOD_USER_PLUGINS_DIR'] = os.path.join(DATA_DIR, 'lv2')

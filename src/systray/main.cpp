@@ -1,8 +1,8 @@
-// SPDX-FileCopyrightText: 2023 MOD Audio UG
+// SPDX-FileCopyrightText: 2023-2024 MOD Audio UG
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-#include "mod-app.hpp"
-#include "qrc_mod-app.hpp"
+#include "mod-desktop-app.hpp"
+#include "qrc_mod-desktop-app.hpp"
 
 #include <QtCore/QJsonDocument>
 #include <QtCore/QJsonObject>
@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
     // TODO set branding here
 
     QApplication app(argc, argv);
-    app.setApplicationName("MOD App");
+    app.setApplicationName("MOD Desktop App");
     app.setOrganizationName("MOD Audio");
     app.setWindowIcon(QIcon(":/res/mod-logo.svg"));
 
@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
 
     SHGetSpecialFolderPathW(nullptr, path, CSIDL_MYDOCUMENTS, FALSE);
 
-    std::wcscat(path, L"\\MOD App");
+    std::wcscat(path, L"\\MOD Desktop App");
     _wmkdir(path);
     SetEnvironmentVariableW(L"MOD_DATA_DIR", path);
 
@@ -243,10 +243,10 @@ int main(int argc, char* argv[])
         return 1;
 
    #ifdef __APPLE__
-    std::strcat(path, "/Documents/MOD App");
+    std::strcat(path, "/Documents/MOD Desktop App");
    #else
     // TODO fetch user docs dir
-    std::strcat(path, "/Documents/MOD App");
+    std::strcat(path, "/Documents/MOD Desktop App");
    #endif
 
     mkdir(path, 0777);

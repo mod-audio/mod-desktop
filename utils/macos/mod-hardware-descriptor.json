@@ -1,5 +1,5 @@
 {
-  "name": "MOD App",
+  "name": "MOD Desktop App",
   "platform": "desktop",
   "architecture": "universal",
   "bin-compat": "macos-universal"

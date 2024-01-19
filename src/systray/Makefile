@@ -41,12 +41,12 @@ PAWPAW_PREFIX = $(PAWPAW_DIR)/targets/$(PAWPAW_TARGET)
 # ---------------------------------------------------------------------------------------------------------------------
 
 ifeq ($(WINDOWS),true)
-TARGET = mod-app.exe
+TARGET = mod-desktop-app.exe
 EXTRAS = Qt5Core.dll Qt5Gui.dll Qt5Svg.dll Qt5Widgets.dll
 LDFLAGS  += -Wl,-subsystem,windows -ldwmapi
 WINDRES   = $(subst gcc,windres,$(CC))
 else
-TARGET = mod-app
+TARGET = mod-desktop-app
 endif
 
 ifeq ($(LINUX),true)
@@ -83,7 +83,7 @@ endif
 OBJS  = main.cpp.o
 
 ifeq ($(WINDOWS),true)
-OBJS += mod-app.rc.o
+OBJS += mod-desktop-app.rc.o
 endif
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -91,7 +91,7 @@ endif
 all: $(TARGET) $(EXTRAS)
 
 clean:
-	rm -f $(TARGET) *.dll *.exe *.o qrc_mod-app.hpp ui_mod-app.hpp
+	rm -f $(TARGET) *.dll *.exe *.o qrc_mod-desktop-app.hpp ui_mod-desktop-app.hpp
 
 $(TARGET): $(OBJS)
 	@$(shell mkdir -p $(@D))
@@ -105,16 +105,16 @@ ifeq ($(MACOS),true)
 	install_name_tool -change "@rpath/QtWidgets.framework/Versions/5/QtWidgets" "@executable_path/../Frameworks/QtWidgets.framework/QtWidgets" $@
 endif
 
-main.cpp.o: main.cpp mod-app.hpp qrc_mod-app.hpp ui_mod-app.hpp widgets.hpp
+main.cpp.o: main.cpp mod-desktop-app.hpp qrc_mod-desktop-app.hpp ui_mod-desktop-app.hpp widgets.hpp
 	$(CXX) $< $(CXXFLAGS) $(QT5_FLAGS) -c -o $@
 
-mod-app.rc.o: mod-app.rc
+mod-desktop-app.rc.o: mod-desktop-app.rc
 	$(WINDRES) $< -O coff -o $@
 
-qrc_mod-app.hpp: mod-app.qrc
+qrc_mod-desktop-app.hpp: mod-desktop-app.qrc
 	$(QT5_HOSTBINS)/rcc $< -o $@
 
-ui_mod-app.hpp: mod-app.ui
+ui_mod-desktop-app.hpp: mod-desktop-app.ui
 	$(QT5_HOSTBINS)/uic $< -o $@
 
 Qt5%.dll: $(PAWPAW_PREFIX)/bin/Qt5%.dll
