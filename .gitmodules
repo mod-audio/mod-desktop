@@ -1,5 +1,5 @@
-[submodule "src/mod-app-asio"]
-	path = src/mod-app-asio
+[submodule "src/mod-desktop-app-asio"]
+	path = src/mod-desktop-app-asio
 	url = https://github.com/wineasio/wineasio.git
 [submodule "src/mod-host"]
 	path = src/mod-host
