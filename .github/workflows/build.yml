@@ -196,6 +196,10 @@ jobs:
             target: macos-10.15
           - os: macos-12
             target: macos-universal-10.15
+          - os: macos-13
+            target: macos-10.15
+          - os: macos-13
+            target: macos-universal-10.15
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
