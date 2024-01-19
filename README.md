@@ -1,15 +1,15 @@
-# MOD App
+# MOD Desktop App
 
 **MOD Audio is on the desktop!**
 
-This is the source code repository for MOD App, a little tool by [MOD Audio](https://mod.audio/) that combines all the goodies from MOD for the desktop platform packaged in a convenient installer.
+This is the source code repository for MOD Desktop App, a little tool by [MOD Audio](https://mod.audio/) that combines all the goodies from MOD for the desktop platform packaged in a convenient installer.
 
-![screenshot](mod-app.png "mod-app")
+![screenshot](mod-desktop-app.png "mod-desktop-app")
 
 ## Current status
 
-At this point this tool should be considered VERY EXPERIMENTAL.
-Specially due to MOD related software and plugins never been tested on Windows systems before.
+At this point this tool should be considered in beta state.
+Most things already work but we are still tweaking and fixing a lot, specially due to MOD related software and plugins never been tested on Windows systems before.
 Feedback and testing is very much appreciated, make sure to report issues you find during your own testing.
 
 Current known issues:
@@ -19,21 +19,27 @@ Current known issues:
 
 ## Download
 
-MOD App only has builds for Windows 64bit for now, find them in the [releases section](https://github.com/moddevices/mod-app/releases).
+MOD Desktop App has builds for:
+
+- Linux x86_64
+- macOS universal (Intel + Apple Sillicon)
+- Windows 64bit
+
+You can find them in the [releases section](https://github.com/moddevices/mod-desktop-app/releases).
 
 ## Development
 
 If you want to contribute, here are a few items where help would be appreciated:
 
 - Debugging and fixing Windows specific issues within mod-ui (*)
-- Documentation regarding "universal" ASIO drivers, like ASIO4ALL and FlexASIO, and how to set them nicely for MOD App
+- Documentation regarding "universal" ASIO drivers, like ASIO4ALL and FlexASIO, and how to set them nicely for MOD Desktop App
 
-(*) Note: on Windows the default installation has html/css/js files in `C:\Program Files\MOD App\html` and python files in `C:\Program Files\MOD App\mod`, which can be directly modified, making it very easy and convenient to try out any changes.
+(*) Note: on Windows the default installation has html/css/js files in `C:\Program Files\MOD Desktop App\html` and python files in `C:\Program Files\MOD Desktop App\mod`, which can be directly modified, making it very easy and convenient to try out any changes.
 
 Also help in these areas, but they are much more involved:
-- Create a JACK-API-compatible node-based audio graph, to be used for eventually running "mod-app as a plugin" (there are a few opensource libs for this already, like the one included in miniaudio)
-- Custom [jack-router](https://github.com/jackaudio/jack-router) build targetting MOD App (TBD how to best package jack2 within mod-app)
+- Create a JACK-API-compatible node-based audio graph, to be used for eventually running "mod-desktop-app as a plugin" (there are a few opensource libs for this already, like the one included in miniaudio)
+- Create a virtual sound device for macOS that can send audio into a JACK client, similar to JACK-Router and WineASIO projects
 
 ## License
 
-MOD App is licensed under AGPLv3+, see [LICENSE](LICENSE) for more details.  
+MOD Desktop App is licensed under AGPLv3+, see [LICENSE](LICENSE) for more details.
