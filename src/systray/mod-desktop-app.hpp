@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 MOD Audio UG
+// SPDX-FileCopyrightText: 2023-2024 MOD Audio UG
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 #pragma once
@@ -775,6 +775,7 @@ private:
         ui.gb_audio->setEnabled(false);
         ui.gb_midi->setEnabled(false);
         ui.gb_lv2->setEnabled(false);
+        ui.l_status->setText(tr("Starting..."));
     }
 
     void setRunning()
@@ -782,6 +783,7 @@ private:
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
         successfullyStarted = true;
         ui.b_opengui->setEnabled(true);
+        ui.l_status->setText(tr("Started"));
         systray->setToolTip(tr("MOD Desktop App: Running"));
         systray->showMessage(tr("MOD Desktop App"), tr("Running"), QSystemTrayIcon::Information);
     }
@@ -795,6 +797,7 @@ private:
         ui.gb_audio->setEnabled(true);
         ui.gb_midi->setEnabled(true);
         ui.gb_lv2->setEnabled(true);
+        ui.l_status->setText(tr("Stopped"));
         systray->setToolTip(tr("MOD Desktop App: Stopped"));
     }
 
