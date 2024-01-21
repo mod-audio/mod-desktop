@@ -326,9 +326,9 @@ build-ui/lib/libmod_utils$(SO_EXT): src/mod-ui/utils/libmod_utils$(SO_EXT) build
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-build/mod-desktop-app.app/Contents/Info.plist: utils/macos/Info.plist
+build/mod-desktop-app.app/Contents/Info.plist: utils/macos/app.plist.in
 	@mkdir -p build/mod-desktop-app.app/Contents
-	ln -sf $(abspath $<) $@
+	sed -e "s/@version@/$(VERSION)/" $< > $@
 
 build/mod-desktop-app.app/Contents/Frameworks/Qt%.framework: $(PAWPAW_PREFIX)/lib/Qt%.framework
 	@mkdir -p build/mod-desktop-app.app/Contents/Frameworks

@@ -12,6 +12,8 @@
 	<string>mod-logo.icns</string>
 	<key>CFBundleIdentifier</key>
 	<string>audio.mod.desktop-app</string>
+	<key>CFBundleShortVersionString</key>
+	<string>@version@</string>
 	<key>NSHighResolutionCapable</key>
 	<true/>
 	<key>NSRequiresAquaSystemAppearance</key>

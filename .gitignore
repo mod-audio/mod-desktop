@@ -5,6 +5,7 @@
 *.dmg
 *.exe
 *.o
+*.pkg
 *.tar.gz
 *.zip
 qrc_*.hpp

@@ -13,24 +13,24 @@ else
     PAWPAW_PREFIX="${HOME}/PawPawBuilds/targets/macos-universal-10.15"
 fi
 
-QTLIBS=("Core" "Gui" "OpenGL" "PrintSupport" "Svg" "Widgets")
-
+rm -rf build/pkg build/*.pkg
 rm -rf mod-ui/mod/__pycache__
 rm -rf mod-ui/mod/communication/__pycache__
 rm -rf mod-ui/modtools/__pycache__
 
-rm -rf build/dmg
-mkdir build/dmg
+# create pkg dir for placing patched app bundle inside
+mkdir build/pkg
+gcp -rL "build/mod-desktop-app.app" "build/pkg/MOD Desktop App.app"
 
-gcp -rL "build/mod-desktop-app.app" "build/dmg/MOD Desktop App.app"
-gcp utils/macos/macos-readme.txt build/dmg/README.txt
-
-pushd "build/dmg/MOD Desktop App.app/Contents"
+# patch rpath for Qt libs and jack tools
+pushd "build/pkg/MOD Desktop App.app/Contents"
 
 rm -rf Frameworks/*/*.prl
 rm -rf Frameworks/*/Headers
 rm -rf Frameworks/*/Versions
 rm -rf MacOS/data
+
+QTLIBS=("Core" "Gui" "OpenGL" "PrintSupport" "Svg" "Widgets")
 
 for f in $(ls Frameworks/*/Qt* PlugIns/*/libq*.dylib); do
     for q in "${QTLIBS[@]}"; do
@@ -50,5 +50,24 @@ done
 
 popd
 
-hdiutil create "mod-desktop-app-$(cat VERSION)-macOS.dmg" -srcfolder build/dmg -volname "MOD Desktop App" -fs HFS+ -ov
-rm -rf build/dmg
+# create base app pkg
+pkgbuild \
+  --identifier "audio.mod.desktop-app" \
+  --component-plist "utils/macos/build.plist" \
+  --install-location "/Applications/" \
+  --root "${PWD}/build/pkg/" \
+  build/mod-desktop-app.pkg
+
+# create final pkg
+sed -e "s|@builddir@|${PWD}/build|" \
+    utils/macos/package.xml.in > build/package.xml
+
+productbuild \
+  --distribution build/package.xml \
+  --identifier "audio.mod.desktop-app" \
+  --package-path "${PWD}/build" \
+  --version 0 \
+  mod-desktop-app-$(cat VERSION)-macOS.pkg
+
+# cleanup
+rm -rf build/pkg

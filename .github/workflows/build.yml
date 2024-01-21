@@ -235,14 +235,14 @@ jobs:
       - name: Pack
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
-          ./utils/macos/macos-dmg.sh ${{ matrix.target }}
-          mv mod-desktop-app-*.dmg mod-desktop-app-${{ github.event.pull_request.number || env.SHA8 }}-macOS.dmg
+          ./utils/macos/macos-pkg.sh ${{ matrix.target }}
+          mv mod-desktop-app-*.pkg mod-desktop-app-${{ github.event.pull_request.number || env.SHA8 }}-macOS.pkg
       - uses: actions/upload-artifact@v3
         if: ${{ matrix.os == env.RELEASE_OS_MAC && matrix.target == 'macos-universal-10.15' }}
         with:
           name: mod-desktop-app-${{ github.event.pull_request.number || env.SHA8 }}-macOS
           path: |
-            *.dmg
+            *.pkg
       - uses: softprops/action-gh-release@v1
         if: ${{ matrix.os == env.RELEASE_OS_MAC && startsWith(github.ref, 'refs/tags/') }}
         with:
@@ -251,7 +251,7 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            *.dmg
+            *.pkg
 
   win64:
     strategy:

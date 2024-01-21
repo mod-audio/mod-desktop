@@ -1,0 +1,11 @@
+MOD Audio is on the desktop!
+
+This is an installer for the MOD Desktop App for macOS.
+After installation a "MOD Desktop App" will be available on your applications folder.
+
+NOTE: At this point this tool should be considered in beta state.
+Most things already work but we are still tweaking and fixing a lot.
+Feedback and testing is very much appreciated, make sure to report issues you find during your own testing.
+
+Discussion page: https://forum.mod.audio/t/introducing-the-mod-app-for-desktops-beta-release/10495
+Project page: https://github.com/moddevices/mod-desktop-app
