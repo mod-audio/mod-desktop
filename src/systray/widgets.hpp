@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "utils.hpp"
+
 #include <QtCore/QTimer>
 #include <QtWidgets/QFrame>
 #include <QtWidgets/QToolButton>
@@ -33,15 +35,6 @@ public:
     }
 };
 
-static inline
-QWidget* getFullParent(QWidget* const w)
-{
-    if (QWidget* const p = dynamic_cast<QWidget*>(w->parent()))
-        return getFullParent(p);
-
-    return w;
-}
-
 class CollapsibleWidget : public QWidget
 {
     QToolButtonWithMouseTracking* toggleButton = nullptr;
@@ -70,7 +63,7 @@ public:
 private slots:
     void reduceSize()
     {
-        QWidget* const p = getFullParent(this);
+        QWidget* const p = getLastParentOrSelf(this);
         p->resize(p->width(), p->height() - height());
     }
 

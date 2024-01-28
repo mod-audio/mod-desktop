@@ -6,6 +6,7 @@
 #include "ui_mod-desktop-app.hpp"
 
 #include <QtCore/QDebug>
+#include <QtCore/QDir>
 #include <QtCore/QProcess>
 #include <QtCore/QSettings>
 #include <QtCore/QTimer>
@@ -118,6 +119,7 @@ class AppWindow : public QMainWindow
     QMenu* sysmenu = nullptr;
     QSystemTrayIcon* systray = nullptr;
 
+    const QString cwd;
     AppProcess processHost;
     AppProcess processUI;
     bool startingHost = false;
@@ -147,8 +149,9 @@ class AppWindow : public QMainWindow
     QStringList inputs;
 
 public:
-    AppWindow(const QString& cwd)
-        : processHost(this, cwd),
+    AppWindow()
+        : cwd(QDir::currentPath()),
+          processHost(this, cwd),
           processUI(this, cwd)
     {
         ui.setupUi(this);
@@ -241,14 +244,6 @@ public:
     void fillInDeviceList()
     {
         printf("--------------------------------------------------------\n");
-
-       #ifdef Q_OS_WIN
-        SetEnvironmentVariableW(L"JACK_NO_START_SERVER", L"1");
-        SetEnvironmentVariableW(L"PYTHONUNBUFFERED", L"1");
-       #else
-        setenv("JACK_NO_START_SERVER", "1", 1);
-        setenv("PYTHONUNBUFFERED", "1", 1);
-       #endif
 
         ui.cb_device->blockSignals(true);
 
@@ -801,67 +796,6 @@ private:
         systray->setToolTip(tr("MOD Desktop App: Stopped"));
     }
 
-    QString getLV2Path() const
-    {
-       #ifdef _WIN32
-        WCHAR path[MAX_PATH + 256] = {};
-        DWORD pathlen = GetEnvironmentVariableW(L"MOD_LV2_PATH", path, sizeof(path)/sizeof(path[0]));
-        DWORD pathmax = pathlen;
-       #else
-        char path[PATH_MAX + 256] = {};
-        std::strcpy(path, std::getenv("MOD_LV2_PATH"));
-       #endif
-
-        if (ui.cb_lv2_all_plugins->isChecked())
-        {
-           #if defined(__APPLE__)
-            std::strcat(path, ":~/Library/Audio/Plug-Ins/LV2:/Library/Audio/Plug-Ins/LV2");
-           #elif defined(_WIN32)
-            pathlen = GetEnvironmentVariableW(L"LOCALAPPDATA", path + pathmax + 1, sizeof(path)/sizeof(path[0]) - pathmax - 1);
-            if (pathlen == pathmax)
-                pathlen = GetEnvironmentVariableW(L"APPDATA", path + pathmax + 1, sizeof(path)/sizeof(path[0]) - pathmax - 1);
-            if (pathlen != pathmax)
-            {
-                path[pathmax] = L';';
-                pathmax += pathlen;
-                path[pathmax++] = L'\\';
-                path[pathmax++] = L'L';
-                path[pathmax++] = L'V';
-                path[pathmax++] = L'2';
-                path[pathmax] = 0;
-            }
-
-            pathlen = GetEnvironmentVariableW(L"COMMONPROGRAMFILES", path + pathmax + 1, sizeof(path)/sizeof(path[0]) - pathmax - 1);
-            if (pathlen != pathmax)
-            {
-                path[pathmax] = L';';
-                pathmax += pathlen;
-                path[pathmax++] = L'\\';
-                path[pathmax++] = L'L';
-                path[pathmax++] = L'V';
-                path[pathmax++] = L'2';
-                path[pathmax] = 0;
-            }
-           #else
-            if (const char* const env = std::getenv("LV2_PATH"))
-            {
-                std::strcat(path, ":");
-                std::strcat(path, env);
-            }
-            else
-            {
-                std::strcat(path, ":~/.lv2:/usr/local/lib/lv2:/usr/lib/lv2");
-            }
-           #endif
-        }
-
-       #ifdef _WIN32
-        return QString::fromWCharArray(path);
-       #else
-        return QString::fromUtf8(path);
-       #endif
-    }
-
     QString getProcessErrorAsString(QProcess::ProcessError error)
     {
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
@@ -901,7 +835,7 @@ private:
 
             QProcessEnvironment env(QProcessEnvironment::systemEnvironment());
 
-            env.insert("LV2_PATH", getLV2Path());
+            env.insert("LV2_PATH", getLV2Path(ui.cb_lv2_all_plugins->isChecked()));
 
             if (ui.cb_verbose_ui->isChecked() && ui.cb_verbose_ui->isEnabled())
                 env.insert("MOD_LOG", "2");
@@ -1071,8 +1005,7 @@ private slots:
         {
             QProcessEnvironment env(QProcessEnvironment::systemEnvironment());
 
-            env.insert("JACK_NO_START_SERVER", "1");
-            env.insert("LV2_PATH", getLV2Path());
+            env.insert("LV2_PATH", getLV2Path(ui.cb_lv2_all_plugins->isChecked()));
 
             if (ui.cb_verbose_host->isChecked() && ui.cb_verbose_host->isEnabled())
                 env.insert("MOD_LOG", "1");
@@ -1101,13 +1034,13 @@ private slots:
     void openGui() const
     {
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
-        QDesktopServices::openUrl(QUrl("http://127.0.0.1:18181"));
+        ::openWebGui();
     }
 
     void openUserFilesDir() const
     {
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
-        QDesktopServices::openUrl(QUrl::fromLocalFile(getUserFilesDir()));
+        ::openUserFilesDir();
     }
 
     void showLogs(const bool show)
