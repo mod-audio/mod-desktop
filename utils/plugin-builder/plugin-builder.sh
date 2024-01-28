@@ -23,8 +23,10 @@ fi
 # ---------------------------------------------------------------------------------------------------------------------
 # import env
 
-export PAWPAW_SKIP_LTO=1
+export PAWPAW_FAST_MATH=1
+export PAWPAW_MODAUDIO=1
 export PAWPAW_QUIET=1
+export PAWPAW_SKIP_LTO=1
 source src/PawPaw/local.env "${target}"
 
 # ---------------------------------------------------------------------------------------------------------------------
