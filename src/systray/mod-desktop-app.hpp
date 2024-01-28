@@ -754,6 +754,8 @@ private:
         startingHost = true;
         ui.b_start->setEnabled(false);
         ui.b_stop->setEnabled(true);
+        ui.cb_device->setEnabled(false);
+        ui.l_device->setEnabled(false);
         ui.gb_audio->setEnabled(false);
         ui.gb_midi->setEnabled(false);
         ui.gb_lv2->setEnabled(false);
@@ -776,6 +778,8 @@ private:
         ui.b_start->setEnabled(true);
         ui.b_stop->setEnabled(false);
         ui.b_opengui->setEnabled(false);
+        ui.cb_device->setEnabled(true);
+        ui.l_device->setEnabled(true);
         ui.gb_audio->setEnabled(true);
         ui.gb_midi->setEnabled(true);
         ui.gb_lv2->setEnabled(true);
