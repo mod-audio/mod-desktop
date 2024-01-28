@@ -217,10 +217,12 @@ public:
         connect(&processHost, &QProcess::errorOccurred, this, &AppWindow::hostStartError);
         connect(&processHost, &QProcess::started, this, &AppWindow::hostStartSuccess);
         connect(&processHost, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this, &AppWindow::hostFinished);
+        connect(&processHost, &QProcess::readyReadStandardOutput, this, &AppWindow::hostReadStdOut);
 
         connect(&processUI, &QProcess::errorOccurred, this, &AppWindow::uiStartError);
         connect(&processUI, &QProcess::started, this, &AppWindow::uiStartSuccess);
         connect(&processUI, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this, &AppWindow::uiFinished);
+        connect(&processUI, &QProcess::readyReadStandardOutput, this, &AppWindow::uiReadStdOut);
 
         timerId = startTimer(500);
 
@@ -606,21 +608,6 @@ protected:
                 }
             }
            #endif
-
-            if (startingHost || stoppingHost || processHost.state() != QProcess::NotRunning)
-                readHostLog();
-
-            if (startingUI || stoppingUI || processUI.state() != QProcess::NotRunning)
-            {
-                const QByteArray text = processUI.readAll().trimmed();
-                if (! text.isEmpty())
-                {
-                    ui.text_ui->appendPlainText(text);
-
-                    if (text == "Internal client mod-host successfully loaded")
-                        startingUI = false;
-                }
-            }
         }
 
         QMainWindow::timerEvent(event);
@@ -817,42 +804,6 @@ private:
             QMessageBox::critical(nullptr, tr("Error"), message);
         else
             systray->showMessage(tr("Error"), message, QSystemTrayIcon::Critical);
-    }
-
-    void readHostLog()
-    {
-        const QByteArray text = processHost.readAll().trimmed();
-
-        if (text.isEmpty())
-            return;
-
-        ui.text_host->appendPlainText(text);
-
-        if (text.contains("Internal client mod-host successfully loaded"))
-        {
-            startingHost = false;
-            startingUI = true;
-
-            QProcessEnvironment env(QProcessEnvironment::systemEnvironment());
-
-            env.insert("LV2_PATH", getLV2Path(ui.cb_lv2_all_plugins->isChecked()));
-
-            if (ui.cb_verbose_ui->isChecked() && ui.cb_verbose_ui->isEnabled())
-                env.insert("MOD_LOG", "2");
-            else if (ui.cb_verbose_basic->isChecked())
-                env.insert("MOD_LOG", "1");
-            else
-                env.insert("MOD_LOG", "0");
-
-            if (ui.cb_lv2_all_cv->isChecked())
-                env.insert("MOD_UI_ALLOW_REGULAR_CV", "1");
-
-            if (ui.cb_lv2_only_with_modgui->isChecked())
-                env.insert("MOD_UI_ONLY_SHOW_PLUGINS_WITH_MODGUI", "1");
-
-            processUI.setProcessEnvironment(env);
-            processUI.start();
-        }
     }
 
     void stopHostIfNeeded()
@@ -1083,7 +1034,6 @@ private slots:
     void hostStartError(QProcess::ProcessError error)
     {
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
-        readHostLog();
 
         // crashed while stopping, ignore
         if (error == QProcess::Crashed && stoppingHost)
@@ -1121,7 +1071,6 @@ private slots:
     void hostStartSuccess()
     {
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
-        readHostLog();
     }
 
     void uiStartSuccess()
@@ -1135,17 +1084,59 @@ private slots:
     {
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
         startingHost = stoppingHost = false;
-        readHostLog();
         stopUIIfNeeded();
         setStopped();
     }
 
     void uiFinished(int exitCode, QProcess::ExitStatus exitStatus)
     {
-        printf("----------- %s %d\n", __FUNCTION__, __LINE__);
         startingUI = stoppingUI = false;
         stopHostIfNeeded();
         setStopped();
+    }
+
+    void hostReadStdOut()
+    {
+        const QByteArray text = processHost.readAll().trimmed();
+
+        if (text.isEmpty())
+            return;
+
+        ui.text_host->appendPlainText(text);
+
+        if (text.contains("Internal client mod-host successfully loaded"))
+        {
+            startingHost = false;
+            startingUI = true;
+
+            QProcessEnvironment env(QProcessEnvironment::systemEnvironment());
+
+            env.insert("LV2_PATH", getLV2Path(ui.cb_lv2_all_plugins->isChecked()));
+
+            if (ui.cb_verbose_ui->isChecked() && ui.cb_verbose_ui->isEnabled())
+                env.insert("MOD_LOG", "2");
+            else if (ui.cb_verbose_basic->isChecked())
+                env.insert("MOD_LOG", "1");
+            else
+                env.insert("MOD_LOG", "0");
+
+            if (ui.cb_lv2_all_cv->isChecked())
+                env.insert("MOD_UI_ALLOW_REGULAR_CV", "1");
+
+            if (ui.cb_lv2_only_with_modgui->isChecked())
+                env.insert("MOD_UI_ONLY_SHOW_PLUGINS_WITH_MODGUI", "1");
+
+            processUI.setProcessEnvironment(env);
+            processUI.start();
+        }
+    }
+
+    void uiReadStdOut()
+    {
+        const QByteArray text = processUI.readAll().trimmed();
+
+        if (! text.isEmpty())
+            ui.text_ui->appendPlainText(text);
     }
 
     void iconActivated(QSystemTrayIcon::ActivationReason reason)

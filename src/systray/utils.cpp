@@ -148,7 +148,7 @@ void initEvironment()
     SetEnvironmentVariableW(L"MOD_KEYS_PATH", path);
    #else
     std::memcpy(path, dataDir, dataDirLen);
-    std::strncat(path + dataDirLen, "/keys/", PATH_MAX - dataDirLen - 1);
+    std::strncpy(path + dataDirLen, "/keys/", PATH_MAX - dataDirLen - 1);
     setenv("MOD_KEYS_PATH", path, 1);
   #endif
 
@@ -161,12 +161,12 @@ void initEvironment()
     SetEnvironmentVariableW(L"MOD_LV2_PATH", path);
   #else
     std::memcpy(path, dataDir, dataDirLen);
-    std::strncat(path + dataDirLen, "/lv2:", PATH_MAX - dataDirLen - 1);
+    std::strncpy(path + dataDirLen, "/lv2:", PATH_MAX - dataDirLen - 1);
     std::strncat(path, appDir, PATH_MAX - 1);
    #ifdef __APPLE__
-    std::strncpy(path, "PlugIns/LV2", PATH_MAX - 1);
+    std::strncat(path, "/../PlugIns/LV2", PATH_MAX - 1);
    #else
-    std::strncpy(path, "/plugins", PATH_MAX - 1);
+    std::strncat(path, "/plugins", PATH_MAX - 1);
    #endif
     setenv("MOD_LV2_PATH", path, 1);
   #endif

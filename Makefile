@@ -599,7 +599,7 @@ build-midi-merger/Makefile: $(BOOTSTRAP_FILES)
 src/mod-desktop-app-asio/mod-desktop-app-asio.dll: src/mod-desktop-app-asio/*.c
 	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) -C src/mod-desktop-app-asio
 
-src/systray/mod-desktop-app$(APP_EXT): src/systray/main.cpp src/systray/mod-desktop-app.hpp src/systray/mod-desktop-app.qrc src/systray/mod-desktop-app.ui src/systray/widgets.hpp
+src/systray/mod-desktop-app$(APP_EXT): src/systray/main.cpp src/systray/mod-desktop-app.hpp src/systray/mod-desktop-app.qrc src/systray/mod-desktop-app.ui src/systray/utils.cpp src/systray/utils.hpp src/systray/widgets.hpp
 	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) -C src/systray
 
 # ---------------------------------------------------------------------------------------------------------------------

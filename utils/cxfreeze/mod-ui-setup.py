@@ -43,22 +43,28 @@ os.environ['MOD_USER_FILES_DIR'] = os.path.join(DATA_DIR, 'user-files')
 os.environ['MOD_USER_PEDALBOARDS_DIR'] = os.path.join(DATA_DIR, 'pedalboards')
 os.environ['MOD_USER_PLUGINS_DIR'] = os.path.join(DATA_DIR, 'lv2')
 
-os.makedirs(os.path.join(DATA_DIR, 'user-files', 'Audio Loops'), exist_ok=True)
-os.makedirs(os.path.join(DATA_DIR, 'user-files', 'Audio Recordings'), exist_ok=True)
-os.makedirs(os.path.join(DATA_DIR, 'user-files', 'Audio Samples'), exist_ok=True)
-os.makedirs(os.path.join(DATA_DIR, 'user-files', 'Audio Tracks'), exist_ok=True)
-os.makedirs(os.path.join(DATA_DIR, 'user-files', 'MIDI Clips'), exist_ok=True)
-os.makedirs(os.path.join(DATA_DIR, 'user-files', 'MIDI Songs'), exist_ok=True)
-os.makedirs(os.path.join(DATA_DIR, 'user-files', 'Reverb IRs'), exist_ok=True)
-os.makedirs(os.path.join(DATA_DIR, 'user-files', 'Speaker Cabinets IRs'), exist_ok=True)
-os.makedirs(os.path.join(DATA_DIR, 'user-files', 'Hydrogen Drumkits'), exist_ok=True)
-os.makedirs(os.path.join(DATA_DIR, 'user-files', 'SF2 Instruments'), exist_ok=True)
-os.makedirs(os.path.join(DATA_DIR, 'user-files', 'SFZ Instruments'), exist_ok=True)
-os.makedirs(os.path.join(DATA_DIR, 'user-files', 'Aida DSP Models'), exist_ok=True)
-os.makedirs(os.path.join(DATA_DIR, 'user-files', 'NAM Models'), exist_ok=True)
+def makedirs(dir: str):
+    try:
+        os.makedirs(os.path.join(DATA_DIR, 'user-files', 'Audio Loops'), exist_ok=True)
+    except OSError:
+        pass
+
+makedirs(os.path.join(DATA_DIR, 'user-files', 'Audio Loops'))
+makedirs(os.path.join(DATA_DIR, 'user-files', 'Audio Recordings'))
+makedirs(os.path.join(DATA_DIR, 'user-files', 'Audio Samples'))
+makedirs(os.path.join(DATA_DIR, 'user-files', 'Audio Tracks'))
+makedirs(os.path.join(DATA_DIR, 'user-files', 'MIDI Clips'))
+makedirs(os.path.join(DATA_DIR, 'user-files', 'MIDI Songs'))
+makedirs(os.path.join(DATA_DIR, 'user-files', 'Reverb IRs'))
+makedirs(os.path.join(DATA_DIR, 'user-files', 'Speaker Cabinets IRs'))
+makedirs(os.path.join(DATA_DIR, 'user-files', 'Hydrogen Drumkits'))
+makedirs(os.path.join(DATA_DIR, 'user-files', 'SF2 Instruments'))
+makedirs(os.path.join(DATA_DIR, 'user-files', 'SFZ Instruments'))
+makedirs(os.path.join(DATA_DIR, 'user-files', 'Aida DSP Models'))
+makedirs(os.path.join(DATA_DIR, 'user-files', 'NAM Models'))
 
 # fake device setup
-os.makedirs(os.path.join(DATA_DIR, 'device'), exist_ok=True)
+makedirs(os.path.join(DATA_DIR, 'device'))
 #os.environ['MOD_API_KEY'] = os.path.join(resdir, '..', 'mod_api_key.pub')
 os.environ['MOD_DEVICE_KEY'] = os.path.join(DATA_DIR, 'device', 'rsa')
 os.environ['MOD_DEVICE_TAG'] = os.path.join(DATA_DIR, 'device', 'tag')
