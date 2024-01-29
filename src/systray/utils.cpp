@@ -64,6 +64,12 @@ void initEvironment()
         getcwd(appDir, PATH_MAX - 1);
         std::strncat(appDir, info.dli_fname + 1, PATH_MAX - 1);
     }
+    else if (info.dli_fname[0] != '/')
+    {
+        getcwd(appDir, PATH_MAX - 1);
+        std::strncat(appDir, "/", PATH_MAX - 1);
+        std::strncat(appDir, info.dli_fname, PATH_MAX - 1);
+    }
     else
     {
         std::strncpy(appDir, info.dli_fname, PATH_MAX - 1);
