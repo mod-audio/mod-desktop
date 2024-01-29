@@ -10,20 +10,21 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QStyleFactory>
 
-#include <cstring>
-
 #ifdef _WIN32
 #include <dwmapi.h>
 #include <shlobj.h>
 #define PRE_20H1_DWMWA_USE_IMMERSIVE_DARK_MODE 19
 #define DWMWA_USE_IMMERSIVE_DARK_MODE 20
 #else
+#include <QtCore/QStandardPaths>
 #include <dlfcn.h>
 #include <pwd.h>
 #include <signal.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #endif
+
+#include <cstring>
 
 #if defined(__APPLE__)
 #include <sys/syslimits.h>
@@ -82,7 +83,7 @@ void initEvironment()
    #endif
 
     // get and set directory to our documents and settings, under "user documents"; also make sure it exists
-  #ifdef _WIN32
+   #ifdef _WIN32
     WCHAR dataDir[MAX_PATH] = {};
     SHGetSpecialFolderPathW(nullptr, dataDir, CSIDL_MYDOCUMENTS, false);
 
@@ -91,30 +92,19 @@ void initEvironment()
     _wmkdir(dataDir);
 
     SetEnvironmentVariableW(L"MOD_DATA_DIR", dataDir);
-  #else
+   #else
     char dataDir[PATH_MAX] = {};
 
-    if (const char* const home = getenv("HOME"))
-        std::strncpy(dataDir, home, PATH_MAX - 1);
-    else if (struct passwd* const pwd = getpwuid(getuid()))
-        std::strncpy(dataDir, pwd->pw_dir, PATH_MAX - 1);
+    // NOTE a generic implementation is a bit complex, let Qt do it for us this time
+    const QByteArray docsDir(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation).toUtf8());
+    std::strncpy(dataDir, docsDir.constData(), PATH_MAX - 1);
 
     mkdir(dataDir, 0777);
-   #ifdef __APPLE__
-    std::strncat(dataDir, "/Documents", PATH_MAX - 1);
-    mkdir(dataDir, 0777);
     std::strncat(dataDir, "/MOD Desktop App", PATH_MAX - 1);
-    mkdir(dataDir, 0777);
-   #else
-    // TODO fetch user docs dir
-    std::strncat(dataDir, "/Documents", PATH_MAX - 1);
-    mkdir(dataDir, 0777);
-    std::strncat(dataDir, "/MOD Desktop App", PATH_MAX - 1);
-   #endif
     mkdir(dataDir, 0777);
 
     setenv("MOD_DATA_DIR", dataDir, 1);
-  #endif
+   #endif
 
     // reusable
    #ifdef _WIN32
