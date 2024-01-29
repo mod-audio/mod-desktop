@@ -376,8 +376,10 @@ void setupDarkModePalette(QApplication& app)
 
     app.setStyle(QStyleFactory::create("Fusion"));
     app.setPalette(palette);
-    // TODO check if this is ok
-    app.setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
+    app.setStyleSheet(R"(
+        #frame_audio, #frame_gui, #frame_lv2, #frame_midi { border: 1px solid #3b3b3b; }
+        QToolTip { color: #e6e6e6; background-color: #252525; border: 1px solid #424242; }
+    R)");
 }
 
 void setupDarkModeWindow(QMainWindow& window)
