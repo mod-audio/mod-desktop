@@ -15,7 +15,7 @@ QWidget* getLastParentOrSelf(QWidget* const w) noexcept
 }
 
 /* Setup environment, should be the first call in the application.
- * Also creates needed directories and change current working directory to where this application lives in.
+ * Also creates needed directories and changes current working directory to where this application lives in.
  */
 void initEvironment();
 
