@@ -48,7 +48,7 @@ jobs:
               rm *.deb
             ;;
           esac
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Set up dependencies
@@ -62,7 +62,7 @@ jobs:
           apt-get install -yqq ${freetypepkgname} p7zip-full unzip wget xdg-user-dirs zip
       - name: Set up cache
         id: cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/PawPawBuilds
@@ -90,7 +90,7 @@ jobs:
           mv build mod-desktop-app-${{ env.VERSION_TAG }}-linux-x86_64/mod-desktop-app
           cp utils/linux/mod-desktop-app.* mod-desktop-app-${{ env.VERSION_TAG }}-linux-x86_64/
           tar chJf mod-desktop-app-${{ env.VERSION_TAG }}-linux-x86_64.tar.xz mod-desktop-app-${{ env.VERSION_TAG }}-linux-x86_64
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: ${{ matrix.container == env.RELEASE_OS_LINUX }}
         with:
           name: mod-desktop-app-${{ env.VERSION_TAG }}-linux-x86_64
@@ -136,7 +136,7 @@ jobs:
               rm *.deb
             ;;
           esac
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Set up dependencies
@@ -150,7 +150,7 @@ jobs:
           apt-get install -yqq ${freetypepkgname} p7zip-full unzip wget xdg-user-dirs zip
       - name: Set up cache
         id: cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/PawPawBuilds
@@ -178,7 +178,7 @@ jobs:
           mv build mod-desktop-app-${{ env.VERSION_TAG }}-linux-x86_64-debug/mod-desktop-app
           cp utils/linux/mod-desktop-app.* mod-desktop-app-${{ env.VERSION_TAG }}-linux-x86_64-debug/
           tar chJf mod-desktop-app-${{ env.VERSION_TAG }}-linux-x86_64-debug.tar.xz mod-desktop-app-${{ env.VERSION_TAG }}-linux-x86_64-debug
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: ${{ matrix.container == env.RELEASE_OS_LINUX }}
         with:
           name: mod-desktop-app-${{ env.VERSION_TAG }}-linux-x86_64-debug
@@ -203,7 +203,7 @@ jobs:
             target: macos-universal-10.15
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Set up dependencies
@@ -212,7 +212,7 @@ jobs:
           brew install p7zip wget
       - name: Set up cache
         id: cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/PawPawBuilds
@@ -238,7 +238,7 @@ jobs:
         run: |
           ./utils/macos/macos-pkg.sh ${{ matrix.target }}
           mv mod-desktop-app-*.pkg mod-desktop-app-${{ env.VERSION_TAG }}-macOS.pkg
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: ${{ matrix.os == env.RELEASE_OS_MAC && matrix.target == 'macos-universal-10.15' }}
         with:
           name: mod-desktop-app-${{ env.VERSION_TAG }}-macOS
@@ -269,7 +269,7 @@ jobs:
       - name: Update git
         run: |
           apt-get update -qq && apt-get install -yqq git
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Set up dependencies
@@ -278,7 +278,7 @@ jobs:
           apt-get install -yqq libfreetype-dev libx11-dev libxcursor-dev libxext-dev libxrandr-dev libxrender-dev p7zip-full unzip wget xdg-user-dirs xvfb zip
       - name: Set up cache
         id: cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/PawPawBuilds
@@ -307,7 +307,7 @@ jobs:
           rm -rf build/innosetup-*
           mv build mod-desktop-app-${{ env.VERSION_TAG }}-win64
           zip -r -9 mod-desktop-app-${{ env.VERSION_TAG }}-win64.zip mod-desktop-app-${{ env.VERSION_TAG }}-win64
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: ${{ matrix.container == env.RELEASE_OS_WIN64 }}
         with:
           name: mod-desktop-app-${{ env.VERSION_TAG }}-win64
