@@ -514,7 +514,7 @@ public:
                 const PaDeviceInfo* const devInfo = Pa_GetDeviceInfo(i);
                 const QString& hostApiName(apis[devInfo->hostApi]);
 
-                const QString devName(QString::fromUtf8(devInfo->name));
+                QString devName(QString::fromUtf8(devInfo->name));
 
                #if defined(Q_OS_LINUX)
                 if (hostApiName == "ALSA")
@@ -542,16 +542,21 @@ public:
 
                 const QString uid(hostApiName + "::" + devName);
 
+                if (hostApiName == "JACK" || hostApiName == "JACK Audio Connection Kit")
+                    devName = "JACK / PipeWire";
+                else if (hostApiName != "Windows WASAPI")
+                    devName = uid;
+
                 if (devInfo->maxInputChannels > 0 && canUseSeparateInput)
                 {
-                    ui.cb_input->addItem(uid);
+                    ui.cb_input->addItem(devName);
                     inputs.append(uid);
                 }
 
                 if (devInfo->maxOutputChannels > 0)
                 {
-                    ui.cb_device->addItem(hostApiName == "JACK" || hostApiName == "JACK Audio Connection Kit"
-                                          ? "JACK / PipeWire" : uid);
+                    ui.cb_device->addItem(devName);
+
                     devices.append({
                         uid,
                         devInfo->maxInputChannels > 0,
