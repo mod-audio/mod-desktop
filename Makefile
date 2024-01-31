@@ -221,8 +221,7 @@ ifneq ($(PAWPAW_DEBUG),1)
 PLUGINS += mod-pitchshifter
 PLUGINS += modspectre
 PLUGINS += pitchtracking-series
-# needs fixing, cuts audio output
-# PLUGINS += x42-fat1
+PLUGINS += x42-fat1
 PLUGINS += x42-tuna-lv2-labs
 endif
 
