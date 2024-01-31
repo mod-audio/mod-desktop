@@ -772,7 +772,7 @@ private:
         printf("----------- %s %d\n", __FUNCTION__, __LINE__);
         successfullyStarted = true;
         ui.b_opengui->setEnabled(true);
-        ui.l_status->setText(tr("Started"));
+        ui.l_status->setText(tr("Running"));
         systray->setToolTip(tr("MOD Desktop App: Running"));
         systray->showMessage(tr("MOD Desktop App"), tr("Running"), QSystemTrayIcon::Information);
     }
