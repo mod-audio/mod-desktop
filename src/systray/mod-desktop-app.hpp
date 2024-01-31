@@ -711,7 +711,7 @@ private:
 
         ui.cb_midi->setChecked(settings.value("EnableMIDI", true).toBool());
         ui.sp_midi_pb->setValue(settings.value("PedalboardsMidiChannel", 0).toInt());
-        ui.sp_midi_pb->setValue(settings.value("SnapshotsMidiChannel", 0).toInt());
+        ui.sp_midi_ss->setValue(settings.value("SnapshotsMidiChannel", 0).toInt());
 
         const bool verboseLogs = settings.value("VerboseLogs", false).toBool();
         ui.gb_logs->setVisible(verboseLogs);
