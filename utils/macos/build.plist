@@ -12,7 +12,7 @@
 		<key>BundleOverwriteAction</key>
 		<string>upgrade</string>
 		<key>RootRelativeBundlePath</key>
-		<string>MOD Desktop App.app</string>
+		<string>MOD Desktop.app</string>
 	</dict>
 </array>
 </plist>

@@ -29,7 +29,7 @@ options = {
 
 exe_options = {
   "script": f".{s}utils{s}cxfreeze{s}mod-ui-setup.py",
-  "copyright": "Copyright (C) 2023 MOD Audio UG",
+  "copyright": "Copyright (C) 2012-2024 MOD Audio UG",
   "targetName": f"mod-ui{exe}",
 }
 

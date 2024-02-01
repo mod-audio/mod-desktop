@@ -84,45 +84,45 @@ BOOTSTRAP_FILES += $(PAWPAW_PREFIX)/bin/jackd$(APP_EXT)
 BOOTSTRAP_FILES += $(PAWPAW_PREFIX)/include/armadillo
 
 # ---------------------------------------------------------------------------------------------------------------------
-# List of files for mod-desktop-app packaging, often symlinks to the real files
+# List of files for mod-desktop packaging, often symlinks to the real files
 
 TARGETS = build-ui/lib/libmod_utils$(SO_EXT)
 
 ifeq ($(MACOS),true)
-TARGETS += build/mod-desktop-app.app/Contents/Info.plist
-TARGETS += build/mod-desktop-app.app/Contents/Frameworks/QtCore.framework
-TARGETS += build/mod-desktop-app.app/Contents/Frameworks/QtGui.framework
-TARGETS += build/mod-desktop-app.app/Contents/Frameworks/QtOpenGL.framework
-TARGETS += build/mod-desktop-app.app/Contents/Frameworks/QtPrintSupport.framework
-TARGETS += build/mod-desktop-app.app/Contents/Frameworks/QtSvg.framework
-TARGETS += build/mod-desktop-app.app/Contents/Frameworks/QtWidgets.framework
-TARGETS += build/mod-desktop-app.app/Contents/MacOS/jackd
-TARGETS += build/mod-desktop-app.app/Contents/MacOS/jack/jack-session.conf
-TARGETS += build/mod-desktop-app.app/Contents/MacOS/jack/jack_coreaudio.so
-TARGETS += build/mod-desktop-app.app/Contents/MacOS/jack/jack_coremidi.so
-TARGETS += build/mod-desktop-app.app/Contents/MacOS/jack/jack_dummy.so
-TARGETS += build/mod-desktop-app.app/Contents/MacOS/jack/mod-host.so
-TARGETS += build/mod-desktop-app.app/Contents/MacOS/jack/mod-midi-broadcaster.so
-TARGETS += build/mod-desktop-app.app/Contents/MacOS/jack/mod-midi-merger.so
-TARGETS += build/mod-desktop-app.app/Contents/MacOS/libjack.0.dylib
-TARGETS += build/mod-desktop-app.app/Contents/MacOS/libjackserver.0.dylib
-TARGETS += build/mod-desktop-app.app/Contents/MacOS/lib/library.zip
-TARGETS += build/mod-desktop-app.app/Contents/MacOS/mod-desktop-app
-TARGETS += build/mod-desktop-app.app/Contents/MacOS/mod-pedalboard
-TARGETS += build/mod-desktop-app.app/Contents/MacOS/mod-ui
-TARGETS += build/mod-desktop-app.app/Contents/MacOS/mod
-TARGETS += build/mod-desktop-app.app/Contents/MacOS/modtools
-TARGETS += build/mod-desktop-app.app/Contents/PlugIns/generic/libqtuiotouchplugin.dylib
-TARGETS += build/mod-desktop-app.app/Contents/PlugIns/iconengines/libqsvgicon.dylib
-TARGETS += build/mod-desktop-app.app/Contents/PlugIns/imageformats/libqsvg.dylib
-TARGETS += build/mod-desktop-app.app/Contents/PlugIns/LV2
-TARGETS += build/mod-desktop-app.app/Contents/PlugIns/platforms/libqcocoa.dylib
-TARGETS += build/mod-desktop-app.app/Contents/PlugIns/styles/libqmacstyle.dylib
-TARGETS += build/mod-desktop-app.app/Contents/Resources/default.pedalboard
-TARGETS += build/mod-desktop-app.app/Contents/Resources/html
-TARGETS += build/mod-desktop-app.app/Contents/Resources/mod-hardware-descriptor.json
-TARGETS += build/mod-desktop-app.app/Contents/Resources/mod-logo.icns
-TARGETS += build/mod-desktop-app.app/Contents/Resources/VERSION
+TARGETS += build/mod-desktop.app/Contents/Info.plist
+TARGETS += build/mod-desktop.app/Contents/Frameworks/QtCore.framework
+TARGETS += build/mod-desktop.app/Contents/Frameworks/QtGui.framework
+TARGETS += build/mod-desktop.app/Contents/Frameworks/QtOpenGL.framework
+TARGETS += build/mod-desktop.app/Contents/Frameworks/QtPrintSupport.framework
+TARGETS += build/mod-desktop.app/Contents/Frameworks/QtSvg.framework
+TARGETS += build/mod-desktop.app/Contents/Frameworks/QtWidgets.framework
+TARGETS += build/mod-desktop.app/Contents/MacOS/jackd
+TARGETS += build/mod-desktop.app/Contents/MacOS/jack/jack-session.conf
+TARGETS += build/mod-desktop.app/Contents/MacOS/jack/jack_coreaudio.so
+TARGETS += build/mod-desktop.app/Contents/MacOS/jack/jack_coremidi.so
+TARGETS += build/mod-desktop.app/Contents/MacOS/jack/jack_dummy.so
+TARGETS += build/mod-desktop.app/Contents/MacOS/jack/mod-host.so
+TARGETS += build/mod-desktop.app/Contents/MacOS/jack/mod-midi-broadcaster.so
+TARGETS += build/mod-desktop.app/Contents/MacOS/jack/mod-midi-merger.so
+TARGETS += build/mod-desktop.app/Contents/MacOS/libjack.0.dylib
+TARGETS += build/mod-desktop.app/Contents/MacOS/libjackserver.0.dylib
+TARGETS += build/mod-desktop.app/Contents/MacOS/lib/library.zip
+TARGETS += build/mod-desktop.app/Contents/MacOS/mod-desktop
+TARGETS += build/mod-desktop.app/Contents/MacOS/mod-pedalboard
+TARGETS += build/mod-desktop.app/Contents/MacOS/mod-ui
+TARGETS += build/mod-desktop.app/Contents/MacOS/mod
+TARGETS += build/mod-desktop.app/Contents/MacOS/modtools
+TARGETS += build/mod-desktop.app/Contents/PlugIns/generic/libqtuiotouchplugin.dylib
+TARGETS += build/mod-desktop.app/Contents/PlugIns/iconengines/libqsvgicon.dylib
+TARGETS += build/mod-desktop.app/Contents/PlugIns/imageformats/libqsvg.dylib
+TARGETS += build/mod-desktop.app/Contents/PlugIns/LV2
+TARGETS += build/mod-desktop.app/Contents/PlugIns/platforms/libqcocoa.dylib
+TARGETS += build/mod-desktop.app/Contents/PlugIns/styles/libqmacstyle.dylib
+TARGETS += build/mod-desktop.app/Contents/Resources/default.pedalboard
+TARGETS += build/mod-desktop.app/Contents/Resources/html
+TARGETS += build/mod-desktop.app/Contents/Resources/mod-hardware-descriptor.json
+TARGETS += build/mod-desktop.app/Contents/Resources/mod-logo.icns
+TARGETS += build/mod-desktop.app/Contents/Resources/VERSION
 else
 TARGETS += build/default.pedalboard
 TARGETS += build/html
@@ -132,7 +132,7 @@ TARGETS += build/jack/mod-host$(SO_EXT)
 TARGETS += build/jack/mod-midi-broadcaster$(SO_EXT)
 TARGETS += build/jack/mod-midi-merger$(SO_EXT)
 TARGETS += build/lib/library.zip
-TARGETS += build/mod-desktop-app$(APP_EXT)
+TARGETS += build/mod-desktop$(APP_EXT)
 TARGETS += build/mod-pedalboard$(APP_EXT)
 TARGETS += build/mod-ui$(APP_EXT)
 TARGETS += build/mod
@@ -146,7 +146,7 @@ TARGETS += build/jack/jack_winmme.dll
 TARGETS += build/libjack64.dll
 TARGETS += build/libjackserver64.dll
 TARGETS += build/libpython3.8.dll
-TARGETS += build/mod-desktop-app-asio.dll
+TARGETS += build/mod-desktop-asio.dll
 TARGETS += build/Qt5Core.dll
 TARGETS += build/Qt5Gui.dll
 TARGETS += build/Qt5Svg.dll
@@ -168,7 +168,7 @@ endif
 endif
 
 # ---------------------------------------------------------------------------------------------------------------------
-# Set up plugins to build and ship inside mod-desktop-app
+# Set up plugins to build and ship inside mod-desktop
 
 # List of plugin projects to build
 PLUGINS  = abgate
@@ -217,7 +217,7 @@ PLUGINS += x42-xfade
 PLUGINS += zam-plugins
 
 ifneq ($(PAWPAW_DEBUG),1)
-# build issues around fftw https://github.com/moddevices/mod-desktop-app/actions/runs/7386470509/job/20093128972
+# build issues around fftw https://github.com/moddevices/mod-desktop/actions/runs/7386470509/job/20093128972
 PLUGINS += mod-pitchshifter
 PLUGINS += modspectre
 PLUGINS += pitchtracking-series
@@ -326,110 +326,110 @@ build-ui/lib/libmod_utils$(SO_EXT): src/mod-ui/utils/libmod_utils$(SO_EXT) build
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-build/mod-desktop-app.app/Contents/Info.plist: utils/macos/app.plist.in
-	@mkdir -p build/mod-desktop-app.app/Contents
+build/mod-desktop.app/Contents/Info.plist: utils/macos/app.plist.in
+	@mkdir -p build/mod-desktop.app/Contents
 	sed -e "s/@version@/$(VERSION)/" $< > $@
 
-build/mod-desktop-app.app/Contents/Frameworks/Qt%.framework: $(PAWPAW_PREFIX)/lib/Qt%.framework
-	@mkdir -p build/mod-desktop-app.app/Contents/Frameworks
+build/mod-desktop.app/Contents/Frameworks/Qt%.framework: $(PAWPAW_PREFIX)/lib/Qt%.framework
+	@mkdir -p build/mod-desktop.app/Contents/Frameworks
 	ln -sf $(abspath $<) $@
 
-build/mod-desktop-app.app/Contents/MacOS/jackd: $(PAWPAW_PREFIX)/bin/jackd
-	@mkdir -p build/mod-desktop-app.app/Contents/MacOS
+build/mod-desktop.app/Contents/MacOS/jackd: $(PAWPAW_PREFIX)/bin/jackd
+	@mkdir -p build/mod-desktop.app/Contents/MacOS
 	ln -sf $(abspath $<) $@
 
-build/mod-desktop-app.app/Contents/MacOS/jack/jack-session.conf: utils/jack/jack-session.conf
-	@mkdir -p build/mod-desktop-app.app/Contents/MacOS/jack
+build/mod-desktop.app/Contents/MacOS/jack/jack-session.conf: utils/jack/jack-session.conf
+	@mkdir -p build/mod-desktop.app/Contents/MacOS/jack
 	ln -sf $(abspath $<) $@
 
-build/mod-desktop-app.app/Contents/MacOS/jack/jack_%.so: $(PAWPAW_PREFIX)/lib/jack/jack_%.so
-	@mkdir -p build/mod-desktop-app.app/Contents/MacOS/jack
+build/mod-desktop.app/Contents/MacOS/jack/jack_%.so: $(PAWPAW_PREFIX)/lib/jack/jack_%.so
+	@mkdir -p build/mod-desktop.app/Contents/MacOS/jack
 	ln -sf $(abspath $<) $@
 
-build/mod-desktop-app.app/Contents/MacOS/jack/mod-host.so: src/mod-host/mod-host.so
-	@mkdir -p build/mod-desktop-app.app/Contents/MacOS/jack
+build/mod-desktop.app/Contents/MacOS/jack/mod-host.so: src/mod-host/mod-host.so
+	@mkdir -p build/mod-desktop.app/Contents/MacOS/jack
 	ln -sf $(abspath $<) $@
 
-build/mod-desktop-app.app/Contents/MacOS/jack/mod-midi-broadcaster.so: build-midi-merger/mod-midi-broadcaster.so
-	@mkdir -p build/mod-desktop-app.app/Contents/MacOS/jack
+build/mod-desktop.app/Contents/MacOS/jack/mod-midi-broadcaster.so: build-midi-merger/mod-midi-broadcaster.so
+	@mkdir -p build/mod-desktop.app/Contents/MacOS/jack
 	ln -sf $(abspath $<) $@
 
-build/mod-desktop-app.app/Contents/MacOS/jack/mod-midi-merger.so: build-midi-merger/mod-midi-merger.so
-	@mkdir -p build/mod-desktop-app.app/Contents/MacOS/jack
+build/mod-desktop.app/Contents/MacOS/jack/mod-midi-merger.so: build-midi-merger/mod-midi-merger.so
+	@mkdir -p build/mod-desktop.app/Contents/MacOS/jack
 	ln -sf $(abspath $<) $@
 
-build/mod-desktop-app.app/Contents/MacOS/libjack%: $(PAWPAW_PREFIX)/lib/libjack%
-	@mkdir -p build/mod-desktop-app.app/Contents/MacOS
+build/mod-desktop.app/Contents/MacOS/libjack%: $(PAWPAW_PREFIX)/lib/libjack%
+	@mkdir -p build/mod-desktop.app/Contents/MacOS
 	ln -sf $(abspath $<) $@
 
-build/mod-desktop-app.app/Contents/MacOS/lib/library.zip: build-pedalboard/mod-pedalboard$(APP_EXT) build-ui/mod-ui$(APP_EXT)
+build/mod-desktop.app/Contents/MacOS/lib/library.zip: build-pedalboard/mod-pedalboard$(APP_EXT) build-ui/mod-ui$(APP_EXT)
 	@mkdir -p build
-	ln -sf $(abspath build-ui/lib) build/mod-desktop-app.app/Contents/MacOS/lib
+	ln -sf $(abspath build-ui/lib) build/mod-desktop.app/Contents/MacOS/lib
 	touch $@
 
-build/mod-desktop-app.app/Contents/MacOS/mod-desktop-app: src/systray/mod-desktop-app
-	@mkdir -p build/mod-desktop-app.app/Contents/MacOS
+build/mod-desktop.app/Contents/MacOS/mod-desktop: src/systray/mod-desktop
+	@mkdir -p build/mod-desktop.app/Contents/MacOS
 	cp -v $(abspath $<) $@
 
-build/mod-desktop-app.app/Contents/MacOS/mod-pedalboard: build-pedalboard/mod-pedalboard$(APP_EXT)
-	@mkdir -p build/mod-desktop-app.app/Contents/MacOS
+build/mod-desktop.app/Contents/MacOS/mod-pedalboard: build-pedalboard/mod-pedalboard$(APP_EXT)
+	@mkdir -p build/mod-desktop.app/Contents/MacOS
 	ln -sf $(abspath $<) $@
 
-build/mod-desktop-app.app/Contents/MacOS/mod-ui: build-ui/mod-ui$(APP_EXT)
-	@mkdir -p build/mod-desktop-app.app/Contents/MacOS
+build/mod-desktop.app/Contents/MacOS/mod-ui: build-ui/mod-ui$(APP_EXT)
+	@mkdir -p build/mod-desktop.app/Contents/MacOS
 	ln -sf $(abspath $<) $@
 
-build/mod-desktop-app.app/Contents/MacOS/mod: src/mod-ui/mod
-	@mkdir -p build/mod-desktop-app.app/Contents/MacOS/
+build/mod-desktop.app/Contents/MacOS/mod: src/mod-ui/mod
+	@mkdir -p build/mod-desktop.app/Contents/MacOS/
 	ln -sf $(abspath $<) $@
 
-build/mod-desktop-app.app/Contents/MacOS/modtools: src/mod-ui/modtools
-	@mkdir -p build/mod-desktop-app.app/Contents/MacOS/
+build/mod-desktop.app/Contents/MacOS/modtools: src/mod-ui/modtools
+	@mkdir -p build/mod-desktop.app/Contents/MacOS/
 	ln -sf $(abspath $<) $@
 
-build/mod-desktop-app.app/Contents/PlugIns/generic/libq%.dylib: $(PAWPAW_PREFIX)/lib/qt5/plugins/generic/libq%.dylib
-	@mkdir -p build/mod-desktop-app.app/Contents/PlugIns/generic
+build/mod-desktop.app/Contents/PlugIns/generic/libq%.dylib: $(PAWPAW_PREFIX)/lib/qt5/plugins/generic/libq%.dylib
+	@mkdir -p build/mod-desktop.app/Contents/PlugIns/generic
 	ln -sf $(abspath $<) $@
 
-build/mod-desktop-app.app/Contents/PlugIns/iconengines/libq%.dylib: $(PAWPAW_PREFIX)/lib/qt5/plugins/iconengines/libq%.dylib
-	@mkdir -p build/mod-desktop-app.app/Contents/PlugIns/iconengines
+build/mod-desktop.app/Contents/PlugIns/iconengines/libq%.dylib: $(PAWPAW_PREFIX)/lib/qt5/plugins/iconengines/libq%.dylib
+	@mkdir -p build/mod-desktop.app/Contents/PlugIns/iconengines
 	ln -sf $(abspath $<) $@
 
-build/mod-desktop-app.app/Contents/PlugIns/imageformats/libq%.dylib: $(PAWPAW_PREFIX)/lib/qt5/plugins/imageformats/libq%.dylib
-	@mkdir -p build/mod-desktop-app.app/Contents/PlugIns/imageformats
+build/mod-desktop.app/Contents/PlugIns/imageformats/libq%.dylib: $(PAWPAW_PREFIX)/lib/qt5/plugins/imageformats/libq%.dylib
+	@mkdir -p build/mod-desktop.app/Contents/PlugIns/imageformats
 	ln -sf $(abspath $<) $@
 
-build/mod-desktop-app.app/Contents/PlugIns/LV2:
-	@mkdir -p build/mod-desktop-app.app/Contents/PlugIns
+build/mod-desktop.app/Contents/PlugIns/LV2:
+	@mkdir -p build/mod-desktop.app/Contents/PlugIns
 	@mkdir -p build/plugins
 	ln -sf $(abspath build/plugins) $@
 
-build/mod-desktop-app.app/Contents/PlugIns/platforms/libq%.dylib: $(PAWPAW_PREFIX)/lib/qt5/plugins/platforms/libq%.dylib
-	@mkdir -p build/mod-desktop-app.app/Contents/PlugIns/platforms
+build/mod-desktop.app/Contents/PlugIns/platforms/libq%.dylib: $(PAWPAW_PREFIX)/lib/qt5/plugins/platforms/libq%.dylib
+	@mkdir -p build/mod-desktop.app/Contents/PlugIns/platforms
 	ln -sf $(abspath $<) $@
 
-build/mod-desktop-app.app/Contents/PlugIns/styles/libq%.dylib: $(PAWPAW_PREFIX)/lib/qt5/plugins/styles/libq%.dylib
-	@mkdir -p build/mod-desktop-app.app/Contents/PlugIns/styles
+build/mod-desktop.app/Contents/PlugIns/styles/libq%.dylib: $(PAWPAW_PREFIX)/lib/qt5/plugins/styles/libq%.dylib
+	@mkdir -p build/mod-desktop.app/Contents/PlugIns/styles
 	ln -sf $(abspath $<) $@
 
-build/mod-desktop-app.app/Contents/Resources/default.pedalboard: src/mod-ui/default.pedalboard
-	@mkdir -p build/mod-desktop-app.app/Contents/Resources
+build/mod-desktop.app/Contents/Resources/default.pedalboard: src/mod-ui/default.pedalboard
+	@mkdir -p build/mod-desktop.app/Contents/Resources
 	ln -sf $(abspath $<) $@
 
-build/mod-desktop-app.app/Contents/Resources/html: src/mod-ui/html
-	@mkdir -p build/mod-desktop-app.app/Contents/Resources
+build/mod-desktop.app/Contents/Resources/html: src/mod-ui/html
+	@mkdir -p build/mod-desktop.app/Contents/Resources
 	ln -sf $(abspath $<) $@
 
-build/mod-desktop-app.app/Contents/Resources/mod-hardware-descriptor.json: utils/macos/mod-hardware-descriptor.json
-	@mkdir -p build/mod-desktop-app.app/Contents/Resources
+build/mod-desktop.app/Contents/Resources/mod-hardware-descriptor.json: utils/macos/mod-hardware-descriptor.json
+	@mkdir -p build/mod-desktop.app/Contents/Resources
 	ln -sf $(abspath $<) $@
 
-build/mod-desktop-app.app/Contents/Resources/mod-logo.icns: res/mod-logo.icns
-	@mkdir -p build/mod-desktop-app.app/Contents/Resources
+build/mod-desktop.app/Contents/Resources/mod-logo.icns: res/mod-logo.icns
+	@mkdir -p build/mod-desktop.app/Contents/Resources
 	ln -sf $(abspath $<) $@
 
-build/mod-desktop-app.app/Contents/Resources/VERSION: VERSION
-	@mkdir -p build/mod-desktop-app.app/Contents/Resources
+build/mod-desktop.app/Contents/Resources/VERSION: VERSION
+	@mkdir -p build/mod-desktop.app/Contents/Resources
 	ln -sf $(abspath $<) $@
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -468,7 +468,7 @@ build/lib/library.zip: build-pedalboard/mod-pedalboard$(APP_EXT) build-ui/mod-ui
 	ln -sf $(abspath build-ui/lib) build/lib
 	touch $@
 
-build/mod-desktop-app$(APP_EXT): src/systray/mod-desktop-app$(APP_EXT)
+build/mod-desktop$(APP_EXT): src/systray/mod-desktop$(APP_EXT)
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
 
@@ -520,7 +520,7 @@ build/libpython%: $(PAWPAW_PREFIX)/bin/libpython%
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
 
-build/mod-desktop-app-asio.dll: src/mod-desktop-app-asio/mod-desktop-app-asio.dll
+build/mod-desktop-asio.dll: src/mod-desktop-asio/mod-desktop-asio.dll
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
 
@@ -571,12 +571,12 @@ build-ui/mod-ui$(APP_EXT): utils/cxfreeze/mod-ui.py utils/cxfreeze/mod-ui-setup.
 	touch $@
 
 src/mod-ui/utils/libmod_utils$(SO_EXT): $(BOOTSTRAP_FILES) src/mod-ui/utils/utils.h src/mod-ui/utils/utils_jack.cpp src/mod-ui/utils/utils_lilv.cpp
-	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) MODAPP=1 -C src/mod-ui/utils
+	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) MOD_DESKTOP=1 -C src/mod-ui/utils
 
 # ---------------------------------------------------------------------------------------------------------------------
 
 src/mod-host/mod-host.so: src/mod-host/src/*.c src/mod-host/src/*.h src/mod-host/src/monitor/*.c src/mod-host/src/monitor/*.h $(BOOTSTRAP_FILES)
-	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) MODAPP=1 SKIP_READLINE=1 SKIP_FFTW335=1 -C src/mod-host
+	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) MOD_DESKTOP=1 SKIP_READLINE=1 SKIP_FFTW335=1 -C src/mod-host
 
 # ---------------------------------------------------------------------------------------------------------------------
 
@@ -595,10 +595,10 @@ build-midi-merger/Makefile: $(BOOTSTRAP_FILES)
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-src/mod-desktop-app-asio/mod-desktop-app-asio.dll: src/mod-desktop-app-asio/*.c
-	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) -C src/mod-desktop-app-asio
+src/mod-desktop-asio/mod-desktop-asio.dll: src/mod-desktop-asio/*.c
+	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) -C src/mod-desktop-asio
 
-src/systray/mod-desktop-app$(APP_EXT): src/systray/main.cpp src/systray/mod-desktop-app.hpp src/systray/mod-desktop-app.qrc src/systray/mod-desktop-app.ui src/systray/utils.cpp src/systray/utils.hpp src/systray/widgets.hpp
+src/systray/mod-desktop$(APP_EXT): src/systray/main.cpp src/systray/mod-desktop.hpp src/systray/mod-desktop.qrc src/systray/mod-desktop.ui src/systray/utils.cpp src/systray/utils.hpp src/systray/widgets.hpp
 	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) -C src/systray
 
 # ---------------------------------------------------------------------------------------------------------------------

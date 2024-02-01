@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <installer-gui-script minSpecVersion="1">
-    <title>MOD Desktop App</title>
+    <title>MOD Desktop</title>
     <domains enable_anywhere="false" enable_currentUserHome="false" enable_localSystem="true" />
     <license file="@builddir@/../LICENSE" mime-type="text/plain" />
     <options customize="always" hostArchitectures="arm64,x86_64" require-scripts="false" rootVolumeOnly="true" />
-    <pkg-ref id="audio.mod.desktop-app" />
+    <pkg-ref id="audio.mod.desktop" />
     <welcome file="@builddir@/../utils/macos/welcome.txt" mime-type="text/plain" />
-    <choice id="audio.mod.desktop-app-pkg" title="MOD Desktop App" description='MOD Desktop App macOS bundle' visible="true" enabled="false" selected="true">
-        <pkg-ref id="audio.mod.desktop-app-pkg" version="0">mod-desktop-app.pkg</pkg-ref>
+    <choice id="audio.mod.desktop-pkg" title="MOD Desktop" description='MOD Desktop macOS bundle' visible="true" enabled="false" selected="true">
+        <pkg-ref id="audio.mod.desktop-pkg" version="0">mod-desktop.pkg</pkg-ref>
     </choice>
     <choices-outline>
-       <line choice="audio.mod.desktop-app-pkg"/>
+       <line choice="audio.mod.desktop-pkg"/>
     </choices-outline>
 </installer-gui-script>

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MOD Desktop App</string>
+   <string>MOD Desktop</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout_8" stretch="0,1">
@@ -57,7 +57,7 @@
             <string notr="true"/>
            </property>
            <property name="pixmap">
-            <pixmap resource="mod-desktop-app.qrc">:/res/mod-logo.svg</pixmap>
+            <pixmap resource="mod-desktop.qrc">:/res/mod-logo.svg</pixmap>
            </property>
            <property name="scaledContents">
             <bool>true</bool>
@@ -93,7 +93,7 @@
             </font>
            </property>
            <property name="text">
-            <string notr="true">MOD Desktop App</string>
+            <string notr="true">MOD Desktop</string>
            </property>
            <property name="textFormat">
             <enum>Qt::PlainText</enum>
@@ -1122,7 +1122,7 @@ Smaller buffer gives less latency but consumes more CPU, while bigger buffers ha
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="mod-desktop-app.qrc"/>
+  <include location="mod-desktop.qrc"/>
  </resources>
  <connections>
   <connection>

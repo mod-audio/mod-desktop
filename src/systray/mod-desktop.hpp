@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "ui_mod-desktop-app.hpp"
+#include "ui_mod-desktop.hpp"
 
 #include <QtCore/QDebug>
 #include <QtCore/QDir>
@@ -227,7 +227,7 @@ public:
         timerId = startTimer(500);
 
        #ifdef Q_OS_WIN
-        openEvent = ::CreateEventA(nullptr, false, false, "Global\\mod-desktop-app-open");
+        openEvent = ::CreateEventA(nullptr, false, false, "Global\\mod-desktop-open");
        #endif
     }
 
@@ -522,7 +522,7 @@ public:
                #elif defined(Q_OS_WIN)
                 if (hostApiName == "ASIO")
                 {
-                    if (devName == "JackRouter" || devName == "MOD Desktop App")
+                    if (devName == "JackRouter" || devName == "MOD Desktop")
                         continue;
                 }
                 else if (hostApiName != "Windows WASAPI")
@@ -773,8 +773,8 @@ private:
         successfullyStarted = true;
         ui.b_opengui->setEnabled(true);
         ui.l_status->setText(tr("Running"));
-        systray->setToolTip(tr("MOD Desktop App: Running"));
-        systray->showMessage(tr("MOD Desktop App"), tr("Running"), QSystemTrayIcon::Information);
+        systray->setToolTip(tr("MOD Desktop: Running"));
+        systray->showMessage(tr("MOD Desktop"), tr("Running"), QSystemTrayIcon::Information);
     }
 
     void setStopped()
@@ -789,7 +789,7 @@ private:
         ui.gb_midi->setEnabled(true);
         ui.gb_lv2->setEnabled(true);
         ui.l_status->setText(tr("Stopped"));
-        systray->setToolTip(tr("MOD Desktop App: Stopped"));
+        systray->setToolTip(tr("MOD Desktop: Stopped"));
     }
 
     QString getProcessErrorAsString(QProcess::ProcessError error)
@@ -893,7 +893,7 @@ private slots:
             "-R",
             "-S",
             "-n",
-            "mod-desktop-app",
+            "mod-desktop",
         };
 
         if (midiEnabled)

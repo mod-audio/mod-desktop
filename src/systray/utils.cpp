@@ -94,7 +94,7 @@ void initEvironment()
     SHGetSpecialFolderPathW(nullptr, dataDir, CSIDL_MYDOCUMENTS, false);
 
     _wmkdir(dataDir);
-    std::wcsncat(dataDir, L"\\MOD Desktop App", MAX_PATH - 1);
+    std::wcsncat(dataDir, L"\\MOD Desktop", MAX_PATH - 1);
     _wmkdir(dataDir);
 
     SetEnvironmentVariableW(L"MOD_DATA_DIR", dataDir);
@@ -106,7 +106,7 @@ void initEvironment()
     std::strncpy(dataDir, docsDir.constData(), PATH_MAX - 1);
 
     mkdir(dataDir, 0777);
-    std::strncat(dataDir, "/MOD Desktop App", PATH_MAX - 1);
+    std::strncat(dataDir, "/MOD Desktop", PATH_MAX - 1);
     mkdir(dataDir, 0777);
 
     setenv("MOD_DATA_DIR", dataDir, 1);

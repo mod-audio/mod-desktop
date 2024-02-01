@@ -5,13 +5,13 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleDisplayName</key>
-	<string>MOD Desktop App</string>
+	<string>MOD Desktop</string>
 	<key>CFBundleExecutable</key>
-	<string>mod-desktop-app</string>
+	<string>mod-desktop</string>
 	<key>CFBundleIconFile</key>
 	<string>mod-logo.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>audio.mod.desktop-app</string>
+	<string>audio.mod.desktop</string>
 	<key>CFBundleShortVersionString</key>
 	<string>@version@</string>
 	<key>NSHighResolutionCapable</key>
@@ -19,7 +19,7 @@
 	<key>NSRequiresAquaSystemAppearance</key>
 	<false/>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>MOD Desktop App requires microphone permissions for audio input.</string>
+	<string>MOD Desktop requires microphone permissions for audio input.</string>
 	<key>CFBundleSupportedPlatforms</key>
 	<array>
 		<string>MacOSX</string>

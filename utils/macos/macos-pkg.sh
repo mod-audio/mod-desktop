@@ -20,10 +20,10 @@ rm -rf mod-ui/modtools/__pycache__
 
 # create pkg dir for placing patched app bundle inside
 mkdir build/pkg
-gcp -rL "build/mod-desktop-app.app" "build/pkg/MOD Desktop App.app"
+gcp -rL "build/mod-desktop.app" "build/pkg/MOD Desktop.app"
 
 # patch rpath for Qt libs and jack tools
-pushd "build/pkg/MOD Desktop App.app/Contents"
+pushd "build/pkg/MOD Desktop.app/Contents"
 
 rm -rf Frameworks/*/*.prl
 rm -rf Frameworks/*/Headers
@@ -56,7 +56,7 @@ pkgbuild \
   --component-plist "utils/macos/build.plist" \
   --install-location "/Applications/" \
   --root "${PWD}/build/pkg/" \
-  build/mod-desktop-app.pkg
+  build/mod-desktop.pkg
 
 # create final pkg
 sed -e "s|@builddir@|${PWD}/build|" \
@@ -67,7 +67,7 @@ productbuild \
   --identifier "audio.mod.desktop-app" \
   --package-path "${PWD}/build" \
   --version 0 \
-  mod-desktop-app-$(cat VERSION)-macOS.pkg
+  mod-desktop-$(cat VERSION)-macOS.pkg
 
 # cleanup
 rm -rf build/pkg

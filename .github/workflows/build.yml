@@ -3,9 +3,9 @@ name: build
 on: [push, pull_request]
 
 env:
-  CACHE_VERSION_LINUX: 18
-  CACHE_VERSION_MACOS: 18
-  CACHE_VERSION_WIN64: 18
+  CACHE_VERSION_LINUX: 19
+  CACHE_VERSION_MACOS: 19
+  CACHE_VERSION_WIN64: 19
   DEBIAN_FRONTEND: noninteractive
   PAWPAW_FAST_MATH: 1
   PAWPAW_SKIP_LTO: 1
@@ -88,14 +88,14 @@ jobs:
       - name: Pack
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
-          mkdir mod-desktop-app-${{ env.VERSION_TAG }}-linux-x86_64
-          mv build mod-desktop-app-${{ env.VERSION_TAG }}-linux-x86_64/mod-desktop-app
-          cp utils/linux/mod-desktop-app.* mod-desktop-app-${{ env.VERSION_TAG }}-linux-x86_64/
-          tar chJf mod-desktop-app-${{ env.VERSION_TAG }}-linux-x86_64.tar.xz mod-desktop-app-${{ env.VERSION_TAG }}-linux-x86_64
+          mkdir mod-desktop-${{ env.VERSION_TAG }}-linux-x86_64
+          mv build mod-desktop-${{ env.VERSION_TAG }}-linux-x86_64/mod-desktop
+          cp utils/linux/mod-desktop.* mod-desktop-${{ env.VERSION_TAG }}-linux-x86_64/
+          tar chJf mod-desktop-${{ env.VERSION_TAG }}-linux-x86_64.tar.xz mod-desktop-${{ env.VERSION_TAG }}-linux-x86_64
       - uses: actions/upload-artifact@v3
         if: ${{ matrix.container == env.RELEASE_OS_LINUX }}
         with:
-          name: mod-desktop-app-${{ env.VERSION_TAG }}-linux-x86_64
+          name: mod-desktop-${{ env.VERSION_TAG }}-linux-x86_64
           path: |
             *.tar.xz
       - uses: softprops/action-gh-release@v1
@@ -178,14 +178,14 @@ jobs:
       - name: Pack
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
-          mkdir mod-desktop-app-${{ env.VERSION_TAG }}-linux-x86_64-debug
-          mv build mod-desktop-app-${{ env.VERSION_TAG }}-linux-x86_64-debug/mod-desktop-app
-          cp utils/linux/mod-desktop-app.* mod-desktop-app-${{ env.VERSION_TAG }}-linux-x86_64-debug/
-          tar chJf mod-desktop-app-${{ env.VERSION_TAG }}-linux-x86_64-debug.tar.xz mod-desktop-app-${{ env.VERSION_TAG }}-linux-x86_64-debug
+          mkdir mod-desktop-${{ env.VERSION_TAG }}-linux-x86_64-debug
+          mv build mod-desktop-${{ env.VERSION_TAG }}-linux-x86_64-debug/mod-desktop
+          cp utils/linux/mod-desktop.* mod-desktop-${{ env.VERSION_TAG }}-linux-x86_64-debug/
+          tar chJf mod-desktop-${{ env.VERSION_TAG }}-linux-x86_64-debug.tar.xz mod-desktop-${{ env.VERSION_TAG }}-linux-x86_64-debug
       - uses: actions/upload-artifact@v3
         if: ${{ matrix.container == env.RELEASE_OS_LINUX }}
         with:
-          name: mod-desktop-app-${{ env.VERSION_TAG }}-linux-x86_64-debug
+          name: mod-desktop-${{ env.VERSION_TAG }}-linux-x86_64-debug
           path: |
             *.tar.xz
 
@@ -241,11 +241,11 @@ jobs:
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
           ./utils/macos/macos-pkg.sh ${{ matrix.target }}
-          mv mod-desktop-app-*.pkg mod-desktop-app-${{ env.VERSION_TAG }}-macOS.pkg
+          mv mod-desktop-*.pkg mod-desktop-${{ env.VERSION_TAG }}-macOS.pkg
       - uses: actions/upload-artifact@v4
         if: ${{ matrix.os == env.RELEASE_OS_MAC && matrix.target == 'macos-universal-10.15' }}
         with:
-          name: mod-desktop-app-${{ env.VERSION_TAG }}-macOS
+          name: mod-desktop-${{ env.VERSION_TAG }}-macOS
           path: |
             *.pkg
       - uses: softprops/action-gh-release@v1
@@ -307,14 +307,14 @@ jobs:
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
           xvfb-run ./utils/win64/win64-installer.sh
-          mv mod-desktop-app-*.exe mod-desktop-app-${{ env.VERSION_TAG }}-win64.exe
+          mv mod-desktop-*.exe mod-desktop-${{ env.VERSION_TAG }}-win64.exe
           rm -rf build/innosetup-*
-          mv build mod-desktop-app-${{ env.VERSION_TAG }}-win64
-          zip -r -9 mod-desktop-app-${{ env.VERSION_TAG }}-win64.zip mod-desktop-app-${{ env.VERSION_TAG }}-win64
+          mv build mod-desktop-${{ env.VERSION_TAG }}-win64
+          zip -r -9 mod-desktop-${{ env.VERSION_TAG }}-win64.zip mod-desktop-${{ env.VERSION_TAG }}-win64
       - uses: actions/upload-artifact@v4
         if: ${{ matrix.container == env.RELEASE_OS_WIN64 }}
         with:
-          name: mod-desktop-app-${{ env.VERSION_TAG }}-win64
+          name: mod-desktop-${{ env.VERSION_TAG }}-win64
           path: |
             *.exe
             *.zip

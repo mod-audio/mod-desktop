@@ -14,7 +14,7 @@ function convert_path() {
     fi
 }
 
-if [ -e mod-desktop-app.app ]; then
+if [ -e mod-desktop.app ]; then
     DOCS_DIR=~/Documents
 else
     DOCS_DIR=$(xdg-user-dir DOCUMENTS)
@@ -27,19 +27,19 @@ if [ -e jackd.exe ]; then
     JACK_DRIVER_OPTS="-d \"ASIO::WineASIO Driver\""
     JACK_SESSION="-C ./jack/jack-session.conf -X winmme"
     PATH_SEP=';'
-elif [ -e mod-desktop-app.app ]; then
+elif [ -e mod-desktop.app ]; then
     if [ "$(uname -m)" = "x86_64" ] && [ x"${1}" != x"macos-universal-10.15" ]; then
         source ../src/PawPaw/local.env macos-10.15
     else
         source ../src/PawPaw/local.env macos-universal-10.15
     fi
-    JACKD="./mod-desktop-app.app/Contents/MacOS/jackd"
+    JACKD="./mod-desktop.app/Contents/MacOS/jackd"
     JACK_DRIVER="coreaudio"
     JACK_DRIVER_OPTS="-P BuiltInSpeakerDevice"
-    JACK_SESSION="-C ./mod-desktop-app.app/Contents/MacOS/jack/jack-session.conf -X coremidi"
+    JACK_SESSION="-C ./mod-desktop.app/Contents/MacOS/jack/jack-session.conf -X coremidi"
     PATH_SEP=':'
     export DYLD_LIBRARY_PATH="${PAWPAW_PREFIX}/lib"
-    export JACK_DRIVER_DIR="$(pwd)/mod-desktop-app.app/Contents/MacOS/jack"
+    export JACK_DRIVER_DIR="$(pwd)/mod-desktop.app/Contents/MacOS/jack"
 else
     source ../src/PawPaw/local.env linux
     JACKD="./jackd"
@@ -57,26 +57,26 @@ else
     export JACK_DRIVER_DIR="$(pwd)/jack"
 fi
 
-if [ -e mod-desktop-app.app ]; then
-    LV2_PATH="$(convert_path $(pwd)/mod-desktop-app.app/Contents/PlugIns/LV2)"
+if [ -e mod-desktop.app ]; then
+    LV2_PATH="$(convert_path $(pwd)/mod-desktop.app/Contents/PlugIns/LV2)"
 else
     LV2_PATH="$(convert_path $(pwd)/plugins)"
 fi
-LV2_PATH+="${PATH_SEP}$(convert_path "${DOCS_DIR}/MOD Desktop App/lv2")"
+LV2_PATH+="${PATH_SEP}$(convert_path "${DOCS_DIR}/MOD Desktop/lv2")"
 export LV2_PATH
 
-export MOD_KEYS_PATH="$(convert_path "${DOCS_DIR}/MOD Desktop App/keys/")"
-export MOD_USER_FILES_DIR="$(convert_path "${DOCS_DIR}/MOD Desktop App/user-files")"
+export MOD_KEYS_PATH="$(convert_path "${DOCS_DIR}/MOD Desktop/keys/")"
+export MOD_USER_FILES_DIR="$(convert_path "${DOCS_DIR}/MOD Desktop/user-files")"
 
 export JACK_NO_START_SERVER=1
 
 # export MOD_LOG=1
 # export MOD_PLUGIN_THREAD_PRIORITY=57
 
-mkdir -p "${DOCS_DIR}/MOD Desktop App/keys"
-mkdir -p "${DOCS_DIR}/MOD Desktop App/user-files/Audio Recordings"
+mkdir -p "${DOCS_DIR}/MOD Desktop/keys"
+mkdir -p "${DOCS_DIR}/MOD Desktop/user-files/Audio Recordings"
 
 # DEBUG="lldb --"
 
-echo ${JACKD} -R -S -n mod-desktop-app ${JACK_SESSION} -d ${JACK_DRIVER} ${JACK_DRIVER_OPTS} -r 48000 -p 256
-exec ${DEBUG} ${JACKD} -R -S -n mod-desktop-app ${JACK_SESSION} -d ${JACK_DRIVER} ${JACK_DRIVER_OPTS} -r 48000 -p 256
+echo ${JACKD} -R -S -n mod-desktop ${JACK_SESSION} -d ${JACK_DRIVER} ${JACK_DRIVER_OPTS} -r 48000 -p 256
+exec ${DEBUG} ${JACKD} -R -S -n mod-desktop ${JACK_SESSION} -d ${JACK_DRIVER} ${JACK_DRIVER_OPTS} -r 48000 -p 256
