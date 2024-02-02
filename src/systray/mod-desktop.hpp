@@ -972,6 +972,12 @@ private slots:
             else
                 env.insert("MOD_LOG", "0");
 
+           #if !(defined(Q_OS_MAC) || defined(Q_OS_WIN))
+            char quantum[32] = {};
+            std::snprintf(quantum, sizeof(quantum)-1, "%s/48000", ui.cb_buffersize->currentText().toUtf8().constData());
+            env.insert("PIPEWIRE_QUANTUM", quantum);
+           #endif
+
             processHost.setProcessEnvironment(env);
         }
 
