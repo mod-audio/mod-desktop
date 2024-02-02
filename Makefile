@@ -164,6 +164,7 @@ TARGETS += build/jack/jack_portaudio.so
 TARGETS += build/jack/jack-session-alsamidi.conf
 TARGETS += build/libjack.so.0
 TARGETS += build/libjackserver.so.0
+TARGETS += build-ui/libjack.so.0
 endif
 endif
 
@@ -319,6 +320,12 @@ win64-plugins:
 	$(MAKE) PAWPAW_TARGET=win64 plugins
 
 # ---------------------------------------------------------------------------------------------------------------------
+
+ifeq ($(LINUX),true)
+build-ui/libjack.so.0: $(PAWPAW_PREFIX)/lib/libjack.so.0 build/lib/library.zip
+	ln -sf $(abspath $<) $@
+	touch $@
+endif
 
 build-ui/lib/libmod_utils$(SO_EXT): src/mod-ui/utils/libmod_utils$(SO_EXT) build/lib/library.zip
 	ln -sf $(abspath $<) $@

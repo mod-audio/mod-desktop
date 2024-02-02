@@ -38,7 +38,7 @@ elif [ -e mod-desktop.app ]; then
     JACK_DRIVER_OPTS="-P BuiltInSpeakerDevice"
     JACK_SESSION="-C ./mod-desktop.app/Contents/MacOS/jack/jack-session.conf -X coremidi"
     PATH_SEP=':'
-    export DYLD_LIBRARY_PATH="${PAWPAW_PREFIX}/lib"
+    export DYLD_LIBRARY_PATH="${PAWPAW_PREFIX}/lib${DYLD_LIBRARY_PATH:+:$DYLD_LIBRARY_PATH}"
     export JACK_DRIVER_DIR="$(pwd)/mod-desktop.app/Contents/MacOS/jack"
 else
     source ../src/PawPaw/local.env linux
@@ -53,7 +53,7 @@ else
     JACK_SESSION="-C ./jack/jack-session-alsamidi.conf"
     PATH_SEP=':'
     export LD_BIND_NOW=1
-    export LD_LIBRARY_PATH="${PAWPAW_PREFIX}/lib"
+    export LD_LIBRARY_PATH="${PAWPAW_PREFIX}/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
     export JACK_DRIVER_DIR="$(pwd)/jack"
 fi
 

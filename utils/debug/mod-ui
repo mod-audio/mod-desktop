@@ -23,11 +23,11 @@ elif [ -e mod-desktop.app ]; then
     else
         source ../src/PawPaw/local.env macos-universal-10.15
     fi
-    export DYLD_LIBRARY_PATH="${PAWPAW_PREFIX}/lib"
+    export DYLD_LIBRARY_PATH="${PAWPAW_PREFIX}/lib${DYLD_LIBRARY_PATH:+:$DYLD_LIBRARY_PATH}"
     PATH_SEP=':'
 else
     source ../src/PawPaw/local.env linux
-    export LD_LIBRARY_PATH="${PAWPAW_PREFIX}/lib"
+    export LD_LIBRARY_PATH="${PAWPAW_PREFIX}/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
     PATH_SEP=':'
 fi
 

@@ -56,23 +56,26 @@ void initEvironment()
         *wcc = 0;
    #else
     char appDir[PATH_MAX] = {};
-    Dl_info info = {};
-    dladdr((void*)initEvironment, &info);
 
-    if (info.dli_fname[0] == '.')
     {
-        getcwd(appDir, PATH_MAX - 1);
-        std::strncat(appDir, info.dli_fname + 1, PATH_MAX - 1);
-    }
-    else if (info.dli_fname[0] != '/')
-    {
-        getcwd(appDir, PATH_MAX - 1);
-        std::strncat(appDir, "/", PATH_MAX - 1);
-        std::strncat(appDir, info.dli_fname, PATH_MAX - 1);
-    }
-    else
-    {
-        std::strncpy(appDir, info.dli_fname, PATH_MAX - 1);
+        Dl_info info = {};
+        dladdr((void*)initEvironment, &info);
+
+        if (info.dli_fname[0] == '.')
+        {
+            getcwd(appDir, PATH_MAX - 1);
+            std::strncat(appDir, info.dli_fname + 1, PATH_MAX - 1);
+        }
+        else if (info.dli_fname[0] != '/')
+        {
+            getcwd(appDir, PATH_MAX - 1);
+            std::strncat(appDir, "/", PATH_MAX - 1);
+            std::strncat(appDir, info.dli_fname, PATH_MAX - 1);
+        }
+        else
+        {
+            std::strncpy(appDir, info.dli_fname, PATH_MAX - 1);
+        }
     }
 
     if (char* const c = strrchr(appDir, '/'))
@@ -166,6 +169,38 @@ void initEvironment()
    #endif
     setenv("MOD_LV2_PATH", path, 1);
   #endif
+
+   #if !(defined(__APPLE__) || defined(_WIN32))
+    // special handling for PipeWire JACK, need to find full path to shared lib
+    bool usingPipeWire = false;
+    if (void* const pwlib = dlopen("libjack.so.0", RTLD_NOW|RTLD_LOCAL))
+    {
+        typedef int (*jacksym)(void);
+        const jacksym sym = reinterpret_cast<jacksym>(dlsym(pwlib, "jack_client_name_size"));
+
+        if (sym != nullptr && sym() != 0 && dlsym(pwlib, "jack_set_sample_rate") != nullptr)
+        {
+            Dl_info info = {};
+            dladdr(reinterpret_cast<void*>(sym), &info);
+            setenv("JACKBRIDGE_FILENAME", info.dli_fname, 1);
+            usingPipeWire = true;
+        }
+    }
+
+    // if LD_LIBRARY_PATH is set, add our custom lib path on top to make sure jackd can run
+    if (const char* const ldpath = getenv("LD_LIBRARY_PATH"))
+    {
+        std::memcpy(path, appDir, appDirLen);
+        path[appDirLen] = ':';
+        std::strncpy(path + appDirLen + 1, ldpath, PATH_MAX - appDirLen - 2);
+        setenv("LD_LIBRARY_PATH", path, 1);
+    }
+    // always set path in case of PipeWire
+    else if (usingPipeWire)
+    {
+        setenv("LD_LIBRARY_PATH", appDir, 1);
+    }
+   #endif
 
     // other
    #ifndef _WIN32
