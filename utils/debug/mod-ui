@@ -32,19 +32,19 @@ else
 fi
 
 if [ -e mod-desktop.app ]; then
-    DOCS_DIR=~/Documents
+    DOCS_DIR="${HOME}/Documents"
 else
-    DOCS_DIR=$(xdg-user-dir DOCUMENTS)
+    DOCS_DIR="$(xdg-user-dir DOCUMENTS)"
 fi
 
 PYTHON="${EXE_WRAPPER} ${PAWPAW_PREFIX}/bin/python3${APP_EXT}"
 
+LV2_PATH="$(convert_path "${DOCS_DIR}/MOD Desktop/lv2")"
 if [ -e mod-desktop.app ]; then
-    LV2_PATH="$(convert_path $(pwd)/mod-desktop.app/Contents/PlugIns/LV2)"
+    LV2_PATH+=":$(convert_path $(pwd)/mod-desktop.app/Contents/PlugIns/LV2)"
 else
-    LV2_PATH="$(convert_path $(pwd)/plugins)"
+    LV2_PATH="${PATH_SEP}$(convert_path $(pwd)/plugins)"
 fi
-LV2_PATH+="${PATH_SEP}$(convert_path "${DOCS_DIR}/MOD Desktop/lv2")"
 export LV2_PATH
 
 export MOD_APP=1

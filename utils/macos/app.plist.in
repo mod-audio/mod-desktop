@@ -18,6 +18,8 @@
 	<true/>
 	<key>NSRequiresAquaSystemAppearance</key>
 	<false/>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>MOD Desktop stores pedalboards and user files in the Documents folder.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>MOD Desktop requires microphone permissions for audio input.</string>
 	<key>CFBundleSupportedPlatforms</key>

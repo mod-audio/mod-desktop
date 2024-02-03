@@ -22,10 +22,8 @@ DEVICE_DIR = os.path.join(DATA_DIR, 'device')
 sys.path = [ROOT] + sys.path
 
 if sys.platform == 'darwin':
-    lv2dir = os.path.join(ROOT, '..', 'PlugIns', 'LV2')
     resdir = os.path.join(ROOT, '..', 'Resources')
 else:
-    lv2dir = os.path.join(ROOT, 'plugins')
     resdir = ROOT
 
 os.environ['MOD_APP'] = '1'

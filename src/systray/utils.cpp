@@ -163,7 +163,8 @@ void initEvironment()
     std::strncpy(path + dataDirLen, "/lv2:", PATH_MAX - dataDirLen - 1);
     std::strncat(path, appDir, PATH_MAX - 1);
    #ifdef __APPLE__
-    std::strncat(path, "/../PlugIns/LV2", PATH_MAX - 1);
+    path[dataDirLen + 5 + appDirLen - 5] = '\0'; // remove "MacOS"
+    std::strncat(path, "PlugIns/LV2", PATH_MAX - 1);
    #else
     std::strncat(path, "/plugins", PATH_MAX - 1);
    #endif
