@@ -134,7 +134,7 @@ void initEvironment()
   #else
     std::memcpy(path, appDir, appDirLen);
    #ifdef __APPLE__
-    std::strncpy(path + appDirLen - 5, "/pedalboards", PATH_MAX - appDirLen - 1);
+    std::strncpy(path + appDirLen - 5, "/Resources/pedalboards", PATH_MAX - appDirLen - 1);
    #else
     std::strncpy(path + appDirLen, "/pedalboards", PATH_MAX - appDirLen - 1);
    #endif
