@@ -174,18 +174,27 @@ void initEvironment()
    #if !(defined(__APPLE__) || defined(_WIN32))
     // special handling for PipeWire JACK, need to find full path to shared lib
     bool usingPipeWire = false;
-    if (void* const pwlib = dlopen("libjack.so.0", RTLD_NOW|RTLD_LOCAL))
+    if (void* const pwlib = dlmopen(LM_ID_NEWLM, "libjack.so.0", RTLD_NOW|RTLD_LOCAL))
     {
         typedef int (*jacksym)(void);
-        const jacksym sym = reinterpret_cast<jacksym>(dlsym(pwlib, "jack_client_name_size"));
+        const jacksym sym1 = reinterpret_cast<jacksym>(dlsym(pwlib, "jack_client_name_size"));
+        void* const sym2 = dlsym(pwlib, "jack_set_sample_rate");
 
-        if (sym != nullptr && sym() != 0 && dlsym(pwlib, "jack_set_sample_rate") != nullptr)
+        if (sym1 != nullptr && sym2 != nullptr && sym1() != 0)
         {
             Dl_info info = {};
-            dladdr(reinterpret_cast<void*>(sym), &info);
+            dladdr(sym2, &info);
             setenv("JACKBRIDGE_FILENAME", info.dli_fname, 1);
             usingPipeWire = true;
+            fprintf(stdout, "MOD Desktop DEBUG: jacklib syms %p %p | %d | ok with filename'%s'\n", sym1, sym2, sym1(), info.dli_fname);
         }
+        else
+        {
+            fprintf(stdout, "MOD Desktop DEBUG: jacklib syms %p %p | %d | failed\n", sym1, sym2, sym1 != nullptr ? sym1() : -1337);
+        }
+        fflush(stdout);
+
+        dlclose(pwlib);
     }
 
     // if LD_LIBRARY_PATH is set, add our custom lib path on top to make sure jackd can run
