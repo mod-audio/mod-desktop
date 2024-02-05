@@ -122,6 +122,7 @@ TARGETS += build/mod-desktop.app/Contents/Resources/default.pedalboard
 TARGETS += build/mod-desktop.app/Contents/Resources/html
 TARGETS += build/mod-desktop.app/Contents/Resources/mod-hardware-descriptor.json
 TARGETS += build/mod-desktop.app/Contents/Resources/mod-logo.icns
+TARGETS += build/mod-desktop.app/Contents/Resources/pedalboards
 TARGETS += build/mod-desktop.app/Contents/Resources/VERSION
 else
 TARGETS += build/default.pedalboard
@@ -138,6 +139,7 @@ TARGETS += build/mod-ui$(APP_EXT)
 TARGETS += build/mod
 TARGETS += build/modtools
 TARGETS += build/mod-hardware-descriptor.json
+TARGETS += build/pedalboards
 TARGETS += build/VERSION
 ifeq ($(WINDOWS),true)
 TARGETS += build/jack/jack_dummy.dll
@@ -435,6 +437,10 @@ build/mod-desktop.app/Contents/Resources/mod-logo.icns: res/mod-logo.icns
 	@mkdir -p build/mod-desktop.app/Contents/Resources
 	ln -sf $(abspath $<) $@
 
+build/mod-desktop.app/Contents/Resources/pedalboards: pedalboards
+	@mkdir -p build/mod-desktop.app/Contents/Resources
+	ln -sf $(abspath $<) $@
+
 build/mod-desktop.app/Contents/Resources/VERSION: VERSION
 	@mkdir -p build/mod-desktop.app/Contents/Resources
 	ln -sf $(abspath $<) $@
@@ -504,6 +510,10 @@ build/mod-hardware-descriptor.json: utils/linux/mod-hardware-descriptor.json
 	@mkdir -p build
 	ln -sf $(abspath $<) $@
 endif
+
+build/pedalboards: pedalboards
+	@mkdir -p build
+	ln -sf $(abspath $<) $@
 
 build/VERSION: VERSION
 	@mkdir -p build

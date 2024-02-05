@@ -1,0 +1,4361 @@
+{
+    "snapshots": [
+        {
+            "name": "Acid Saw Bass",
+            "data": {
+                "mod_cv_slew_2": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "BYPASS": 1.0,
+                        "RiseTime": 595.04016100000001,
+                        "FallTime": 595.04016100000001
+                    }
+                },
+                "mod_cv_slew_3": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "BYPASS": 1.0,
+                        "RiseTime": 4.0,
+                        "FallTime": 14.591303825378418
+                    }
+                },
+                "mod_cv_slew_1": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "BYPASS": 1.0,
+                        "RiseTime": 15.723438262939453,
+                        "FallTime": 15.723438262939453
+                    }
+                },
+                "modulay": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "repeats": 48.400001525878906,
+                        "tone": 3223.709716796875,
+                        "depth": 0.3580310046672821,
+                        "mix": 30.0,
+                        "rate": 2.0,
+                        "time": 485.5,
+                        "morph": 50.0
+                    }
+                },
+                "mod_cv_slew": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "BYPASS": 1.0,
+                        "RiseTime": 5.0,
+                        "FallTime": 15.723438262939453
+                    }
+                },
+                "mod_cv_attenuverter_4": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 1.4550000429153442,
+                        "Smoothing": 1.0,
+                        "Mode": 1.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "notes_111114": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "DYN > VCA\n\n\n\nFIX > VCA",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mono": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "threshold": -22.5,
+                        "gain": 3.84375,
+                        "release": 0.0010000000474974513,
+                        "rms": 0.5,
+                        "ratio": 9.90625,
+                        "bypass": 0.0,
+                        "attack": 0.0059919999912381172,
+                        "noClip": 1.0
+                    }
+                },
+                "cv": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "HoldPitch": 1.0,
+                        "ConfidenceThreshold": 12.5,
+                        "Sensitivity": 50.049999237060547,
+                        "Octave": -1.0,
+                        "Tolerance": 10.0
+                    }
+                },
+                "notes_1111111118": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Page 1: VCO (Oscillator)\n\n--subpage 1--\nMSTR OCT, VCO2 OCT, VCO3 OCT\n--subpage 2--\nVCO1 WAVE, VCO2 SEMI, VCO3 SEMI\n--subpage 3--\nLFO WAVE, LFO RATE, LFO>VCO\n\n--foots--\nVCO2+3, LFO>VCO\n",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "20",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "Gain": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "Gain": -5.0
+                    }
+                },
+                "mod_cv_control": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "Smoothing": 1.0,
+                        "Control": 10.0
+                    }
+                },
+                "notes_11111111119": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Page 3: VCA / Dynamics\n\n--subpage 1--\nFIX>VCA, DYN>VCA, OUT LVL\n--subpage 2--\n SENSITIVITY, CONFIDENCE, TOLERANCE\n--subpage 3--\n -\n--foots--\n CMP DYN",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "20",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_control_6": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Smoothing": 1.0,
+                        "Control": 5.9499998092651367
+                    }
+                },
+                "Plate": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "blend": 0.19499999284744263,
+                        "tail": 0.65499997138977051,
+                        "bandwidth": 1.0,
+                        "damping": 0.375
+                    }
+                },
+                "stereo": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "gain": 0.0,
+                        "enable": 1.0,
+                        "mute": 0.0
+                    }
+                },
+                "mod_cv_gate": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "ClosingThreshold": 0.0,
+                        "PluginEnabled": 1.0,
+                        "OpeningThreshold": 0.0099999997764825821
+                    }
+                },
+                "vcf": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "resonanceGain": 0.0,
+                        "linFMGain": 1.0,
+                        "resonance": 0.87599998712539673,
+                        "expFMGain": 2.34375,
+                        "freq": 2.0,
+                        "vcfType": 0.0,
+                        "inputGain": 1.0
+                    }
+                },
+                "lfo2_freq_1": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "waveForm": 0.0,
+                        "phi0": 0.0,
+                        "freq": 0.80000001192092896
+                    }
+                },
+                "notes_1111115": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "VCF FREQ\nVCF TYPE\nVCF RESO",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Fixed Velocity Chain",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes_111111111120": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Page 4: FX (Delay, Reverb)\n\n--subpage 1--\n M TIME, M FEEDBK, M MIX\n--subpage 2--\nP DECAY, P MIX, P DAMP\n--subpage 3--\nP LPF, -\n\n--foots--\nMODULAY, SHIROVERB",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "20",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mono_2": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "gain": 0.0,
+                        "LowPass": 1.0,
+                        "LSgain": 0.0,
+                        "HPQ": 0.69999998807907104,
+                        "sec2": 1.0,
+                        "sec3": 1.0,
+                        "sec4": 1.0,
+                        "LPQ": 0.91874998807907104,
+                        "q1": 0.60000002384185791,
+                        "q2": 0.60000002384185791,
+                        "q3": 0.60000002384185791,
+                        "q4": 0.60000002384185791,
+                        "HPfreq": 30.0,
+                        "LPfreq": 8000.0,
+                        "peakreset": 1.0,
+                        "LSfreq": 80.0,
+                        "HSsec": 1.0,
+                        "gain4": 0.0,
+                        "gain1": 0.0,
+                        "gain3": 0.0,
+                        "gain2": 0.0,
+                        "freq4": 2500.0,
+                        "freq1": 160.0,
+                        "freq2": 397.0,
+                        "freq3": 1250.0,
+                        "HSq": 1.0,
+                        "enable": 1.0,
+                        "LSq": 1.0,
+                        "HighPass": 1.0,
+                        "sec1": 1.0,
+                        "LSsec": 1.0,
+                        "HSfreq": 8000.0,
+                        "HSgain": 0.0
+                    }
+                },
+                "notes_1111111111221": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Page 2: VCF (Filter)\n\n--subpage 1--\nVCF FREQ, DYN>VCF, KEY>VCF\n--subpage 2--\nVCF TYPE, VCF RESO, FLT TIME\n--subpage 3--\nLFO WAVE, LFO RATE, LFO>VCF\n\n--foots--\n FILTER >, FILTER <",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "20",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_attenuverter": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 3.9130430221557617,
+                        "Smoothing": 1.0,
+                        "Mode": 1.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "mod_audio_to_cv": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Level": 10.0,
+                        "Offset": 0.0,
+                        "BYPASS": 1.0
+                    }
+                },
+                "vco3_1": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "waveForm": 2.0,
+                        "pwGain": 0.0,
+                        "linFMGain": 0.14492799341678619,
+                        "semitone": 7.0,
+                        "edge": 1.0,
+                        "octave": 0.0,
+                        "expFMGain": 0.0,
+                        "tune": 0.0,
+                        "phi0": 0.0,
+                        "pw0": 0.5
+                    }
+                },
+                "vco3_2": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "waveForm": 2.0,
+                        "pwGain": 0.0,
+                        "linFMGain": 0.14492799341678619,
+                        "semitone": 4.0,
+                        "edge": 1.0,
+                        "octave": 0.0,
+                        "expFMGain": 0.0,
+                        "tune": 0.0,
+                        "phi0": 0.0,
+                        "pw0": 0.5
+                    }
+                },
+                "mod_cv_range": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Mode": 1.0,
+                        "MinRange": 0.41407901048660278,
+                        "MaxRange": 9.0269145965576172
+                    }
+                },
+                "mod_cv_attenuverter_3": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": -2.0,
+                        "Smoothing": 0.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "notes_7": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "KEY>VCF\n\n\n\nDYN > VCF",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_attenuverter_1": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 6.4499998092651367,
+                        "Smoothing": 1.0,
+                        "Mode": 1.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "notes_5": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Three VCO3's take care of sound generation",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes_2": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "LFO>VCO\n\nLFO WAVE\nLFO FREQ\nLFO>VCO",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes_3": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Page 1: VCO (Oscillator)\nPage 2: VCF (Filter)\nPage 3: VCA / Dynamics\nPage 4: FX (Delay, Reverb)",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "32",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_attenuverter_5": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 0.10000000149011612,
+                        "Smoothing": 1.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "notes_1": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "LFO WAVE\nLFO RATE\nLFO>VCF\n",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_attenuverter_9": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 0.075000002980232239,
+                        "Smoothing": 1.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "mod_cv_attenuverter_8": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 10.0,
+                        "Smoothing": 1.0,
+                        "Mode": 1.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "lfo2_freq": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "waveForm": 0.0,
+                        "phi0": 0.0,
+                        "freq": 6.5
+                    }
+                },
+                "notes_9": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Dynamic Chain\n\n(Envelope Follower)",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes_6": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "FILTER >\nFILTER <\n\nMomentary foot addressings",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_attenuverter_2": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 0.10000000149011612,
+                        "Smoothing": 1.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "vcalin": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "in2": 1.0,
+                        "in1": 1.0,
+                        "gain1": 0.0,
+                        "outputLevel": 0.24016599357128143,
+                        "gain2": 0.0
+                    }
+                },
+                "mod_cv_abs": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "PluginEnabled": 1.0
+                    }
+                },
+                "notes_11111116": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Keytracking Chain",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes_111111117": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "WELCOME, INTRODUCTION HERE!",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_control_3": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "Smoothing": 1.0,
+                        "Control": 10.0
+                    }
+                },
+                "mod_cv_control_2": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "Smoothing": 1.0,
+                        "Control": 10.0
+                    }
+                },
+                "mono_1": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "gain": 0.0,
+                        "LowPass": 1.0,
+                        "LSgain": 0.0,
+                        "HPQ": 0.69999998807907104,
+                        "sec2": 1.0,
+                        "sec3": 1.0,
+                        "sec4": 1.0,
+                        "LPQ": 1.0,
+                        "q1": 0.60000002384185791,
+                        "q2": 0.60000002384185791,
+                        "q3": 0.60000002384185791,
+                        "q4": 0.60000002384185791,
+                        "HPfreq": 80.0,
+                        "LPfreq": 1000.0,
+                        "peakreset": 1.0,
+                        "LSfreq": 80.0,
+                        "HSsec": 1.0,
+                        "gain4": 0.0,
+                        "gain1": 0.0,
+                        "gain3": 0.0,
+                        "gain2": 0.0,
+                        "freq4": 2500.0,
+                        "freq1": 160.0,
+                        "freq2": 397.0,
+                        "freq3": 1250.0,
+                        "HSq": 1.0,
+                        "enable": 1.0,
+                        "LSq": 1.0,
+                        "HighPass": 1.0,
+                        "sec1": 1.0,
+                        "LSsec": 1.0,
+                        "HSfreq": 8000.0,
+                        "HSgain": 0.0
+                    }
+                },
+                "mod_cv_attenuverter_7": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 1.0,
+                        "Smoothing": 1.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "vco3": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "waveForm": 2.0,
+                        "pwGain": 0.0,
+                        "linFMGain": 0.14000000059604645,
+                        "semitone": 0.0,
+                        "edge": 1.0,
+                        "octave": 0.0,
+                        "expFMGain": 0.0,
+                        "tune": 0.0,
+                        "phi0": 0.0,
+                        "pw0": 0.5
+                    }
+                },
+                "mod_cv_attenuverter_6": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 1.0,
+                        "Smoothing": 0.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                }
+            }
+        },
+        {
+            "name": "Acid Square Bass",
+            "data": {
+                "mod_cv_slew_2": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "BYPASS": 1.0,
+                        "RiseTime": 595.04016100000001,
+                        "FallTime": 595.04016100000001
+                    }
+                },
+                "mod_cv_slew_3": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "BYPASS": 1.0,
+                        "RiseTime": 4.0,
+                        "FallTime": 14.591303825378418
+                    }
+                },
+                "mod_cv_slew_1": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "BYPASS": 1.0,
+                        "RiseTime": 15.723438262939453,
+                        "FallTime": 15.723438262939453
+                    }
+                },
+                "modulay": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "repeats": 48.400001525878906,
+                        "tone": 3223.709716796875,
+                        "depth": 0.3580310046672821,
+                        "mix": 30.0,
+                        "rate": 2.0,
+                        "time": 485.5,
+                        "morph": 50.0
+                    }
+                },
+                "mod_cv_slew": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "BYPASS": 1.0,
+                        "RiseTime": 5.0,
+                        "FallTime": 15.723438262939453
+                    }
+                },
+                "mod_cv_attenuverter_4": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 1.4550000000000001,
+                        "Smoothing": 1.0,
+                        "Mode": 1.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "notes_111114": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "DYN > VCA\n\n\n\nFIX > VCA",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mono": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "threshold": -22.5,
+                        "gain": 3.84375,
+                        "release": 0.0010000000474974513,
+                        "rms": 0.5,
+                        "ratio": 9.90625,
+                        "bypass": 0.0,
+                        "attack": 0.0059919999912381172,
+                        "noClip": 1.0
+                    }
+                },
+                "cv": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "HoldPitch": 1.0,
+                        "ConfidenceThreshold": 12.5,
+                        "Sensitivity": 50.049999237060547,
+                        "Octave": -1.0,
+                        "Tolerance": 10.0
+                    }
+                },
+                "notes_1111111118": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Page 1: VCO (Oscillator)\n\n--subpage 1--\nMSTR OCT, VCO2 OCT, VCO3 OCT\n--subpage 2--\nVCO1 WAVE, VCO2 SEMI, VCO3 SEMI\n--subpage 3--\nLFO WAVE, LFO RATE, LFO>VCO\n\n--foots--\nVCO2+3, LFO>VCO\n",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "20",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "Gain": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "Gain": -5.0
+                    }
+                },
+                "mod_cv_control": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "Smoothing": 1.0,
+                        "Control": 10.0
+                    }
+                },
+                "notes_11111111119": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Page 3: VCA / Dynamics\n\n--subpage 1--\nFIX>VCA, DYN>VCA, OUT LVL\n--subpage 2--\n -\n--subpage 3--\n -\n--foots--\n CMP DYN",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "20",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_control_6": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Smoothing": 1.0,
+                        "Control": 5.9499998092651367
+                    }
+                },
+                "Plate": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "blend": 0.19500000000000001,
+                        "tail": 0.65499997138977051,
+                        "bandwidth": 1.0,
+                        "damping": 0.375
+                    }
+                },
+                "stereo": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "gain": 0.0,
+                        "enable": 1.0,
+                        "mute": 0.0
+                    }
+                },
+                "mod_cv_gate": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "ClosingThreshold": 0.0,
+                        "PluginEnabled": 1.0,
+                        "OpeningThreshold": 0.0099999997764825821
+                    }
+                },
+                "vcf": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "resonanceGain": 0.0,
+                        "linFMGain": 1.0,
+                        "resonance": 0.87599998712539673,
+                        "expFMGain": 2.34375,
+                        "freq": 2.0,
+                        "vcfType": 0.0,
+                        "inputGain": 1.0
+                    }
+                },
+                "lfo2_freq_1": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "waveForm": 0.0,
+                        "phi0": 0.0,
+                        "freq": 0.80000001192092896
+                    }
+                },
+                "notes_1111115": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "VCF FREQ\nVCF TYPE\nVCF RESO",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Fixed Velocity Chain",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes_111111111120": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Page 4: FX (Delay, Reverb)\n\n--subpage 1--\n M TIME, M FEEDBK, M MIX\n--subpage 2--\n S DECAY, S RATIO, S MIX\n--subpage 3--\n S SHIM, S TONE, S BNDWDTH\n\n--foots--\nMODULAY, SHIROVERB",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "20",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mono_2": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "gain": 0.0,
+                        "LowPass": 1.0,
+                        "LSgain": 0.0,
+                        "HPQ": 0.69999998807907104,
+                        "sec2": 1.0,
+                        "sec3": 1.0,
+                        "sec4": 1.0,
+                        "LPQ": 0.91874998807907104,
+                        "q1": 0.60000002384185791,
+                        "q2": 0.60000002384185791,
+                        "q3": 0.60000002384185791,
+                        "q4": 0.60000002384185791,
+                        "HPfreq": 30.0,
+                        "LPfreq": 8000.0,
+                        "peakreset": 1.0,
+                        "LSfreq": 80.0,
+                        "HSsec": 1.0,
+                        "gain4": 0.0,
+                        "gain1": 0.0,
+                        "gain3": 0.0,
+                        "gain2": 0.0,
+                        "freq4": 2500.0,
+                        "freq1": 160.0,
+                        "freq2": 397.0,
+                        "freq3": 1250.0,
+                        "HSq": 1.0,
+                        "enable": 1.0,
+                        "LSq": 1.0,
+                        "HighPass": 1.0,
+                        "sec1": 1.0,
+                        "LSsec": 1.0,
+                        "HSfreq": 8000.0,
+                        "HSgain": 0.0
+                    }
+                },
+                "notes_1111111111221": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Page 2: VCF (Filter)\n\n--subpage 1--\nVCF FREQ, DYN>VCF, KEY>VCF\n--subpage 2--\nVCF TYPE, VCF RESO, FLT TIME\n--subpage 3--\nLFO WAVE, LFO RATE, LFO>VCF\n\n--foots--\n FILTER >, FILTER <",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "20",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_attenuverter": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 3.9130430221557617,
+                        "Smoothing": 1.0,
+                        "Mode": 1.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "mod_audio_to_cv": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Level": 10.0,
+                        "Offset": 0.0,
+                        "BYPASS": 1.0
+                    }
+                },
+                "vco3_1": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "waveForm": 2.0,
+                        "pwGain": 0.0,
+                        "linFMGain": 0.14492799341678619,
+                        "semitone": 7.0,
+                        "edge": 1.0,
+                        "octave": 0.0,
+                        "expFMGain": 0.0,
+                        "tune": 0.0,
+                        "phi0": 0.0,
+                        "pw0": 0.5
+                    }
+                },
+                "vco3_2": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "waveForm": 2.0,
+                        "pwGain": 0.0,
+                        "linFMGain": 0.14492799341678619,
+                        "semitone": 4.0,
+                        "edge": 1.0,
+                        "octave": 0.0,
+                        "expFMGain": 0.0,
+                        "tune": 0.0,
+                        "phi0": 0.0,
+                        "pw0": 0.5
+                    }
+                },
+                "mod_cv_range": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Mode": 1.0,
+                        "MinRange": 0.41407901048660278,
+                        "MaxRange": 9.0269145965576172
+                    }
+                },
+                "mod_cv_attenuverter_3": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": -2.0,
+                        "Smoothing": 0.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "notes_7": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "KEY>VCF\n\n\n\nDYN > VCF",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_attenuverter_1": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 6.4500000000000002,
+                        "Smoothing": 1.0,
+                        "Mode": 1.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "notes_5": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Three VCO3's take care of sound generation",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes_2": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "LFO>VCO\n\nLFO WAVE\nLFO FREQ\nLFO>VCO",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes_3": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Page 1: VCO (Oscillator)\nPage 2: VCF (Filter)\nPage 3: VCA / Dynamics\nPage 4: FX (Delay, Reverb)",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "32",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_attenuverter_5": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 0.10000000149011612,
+                        "Smoothing": 1.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "notes_1": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "LFO WAVE\nLFO RATE\nLFO>VCF\n",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_attenuverter_9": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 0.075000002980232239,
+                        "Smoothing": 1.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "mod_cv_attenuverter_8": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 10.0,
+                        "Smoothing": 1.0,
+                        "Mode": 1.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "lfo2_freq": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "waveForm": 0.0,
+                        "phi0": 0.0,
+                        "freq": 6.5
+                    }
+                },
+                "notes_9": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Dynamic Chain\n\n(Envelope Follower)",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes_6": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "FILTER >\nFILTER <\n\nMomentary foot addressings",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_attenuverter_2": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 0.10000000149011612,
+                        "Smoothing": 1.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "vcalin": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "in2": 1.0,
+                        "in1": 1.0,
+                        "gain1": 0.0,
+                        "outputLevel": 0.24016599357128143,
+                        "gain2": 0.0
+                    }
+                },
+                "mod_cv_abs": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "PluginEnabled": 1.0
+                    }
+                },
+                "notes_11111116": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Keytracking Chain",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes_111111117": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "WELCOME, INTRODUCTION HERE!",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_control_3": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "Smoothing": 1.0,
+                        "Control": 10.0
+                    }
+                },
+                "mod_cv_control_2": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "Smoothing": 1.0,
+                        "Control": 10.0
+                    }
+                },
+                "mono_1": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "gain": 0.0,
+                        "LowPass": 1.0,
+                        "LSgain": 0.0,
+                        "HPQ": 0.69999998807907104,
+                        "sec2": 1.0,
+                        "sec3": 1.0,
+                        "sec4": 1.0,
+                        "LPQ": 1.0,
+                        "q1": 0.60000002384185791,
+                        "q2": 0.60000002384185791,
+                        "q3": 0.60000002384185791,
+                        "q4": 0.60000002384185791,
+                        "HPfreq": 80.0,
+                        "LPfreq": 1000.0,
+                        "peakreset": 1.0,
+                        "LSfreq": 80.0,
+                        "HSsec": 1.0,
+                        "gain4": 0.0,
+                        "gain1": 0.0,
+                        "gain3": 0.0,
+                        "gain2": 0.0,
+                        "freq4": 2500.0,
+                        "freq1": 160.0,
+                        "freq2": 397.0,
+                        "freq3": 1250.0,
+                        "HSq": 1.0,
+                        "enable": 1.0,
+                        "LSq": 1.0,
+                        "HighPass": 1.0,
+                        "sec1": 1.0,
+                        "LSsec": 1.0,
+                        "HSfreq": 8000.0,
+                        "HSgain": 0.0
+                    }
+                },
+                "mod_cv_attenuverter_7": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 1.0,
+                        "Smoothing": 1.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "vco3": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "waveForm": 3.0,
+                        "pwGain": 0.0,
+                        "linFMGain": 0.14000000059604645,
+                        "semitone": 0.0,
+                        "edge": 1.0,
+                        "octave": 0.0,
+                        "expFMGain": 0.0,
+                        "tune": 0.0,
+                        "phi0": 0.0,
+                        "pw0": 0.5
+                    }
+                },
+                "mod_cv_attenuverter_6": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 1.0,
+                        "Smoothing": 0.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                }
+            }
+        },
+        {
+            "name": "+4 and +5",
+            "data": {
+                "mod_cv_slew_2": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "BYPASS": 1.0,
+                        "RiseTime": 595.04016100000001,
+                        "FallTime": 595.04016100000001
+                    }
+                },
+                "mod_cv_slew_3": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "BYPASS": 1.0,
+                        "RiseTime": 4.0,
+                        "FallTime": 14.591303825378418
+                    }
+                },
+                "mod_cv_slew_1": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "BYPASS": 1.0,
+                        "RiseTime": 15.723438262939453,
+                        "FallTime": 15.723438262939453
+                    }
+                },
+                "modulay": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "repeats": 48.400001525878906,
+                        "tone": 3223.709716796875,
+                        "depth": 0.3580310046672821,
+                        "mix": 30.0,
+                        "rate": 2.0,
+                        "time": 485.5,
+                        "morph": 50.0
+                    }
+                },
+                "mod_cv_slew": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "BYPASS": 1.0,
+                        "RiseTime": 5.0,
+                        "FallTime": 15.723438262939453
+                    }
+                },
+                "mod_cv_attenuverter_4": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 1.4550000000000001,
+                        "Smoothing": 1.0,
+                        "Mode": 1.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "notes_111114": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "DYN > VCA\n\n\n\nFIX > VCA",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mono": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "threshold": -22.5,
+                        "gain": 3.84375,
+                        "release": 0.0010000000474974513,
+                        "rms": 0.5,
+                        "ratio": 9.90625,
+                        "bypass": 0.0,
+                        "attack": 0.0059919999912381172,
+                        "noClip": 1.0
+                    }
+                },
+                "cv": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "HoldPitch": 1.0,
+                        "ConfidenceThreshold": 12.5,
+                        "Sensitivity": 50.049999237060547,
+                        "Octave": 0.0,
+                        "Tolerance": 10.0
+                    }
+                },
+                "notes_1111111118": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Page 1: VCO (Oscillator)\n\n--subpage 1--\nMSTR OCT, VCO2 OCT, VCO3 OCT\n--subpage 2--\nVCO1 WAVE, VCO2 SEMI, VCO3 SEMI\n--subpage 3--\nLFO WAVE, LFO RATE, LFO>VCO\n\n--foots--\nVCO2+3, LFO>VCO\n",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "20",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "Gain": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Gain": -5.0
+                    }
+                },
+                "mod_cv_control": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "Smoothing": 1.0,
+                        "Control": 10.0
+                    }
+                },
+                "notes_11111111119": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Page 3: VCA / Dynamics\n\n--subpage 1--\nFIX>VCA, DYN>VCA, OUT LVL\n--subpage 2--\n -\n--subpage 3--\n -\n--foots--\n CMP DYN",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "20",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_control_6": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Smoothing": 1.0,
+                        "Control": 5.9499998092651367
+                    }
+                },
+                "Plate": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "blend": 0.19500000000000001,
+                        "tail": 0.65499997138977051,
+                        "bandwidth": 1.0,
+                        "damping": 0.375
+                    }
+                },
+                "stereo": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "gain": 0.0,
+                        "enable": 1.0,
+                        "mute": 0.0
+                    }
+                },
+                "mod_cv_gate": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "ClosingThreshold": 0.0,
+                        "PluginEnabled": 1.0,
+                        "OpeningThreshold": 0.0099999997764825821
+                    }
+                },
+                "vcf": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "resonanceGain": 0.0,
+                        "linFMGain": 1.0,
+                        "resonance": 0.376,
+                        "expFMGain": 2.34375,
+                        "freq": 2.1000000000000001,
+                        "vcfType": 0.0,
+                        "inputGain": 1.0
+                    }
+                },
+                "lfo2_freq_1": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "waveForm": 0.0,
+                        "phi0": 0.0,
+                        "freq": 0.80000001192092896
+                    }
+                },
+                "notes_1111115": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "VCF FREQ\nVCF TYPE\nVCF RESO",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Fixed Velocity Chain",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes_111111111120": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Page 4: FX (Delay, Reverb)\n\n--subpage 1--\n M TIME, M FEEDBK, M MIX\n--subpage 2--\n S DECAY, S RATIO, S MIX\n--subpage 3--\n S SHIM, S TONE, S BNDWDTH\n\n--foots--\nMODULAY, SHIROVERB",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "20",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mono_2": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "gain": 0.0,
+                        "LowPass": 1.0,
+                        "LSgain": 0.0,
+                        "HPQ": 0.69999998807907104,
+                        "sec2": 1.0,
+                        "sec3": 1.0,
+                        "sec4": 1.0,
+                        "LPQ": 0.91874998807907104,
+                        "q1": 0.60000002384185791,
+                        "q2": 0.60000002384185791,
+                        "q3": 0.60000002384185791,
+                        "q4": 0.60000002384185791,
+                        "HPfreq": 30.0,
+                        "LPfreq": 8000.0,
+                        "peakreset": 1.0,
+                        "LSfreq": 80.0,
+                        "HSsec": 1.0,
+                        "gain4": 0.0,
+                        "gain1": 0.0,
+                        "gain3": 0.0,
+                        "gain2": 0.0,
+                        "freq4": 2500.0,
+                        "freq1": 160.0,
+                        "freq2": 397.0,
+                        "freq3": 1250.0,
+                        "HSq": 1.0,
+                        "enable": 1.0,
+                        "LSq": 1.0,
+                        "HighPass": 1.0,
+                        "sec1": 1.0,
+                        "LSsec": 1.0,
+                        "HSfreq": 8000.0,
+                        "HSgain": 0.0
+                    }
+                },
+                "notes_1111111111221": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Page 2: VCF (Filter)\n\n--subpage 1--\nVCF FREQ, DYN>VCF, KEY>VCF\n--subpage 2--\nVCF TYPE, VCF RESO, FLT TIME\n--subpage 3--\nLFO WAVE, LFO RATE, LFO>VCF\n\n--foots--\n FILTER >, FILTER <",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "20",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_attenuverter": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 3.9130430221557617,
+                        "Smoothing": 1.0,
+                        "Mode": 1.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "mod_audio_to_cv": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Level": 10.0,
+                        "Offset": 0.0,
+                        "BYPASS": 1.0
+                    }
+                },
+                "vco3_1": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "waveForm": 2.0,
+                        "pwGain": 0.0,
+                        "linFMGain": 0.14492799341678619,
+                        "semitone": 5.0,
+                        "edge": 1.0,
+                        "octave": 0.0,
+                        "expFMGain": 0.0,
+                        "tune": 0.0,
+                        "phi0": 0.0,
+                        "pw0": 0.5
+                    }
+                },
+                "vco3_2": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "waveForm": 2.0,
+                        "pwGain": 0.0,
+                        "linFMGain": 0.14492799341678619,
+                        "semitone": 4.0,
+                        "edge": 1.0,
+                        "octave": 1.0,
+                        "expFMGain": 0.0,
+                        "tune": 0.0,
+                        "phi0": 0.0,
+                        "pw0": 0.5
+                    }
+                },
+                "mod_cv_range": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Mode": 1.0,
+                        "MinRange": 0.41407901048660278,
+                        "MaxRange": 9.0269145965576172
+                    }
+                },
+                "mod_cv_attenuverter_3": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": -2.0,
+                        "Smoothing": 0.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "notes_7": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "KEY>VCF\n\n\n\nDYN > VCF",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_attenuverter_1": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 5.5,
+                        "Smoothing": 1.0,
+                        "Mode": 1.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "notes_5": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Three VCO3's take care of sound generation",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes_2": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "LFO>VCO\n\nLFO WAVE\nLFO FREQ\nLFO>VCO",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes_3": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Page 1: VCO (Oscillator)\nPage 2: VCF (Filter)\nPage 3: VCA / Dynamics\nPage 4: FX (Delay, Reverb)",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "32",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_attenuverter_5": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 0.10000000149011612,
+                        "Smoothing": 1.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "notes_1": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "LFO WAVE\nLFO RATE\nLFO>VCF\n",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_attenuverter_9": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 0.075000002980232239,
+                        "Smoothing": 1.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "mod_cv_attenuverter_8": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 10.0,
+                        "Smoothing": 1.0,
+                        "Mode": 1.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "lfo2_freq": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "waveForm": 0.0,
+                        "phi0": 0.0,
+                        "freq": 6.5
+                    }
+                },
+                "notes_9": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Dynamic Chain\n\n(Envelope Follower)",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes_6": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "FILTER >\nFILTER <\n\nMomentary foot addressings",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_attenuverter_2": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 0.10000000149011612,
+                        "Smoothing": 1.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "vcalin": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "in2": 1.0,
+                        "in1": 1.0,
+                        "gain1": 0.0,
+                        "outputLevel": 0.24016599357128143,
+                        "gain2": 0.0
+                    }
+                },
+                "mod_cv_abs": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "PluginEnabled": 1.0
+                    }
+                },
+                "notes_11111116": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Keytracking Chain",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes_111111117": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "WELCOME, INTRODUCTION HERE!",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_control_3": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "Smoothing": 1.0,
+                        "Control": 10.0
+                    }
+                },
+                "mod_cv_control_2": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Smoothing": 1.0,
+                        "Control": 10.0
+                    }
+                },
+                "mono_1": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "gain": 0.0,
+                        "LowPass": 1.0,
+                        "LSgain": 0.0,
+                        "HPQ": 0.69999998807907104,
+                        "sec2": 1.0,
+                        "sec3": 1.0,
+                        "sec4": 1.0,
+                        "LPQ": 1.0,
+                        "q1": 0.60000002384185791,
+                        "q2": 0.60000002384185791,
+                        "q3": 0.60000002384185791,
+                        "q4": 0.60000002384185791,
+                        "HPfreq": 80.0,
+                        "LPfreq": 1000.0,
+                        "peakreset": 1.0,
+                        "LSfreq": 80.0,
+                        "HSsec": 1.0,
+                        "gain4": 0.0,
+                        "gain1": 0.0,
+                        "gain3": 0.0,
+                        "gain2": 0.0,
+                        "freq4": 2500.0,
+                        "freq1": 160.0,
+                        "freq2": 397.0,
+                        "freq3": 1250.0,
+                        "HSq": 1.0,
+                        "enable": 1.0,
+                        "LSq": 1.0,
+                        "HighPass": 1.0,
+                        "sec1": 1.0,
+                        "LSsec": 1.0,
+                        "HSfreq": 8000.0,
+                        "HSgain": 0.0
+                    }
+                },
+                "mod_cv_attenuverter_7": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 2.23,
+                        "Smoothing": 1.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "vco3": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "waveForm": 2.0,
+                        "pwGain": 0.0,
+                        "linFMGain": 0.14000000059604645,
+                        "semitone": 0.0,
+                        "edge": 1.0,
+                        "octave": 0.0,
+                        "expFMGain": 0.0,
+                        "tune": 0.0,
+                        "phi0": 0.0,
+                        "pw0": 0.5
+                    }
+                },
+                "mod_cv_attenuverter_6": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 1.0,
+                        "Smoothing": 0.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                }
+            }
+        },
+        {
+            "name": "Minor Dub",
+            "data": {
+                "mod_cv_slew_2": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "BYPASS": 1.0,
+                        "RiseTime": 595.04016100000001,
+                        "FallTime": 595.04016100000001
+                    }
+                },
+                "mod_cv_slew_3": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "BYPASS": 1.0,
+                        "RiseTime": 4.0,
+                        "FallTime": 14.591303825378418
+                    }
+                },
+                "mod_cv_slew_1": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "BYPASS": 1.0,
+                        "RiseTime": 15.723438262939453,
+                        "FallTime": 15.723438262939453
+                    }
+                },
+                "modulay": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "repeats": 48.400001525878906,
+                        "tone": 3223.709716796875,
+                        "depth": 0.3580310046672821,
+                        "mix": 30.0,
+                        "rate": 2.0,
+                        "time": 387.5,
+                        "morph": 50.0
+                    }
+                },
+                "mod_cv_slew": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "BYPASS": 1.0,
+                        "RiseTime": 5.0,
+                        "FallTime": 15.723438262939453
+                    }
+                },
+                "mod_cv_attenuverter_4": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 1.4550000000000001,
+                        "Smoothing": 1.0,
+                        "Mode": 1.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "notes_111114": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "DYN > VCA\n\n\n\nFIX > VCA",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mono": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "threshold": -22.5,
+                        "gain": 3.84375,
+                        "release": 0.0010000000474974513,
+                        "rms": 0.5,
+                        "ratio": 9.90625,
+                        "bypass": 0.0,
+                        "attack": 0.0059919999912381172,
+                        "noClip": 1.0
+                    }
+                },
+                "cv": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "HoldPitch": 1.0,
+                        "ConfidenceThreshold": 12.5,
+                        "Sensitivity": 50.049999237060547,
+                        "Octave": 0.0,
+                        "Tolerance": 10.0
+                    }
+                },
+                "notes_1111111118": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Page 1: VCO (Oscillator)\n\n--subpage 1--\nMSTR OCT, VCO2 OCT, VCO3 OCT\n--subpage 2--\nVCO1 WAVE, VCO2 SEMI, VCO3 SEMI\n--subpage 3--\nLFO WAVE, LFO RATE, LFO>VCO\n\n--foots--\nVCO2+3, LFO>VCO\n",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "20",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "Gain": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Gain": -5.0
+                    }
+                },
+                "mod_cv_control": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "Smoothing": 1.0,
+                        "Control": 10.0
+                    }
+                },
+                "notes_11111111119": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Page 3: VCA / Dynamics\n\n--subpage 1--\nFIX>VCA, DYN>VCA, OUT LVL\n--subpage 2--\n -\n--subpage 3--\n -\n--foots--\n CMP DYN",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "20",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_control_6": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Smoothing": 1.0,
+                        "Control": 5.9499998092651367
+                    }
+                },
+                "Plate": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "blend": 0.19500000000000001,
+                        "tail": 0.65499997138977051,
+                        "bandwidth": 1.0,
+                        "damping": 0.375
+                    }
+                },
+                "stereo": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "gain": 0.0,
+                        "enable": 1.0,
+                        "mute": 0.0
+                    }
+                },
+                "mod_cv_gate": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "ClosingThreshold": 0.0,
+                        "PluginEnabled": 1.0,
+                        "OpeningThreshold": 0.0099999997764825821
+                    }
+                },
+                "vcf": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "resonanceGain": 0.0,
+                        "linFMGain": 1.0,
+                        "resonance": 0.376,
+                        "expFMGain": 2.34375,
+                        "freq": 2.1000000000000001,
+                        "vcfType": 0.0,
+                        "inputGain": 1.0
+                    }
+                },
+                "lfo2_freq_1": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "waveForm": 0.0,
+                        "phi0": 0.0,
+                        "freq": 0.80000001192092896
+                    }
+                },
+                "notes_1111115": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "VCF FREQ\nVCF TYPE\nVCF RESO",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Fixed Velocity Chain",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes_111111111120": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Page 4: FX (Delay, Reverb)\n\n--subpage 1--\n M TIME, M FEEDBK, M MIX\n--subpage 2--\n S DECAY, S RATIO, S MIX\n--subpage 3--\n S SHIM, S TONE, S BNDWDTH\n\n--foots--\nMODULAY, SHIROVERB",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "20",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mono_2": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "gain": 0.0,
+                        "LowPass": 1.0,
+                        "LSgain": 0.0,
+                        "HPQ": 0.69999998807907104,
+                        "sec2": 1.0,
+                        "sec3": 1.0,
+                        "sec4": 1.0,
+                        "LPQ": 0.91874998807907104,
+                        "q1": 0.60000002384185791,
+                        "q2": 0.60000002384185791,
+                        "q3": 0.60000002384185791,
+                        "q4": 0.60000002384185791,
+                        "HPfreq": 30.0,
+                        "LPfreq": 8000.0,
+                        "peakreset": 1.0,
+                        "LSfreq": 80.0,
+                        "HSsec": 1.0,
+                        "gain4": 0.0,
+                        "gain1": 0.0,
+                        "gain3": 0.0,
+                        "gain2": 0.0,
+                        "freq4": 2500.0,
+                        "freq1": 160.0,
+                        "freq2": 397.0,
+                        "freq3": 1250.0,
+                        "HSq": 1.0,
+                        "enable": 1.0,
+                        "LSq": 1.0,
+                        "HighPass": 1.0,
+                        "sec1": 1.0,
+                        "LSsec": 1.0,
+                        "HSfreq": 8000.0,
+                        "HSgain": 0.0
+                    }
+                },
+                "notes_1111111111221": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Page 2: VCF (Filter)\n\n--subpage 1--\nVCF FREQ, DYN>VCF, KEY>VCF\n--subpage 2--\nVCF TYPE, VCF RESO, FLT TIME\n--subpage 3--\nLFO WAVE, LFO RATE, LFO>VCF\n\n--foots--\n FILTER >, FILTER <",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "20",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_attenuverter": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 3.9130430221557617,
+                        "Smoothing": 1.0,
+                        "Mode": 1.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "mod_audio_to_cv": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Level": 10.0,
+                        "Offset": 0.0,
+                        "BYPASS": 1.0
+                    }
+                },
+                "vco3_1": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "waveForm": 2.0,
+                        "pwGain": 0.0,
+                        "linFMGain": 0.14492799341678619,
+                        "semitone": 3.0,
+                        "edge": 1.0,
+                        "octave": 0.0,
+                        "expFMGain": 0.0,
+                        "tune": 0.0,
+                        "phi0": 0.0,
+                        "pw0": 0.5
+                    }
+                },
+                "vco3_2": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "waveForm": 2.0,
+                        "pwGain": 0.0,
+                        "linFMGain": 0.14492799341678619,
+                        "semitone": 7.0,
+                        "edge": 1.0,
+                        "octave": 0.0,
+                        "expFMGain": 0.0,
+                        "tune": 0.0,
+                        "phi0": 0.0,
+                        "pw0": 0.5
+                    }
+                },
+                "mod_cv_range": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Mode": 1.0,
+                        "MinRange": 0.41407901048660278,
+                        "MaxRange": 9.0269145965576172
+                    }
+                },
+                "mod_cv_attenuverter_3": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": -2.0,
+                        "Smoothing": 0.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "notes_7": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "KEY>VCF\n\n\n\nDYN > VCF",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_attenuverter_1": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 9.5,
+                        "Smoothing": 1.0,
+                        "Mode": 1.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "notes_5": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Three VCO3's take care of sound generation",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes_2": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "LFO>VCO\n\nLFO WAVE\nLFO FREQ\nLFO>VCO",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes_3": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Page 1: VCO (Oscillator)\nPage 2: VCF (Filter)\nPage 3: VCA / Dynamics\nPage 4: FX (Delay, Reverb)",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "32",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_attenuverter_5": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 0.10000000149011612,
+                        "Smoothing": 1.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "notes_1": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "LFO WAVE\nLFO RATE\nLFO>VCF\n",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_attenuverter_9": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 0.075000002980232239,
+                        "Smoothing": 1.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "mod_cv_attenuverter_8": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 10.0,
+                        "Smoothing": 1.0,
+                        "Mode": 1.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "lfo2_freq": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "waveForm": 0.0,
+                        "phi0": 0.0,
+                        "freq": 6.5
+                    }
+                },
+                "notes_9": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Dynamic Chain\n\n(Envelope Follower)",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes_6": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "FILTER >\nFILTER <\n\nMomentary foot addressings",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_attenuverter_2": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 0.10000000149011612,
+                        "Smoothing": 1.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "vcalin": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "in2": 1.0,
+                        "in1": 1.0,
+                        "gain1": 0.0,
+                        "outputLevel": 0.24016599357128143,
+                        "gain2": 0.0
+                    }
+                },
+                "mod_cv_abs": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "PluginEnabled": 1.0
+                    }
+                },
+                "notes_11111116": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Keytracking Chain",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes_111111117": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "WELCOME, INTRODUCTION HERE!",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_control_3": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "Smoothing": 1.0,
+                        "Control": 10.0
+                    }
+                },
+                "mod_cv_control_2": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Smoothing": 1.0,
+                        "Control": 10.0
+                    }
+                },
+                "mono_1": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "gain": 0.0,
+                        "LowPass": 1.0,
+                        "LSgain": 0.0,
+                        "HPQ": 0.69999998807907104,
+                        "sec2": 1.0,
+                        "sec3": 1.0,
+                        "sec4": 1.0,
+                        "LPQ": 1.0,
+                        "q1": 0.60000002384185791,
+                        "q2": 0.60000002384185791,
+                        "q3": 0.60000002384185791,
+                        "q4": 0.60000002384185791,
+                        "HPfreq": 80.0,
+                        "LPfreq": 1000.0,
+                        "peakreset": 1.0,
+                        "LSfreq": 80.0,
+                        "HSsec": 1.0,
+                        "gain4": 0.0,
+                        "gain1": 0.0,
+                        "gain3": 0.0,
+                        "gain2": 0.0,
+                        "freq4": 2500.0,
+                        "freq1": 160.0,
+                        "freq2": 397.0,
+                        "freq3": 1250.0,
+                        "HSq": 1.0,
+                        "enable": 1.0,
+                        "LSq": 1.0,
+                        "HighPass": 1.0,
+                        "sec1": 1.0,
+                        "LSsec": 1.0,
+                        "HSfreq": 8000.0,
+                        "HSgain": 0.0
+                    }
+                },
+                "mod_cv_attenuverter_7": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 1.0,
+                        "Smoothing": 1.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "vco3": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "waveForm": 2.0,
+                        "pwGain": 0.0,
+                        "linFMGain": 0.14000000059604645,
+                        "semitone": 0.0,
+                        "edge": 1.0,
+                        "octave": 0.0,
+                        "expFMGain": 0.0,
+                        "tune": 0.0,
+                        "phi0": 0.0,
+                        "pw0": 0.5
+                    }
+                },
+                "mod_cv_attenuverter_6": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 1.0,
+                        "Smoothing": 0.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                }
+            }
+        },
+        {
+            "name": "Octave Lead",
+            "data": {
+                "mod_cv_slew_2": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "BYPASS": 1.0,
+                        "RiseTime": 595.04016100000001,
+                        "FallTime": 595.04016100000001
+                    }
+                },
+                "mod_cv_slew_3": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "BYPASS": 1.0,
+                        "RiseTime": 4.0,
+                        "FallTime": 14.591303825378418
+                    }
+                },
+                "mod_cv_slew_1": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "BYPASS": 1.0,
+                        "RiseTime": 15.723438262939453,
+                        "FallTime": 15.723438262939453
+                    }
+                },
+                "modulay": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "repeats": 48.400001525878906,
+                        "tone": 3223.709716796875,
+                        "depth": 0.3580310046672821,
+                        "mix": 30.0,
+                        "rate": 2.0,
+                        "time": 387.5,
+                        "morph": 50.0
+                    }
+                },
+                "mod_cv_slew": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "BYPASS": 1.0,
+                        "RiseTime": 5.0,
+                        "FallTime": 15.723438262939453
+                    }
+                },
+                "mod_cv_attenuverter_4": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 1.4550000000000001,
+                        "Smoothing": 1.0,
+                        "Mode": 1.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "notes_111114": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "DYN > VCA\n\n\n\nFIX > VCA",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mono": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "threshold": -22.5,
+                        "gain": 3.84375,
+                        "release": 0.0010000000474974513,
+                        "rms": 0.5,
+                        "ratio": 9.90625,
+                        "bypass": 0.0,
+                        "attack": 0.0059919999912381172,
+                        "noClip": 1.0
+                    }
+                },
+                "cv": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "HoldPitch": 1.0,
+                        "ConfidenceThreshold": 12.5,
+                        "Sensitivity": 50.049999237060547,
+                        "Octave": 0.0,
+                        "Tolerance": 10.0
+                    }
+                },
+                "notes_1111111118": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Page 1: VCO (Oscillator)\n\n--subpage 1--\nMSTR OCT, VCO2 OCT, VCO3 OCT\n--subpage 2--\nVCO1 WAVE, VCO2 SEMI, VCO3 SEMI\n--subpage 3--\nLFO WAVE, LFO RATE, LFO>VCO\n\n--foots--\nVCO2+3, LFO>VCO\n",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "20",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "Gain": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Gain": -5.0
+                    }
+                },
+                "mod_cv_control": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "Smoothing": 1.0,
+                        "Control": 10.0
+                    }
+                },
+                "notes_11111111119": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Page 3: VCA / Dynamics\n\n--subpage 1--\nFIX>VCA, DYN>VCA, OUT LVL\n--subpage 2--\n -\n--subpage 3--\n -\n--foots--\n CMP DYN",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "20",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_control_6": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Smoothing": 1.0,
+                        "Control": 5.9499998092651367
+                    }
+                },
+                "Plate": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "blend": 0.19500000000000001,
+                        "tail": 0.65499997138977051,
+                        "bandwidth": 1.0,
+                        "damping": 0.375
+                    }
+                },
+                "stereo": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "gain": 0.0,
+                        "enable": 1.0,
+                        "mute": 0.0
+                    }
+                },
+                "mod_cv_gate": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "ClosingThreshold": 0.0,
+                        "PluginEnabled": 1.0,
+                        "OpeningThreshold": 0.0099999997764825821
+                    }
+                },
+                "vcf": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "resonanceGain": 0.0,
+                        "linFMGain": 1.0,
+                        "resonance": 0.376,
+                        "expFMGain": 2.34375,
+                        "freq": 2.1000000000000001,
+                        "vcfType": 0.0,
+                        "inputGain": 1.0
+                    }
+                },
+                "lfo2_freq_1": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "waveForm": 0.0,
+                        "phi0": 0.0,
+                        "freq": 0.80000001192092896
+                    }
+                },
+                "notes_1111115": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "VCF FREQ\nVCF TYPE\nVCF RESO",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Fixed Velocity Chain",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes_111111111120": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Page 4: FX (Delay, Reverb)\n\n--subpage 1--\n M TIME, M FEEDBK, M MIX\n--subpage 2--\n S DECAY, S RATIO, S MIX\n--subpage 3--\n S SHIM, S TONE, S BNDWDTH\n\n--foots--\nMODULAY, SHIROVERB",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "20",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mono_2": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "gain": 0.0,
+                        "LowPass": 1.0,
+                        "LSgain": 0.0,
+                        "HPQ": 0.69999998807907104,
+                        "sec2": 1.0,
+                        "sec3": 1.0,
+                        "sec4": 1.0,
+                        "LPQ": 0.91874998807907104,
+                        "q1": 0.60000002384185791,
+                        "q2": 0.60000002384185791,
+                        "q3": 0.60000002384185791,
+                        "q4": 0.60000002384185791,
+                        "HPfreq": 30.0,
+                        "LPfreq": 8000.0,
+                        "peakreset": 1.0,
+                        "LSfreq": 80.0,
+                        "HSsec": 1.0,
+                        "gain4": 0.0,
+                        "gain1": 0.0,
+                        "gain3": 0.0,
+                        "gain2": 0.0,
+                        "freq4": 2500.0,
+                        "freq1": 160.0,
+                        "freq2": 397.0,
+                        "freq3": 1250.0,
+                        "HSq": 1.0,
+                        "enable": 1.0,
+                        "LSq": 1.0,
+                        "HighPass": 1.0,
+                        "sec1": 1.0,
+                        "LSsec": 1.0,
+                        "HSfreq": 8000.0,
+                        "HSgain": 0.0
+                    }
+                },
+                "notes_1111111111221": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Page 2: VCF (Filter)\n\n--subpage 1--\nVCF FREQ, DYN>VCF, KEY>VCF\n--subpage 2--\nVCF TYPE, VCF RESO, FLT TIME\n--subpage 3--\nLFO WAVE, LFO RATE, LFO>VCF\n\n--foots--\n FILTER >, FILTER <",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "20",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_attenuverter": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 3.9130430221557617,
+                        "Smoothing": 1.0,
+                        "Mode": 1.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "mod_audio_to_cv": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Level": 10.0,
+                        "Offset": 0.0,
+                        "BYPASS": 1.0
+                    }
+                },
+                "vco3_1": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "waveForm": 2.0,
+                        "pwGain": 0.0,
+                        "linFMGain": 0.14492799341678619,
+                        "semitone": 0.0,
+                        "edge": 1.0,
+                        "octave": 1.0,
+                        "expFMGain": 0.0,
+                        "tune": 0.0,
+                        "phi0": 0.0,
+                        "pw0": 0.5
+                    }
+                },
+                "vco3_2": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "waveForm": 2.0,
+                        "pwGain": 0.0,
+                        "linFMGain": 0.14492799341678619,
+                        "semitone": 0.0,
+                        "edge": 1.0,
+                        "octave": 2.0,
+                        "expFMGain": 0.0,
+                        "tune": 0.0,
+                        "phi0": 0.0,
+                        "pw0": 0.5
+                    }
+                },
+                "mod_cv_range": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Mode": 1.0,
+                        "MinRange": 0.41407901048660278,
+                        "MaxRange": 9.0269145965576172
+                    }
+                },
+                "mod_cv_attenuverter_3": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": -2.0,
+                        "Smoothing": 0.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "notes_7": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "KEY>VCF\n\n\n\nDYN > VCF",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_attenuverter_1": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 9.5,
+                        "Smoothing": 1.0,
+                        "Mode": 1.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "notes_5": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Three VCO3's take care of sound generation",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes_2": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "LFO>VCO\n\nLFO WAVE\nLFO FREQ\nLFO>VCO",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes_3": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Page 1: VCO (Oscillator)\nPage 2: VCF (Filter)\nPage 3: VCA / Dynamics\nPage 4: FX (Delay, Reverb)",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "32",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_attenuverter_5": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 0.10000000149011612,
+                        "Smoothing": 1.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "notes_1": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "LFO WAVE\nLFO RATE\nLFO>VCF\n",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_attenuverter_9": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 0.075000002980232239,
+                        "Smoothing": 1.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "mod_cv_attenuverter_8": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 10.0,
+                        "Smoothing": 1.0,
+                        "Mode": 1.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "lfo2_freq": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "waveForm": 0.0,
+                        "phi0": 0.0,
+                        "freq": 6.5
+                    }
+                },
+                "notes_9": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Dynamic Chain\n\n(Envelope Follower)",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes_6": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "FILTER >\nFILTER <\n\nMomentary foot addressings",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_attenuverter_2": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 0.10000000149011612,
+                        "Smoothing": 1.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "vcalin": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "in2": 1.0,
+                        "in1": 1.0,
+                        "gain1": 0.0,
+                        "outputLevel": 0.24016599357128143,
+                        "gain2": 0.0
+                    }
+                },
+                "mod_cv_abs": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "PluginEnabled": 1.0
+                    }
+                },
+                "notes_11111116": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Keytracking Chain",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes_111111117": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "WELCOME, INTRODUCTION HERE!",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_control_3": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "Smoothing": 1.0,
+                        "Control": 10.0
+                    }
+                },
+                "mod_cv_control_2": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Smoothing": 1.0,
+                        "Control": 10.0
+                    }
+                },
+                "mono_1": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "gain": 0.0,
+                        "LowPass": 1.0,
+                        "LSgain": 0.0,
+                        "HPQ": 0.69999998807907104,
+                        "sec2": 1.0,
+                        "sec3": 1.0,
+                        "sec4": 1.0,
+                        "LPQ": 1.0,
+                        "q1": 0.60000002384185791,
+                        "q2": 0.60000002384185791,
+                        "q3": 0.60000002384185791,
+                        "q4": 0.60000002384185791,
+                        "HPfreq": 80.0,
+                        "LPfreq": 1000.0,
+                        "peakreset": 1.0,
+                        "LSfreq": 80.0,
+                        "HSsec": 1.0,
+                        "gain4": 0.0,
+                        "gain1": 0.0,
+                        "gain3": 0.0,
+                        "gain2": 0.0,
+                        "freq4": 2500.0,
+                        "freq1": 160.0,
+                        "freq2": 397.0,
+                        "freq3": 1250.0,
+                        "HSq": 1.0,
+                        "enable": 1.0,
+                        "LSq": 1.0,
+                        "HighPass": 1.0,
+                        "sec1": 1.0,
+                        "LSsec": 1.0,
+                        "HSfreq": 8000.0,
+                        "HSgain": 0.0
+                    }
+                },
+                "mod_cv_attenuverter_7": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 1.0,
+                        "Smoothing": 1.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "vco3": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "waveForm": 2.0,
+                        "pwGain": 0.0,
+                        "linFMGain": 0.14000000059604645,
+                        "semitone": 0.0,
+                        "edge": 1.0,
+                        "octave": 0.0,
+                        "expFMGain": 0.0,
+                        "tune": 0.0,
+                        "phi0": 0.0,
+                        "pw0": 0.5
+                    }
+                },
+                "mod_cv_attenuverter_6": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 1.0,
+                        "Smoothing": 0.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                }
+            }
+        },
+        {
+            "name": "Vibro Lead",
+            "data": {
+                "mod_cv_slew_2": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "BYPASS": 1.0,
+                        "RiseTime": 595.04016100000001,
+                        "FallTime": 595.04016100000001
+                    }
+                },
+                "mod_cv_slew_3": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "BYPASS": 1.0,
+                        "RiseTime": 4.0,
+                        "FallTime": 14.591303825378418
+                    }
+                },
+                "mod_cv_slew_1": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "BYPASS": 1.0,
+                        "RiseTime": 15.723438262939453,
+                        "FallTime": 15.723438262939453
+                    }
+                },
+                "modulay": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "repeats": 48.400001525878906,
+                        "tone": 3223.709716796875,
+                        "depth": 0.3580310046672821,
+                        "mix": 30.0,
+                        "rate": 2.0,
+                        "time": 387.5,
+                        "morph": 50.0
+                    }
+                },
+                "mod_cv_slew": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "BYPASS": 1.0,
+                        "RiseTime": 5.0,
+                        "FallTime": 15.723438262939453
+                    }
+                },
+                "mod_cv_attenuverter_4": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 1.4550000000000001,
+                        "Smoothing": 1.0,
+                        "Mode": 1.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "notes_111114": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "DYN > VCA\n\n\n\nFIX > VCA",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mono": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "threshold": -22.5,
+                        "gain": 3.84375,
+                        "release": 0.0010000000474974513,
+                        "rms": 0.5,
+                        "ratio": 9.90625,
+                        "bypass": 0.0,
+                        "attack": 0.0059919999912381172,
+                        "noClip": 1.0
+                    }
+                },
+                "cv": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "HoldPitch": 1.0,
+                        "ConfidenceThreshold": 12.5,
+                        "Sensitivity": 50.049999237060547,
+                        "Octave": 1.0,
+                        "Tolerance": 10.0
+                    }
+                },
+                "notes_1111111118": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Page 1: VCO (Oscillator)\n\n--subpage 1--\nMSTR OCT, VCO2 OCT, VCO3 OCT\n--subpage 2--\nVCO1 WAVE, VCO2 SEMI, VCO3 SEMI\n--subpage 3--\nLFO WAVE, LFO RATE, LFO>VCO\n\n--foots--\nVCO2+3, LFO>VCO\n",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "20",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "Gain": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "Gain": -5.0
+                    }
+                },
+                "mod_cv_control": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "Smoothing": 1.0,
+                        "Control": 10.0
+                    }
+                },
+                "notes_11111111119": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Page 3: VCA / Dynamics\n\n--subpage 1--\nFIX>VCA, DYN>VCA, OUT LVL\n--subpage 2--\n -\n--subpage 3--\n -\n--foots--\n CMP DYN",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "20",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_control_6": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Smoothing": 1.0,
+                        "Control": 5.9499998092651367
+                    }
+                },
+                "Plate": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "blend": 0.19500000000000001,
+                        "tail": 0.65499997138977051,
+                        "bandwidth": 1.0,
+                        "damping": 0.375
+                    }
+                },
+                "stereo": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "gain": 0.0,
+                        "enable": 1.0,
+                        "mute": 0.0
+                    }
+                },
+                "mod_cv_gate": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "ClosingThreshold": 0.0,
+                        "PluginEnabled": 1.0,
+                        "OpeningThreshold": 0.0099999997764825821
+                    }
+                },
+                "vcf": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "resonanceGain": 0.0,
+                        "linFMGain": 1.0,
+                        "resonance": 0.376,
+                        "expFMGain": 2.34375,
+                        "freq": 2.1000000000000001,
+                        "vcfType": 0.0,
+                        "inputGain": 1.0
+                    }
+                },
+                "lfo2_freq_1": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "waveForm": 0.0,
+                        "phi0": 0.0,
+                        "freq": 0.80000001192092896
+                    }
+                },
+                "notes_1111115": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "VCF FREQ\nVCF TYPE\nVCF RESO",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Fixed Velocity Chain",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes_111111111120": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Page 4: FX (Delay, Reverb)\n\n--subpage 1--\n M TIME, M FEEDBK, M MIX\n--subpage 2--\n S DECAY, S RATIO, S MIX\n--subpage 3--\n S SHIM, S TONE, S BNDWDTH\n\n--foots--\nMODULAY, SHIROVERB",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "20",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mono_2": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "gain": 0.0,
+                        "LowPass": 1.0,
+                        "LSgain": 0.0,
+                        "HPQ": 0.69999998807907104,
+                        "sec2": 1.0,
+                        "sec3": 1.0,
+                        "sec4": 1.0,
+                        "LPQ": 0.91874998807907104,
+                        "q1": 0.60000002384185791,
+                        "q2": 0.60000002384185791,
+                        "q3": 0.60000002384185791,
+                        "q4": 0.60000002384185791,
+                        "HPfreq": 30.0,
+                        "LPfreq": 8000.0,
+                        "peakreset": 1.0,
+                        "LSfreq": 80.0,
+                        "HSsec": 1.0,
+                        "gain4": 0.0,
+                        "gain1": 0.0,
+                        "gain3": 0.0,
+                        "gain2": 0.0,
+                        "freq4": 2500.0,
+                        "freq1": 160.0,
+                        "freq2": 397.0,
+                        "freq3": 1250.0,
+                        "HSq": 1.0,
+                        "enable": 1.0,
+                        "LSq": 1.0,
+                        "HighPass": 1.0,
+                        "sec1": 1.0,
+                        "LSsec": 1.0,
+                        "HSfreq": 8000.0,
+                        "HSgain": 0.0
+                    }
+                },
+                "notes_1111111111221": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Page 2: VCF (Filter)\n\n--subpage 1--\nVCF FREQ, DYN>VCF, KEY>VCF\n--subpage 2--\nVCF TYPE, VCF RESO, FLT TIME\n--subpage 3--\nLFO WAVE, LFO RATE, LFO>VCF\n\n--foots--\n FILTER >, FILTER <",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "20",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_attenuverter": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 3.9130430221557617,
+                        "Smoothing": 1.0,
+                        "Mode": 1.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "mod_audio_to_cv": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Level": 10.0,
+                        "Offset": 0.0,
+                        "BYPASS": 1.0
+                    }
+                },
+                "vco3_1": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "waveForm": 2.0,
+                        "pwGain": 0.0,
+                        "linFMGain": 0.14492799341678619,
+                        "semitone": 0.0,
+                        "edge": 1.0,
+                        "octave": 1.0,
+                        "expFMGain": 0.0,
+                        "tune": 0.0,
+                        "phi0": 0.0,
+                        "pw0": 0.5
+                    }
+                },
+                "vco3_2": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "waveForm": 2.0,
+                        "pwGain": 0.0,
+                        "linFMGain": 0.14492799341678619,
+                        "semitone": 0.0,
+                        "edge": 1.0,
+                        "octave": 2.0,
+                        "expFMGain": 0.0,
+                        "tune": 0.0,
+                        "phi0": 0.0,
+                        "pw0": 0.5
+                    }
+                },
+                "mod_cv_range": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Mode": 1.0,
+                        "MinRange": 0.41407901048660278,
+                        "MaxRange": 9.0269145965576172
+                    }
+                },
+                "mod_cv_attenuverter_3": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": -2.0,
+                        "Smoothing": 0.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "notes_7": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "KEY>VCF\n\n\n\nDYN > VCF",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_attenuverter_1": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 9.5,
+                        "Smoothing": 1.0,
+                        "Mode": 1.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "notes_5": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Three VCO3's take care of sound generation",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes_2": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "LFO>VCO\n\nLFO WAVE\nLFO FREQ\nLFO>VCO",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes_3": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Page 1: VCO (Oscillator)\nPage 2: VCF (Filter)\nPage 3: VCA / Dynamics\nPage 4: FX (Delay, Reverb)",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "32",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_attenuverter_5": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 0.10000000149011612,
+                        "Smoothing": 1.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "notes_1": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "LFO WAVE\nLFO RATE\nLFO>VCF\n",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_attenuverter_9": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 0.98999999999999999,
+                        "Smoothing": 1.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "mod_cv_attenuverter_8": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 10.0,
+                        "Smoothing": 1.0,
+                        "Mode": 1.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "lfo2_freq": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "waveForm": 0.0,
+                        "phi0": 0.0,
+                        "freq": 6.5
+                    }
+                },
+                "notes_9": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Dynamic Chain\n\n(Envelope Follower)",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes_6": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "FILTER >\nFILTER <\n\nMomentary foot addressings",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_attenuverter_2": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 0.10000000149011612,
+                        "Smoothing": 1.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "vcalin": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "in2": 1.0,
+                        "in1": 1.0,
+                        "gain1": 0.0,
+                        "outputLevel": 0.24016599357128143,
+                        "gain2": 0.0
+                    }
+                },
+                "mod_cv_abs": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "PluginEnabled": 1.0
+                    }
+                },
+                "notes_11111116": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "Keytracking Chain",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "notes_111111117": {
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "WELCOME, INTRODUCTION HERE!",
+                            "s"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "48",
+                            "i"
+                        ]
+                    },
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {}
+                },
+                "mod_cv_control_3": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "Smoothing": 1.0,
+                        "Control": 10.0
+                    }
+                },
+                "mod_cv_control_2": {
+                    "parameters": {},
+                    "bypassed": true,
+                    "preset": "",
+                    "ports": {
+                        "Smoothing": 1.0,
+                        "Control": 10.0
+                    }
+                },
+                "mono_1": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "gain": 0.0,
+                        "LowPass": 1.0,
+                        "LSgain": 0.0,
+                        "HPQ": 0.69999998807907104,
+                        "sec2": 1.0,
+                        "sec3": 1.0,
+                        "sec4": 1.0,
+                        "LPQ": 1.0,
+                        "q1": 0.60000002384185791,
+                        "q2": 0.60000002384185791,
+                        "q3": 0.60000002384185791,
+                        "q4": 0.60000002384185791,
+                        "HPfreq": 80.0,
+                        "LPfreq": 1000.0,
+                        "peakreset": 1.0,
+                        "LSfreq": 80.0,
+                        "HSsec": 1.0,
+                        "gain4": 0.0,
+                        "gain1": 0.0,
+                        "gain3": 0.0,
+                        "gain2": 0.0,
+                        "freq4": 2500.0,
+                        "freq1": 160.0,
+                        "freq2": 397.0,
+                        "freq3": 1250.0,
+                        "HSq": 1.0,
+                        "enable": 1.0,
+                        "LSq": 1.0,
+                        "HighPass": 1.0,
+                        "sec1": 1.0,
+                        "LSsec": 1.0,
+                        "HSfreq": 8000.0,
+                        "HSgain": 0.0
+                    }
+                },
+                "mod_cv_attenuverter_7": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 1.0,
+                        "Smoothing": 1.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                },
+                "vco3": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "waveForm": 2.0,
+                        "pwGain": 0.0,
+                        "linFMGain": 0.14000000059604645,
+                        "semitone": 0.0,
+                        "edge": 1.0,
+                        "octave": 0.0,
+                        "expFMGain": 0.0,
+                        "tune": 0.0,
+                        "phi0": 0.0,
+                        "pw0": 0.5
+                    }
+                },
+                "mod_cv_attenuverter_6": {
+                    "parameters": {},
+                    "bypassed": false,
+                    "preset": "",
+                    "ports": {
+                        "Multiplier": 1.0,
+                        "Smoothing": 0.0,
+                        "Mode": 0.0,
+                        "PluginEnabled": 1.0,
+                        "Offset": 0.0
+                    }
+                }
+            }
+        }
+    ],
+    "current": 0
+}

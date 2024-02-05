@@ -2,5 +2,6 @@
   "name": "MOD Desktop",
   "platform": "desktop",
   "architecture": "universal",
-  "bin-compat": "macos-universal"
+  "bin-compat": "macos-universal",
+  "factory_pedalboards": true
 }

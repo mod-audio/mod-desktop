@@ -1,0 +1,180 @@
+{
+    "/hmi/group1": [],
+    "/cv/graph/mod_cv_parameter_modulation/CVout": {
+        "addrs": [
+            {
+                "minimum": 0.0,
+                "operational_mode": "+",
+                "instance": "/graph/filta",
+                "port": "frequency_control",
+                "steps": 33,
+                "label": "Frequency",
+                "maximum": 1.0
+            }
+        ],
+        "name": "LFO"
+    },
+    "/hmi/knob1": [
+        {
+            "minimum": 9.9999997473787516e-05,
+            "instance": "/graph/lfo2_freq",
+            "momentary": 0,
+            "steps": 201,
+            "coloured": false,
+            "subpage": 0,
+            "page": 0,
+            "port": "freq",
+            "group": null,
+            "dividers": 0.33300000000000002,
+            "label": "LFO RATE",
+            "maximum": 20.0,
+            "tempo": false
+        },
+        {
+            "minimum": 0.0,
+            "instance": "/graph/mod_cv_control",
+            "momentary": 0,
+            "steps": 201,
+            "coloured": false,
+            "subpage": 1,
+            "page": 0,
+            "port": "Control",
+            "group": null,
+            "dividers": null,
+            "label": "Macro",
+            "maximum": 10.0,
+            "tempo": false
+        }
+    ],
+    "/hmi/knob2": [
+        {
+            "minimum": -200.0,
+            "instance": "/graph/mod_cv_parameter_modulation",
+            "momentary": 0,
+            "steps": 201,
+            "coloured": false,
+            "subpage": 0,
+            "page": 0,
+            "port": "ModulationDepth",
+            "group": null,
+            "dividers": null,
+            "label": "LFO>Filta",
+            "maximum": 200.0,
+            "tempo": false
+        },
+        {
+            "minimum": 0.0,
+            "instance": "/graph/xfade",
+            "momentary": 0,
+            "steps": 33,
+            "coloured": false,
+            "subpage": 1,
+            "page": 0,
+            "port": ":bypass",
+            "group": null,
+            "dividers": null,
+            "label": "FX CHAIN",
+            "maximum": 1.0,
+            "tempo": false
+        }
+    ],
+    "/hmi/knob3": [
+        {
+            "minimum": 0.0,
+            "instance": "/graph/mod_cv_parameter_modulation",
+            "momentary": 0,
+            "steps": 201,
+            "coloured": false,
+            "subpage": 0,
+            "page": 0,
+            "port": "ParameterValue",
+            "group": null,
+            "dividers": null,
+            "label": "Filta",
+            "maximum": 100.0,
+            "tempo": false
+        },
+        {
+            "minimum": -1.0,
+            "instance": "/graph/xfade",
+            "momentary": 0,
+            "steps": 201,
+            "coloured": false,
+            "subpage": 1,
+            "page": 0,
+            "port": "xfade",
+            "group": null,
+            "dividers": null,
+            "label": "DRY/WET",
+            "maximum": 1.0,
+            "tempo": false
+        }
+    ],
+    "/hmi/footswitch1": [
+        {
+            "minimum": 0.0,
+            "instance": "/graph/lfo2_freq",
+            "momentary": 0,
+            "steps": 5,
+            "coloured": false,
+            "subpage": 0,
+            "page": 0,
+            "port": "waveForm",
+            "group": "/hmi/group1",
+            "dividers": null,
+            "label": "LFO",
+            "maximum": 5.0,
+            "tempo": false
+        }
+    ],
+    "/hmi/footswitch2": [
+        {
+            "minimum": 0.0,
+            "instance": "/graph/lfo2_freq",
+            "momentary": 0,
+            "steps": 5,
+            "coloured": false,
+            "subpage": 0,
+            "page": 0,
+            "port": "waveForm",
+            "group": "/hmi/group1",
+            "dividers": null,
+            "label": "LFO",
+            "maximum": 5.0,
+            "tempo": false
+        }
+    ],
+    "/cv/graph/mod_cv_control/Cvoutput": {
+        "addrs": [
+            {
+                "minimum": 0.5,
+                "operational_mode": "+",
+                "instance": "/graph/filta_1",
+                "port": "frequency_control",
+                "steps": 33,
+                "label": "Frequency",
+                "maximum": 0.80000000000000004
+            },
+            {
+                "minimum": 0.25,
+                "operational_mode": "+",
+                "instance": "/graph/PlateX2",
+                "port": "blend",
+                "steps": 33,
+                "label": "Mix",
+                "maximum": 0.75
+            },
+            {
+                "minimum": 0.5,
+                "operational_mode": "+",
+                "instance": "/graph/PlateX2",
+                "port": "tail",
+                "steps": 33,
+                "label": "Decay",
+                "maximum": 1.0
+            }
+        ],
+        "name": "Macro"
+    },
+    "/bpm": []
+}

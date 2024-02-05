@@ -1,0 +1,362 @@
+{
+    "snapshots": [
+        {
+            "name": "Default",
+            "data": {
+                "ToggleSwitch4": {
+                    "bypassed": false,
+                    "preset": "",
+                    "parameters": {},
+                    "ports": {
+                        "channel1": 0.0,
+                        "channel2": 0.0,
+                        "channel3": 0.0,
+                        "channel4": 0.0
+                    }
+                },
+                "filta_1": {
+                    "bypassed": false,
+                    "preset": "",
+                    "parameters": {},
+                    "ports": {
+                        "active": 1.0,
+                        "frequency_control": 0.5
+                    }
+                },
+                "s16n8": {
+                    "bypassed": false,
+                    "preset": "",
+                    "parameters": {},
+                    "ports": {
+                        "swing": 0.0,
+                        "grid_12_2": 0.0,
+                        "drummode": 0.0,
+                        "grid_10_1": 0.0,
+                        "chn": 0.0,
+                        "grid_8_3": 0.0,
+                        "grid_13_2": 0.0,
+                        "grid_10_8": 0.0,
+                        "grid_14_8": 127.0,
+                        "grid_13_7": 0.0,
+                        "grid_10_6": 127.0,
+                        "grid_10_5": 0.0,
+                        "grid_16_4": 0.0,
+                        "grid_15_3": 0.0,
+                        "grid_15_2": 0.0,
+                        "grid_13_1": 0.0,
+                        "grid_11_7": 0.0,
+                        "grid_8_7": 0.0,
+                        "grid_15_5": 0.0,
+                        "grid_11_1": 0.0,
+                        "grid_8_5": 0.0,
+                        "grid_11_8": 127.0,
+                        "grid_1_5": 0.0,
+                        "grid_14_1": 0.0,
+                        "grid_2_4": 0.0,
+                        "grid_11_2": 0.0,
+                        "grid_10_2": 0.0,
+                        "grid_6_1": 0.0,
+                        "grid_6_3": 127.0,
+                        "grid_6_2": 0.0,
+                        "grid_6_5": 0.0,
+                        "grid_6_4": 0.0,
+                        "grid_6_7": 0.0,
+                        "grid_6_6": 0.0,
+                        "div": 3.0,
+                        "grid_11_4": 0.0,
+                        "grid_4_7": 0.0,
+                        "grid_4_6": 0.0,
+                        "grid_4_5": 127.0,
+                        "grid_4_4": 0.0,
+                        "grid_4_3": 0.0,
+                        "grid_4_2": 0.0,
+                        "grid_4_1": 0.0,
+                        "grid_2_2": 0.0,
+                        "grid_12_4": 0.0,
+                        "bpm": 120.0,
+                        "grid_15_6": 127.0,
+                        "grid_16_7": 0.0,
+                        "note8": 57.0,
+                        "grid_8_6": 127.0,
+                        "note2": 67.0,
+                        "note3": 65.0,
+                        "note1": 69.0,
+                        "note6": 60.0,
+                        "note7": 59.0,
+                        "note4": 64.0,
+                        "note5": 62.0,
+                        "grid_12_1": 0.0,
+                        "grid_13_8": 0.0,
+                        "grid_13_4": 127.0,
+                        "grid_14_7": 0.0,
+                        "grid_1_8": 127.0,
+                        "grid_8_8": 0.0,
+                        "grid_15_8": 0.0,
+                        "grid_1_2": 0.0,
+                        "grid_8_2": 0.0,
+                        "grid_8_1": 0.0,
+                        "grid_1_1": 0.0,
+                        "grid_1_6": 0.0,
+                        "grid_1_7": 0.0,
+                        "grid_1_4": 0.0,
+                        "grid_8_4": 0.0,
+                        "grid_7_8": 0.0,
+                        "grid_7_1": 0.0,
+                        "grid_7_2": 0.0,
+                        "grid_7_3": 0.0,
+                        "grid_7_4": 127.0,
+                        "grid_7_5": 0.0,
+                        "grid_7_6": 0.0,
+                        "grid_7_7": 127.0,
+                        "grid_11_3": 0.0,
+                        "grid_5_8": 0.0,
+                        "grid_5_6": 0.0,
+                        "grid_5_7": 0.0,
+                        "grid_5_4": 0.0,
+                        "grid_5_5": 127.0,
+                        "grid_5_2": 0.0,
+                        "grid_5_3": 0.0,
+                        "grid_5_1": 0.0,
+                        "grid_6_8": 0.0,
+                        "grid_10_3": 0.0,
+                        "grid_12_8": 0.0,
+                        "grid_12_7": 0.0,
+                        "grid_11_6": 0.0,
+                        "grid_16_8": 0.0,
+                        "grid_16_6": 0.0,
+                        "grid_14_5": 0.0,
+                        "grid_12_6": 127.0,
+                        "grid_10_4": 127.0,
+                        "grid_2_8": 0.0,
+                        "grid_16_1": 0.0,
+                        "grid_2_5": 0.0,
+                        "grid_12_3": 127.0,
+                        "grid_2_7": 127.0,
+                        "grid_2_6": 0.0,
+                        "grid_2_1": 0.0,
+                        "grid_2_3": 0.0,
+                        "grid_14_2": 0.0,
+                        "grid_15_1": 0.0,
+                        "grid_15_7": 0.0,
+                        "grid_9_2": 0.0,
+                        "grid_9_3": 0.0,
+                        "grid_9_1": 0.0,
+                        "grid_9_6": 0.0,
+                        "grid_9_7": 0.0,
+                        "grid_9_4": 0.0,
+                        "grid_9_5": 0.0,
+                        "grid_9_8": 0.0,
+                        "grid_14_3": 0.0,
+                        "grid_1_3": 0.0,
+                        "grid_12_5": 0.0,
+                        "grid_14_6": 0.0,
+                        "grid_16_3": 0.0,
+                        "grid_13_6": 127.0,
+                        "grid_11_5": 0.0,
+                        "grid_16_5": 0.0,
+                        "grid_16_2": 0.0,
+                        "grid_4_8": 0.0,
+                        "panic": 0.0,
+                        "grid_15_4": 127.0,
+                        "grid_10_7": 0.0,
+                        "grid_3_4": 127.0,
+                        "grid_3_5": 0.0,
+                        "grid_3_6": 127.0,
+                        "grid_3_7": 0.0,
+                        "grid_3_1": 0.0,
+                        "grid_3_2": 0.0,
+                        "grid_3_3": 0.0,
+                        "grid_3_8": 0.0,
+                        "grid_13_3": 0.0,
+                        "grid_13_5": 0.0,
+                        "sync": 0.0,
+                        "grid_14_4": 0.0
+                    }
+                },
+                "mod_cv_parameter_modulation": {
+                    "bypassed": false,
+                    "preset": "",
+                    "parameters": {},
+                    "ports": {
+                        "ParameterValue": 50.0,
+                        "ModulationDepth": 82.0,
+                        "BYPASS": 1.0
+                    }
+                },
+                "Gain2x2": {
+                    "bypassed": false,
+                    "preset": "",
+                    "parameters": {},
+                    "ports": {
+                        "Gain": -5.0
+                    }
+                },
+                "mod_cv_control": {
+                    "bypassed": false,
+                    "preset": "",
+                    "parameters": {},
+                    "ports": {
+                        "Control": 0.0,
+                        "Smoothing": 1.0
+                    }
+                },
+                "lfo2_freq": {
+                    "bypassed": false,
+                    "preset": "",
+                    "parameters": {},
+                    "ports": {
+                        "freq": 1.2999999523162842,
+                        "waveForm": 0.0,
+                        "phi0": 0.0
+                    }
+                },
+                "notes_2": {
+                    "bypassed": false,
+                    "preset": "",
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "20",
+                            "i"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "===DRY/WET+BYPASS===\n(using x42 stereo X-fade)\n\n1.Patch the dry signal into the top input(s), and the wet signal into the bottom input(s)\n2. Use the SIGNAL A/B parameter to control the DRY/WET ratio\n3. Bypass to hear only the dry signal.",
+                            "s"
+                        ]
+                    },
+                    "ports": {}
+                },
+                "notes_3": {
+                    "bypassed": false,
+                    "preset": "",
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "20",
+                            "i"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "===CABLES AND ROUTING===\n\n-Signal flow is from left-to-right\n-Purple cables transport audio, blue ones are for MIDI and orange ones are for  CV signals.\n-Hover over an output, and click+drag to route. You can split the signal as many times as you like.\n-Hover over a plug connected to an input and click+drag to change the routing. \n-When multiple cables are connected to an input, click on the plugs to separate them",
+                            "s"
+                        ]
+                    },
+                    "ports": {}
+                },
+                "Kars": {
+                    "bypassed": false,
+                    "preset": "",
+                    "parameters": {},
+                    "ports": {
+                        "release": 4.0625,
+                        "volume": 35.0,
+                        "sustain": 0.0
+                    }
+                },
+                "notes_1": {
+                    "bypassed": false,
+                    "preset": "",
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "23",
+                            "i"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "===CREATING MACRO CONTROLS===\n\n1. Press \"MANAGE CV PORTS\"\n2. Click the checkbox next to the CV port you want to make available as a macro\n3. Adress all parameters in your macro to the CV source you just created.",
+                            "s"
+                        ]
+                    },
+                    "ports": {}
+                },
+                "notes_6": {
+                    "bypassed": false,
+                    "preset": "",
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "20",
+                            "i"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "===MIDI PORTS===\n\n-By default, there is an aggregated MIDI input and output. \n-This means that all incoming MIDI messages get merged and sent to the MOD device through this single port.\n-This also means that all MIDI messages sent to the output port will be sent to all MIDI devices\n\nPress the MIDI PORTS button to select which ports to expose separately",
+                            "s"
+                        ]
+                    },
+                    "ports": {}
+                },
+                "notes_4": {
+                    "bypassed": false,
+                    "preset": "",
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "20",
+                            "i"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "===NAVIGATING THE WEBGUI===\n\n-Click on a plugin to zoom in\n-While zoomed in, click + drag the background to move around in the pedalboard\n-Double click on the background to zoom out",
+                            "s"
+                        ]
+                    },
+                    "ports": {}
+                },
+                "notes_5": {
+                    "bypassed": false,
+                    "preset": "",
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "22",
+                            "i"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "===CHANGING PARAMETER VALUES===\n\nWhile hovering over a control in the web interface, you can:\n-click to increase the value\n-shift-click to decrease the value\nOR\n-click + drag up to increase the value\n-click + drag down to decrease the value",
+                            "s"
+                        ]
+                    },
+                    "ports": {}
+                },
+                "notes": {
+                    "bypassed": false,
+                    "preset": "",
+                    "parameters": {
+                        "http://open-music-kontrollers.ch/lv2/notes#fontHeight": [
+                            "21",
+                            "i"
+                        ],
+                        "http://open-music-kontrollers.ch/lv2/notes#text": [
+                            "===CV PARAMETER MODULATION===\n\n1. Press \"MANAGE CV PORTS\"\n2. Enable desired CV ports\n3. Adress the parameter you would like to modulate to the CV source you just created\n\nTip: use the MOD CV Parameter Modulation plugin to have full control over the target parameter value and modulation depth.",
+                            "s"
+                        ]
+                    },
+                    "ports": {}
+                },
+                "PlateX2": {
+                    "bypassed": false,
+                    "preset": "",
+                    "parameters": {},
+                    "ports": {
+                        "tail": 0.5,
+                        "bandwidth": 0.99949997663497925,
+                        "damping": 0.00050000002374872565,
+                        "blend": 0.25
+                    }
+                },
+                "xfade": {
+                    "bypassed": false,
+                    "preset": "",
+                    "parameters": {},
+                    "ports": {
+                        "shape": 0.0,
+                        "xfade": 1.0,
+                        "mode": 0.0
+                    }
+                },
+                "filta": {
+                    "bypassed": false,
+                    "preset": "",
+                    "parameters": {},
+                    "ports": {
+                        "active": 1.0,
+                        "frequency_control": 0.27816000000000002
+                    }
+                }
+            }
+        }
+    ],
+    "current": 0
+}

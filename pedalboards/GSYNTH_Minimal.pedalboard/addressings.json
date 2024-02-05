@@ -1,0 +1,202 @@
+{
+    "/hmi/group1": [],
+    "/cv/graph/mod_cv_control_6/Cvoutput": {
+        "addrs": [
+            {
+                "maximum": 1000.0,
+                "label": "Rise Time",
+                "operational_mode": "+",
+                "instance": "/graph/mod_cv_slew_2",
+                "steps": 33,
+                "port": "RiseTime",
+                "minimum": 0.10000000149011612
+            },
+            {
+                "maximum": 1000.0,
+                "label": "Fall Time",
+                "operational_mode": "+",
+                "instance": "/graph/mod_cv_slew_2",
+                "steps": 33,
+                "port": "FallTime",
+                "minimum": 0.10000000149011612
+            }
+        ],
+        "name": "FILTER TIME"
+    },
+    "/hmi/knob1": [
+        {
+            "tempo": false,
+            "label": "P Mix",
+            "subpage": 2,
+            "port": "blend",
+            "steps": 201,
+            "dividers": null,
+            "page": 0,
+            "maximum": 1.0,
+            "group": null,
+            "momentary": 0,
+            "instance": "/graph/Plate",
+            "coloured": false,
+            "minimum": 0.0
+        },
+        {
+            "tempo": false,
+            "label": "FLT FREQ",
+            "subpage": 1,
+            "port": "freq",
+            "steps": 201,
+            "dividers": null,
+            "page": 0,
+            "maximum": 10.0,
+            "group": null,
+            "momentary": 0,
+            "instance": "/graph/vcf",
+            "coloured": false,
+            "minimum": 0.0
+        },
+        {
+            "tempo": false,
+            "label": "Sensitivity",
+            "subpage": 0,
+            "port": "Sensitivity",
+            "steps": 201,
+            "dividers": null,
+            "page": 0,
+            "maximum": 100.0,
+            "group": null,
+            "momentary": 0,
+            "instance": "/graph/cv",
+            "coloured": false,
+            "minimum": 0.10000000000000001
+        }
+    ],
+    "/hmi/knob2": [
+        {
+            "tempo": false,
+            "label": "P Decay",
+            "subpage": 2,
+            "port": "tail",
+            "steps": 201,
+            "dividers": null,
+            "page": 0,
+            "maximum": 1.0,
+            "group": null,
+            "momentary": 0,
+            "instance": "/graph/Plate",
+            "coloured": false,
+            "minimum": 0.0
+        },
+        {
+            "tempo": false,
+            "label": "FLT Reso",
+            "subpage": 1,
+            "port": "resonance",
+            "steps": 201,
+            "dividers": null,
+            "page": 0,
+            "maximum": 1.0,
+            "group": null,
+            "momentary": 0,
+            "instance": "/graph/vcf",
+            "coloured": false,
+            "minimum": 0.01
+        },
+        {
+            "tempo": false,
+            "label": "Octave",
+            "subpage": 0,
+            "port": "Octave",
+            "steps": 8,
+            "dividers": null,
+            "page": 0,
+            "maximum": 4.0,
+            "group": null,
+            "momentary": 0,
+            "instance": "/graph/cv",
+            "coloured": false,
+            "minimum": -4.0
+        }
+    ],
+    "/hmi/knob3": [
+        {
+            "tempo": false,
+            "label": "FLT DEPTH",
+            "subpage": 1,
+            "port": "Multiplier",
+            "steps": 201,
+            "dividers": null,
+            "page": 0,
+            "maximum": 10.0,
+            "group": null,
+            "momentary": 0,
+            "instance": "/graph/mod_cv_attenuverter_1",
+            "coloured": false,
+            "minimum": 0.0
+        },
+        {
+            "tempo": false,
+            "label": "Waveform",
+            "subpage": 0,
+            "port": "waveForm",
+            "steps": 6,
+            "dividers": null,
+            "page": 0,
+            "maximum": 6.0,
+            "group": null,
+            "momentary": 0,
+            "instance": "/graph/vco3",
+            "coloured": false,
+            "minimum": 0.0
+        },
+        {
+            "tempo": false,
+            "label": "Out Lvl",
+            "subpage": 2,
+            "port": "gain",
+            "steps": 201,
+            "dividers": null,
+            "page": 0,
+            "maximum": 20.0,
+            "group": null,
+            "momentary": 0,
+            "instance": "/graph/stereo",
+            "coloured": false,
+            "minimum": -20.0
+        }
+    ],
+    "/hmi/footswitch1": [
+        {
+            "tempo": false,
+            "label": "Plate",
+            "subpage": 0,
+            "port": ":bypass",
+            "steps": 33,
+            "dividers": null,
+            "page": 0,
+            "maximum": 1.0,
+            "group": null,
+            "momentary": 0,
+            "instance": "/graph/Plate",
+            "coloured": false,
+            "minimum": 0.0
+        }
+    ],
+    "/hmi/footswitch2": [
+        {
+            "tempo": false,
+            "label": "FLTR >",
+            "subpage": 0,
+            "port": ":bypass",
+            "steps": 33,
+            "dividers": null,
+            "page": 0,
+            "maximum": 1.0,
+            "group": null,
+            "momentary": 1,
+            "instance": "/graph/mod_cv_control",
+            "coloured": false,
+            "minimum": 0.0
+        }
+    ],
+    "/bpm": []
+}

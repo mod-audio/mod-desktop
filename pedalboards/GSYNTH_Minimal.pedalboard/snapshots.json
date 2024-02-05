@@ -1,0 +1,284 @@
+{
+    "snapshots": [
+        {
+            "data": {
+                "mono": {
+                    "preset": "",
+                    "ports": {
+                        "gain": 3.84375,
+                        "bypass": 0.0,
+                        "rms": 0.5,
+                        "release": 0.0010000000474974513,
+                        "noClip": 1.0,
+                        "attack": 0.0059919999912381172,
+                        "threshold": -22.5,
+                        "ratio": 9.90625
+                    },
+                    "bypassed": false,
+                    "parameters": {}
+                },
+                "mod_cv_attenuverter": {
+                    "preset": "",
+                    "ports": {
+                        "Offset": 0.0,
+                        "Multiplier": 3.9130430221557617,
+                        "PluginEnabled": 1.0,
+                        "Smoothing": 1.0,
+                        "Mode": 1.0
+                    },
+                    "bypassed": false,
+                    "parameters": {}
+                },
+                "vcalin": {
+                    "preset": "",
+                    "ports": {
+                        "gain1": 0.0,
+                        "gain2": 0.0,
+                        "outputLevel": 0.24016599357128143,
+                        "in2": 1.0,
+                        "in1": 1.0
+                    },
+                    "bypassed": false,
+                    "parameters": {}
+                },
+                "vco3": {
+                    "preset": "",
+                    "ports": {
+                        "tune": 0.0,
+                        "expFMGain": 0.0,
+                        "phi0": 0.0,
+                        "pw0": 0.5,
+                        "edge": 1.0,
+                        "waveForm": 2.0,
+                        "pwGain": 0.0,
+                        "linFMGain": 0.14000000059604645,
+                        "semitone": 0.0,
+                        "octave": 0.0
+                    },
+                    "bypassed": false,
+                    "parameters": {}
+                },
+                "stereo": {
+                    "preset": "",
+                    "ports": {
+                        "enable": 1.0,
+                        "gain": 0.0,
+                        "mute": 0.0
+                    },
+                    "bypassed": false,
+                    "parameters": {}
+                },
+                "mod_cv_abs": {
+                    "preset": "",
+                    "ports": {
+                        "PluginEnabled": 1.0
+                    },
+                    "bypassed": false,
+                    "parameters": {}
+                },
+                "LowPassFilter": {
+                    "preset": "",
+                    "ports": {
+                        "Freq": 7000.0,
+                        "Order": 2.0
+                    },
+                    "bypassed": false,
+                    "parameters": {}
+                },
+                "mod_cv_gate": {
+                    "preset": "",
+                    "ports": {
+                        "ClosingThreshold": 0.0,
+                        "PluginEnabled": 1.0,
+                        "OpeningThreshold": 0.0099999997764825821
+                    },
+                    "bypassed": false,
+                    "parameters": {}
+                },
+                "cv": {
+                    "preset": "",
+                    "ports": {
+                        "ConfidenceThreshold": 12.5,
+                        "Sensitivity": 50.049999237060547,
+                        "Octave": -1.0,
+                        "HoldPitch": 1.0,
+                        "Tolerance": 10.0
+                    },
+                    "bypassed": false,
+                    "parameters": {}
+                },
+                "mod_cv_slew": {
+                    "preset": "",
+                    "ports": {
+                        "RiseTime": 1.0,
+                        "BYPASS": 1.0,
+                        "FallTime": 31.34687500144355
+                    },
+                    "bypassed": false,
+                    "parameters": {}
+                },
+                "mod_cv_control": {
+                    "preset": "",
+                    "ports": {
+                        "Control": 10.0,
+                        "Smoothing": 1.0
+                    },
+                    "bypassed": true,
+                    "parameters": {}
+                },
+                "mod_cv_control_6": {
+                    "preset": "",
+                    "ports": {
+                        "Control": 7.1014492753623184,
+                        "Smoothing": 1.0
+                    },
+                    "bypassed": false,
+                    "parameters": {}
+                },
+                "mod_cv_attenuverter_7": {
+                    "preset": "",
+                    "ports": {
+                        "Offset": 0.0,
+                        "Multiplier": 1.0,
+                        "PluginEnabled": 1.0,
+                        "Smoothing": 1.0,
+                        "Mode": 0.0
+                    },
+                    "bypassed": false,
+                    "parameters": {}
+                },
+                "mod_cv_attenuverter_4": {
+                    "preset": "",
+                    "ports": {
+                        "Offset": 0.0,
+                        "Multiplier": 1.3999999999999999,
+                        "PluginEnabled": 1.0,
+                        "Smoothing": 1.0,
+                        "Mode": 1.0
+                    },
+                    "bypassed": false,
+                    "parameters": {}
+                },
+                "mod_cv_attenuverter_1": {
+                    "preset": "",
+                    "ports": {
+                        "Offset": 0.0,
+                        "Multiplier": 6.25,
+                        "PluginEnabled": 1.0,
+                        "Smoothing": 1.0,
+                        "Mode": 1.0
+                    },
+                    "bypassed": false,
+                    "parameters": {}
+                },
+                "mono_1": {
+                    "preset": "",
+                    "ports": {
+                        "LPfreq": 1000.0,
+                        "LSq": 1.0,
+                        "HighPass": 1.0,
+                        "q3": 0.60000002384185791,
+                        "sec4": 1.0,
+                        "q1": 0.60000002384185791,
+                        "sec2": 1.0,
+                        "sec3": 1.0,
+                        "q4": 0.60000002384185791,
+                        "sec1": 1.0,
+                        "gain1": 0.0,
+                        "enable": 1.0,
+                        "peakreset": 1.0,
+                        "gain2": 0.0,
+                        "HSq": 1.0,
+                        "gain3": 0.0,
+                        "HSgain": 0.0,
+                        "q2": 0.60000002384185791,
+                        "gain": 0.0,
+                        "HPfreq": 80.0,
+                        "HSsec": 1.0,
+                        "LSsec": 1.0,
+                        "freq1": 160.0,
+                        "LSfreq": 80.0,
+                        "freq3": 1250.0,
+                        "freq4": 2500.0,
+                        "gain4": 0.0,
+                        "LSgain": 0.0,
+                        "HPQ": 0.69999998807907104,
+                        "HSfreq": 8000.0,
+                        "freq2": 397.0,
+                        "LPQ": 1.0,
+                        "LowPass": 1.0
+                    },
+                    "bypassed": false,
+                    "parameters": {}
+                },
+                "mod_audio_to_cv": {
+                    "preset": "",
+                    "ports": {
+                        "Offset": 0.0,
+                        "Level": 10.0,
+                        "BYPASS": 1.0
+                    },
+                    "bypassed": false,
+                    "parameters": {}
+                },
+                "vcf": {
+                    "preset": "",
+                    "ports": {
+                        "resonance": 0.87599998712539673,
+                        "resonanceGain": 0.0,
+                        "vcfType": 0.0,
+                        "freq": 2.0,
+                        "expFMGain": 2.34375,
+                        "linFMGain": 1.0,
+                        "inputGain": 1.0
+                    },
+                    "bypassed": false,
+                    "parameters": {}
+                },
+                "Plate": {
+                    "preset": "",
+                    "ports": {
+                        "bandwidth": 1.0,
+                        "tail": 0.5,
+                        "damping": 0.375,
+                        "blend": 0.19475446428571436
+                    },
+                    "bypassed": false,
+                    "parameters": {}
+                },
+                "mod_cv_slew_1": {
+                    "preset": "",
+                    "ports": {
+                        "RiseTime": 15.723438262939453,
+                        "BYPASS": 1.0,
+                        "FallTime": 15.723438262939453
+                    },
+                    "bypassed": false,
+                    "parameters": {}
+                },
+                "mod_cv_slew_2": {
+                    "preset": "",
+                    "ports": {
+                        "RiseTime": 710.17358400000001,
+                        "BYPASS": 1.0,
+                        "FallTime": 710.17358400000001
+                    },
+                    "bypassed": false,
+                    "parameters": {}
+                },
+                "mod_cv_slew_3": {
+                    "preset": "",
+                    "ports": {
+                        "RiseTime": 4.0,
+                        "BYPASS": 1.0,
+                        "FallTime": 14.591303825378418
+                    },
+                    "bypassed": false,
+                    "parameters": {}
+                }
+            },
+            "name": "Init"
+        }
+    ],
+    "current": 0
+}

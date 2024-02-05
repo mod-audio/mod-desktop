@@ -1,0 +1,19 @@
+@prefix atom: <http://lv2plug.in/ns/ext/atom#> .
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix pset: <http://lv2plug.in/ns/ext/presets#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix state: <http://lv2plug.in/ns/ext/state#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<>
+	a pset:Preset ;
+	lv2:appliesTo <http://gareus.org/oss/lv2/fil4#mono> ;
+	state:state [
+		<http://gareus.org/oss/lv2/fil4#dbscale> "30.0"^^xsd:float ;
+		<http://gareus.org/oss/lv2/fil4#fftgain> "0.0"^^xsd:float ;
+		<http://gareus.org/oss/lv2/fil4#fftmode> "4609"^^xsd:int ;
+		<http://gareus.org/oss/lv2/fil4#fftchannel> "-1"^^xsd:int ;
+		<http://gareus.org/oss/lv2/fil4#uiscale> "1.0"^^xsd:float
+	] .
+

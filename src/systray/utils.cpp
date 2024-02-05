@@ -126,6 +126,21 @@ void initEvironment()
     const size_t dataDirLen = std::strlen(dataDir);
    #endif
 
+    // set path to factory pedalboards
+  #ifdef _WIN32
+    std::memcpy(path, appDir, appDirLen * sizeof(WCHAR));
+    std::wcsncpy(path + appDirLen, L"\\pedalboards", MAX_PATH - appDirLen - 1);
+    SetEnvironmentVariableW(L"MOD_FACTORY_PEDALBOARDS_DIR", path);
+  #else
+    std::memcpy(path, appDir, appDirLen);
+   #ifdef __APPLE__
+    std::strncpy(path + appDirLen - 5, "/pedalboards", PATH_MAX - appDirLen - 1);
+   #else
+    std::strncpy(path + appDirLen, "/pedalboards", PATH_MAX - appDirLen - 1);
+   #endif
+    setenv("MOD_FACTORY_PEDALBOARDS_DIR", path, 1);
+  #endif
+
     // set path to plugin loadable "user-files"; also make sure it exists
    #ifdef _WIN32
     std::memcpy(path, dataDir, dataDirLen * sizeof(WCHAR));

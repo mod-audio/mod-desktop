@@ -2,5 +2,6 @@
   "name": "MOD Desktop",
   "platform": "desktop",
   "architecture": "x64_64",
-  "bin-compat": "linux-x64_64"
+  "bin-compat": "linux-x64_64",
+  "factory_pedalboards": true
 }

@@ -1,0 +1,11 @@
+@prefix ingen: <http://drobilla.net/ns/ingen#> .
+@prefix lv2:   <http://lv2plug.in/ns/lv2core#> .
+@prefix pedal: <http://moddevices.com/ns/modpedal#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+
+<GSYNTH_Flexible.ttl>
+    lv2:prototype ingen:GraphPrototype ;
+    a lv2:Plugin ,
+        ingen:Graph ,
+        pedal:Pedalboard ;
+    rdfs:seeAlso <GSYNTH_Flexible.ttl> .
