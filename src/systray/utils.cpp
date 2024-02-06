@@ -6,6 +6,7 @@
 #include <QtCore/QDir>
 #include <QtCore/QJsonDocument>
 #include <QtCore/QJsonObject>
+#include <QtCore/QMessageAuthenticationCode>
 #include <QtCore/QSettings>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QStyleFactory>
@@ -16,7 +17,6 @@
 #define PRE_20H1_DWMWA_USE_IMMERSIVE_DARK_MODE 19
 #define DWMWA_USE_IMMERSIVE_DARK_MODE 20
 #else
-#include <QtCore/QMessageAuthenticationCode>
 #include <QtCore/QStandardPaths>
 #include <dlfcn.h>
 #include <pwd.h>
