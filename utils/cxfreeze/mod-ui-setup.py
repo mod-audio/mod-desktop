@@ -26,8 +26,8 @@ if sys.platform == 'darwin':
 else:
     resdir = ROOT
 
-os.environ['MOD_APP'] = '1'
 os.environ['MOD_DEFAULT_PEDALBOARD'] = os.path.join(resdir, 'default.pedalboard')
+os.environ['MOD_DESKTOP'] = '1'
 os.environ['MOD_DEV_ENVIRONMENT'] = '0'
 os.environ['MOD_DEVICE_HOST_PORT'] = '18182'
 os.environ['MOD_DEVICE_WEBSERVER_PORT'] = '18181'

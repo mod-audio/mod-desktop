@@ -47,8 +47,8 @@ else
 fi
 export LV2_PATH
 
-export MOD_APP=1
 export MOD_DATA_DIR="$(convert_path "${DOCS_DIR}/MOD Desktop")"
+export MOD_DESKTOP=1
 export MOD_DEV_ENVIRONMENT=0
 export MOD_DEVICE_HOST_PORT=18182
 export MOD_DEVICE_WEBSERVER_PORT=18181

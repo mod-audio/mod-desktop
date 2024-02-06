@@ -36,15 +36,15 @@ void initEvironment()
 {
     // base environment details
    #ifdef _WIN32
-    SetEnvironmentVariableW(L"LANG", L"en_US.UTF-8");
     SetEnvironmentVariableW(L"JACK_NO_START_SERVER", L"1");
+    SetEnvironmentVariableW(L"LANG", L"en_US.UTF-8");
+    SetEnvironmentVariableW(L"MOD_DESKTOP", L"1");
     SetEnvironmentVariableW(L"PYTHONUNBUFFERED", L"1");
-    SetEnvironmentVariableW(L"MOD_APP", L"1");
    #else
-    setenv("LANG", "en_US.UTF-8", 1);
     setenv("JACK_NO_START_SERVER", "1", 1);
+    setenv("LANG", "en_US.UTF-8", 1);
+    setenv("MOD_DESKTOP", "1", 1);
     setenv("PYTHONUNBUFFERED", "1", 1);
-    setenv("MOD_APP", "1", 1);
    #endif
 
     // get directory of this application
