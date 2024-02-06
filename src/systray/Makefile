@@ -55,7 +55,7 @@ LDFLAGS  += $(shell $(PKG_CONFIG) --libs alsa)
 endif
 
 ifeq ($(MACOS),true)
-LDFLAGS  += -framework CoreAudio
+LDFLAGS  += -framework CoreAudio -framework CoreFoundation -framework IOKit
 else
 CXXFLAGS += $(shell $(PKG_CONFIG) --cflags portaudio-2.0)
 LDFLAGS  += $(shell $(PKG_CONFIG) --libs portaudio-2.0)

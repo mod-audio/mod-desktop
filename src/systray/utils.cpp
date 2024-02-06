@@ -28,6 +28,7 @@
 #include <cstring>
 
 #if defined(__APPLE__)
+#include <IOKit/IOKitLib.h>
 #include <sys/syslimits.h>
 #elif defined(__linux__)
 #include <linux/limits.h>
@@ -41,6 +42,7 @@ constexpr uint8_t char2u8(const uint8_t c)
 {
     return c >= '0' && c <= '9' ? c - '0'
         : c >= 'a' && c <= 'f' ? 0xa + c - 'a'
+        : c >= 'A' && c <= 'F' ? 0xa + c - 'A'
         : 0;
 }
 
@@ -139,35 +141,65 @@ void initEvironment()
    #endif
 
     // generate UID
+    uint8_t key[16] = {};
    #if defined(__APPLE__)
-    // TODO
+    if (const CFMutableDictionaryRef deviceRef = IOServiceMatching("IOPlatformExpertDevice"))
+    {
+        const io_service_t service = IOServiceGetMatchingService(MACH_PORT_NULL, deviceRef);
+
+        if (service != IO_OBJECT_NULL)
+        {
+            const CFTypeRef uuidRef = IORegistryEntryCreateCFProperty(service, CFSTR("IOPlatformUUID"), kCFAllocatorDefault, 0);
+            const CFStringRef uuidStr = reinterpret_cast<const CFStringRef>(uuidRef);
+
+            if (CFGetTypeID(uuidRef) == CFStringGetTypeID() && CFStringGetLength(uuidStr) >= 36)
+            {
+                CFStringGetCString(uuidStr, path, PATH_MAX - 1, kCFStringEncodingUTF8);
+
+                for (int i=0, j=0; i+j<36; ++i)
+                {
+                    if (path[i*2+j] == '-')
+                        ++j;
+                    key[i] = char2u8(path[i*2+j]) << 4;
+                    key[i] |= char2u8(path[i*2+j+1]) << 0;
+                }
+            }
+
+            CFRelease(uuidRef);
+            IOObjectRelease(service);
+        }
+    }
    #elif defined(_WIN32)
     // TODO
    #else
     if (FILE* const f = fopen("/etc/machine-id", "r"))
     {
-        size_t len;
-        if (fread(path, PATH_MAX - 1, 1, f) == 0 && (len = strlen(path)) >= 33)
+        if (fread(path, PATH_MAX - 1, 1, f) == 0 && strlen(path) >= 33)
         {
-            uint8_t idkey[16];
             for (int i=0; i<16; ++i)
             {
-                idkey[i] = char2u8(path[i*2]) << 4;
-                idkey[i] |= char2u8(path[i*2+1]) << 0;
+                key[i] = char2u8(path[i*2]) << 4;
+                key[i] |= char2u8(path[i*2+1]) << 0;
             }
-
-            QMessageAuthenticationCode qhash(QCryptographicHash::Sha256);
-            qhash.setKey(QByteArray::fromRawData(reinterpret_cast<const char*>(idkey), sizeof(idkey)));
-            qhash.addData(reinterpret_cast<const char*>(mod_desktop_hash), sizeof(mod_desktop_hash));
-
-            QByteArray qresult(qhash.result().toHex(':').toUpper());
-            qresult.truncate(32 + 15);
-
-            setenv("MOD_DEVICE_UID", qresult.constData(), 1);
         }
         fclose(f);
     }
    #endif
+
+    {
+        QMessageAuthenticationCode qhash(QCryptographicHash::Sha256);
+        qhash.setKey(QByteArray::fromRawData(reinterpret_cast<const char*>(key), sizeof(key)));
+        qhash.addData(reinterpret_cast<const char*>(mod_desktop_hash), sizeof(mod_desktop_hash));
+
+        QByteArray qresult(qhash.result().toHex(':').toUpper());
+        qresult.truncate(32 + 15);
+
+       #ifdef _WIN32
+        SetEnvironmentVariableA("MOD_DEVICE_UID", qresult.constData());
+       #else
+        setenv("MOD_DEVICE_UID", qresult.constData(), 1);
+       #endif
+    }
 
     // set path to factory pedalboards
   #ifdef _WIN32
