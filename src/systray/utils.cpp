@@ -134,7 +134,7 @@ void initEvironment()
   #else
     std::memcpy(path, appDir, appDirLen);
    #ifdef __APPLE__
-    std::strncpy(path + appDirLen - 5, "/Resources/pedalboards", PATH_MAX - appDirLen - 1);
+    std::strncpy(path + appDirLen - 5, "Resources/pedalboards", PATH_MAX - appDirLen - 1);
    #else
     std::strncpy(path + appDirLen, "/pedalboards", PATH_MAX - appDirLen - 1);
    #endif
@@ -152,7 +152,7 @@ void initEvironment()
     std::strncat(path + dataDirLen, "/user-files", PATH_MAX - dataDirLen - 1);
     mkdir(path, 0777);
     setenv("MOD_USER_FILES_DIR", path, 1);
-  #endif
+   #endif
 
     // set path to MOD keys (plugin licenses)
     // NOTE must terminate with a path separator
@@ -164,7 +164,7 @@ void initEvironment()
     std::memcpy(path, dataDir, dataDirLen);
     std::strncpy(path + dataDirLen, "/keys/", PATH_MAX - dataDirLen - 1);
     setenv("MOD_KEYS_PATH", path, 1);
-  #endif
+   #endif
 
     // set path to MOD LV2 plugins (first local/user, then app/system)
   #ifdef _WIN32
@@ -201,7 +201,7 @@ void initEvironment()
             dladdr(sym2, &info);
             setenv("JACKBRIDGE_FILENAME", info.dli_fname, 1);
             usingPipeWire = true;
-            fprintf(stdout, "MOD Desktop DEBUG: jacklib syms %p %p | %d | ok with filename'%s'\n", sym1, sym2, sym1(), info.dli_fname);
+            fprintf(stdout, "MOD Desktop DEBUG: jacklib syms %p %p | %d | ok with filename '%s'\n", sym1, sym2, sym1(), info.dli_fname);
         }
         else
         {
