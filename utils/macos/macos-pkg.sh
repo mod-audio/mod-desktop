@@ -17,6 +17,7 @@ rm -rf build/pkg build/*.pkg
 rm -rf mod-ui/mod/__pycache__
 rm -rf mod-ui/mod/communication/__pycache__
 rm -rf mod-ui/modtools/__pycache__
+./utils/pack-html.sh
 
 # create pkg dir for placing patched app bundle inside
 mkdir build/pkg
