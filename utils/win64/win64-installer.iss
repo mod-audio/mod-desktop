@@ -20,6 +20,7 @@ UsePreviousAppDir=no
 Name: "normal"; Description: "Full installation";
 
 [Components]
+Name: pedalboards; Description: "Factory pedalboards"; Types: normal; Flags: fixed;
 Name: plugins; Description: "LV2 plugins"; Types: normal; Flags: fixed;
 
 [Files]
@@ -30,6 +31,7 @@ Source: "..\..\build\jackd.exe"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "..\..\build\libjack64.dll"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "..\..\build\libjackserver64.dll"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "..\..\build\jack\jack-session.conf"; DestDir: "{app}\jack"; Flags: ignoreversion;
+Source: "..\..\build\jack\jack_dummy.dll"; DestDir: "{app}\jack"; Flags: ignoreversion;
 Source: "..\..\build\jack\jack_portaudio.dll"; DestDir: "{app}\jack"; Flags: ignoreversion;
 Source: "..\..\build\jack\jack_winmme.dll"; DestDir: "{app}\jack"; Flags: ignoreversion;
 Source: "..\..\build\jack\mod-host.dll"; DestDir: "{app}\jack"; Flags: ignoreversion;
@@ -47,8 +49,7 @@ Source: "..\..\build\styles\q*.dll"; DestDir: "{app}\styles"; Flags: ignoreversi
 Source: "..\..\build\mod-pedalboard.exe"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "..\..\build\mod-ui.exe"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "..\..\build\libpython3.8.dll"; DestDir: "{app}"; Flags: ignoreversion;
-Source: "..\..\build\default.pedalboard\manifest.ttl"; DestDir: "{app}\default.pedalboard"; Flags: ignoreversion;
-Source: "..\..\build\default.pedalboard\*.png"; DestDir: "{app}\default.pedalboard"; Flags: ignoreversion;
+Source: "..\..\build\default.pedalboard\*.*"; DestDir: "{app}\default.pedalboard"; Flags: ignoreversion;
 Source: "..\..\build\html\*.html"; DestDir: "{app}\html"; Flags: ignoreversion;
 Source: "..\..\build\html\favicon.ico"; DestDir: "{app}\html"; Flags: ignoreversion;
 Source: "..\..\build\html\css\*.css"; DestDir: "{app}\html\css"; Flags: ignoreversion;

@@ -28,13 +28,17 @@ if [ ! -f "${innodir}"/drive_c/InnoSetup/ISCC.exe ]; then
     env WINEPREFIX="${innodir}" wine "${dlfile}" /allusers /dir=C:\\InnoSetup /nocancel /norestart /verysilent
 fi
 
-# generate plugins
+# generate pedalboards and plugins
 echo -n "" > utils/win64/win64-plugins.iss
 IFS='
 '
 for f in $(find -L build/plugins/ -type f); do
     d=$(dirname $(echo ${f} | sed "s|build/plugins/||"))
     echo "Source: \"..\\..\\$(echo ${f} | tr '/' '\\')\"; DestDir: \"{app}\\plugins\\$(echo ${d} | tr '/' '\\')\"; Components: plugins; Flags: ignoreversion;" >> utils/win64/win64-plugins.iss
+done
+for f in $(find -L pedalboards/ -type f); do
+    d=$(dirname $(echo ${f} | sed "s|pedalboards/||"))
+    echo "Source: \"..\\$(echo ${f} | tr '/' '\\')\"; DestDir: \"{app}\\pedalboards\\$(echo ${d} | tr '/' '\\')\"; Components: pedalboards; Flags: ignoreversion;" >> utils/win64/win64-pedalboards.iss
 done
 
 # generate version

@@ -82,16 +82,19 @@ jobs:
           ./utils/plugin-builder/validate-plugins.sh
           # FIXME dirty carla leaves temp folders around
           rm -rf *.tmp
-      - name: Set sha8
+      - name: Set version tag for release
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
         run: |
-          echo "VERSION_TAG=$(echo ${{ github.event.pull_request.number || github.event.release.tag_name || github.sha }} | cut -c1-8)" >> $GITHUB_ENV
+          echo "VERSION_TAG=$(cat VERSION)" >> $GITHUB_ENV
+      - name: Set version tag for non-release
+        if: ${{ ! startsWith(github.ref, 'refs/tags/') }}
+        run: |
+          echo "VERSION_TAG=$(echo ${{ github.event.pull_request.number || github.sha }} | cut -c1-8)" >> $GITHUB_ENV
       - name: Pack
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
-          mkdir mod-desktop-${{ env.VERSION_TAG }}-linux-x86_64
-          mv build mod-desktop-${{ env.VERSION_TAG }}-linux-x86_64/mod-desktop
-          cp utils/linux/mod-desktop.* mod-desktop-${{ env.VERSION_TAG }}-linux-x86_64/
-          tar chJf mod-desktop-${{ env.VERSION_TAG }}-linux-x86_64.tar.xz mod-desktop-${{ env.VERSION_TAG }}-linux-x86_64
+          ./utils/linux/linux-tar.sh
+          mv mod-desktop-*.tar.xz mod-desktop-${{ env.VERSION_TAG }}-linux-x86_64-debug.tar.xz
       - uses: actions/upload-artifact@v3
         if: ${{ matrix.container == env.RELEASE_OS_LINUX }}
         with:
@@ -172,16 +175,19 @@ jobs:
           ./utils/plugin-builder/validate-plugins.sh
           # FIXME dirty carla leaves temp folders around
           rm -rf *.tmp
-      - name: Set sha8
+      - name: Set version tag for release
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
         run: |
-          echo "VERSION_TAG=$(echo ${{ github.event.pull_request.number || github.event.release.tag_name || github.sha }} | cut -c1-8)" >> $GITHUB_ENV
+          echo "VERSION_TAG=$(cat VERSION)" >> $GITHUB_ENV
+      - name: Set version tag for non-release
+        if: ${{ ! startsWith(github.ref, 'refs/tags/') }}
+        run: |
+          echo "VERSION_TAG=$(echo ${{ github.event.pull_request.number || github.sha }} | cut -c1-8)" >> $GITHUB_ENV
       - name: Pack
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
-          mkdir mod-desktop-${{ env.VERSION_TAG }}-linux-x86_64-debug
-          mv build mod-desktop-${{ env.VERSION_TAG }}-linux-x86_64-debug/mod-desktop
-          cp utils/linux/mod-desktop.* mod-desktop-${{ env.VERSION_TAG }}-linux-x86_64-debug/
-          tar chJf mod-desktop-${{ env.VERSION_TAG }}-linux-x86_64-debug.tar.xz mod-desktop-${{ env.VERSION_TAG }}-linux-x86_64-debug
+          ./utils/linux/linux-tar.sh
+          mv mod-desktop-*.tar.xz mod-desktop-${{ env.VERSION_TAG }}-linux-x86_64-debug.tar.xz
       - uses: actions/upload-artifact@v3
         if: ${{ matrix.container == env.RELEASE_OS_LINUX }}
         with:
@@ -234,9 +240,14 @@ jobs:
           ./utils/plugin-builder/validate-plugins.sh ${{ matrix.target }}
           # FIXME dirty carla leaves temp folders around
           rm -rf *.tmp
-      - name: Set sha8
+      - name: Set version tag for release
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
         run: |
-          echo "VERSION_TAG=$(echo ${{ github.event.pull_request.number || github.event.release.tag_name || github.sha }} | cut -c1-8)" >> $GITHUB_ENV
+          echo "VERSION_TAG=$(cat VERSION)" >> $GITHUB_ENV
+      - name: Set version tag for non-release
+        if: ${{ ! startsWith(github.ref, 'refs/tags/') }}
+        run: |
+          echo "VERSION_TAG=$(echo ${{ github.event.pull_request.number || github.sha }} | cut -c1-8)" >> $GITHUB_ENV
       - name: Pack
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
@@ -300,17 +311,21 @@ jobs:
           ./utils/plugin-builder/validate-plugins.sh
           # FIXME dirty carla leaves temp folders around
           rm -rf *.tmp
-      - name: Set sha8
+      - name: Set version tag for release
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
         run: |
-          echo "VERSION_TAG=$(echo ${{ github.event.pull_request.number || github.event.release.tag_name || github.sha }} | cut -c1-8)" >> $GITHUB_ENV
+          echo "VERSION_TAG=$(cat VERSION)" >> $GITHUB_ENV
+      - name: Set version tag for non-release
+        if: ${{ ! startsWith(github.ref, 'refs/tags/') }}
+        run: |
+          echo "VERSION_TAG=$(echo ${{ github.event.pull_request.number || github.sha }} | cut -c1-8)" >> $GITHUB_ENV
       - name: Pack
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
           xvfb-run ./utils/win64/win64-installer.sh
           mv mod-desktop-*.exe mod-desktop-${{ env.VERSION_TAG }}-win64.exe
-          rm -rf build/innosetup-*
-          mv build mod-desktop-${{ env.VERSION_TAG }}-win64
-          zip -r -9 mod-desktop-${{ env.VERSION_TAG }}-win64.zip mod-desktop-${{ env.VERSION_TAG }}-win64
+          ./utils/win64/win64-zip.sh
+          mv mod-desktop-*.zip mod-desktop-${{ env.VERSION_TAG }}-win64.zip
       - uses: actions/upload-artifact@v4
         if: ${{ matrix.container == env.RELEASE_OS_WIN64 }}
         with:
