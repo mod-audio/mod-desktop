@@ -67,7 +67,6 @@ makedirs(DEVICE_DIR)
 #os.environ['MOD_API_KEY'] = os.path.join(resdir, '..', 'mod_api_key.pub')
 os.environ['MOD_DEVICE_KEY'] = os.path.join(DEVICE_DIR, 'rsa')
 os.environ['MOD_DEVICE_TAG'] = os.path.join(DEVICE_DIR, 'tag')
-os.environ['MOD_DEVICE_UID'] = os.path.join(DEVICE_DIR, 'uid')
 
 from datetime import datetime
 from random import randint
@@ -77,10 +76,6 @@ if os.path.exists(DEVICE_DIR):
         with open(os.environ['MOD_DEVICE_TAG'], 'w') as fh:
             tag = 'MDS-{0}-0-00-000-{1}'.format(datetime.utcnow().strftime('%Y%m%d'), randint(9000, 9999))
             fh.write(tag)
-    if not os.path.isfile(os.environ['MOD_DEVICE_UID']):
-        with open(os.environ['MOD_DEVICE_UID'], 'w') as fh:
-            uid = ':'.join(['{0}{1}'.format(randint(0, 9), randint(0, 9)) for i in range(0, 16)])
-            fh.write(uid)
     if not os.path.isfile(os.environ['MOD_DEVICE_KEY']):
         try:
             key = RSA.generate(2048)

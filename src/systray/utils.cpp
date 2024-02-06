@@ -16,6 +16,7 @@
 #define PRE_20H1_DWMWA_USE_IMMERSIVE_DARK_MODE 19
 #define DWMWA_USE_IMMERSIVE_DARK_MODE 20
 #else
+#include <QtCore/QMessageAuthenticationCode>
 #include <QtCore/QStandardPaths>
 #include <dlfcn.h>
 #include <pwd.h>
@@ -31,6 +32,17 @@
 #elif defined(__linux__)
 #include <linux/limits.h>
 #endif
+
+constexpr const uint8_t mod_desktop_hash[] = {
+    0xe4, 0xf7, 0x0d, 0xe9, 0x77, 0xb8, 0x47, 0xe0, 0xba, 0x2e, 0x70, 0x14, 0x93, 0x7a, 0xce, 0xa7
+};
+
+constexpr uint8_t char2u8(const uint8_t c)
+{
+    return c >= '0' && c <= '9' ? c - '0'
+        : c >= 'a' && c <= 'f' ? 0xa + c - 'a'
+        : 0;
+}
 
 void initEvironment()
 {
@@ -124,6 +136,37 @@ void initEvironment()
     char path[PATH_MAX] = {};
     const size_t appDirLen = std::strlen(appDir);
     const size_t dataDirLen = std::strlen(dataDir);
+   #endif
+
+    // generate UID
+   #if defined(__APPLE__)
+    // TODO
+   #elif defined(_WIN32)
+    // TODO
+   #else
+    if (FILE* const f = fopen("/etc/machine-id", "r"))
+    {
+        size_t len;
+        if (fread(path, PATH_MAX - 1, 1, f) == 0 && (len = strlen(path)) >= 33)
+        {
+            uint8_t idkey[16];
+            for (int i=0; i<16; ++i)
+            {
+                idkey[i] = char2u8(path[i*2]) << 4;
+                idkey[i] |= char2u8(path[i*2+1]) << 0;
+            }
+
+            QMessageAuthenticationCode qhash(QCryptographicHash::Sha256);
+            qhash.setKey(QByteArray::fromRawData(reinterpret_cast<const char*>(idkey), sizeof(idkey)));
+            qhash.addData(reinterpret_cast<const char*>(mod_desktop_hash), sizeof(mod_desktop_hash));
+
+            QByteArray qresult(qhash.result().toHex(':').toUpper());
+            qresult.truncate(32 + 15);
+
+            setenv("MOD_DEVICE_UID", qresult.constData(), 1);
+        }
+        fclose(f);
+    }
    #endif
 
     // set path to factory pedalboards
