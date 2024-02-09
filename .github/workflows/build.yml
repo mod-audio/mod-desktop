@@ -3,7 +3,7 @@ name: build
 on: [push, pull_request]
 
 env:
-  CACHE_VERSION_LINUX: 23
+  CACHE_VERSION_LINUX: 24
   CACHE_VERSION_MACOS: 19
   CACHE_VERSION_WIN64: 19
   DEBIAN_FRONTEND: noninteractive
