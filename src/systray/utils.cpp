@@ -219,12 +219,12 @@ void initEvironment()
     // set path to plugin loadable "user-files"; also make sure it exists
    #ifdef _WIN32
     std::memcpy(path, dataDir, dataDirLen * sizeof(WCHAR));
-    std::wcsncat(path + dataDirLen, L"\\user-files", MAX_PATH - dataDirLen - 1);
+    std::wcsncpy(path + dataDirLen, L"\\user-files", MAX_PATH - dataDirLen - 1);
     _wmkdir(path);
     SetEnvironmentVariableW(L"MOD_USER_FILES_DIR", path);
    #else
     std::memcpy(path, dataDir, dataDirLen);
-    std::strncat(path + dataDirLen, "/user-files", PATH_MAX - dataDirLen - 1);
+    std::strncpy(path + dataDirLen, "/user-files", PATH_MAX - dataDirLen - 1);
     mkdir(path, 0777);
     setenv("MOD_USER_FILES_DIR", path, 1);
    #endif
@@ -276,11 +276,11 @@ void initEvironment()
             dladdr(sym2, &info);
             setenv("JACKBRIDGE_FILENAME", info.dli_fname, 1);
             usingPipeWire = true;
-            fprintf(stdout, "MOD Desktop DEBUG: jacklib syms %p %p | %d | ok with filename '%s'\n", sym1, sym2, sym1(), info.dli_fname);
+            fprintf(stdout, "MOD Desktop DEBUG: jacklib syms %p %p | %d | using pipewire with filename '%s'\n", sym1, sym2, sym1(), info.dli_fname);
         }
         else
         {
-            fprintf(stdout, "MOD Desktop DEBUG: jacklib syms %p %p | %d | failed\n", sym1, sym2, sym1 != nullptr ? sym1() : -1337);
+            fprintf(stdout, "MOD Desktop DEBUG: jacklib syms %p %p | %d | using regular jack\n", sym1, sym2, sym1 != nullptr ? sym1() : -1337);
         }
         fflush(stdout);
 
