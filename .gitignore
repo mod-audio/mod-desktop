@@ -11,5 +11,6 @@
 qrc_*.hpp
 ui_*.hpp
 /src/systray/mod-desktop
-/utils/win64-plugins.iss
-/utils/win64-version.iss
+/utils/win64/win64-pedalboards.iss
+/utils/win64/win64-plugins.iss
+/utils/win64/win64-version.iss
