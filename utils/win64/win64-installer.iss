@@ -156,6 +156,8 @@ Source: "..\..\build\mod-desktop-asio.dll"; DestDir: "{win}\System32"; Flags: ig
 ; misc
 Source: "..\..\build\mod-hardware-descriptor.json"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "..\..\build\VERSION"; DestDir: "{app}"; Flags: ignoreversion;
+; pedalboards
+#include "win64-pedalboards.iss"
 ; plugins
 #include "win64-plugins.iss"
 

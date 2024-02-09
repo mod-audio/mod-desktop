@@ -38,7 +38,7 @@ for f in $(find -L build/plugins/ -type f); do
 done
 for f in $(find -L pedalboards/ -type f); do
     d=$(dirname $(echo ${f} | sed "s|pedalboards/||"))
-    echo "Source: \"..\\$(echo ${f} | tr '/' '\\')\"; DestDir: \"{app}\\pedalboards\\$(echo ${d} | tr '/' '\\')\"; Components: pedalboards; Flags: ignoreversion;" >> utils/win64/win64-pedalboards.iss
+    echo "Source: \"..\\..\\$(echo ${f} | tr '/' '\\')\"; DestDir: \"{app}\\pedalboards\\$(echo ${d} | tr '/' '\\')\"; Components: pedalboards; Flags: ignoreversion;" >> utils/win64/win64-pedalboards.iss
 done
 
 # generate version
