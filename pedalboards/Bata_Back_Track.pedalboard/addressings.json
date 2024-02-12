@@ -1,0 +1,26 @@
+{
+    "/bpm": [
+        {
+            "instance": "/graph/echo",
+            "port": "ldelay",
+            "label": "L Delay",
+            "minimum": 0.5,
+            "maximum": 48,
+            "steps": 19,
+            "tempo": true,
+            "dividers": 5.333,
+            "page": null
+        },
+        {
+            "instance": "/graph/echo",
+            "port": "rhaasdelay",
+            "label": "Right Haas Delay",
+            "minimum": 0.5,
+            "maximum": 48,
+            "steps": 19,
+            "tempo": true,
+            "dividers": 2.666,
+            "page": null
+        }
+    ]
+}
