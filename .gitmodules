@@ -16,3 +16,6 @@
 [submodule "src/PawPaw"]
 	path = src/PawPaw
 	url = https://github.com/DISTRHO/PawPaw.git
+[submodule "src/DPF"]
+	path = src/DPF
+	url = https://github.com/DISTRHO/DPF.git

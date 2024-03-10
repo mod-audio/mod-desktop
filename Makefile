@@ -161,6 +161,7 @@ TARGETS += build/styles/qwindowsvistastyle.dll
 else
 TARGETS += build/jack/alsa_midi.so
 TARGETS += build/jack/jack_alsa.so
+TARGETS += build/jack/jack_desktop.so
 TARGETS += build/jack/jack_dummy.so
 TARGETS += build/jack/jack_portaudio.so
 TARGETS += build/jack/jack-session-alsamidi.conf
