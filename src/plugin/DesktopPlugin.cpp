@@ -190,34 +190,15 @@ public:
           stop();
     }
 
-    bool start(const uint32_t sampleRate)
+    bool start(const char* const args[])
     {
-        const String sampleRateStr(sampleRate);
-
-        #define P "/home/falktx/Source/MOD/mod-app/build"
-
-        const char* const args[] = {
-            "jackd", "-R", "-S", "-n", "mod-desktop", "-C", P "/jack/jack-session.conf", "-d", "desktop", "-r", sampleRateStr.buffer(), nullptr
-        };
-
-        // FIXME
-        setenv("LD_LIBRARY_PATH", P, 1);
-        setenv("JACK_DRIVER_DIR", P "/jack", 1);
-        setenv("MOD_DATA_DIR", P "/data", 1);
-        setenv("MOD_FACTORY_PEDALBOARDS_DIR", P "/pedalboards", 1);
-        setenv("MOD_DESKTOP", "1", 1);
-        setenv("LANG", "en_US.UTF-8", 1);
-        setenv("LV2_PATH", P "/plugins", 1);
-
-        #undef P
-
         const pid_t ret = pid = vfork();
 
         switch (ret)
         {
         // child process
         case 0:
-            execvp("/usr/bin/jackd", const_cast<char* const*>(args));
+            execvp(args[0], const_cast<char* const*>(args));
 
             d_stderr2("exec failed: %d:%s", errno, std::strerror(errno));
             _exit(1);
@@ -300,6 +281,7 @@ public:
 class DesktopPlugin : public Plugin
 {
     ChildProcess jackd;
+    ChildProcess mod_ui;
     SharedMemory shm;
     bool processing = false;
     float fParameters[24] = {};
@@ -316,7 +298,26 @@ public:
         if (isDummyInstance())
             return;
 
-        if (shm.init() && jackd.start(getSampleRate()))
+        #define P "/home/falktx/Source/MOD/mod-app/build"
+
+        // FIXME
+        setenv("LD_LIBRARY_PATH", P, 1);
+        setenv("JACK_DRIVER_DIR", P "/jack", 1);
+        setenv("MOD_DATA_DIR", P "/data", 1);
+        setenv("MOD_FACTORY_PEDALBOARDS_DIR", P "/pedalboards", 1);
+        setenv("MOD_DESKTOP", "1", 1);
+        setenv("LANG", "en_US.UTF-8", 1);
+        setenv("LV2_PATH", P "/plugins", 1);
+
+        const String sampleRateStr(static_cast<int>(getSampleRate()));
+        const char* const jackd_args[] = {
+            P "/jackd", "-R", "-S", "-n", "mod-desktop", "-C", P "/jack/jack-session.conf", "-d", "desktop", "-r", sampleRateStr.buffer(), nullptr
+        };
+        const char* const mod_ui_args[] = {
+            P "/mod-ui", nullptr
+        };
+
+        if (shm.init() && jackd.start(jackd_args) && mod_ui.start(mod_ui_args))
         {
             processing = true;
             shm.getAudioData(fInBuffers);
@@ -326,6 +327,7 @@ public:
 
     ~DesktopPlugin()
     {
+        mod_ui.stop();
         jackd.stop();
         shm.deinit();
 
@@ -554,11 +556,16 @@ protected:
 
     void sampleRateChanged(const double sampleRate) override
     {
-        if (processing)
-        {
-            jackd.stop();
-            jackd.start(sampleRate);
-        }
+        if (! processing)
+            return;
+
+        const String sampleRateStr(static_cast<int>(sampleRate));
+        const char* const jackd_args[] = {
+            P "/jackd", "-R", "-S", "-n", "mod-desktop", "-C", P "/jack/jack-session.conf", "-d", "desktop", "-r", sampleRateStr.buffer(), nullptr
+        };
+
+        jackd.stop();
+        jackd.start(jackd_args);
     }
 
     // -------------------------------------------------------------------------------------------------------
