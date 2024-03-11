@@ -96,6 +96,7 @@ TARGETS += build/mod-desktop.app/Contents/Frameworks/QtOpenGL.framework
 TARGETS += build/mod-desktop.app/Contents/Frameworks/QtPrintSupport.framework
 TARGETS += build/mod-desktop.app/Contents/Frameworks/QtSvg.framework
 TARGETS += build/mod-desktop.app/Contents/Frameworks/QtWidgets.framework
+TARGETS += build/mod-desktop.app/Contents/LV2
 TARGETS += build/mod-desktop.app/Contents/MacOS/jackd
 TARGETS += build/mod-desktop.app/Contents/MacOS/jack/jack-session.conf
 TARGETS += build/mod-desktop.app/Contents/MacOS/jack/jack_coreaudio.so
@@ -115,7 +116,6 @@ TARGETS += build/mod-desktop.app/Contents/MacOS/modtools
 TARGETS += build/mod-desktop.app/Contents/PlugIns/generic/libqtuiotouchplugin.dylib
 TARGETS += build/mod-desktop.app/Contents/PlugIns/iconengines/libqsvgicon.dylib
 TARGETS += build/mod-desktop.app/Contents/PlugIns/imageformats/libqsvg.dylib
-TARGETS += build/mod-desktop.app/Contents/PlugIns/LV2
 TARGETS += build/mod-desktop.app/Contents/PlugIns/platforms/libqcocoa.dylib
 TARGETS += build/mod-desktop.app/Contents/PlugIns/styles/libqmacstyle.dylib
 TARGETS += build/mod-desktop.app/Contents/Resources/default.pedalboard
@@ -408,8 +408,8 @@ build/mod-desktop.app/Contents/PlugIns/imageformats/libq%.dylib: $(PAWPAW_PREFIX
 	@mkdir -p build/mod-desktop.app/Contents/PlugIns/imageformats
 	ln -sf $(abspath $<) $@
 
-build/mod-desktop.app/Contents/PlugIns/LV2:
-	@mkdir -p build/mod-desktop.app/Contents/PlugIns
+build/mod-desktop.app/Contents/LV2:
+	@mkdir -p build/mod-desktop.app/Contents
 	@mkdir -p build/plugins
 	ln -sf $(abspath build/plugins) $@
 

@@ -13,18 +13,18 @@ else
     PAWPAW_PREFIX="${HOME}/PawPawBuilds/targets/macos-universal-10.15"
 fi
 
-rm -rf build/pkg build/*.pkg
+rm -rf build/dmg build/*.dmg
 rm -rf mod-ui/mod/__pycache__
 rm -rf mod-ui/mod/communication/__pycache__
 rm -rf mod-ui/modtools/__pycache__
 ./utils/pack-html.sh
 
-# create pkg dir for placing patched app bundle inside
-mkdir build/pkg
-gcp -rL "build/mod-desktop.app" "build/pkg/MOD Desktop.app"
+# create dmg dir for placing patched app bundle inside
+mkdir build/dmg
+gcp -rL "build/mod-desktop.app" "build/dmg/MOD Desktop.app"
 
 # patch rpath for Qt libs and jack tools
-pushd "build/pkg/MOD Desktop.app/Contents"
+pushd "build/dmg/MOD Desktop.app/Contents"
 
 rm -rf Frameworks/*/*.prl
 rm -rf Frameworks/*/Headers
@@ -61,10 +61,6 @@ if [ -n "${CODESIGN_APP_IDENTITY}" ]; then
     security import codesign.p12 -f pkcs12 -P "${CODESIGN_APP_P12_PASSWORD}" -k build.keychain -T /usr/bin/codesign -T /usr/bin/security
     rm codesign.p12
 
-    echo "${CODESIGN_PKG_P12_CONTENTS}" | base64 -d -o codesign.p12
-    security import codesign.p12 -f pkcs12 -P "${CODESIGN_PKG_P12_PASSWORD}" -k build.keychain -T /usr/bin/pkgbuild -T /usr/bin/productbuild -T /usr/bin/security
-    rm codesign.p12
-
     security set-key-partition-list -S apple-tool:,apple: -k dummypassword build.keychain
     security list-keychains -d user -s build.keychain login.keychain
 
@@ -90,33 +86,21 @@ if [ -n "${CODESIGN_APP_IDENTITY}" ]; then
         --option runtime \
         --entitlements "utils/macos/entitlements.plist" \
         "build/pkg/MOD Desktop.app"
-
-    PKG_SIGN_ARGS=(--sign "${CODESIGN_PKG_IDENTITY}")
 fi
 
-# create base app pkg
-pkgbuild \
-  --identifier "audio.mod.desktop-app" \
-  --component-plist "utils/macos/build.plist" \
-  --install-location "/Applications/" \
-  --root "${PWD}/build/pkg/" \
-  "${PKG_SIGN_ARGS[@]}" \
-  build/mod-desktop.pkg
+# create dmg
+hdiutil create "mod-desktop-$(cat VERSION)-macOS.dmg" -srcfolder build/dmg -volname "MOD Desktop" -fs HFS+ -ov
 
-# create final pkg
-sed -e "s|@builddir@|${PWD}/build|" \
-    utils/macos/package.xml.in > build/package.xml
-
-productbuild \
-  --distribution build/package.xml \
-  --identifier "audio.mod.desktop-app" \
-  --package-path "${PWD}/build" \
-  --version 0 \
-  "${PKG_SIGN_ARGS[@]}" \
-  mod-desktop-$(cat VERSION)-macOS.pkg
+if [ -n "${CODESIGN_IDENTITY}" ]; then
+    codesign -s "${MACOS_APP_DEV_ID}" \
+        --force \
+        --verbose \
+        --timestamp \
+        --option runtime \
+        --entitlements "utils/macos/entitlements.plist" \
+        "mod-desktop-$(cat VERSION)-macOS.dmg"
+    security delete-keychain build.keychain
+fi
 
 # cleanup
-rm -rf build/pkg
-[ -n "${CODESIGN_APP_IDENTITY}" ] && security delete-keychain build.keychain
-
-exit 0
+rm -rf build/dmg

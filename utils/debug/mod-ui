@@ -41,7 +41,7 @@ PYTHON="${EXE_WRAPPER} ${PAWPAW_PREFIX}/bin/python3${APP_EXT}"
 
 LV2_PATH="$(convert_path "${DOCS_DIR}/MOD Desktop/lv2")"
 if [ -e mod-desktop.app ]; then
-    LV2_PATH+=":$(convert_path $(pwd)/mod-desktop.app/Contents/PlugIns/LV2)"
+    LV2_PATH+=":$(convert_path $(pwd)/mod-desktop.app/Contents/LV2)"
 else
     LV2_PATH="${PATH_SEP}$(convert_path $(pwd)/plugins)"
 fi

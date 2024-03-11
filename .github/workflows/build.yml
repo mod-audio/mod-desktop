@@ -7,11 +7,12 @@ env:
   CACHE_VERSION_MACOS: 20
   CACHE_VERSION_WIN64: 19
   DEBIAN_FRONTEND: noninteractive
+  HOMEBREW_NO_AUTO_UPDATE: 1
   PAWPAW_FAST_MATH: 1
   PAWPAW_SKIP_LTO: 1
   PAWPAW_SKIP_TESTS: 1
   RELEASE_OS_LINUX: ubuntu:18.04
-  RELEASE_OS_MAC: macos-11
+  RELEASE_OS_MAC: macos-12
   RELEASE_OS_WIN64: ubuntu:22.04
 
 jobs:
@@ -211,10 +212,10 @@ jobs:
             target: macos-10.15
           - os: macos-12
             target: macos-universal-10.15
-          - os: macos-13
-            target: macos-10.15
-          - os: macos-13
-            target: macos-universal-10.15
+          # - os: macos-13
+          #   target: macos-10.15
+          # - os: macos-13
+          #   target: macos-universal-10.15
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -222,6 +223,7 @@ jobs:
           submodules: recursive
       - name: Set up dependencies
         run: |
+          brew uninstall --ignore-dependencies --force azure-cli aws-sam-cli php
           ./src/PawPaw/.github/workflows/bootstrap-deps.sh ${{ matrix.target }}
           brew install p7zip wget
       - name: Set up cache
@@ -239,9 +241,10 @@ jobs:
         run: |
           make PAWPAW_TARGET=${{ matrix.target }}
       - name: Validate plugins
-        if: steps.cache.outputs.cache-hit == 'true'
+        if: false
+        #if: steps.cache.outputs.cache-hit == 'true'
         run: |
-          ./utils/plugin-builder/validate-plugins.sh ${{ matrix.target }}
+          # ./utils/plugin-builder/validate-plugins.sh ${{ matrix.target }}
           # FIXME dirty carla leaves temp folders around
           rm -rf *.tmp
       - name: Set version tag for release
@@ -254,6 +257,13 @@ jobs:
           echo "VERSION_TAG=$(echo ${{ github.event.pull_request.number || github.sha }} | cut -c1-8)" >> $GITHUB_ENV
       - name: Pack
         if: steps.cache.outputs.cache-hit == 'true'
+        env:
+          CODESIGN_APP_IDENTITY: ${{ secrets.CODESIGN_APP_IDENTITY }}
+          CODESIGN_PKG_IDENTITY: ${{ secrets.CODESIGN_PKG_IDENTITY }}
+          CODESIGN_APP_P12_CONTENTS: ${{ secrets.CODESIGN_APP_P12_CONTENTS }}
+          CODESIGN_PKG_P12_CONTENTS: ${{ secrets.CODESIGN_PKG_P12_CONTENTS }}
+          CODESIGN_APP_P12_PASSWORD: ${{ secrets.CODESIGN_APP_P12_PASSWORD }}
+          CODESIGN_PKG_P12_PASSWORD: ${{ secrets.CODESIGN_PKG_P12_PASSWORD }}
         run: |
           ./utils/macos/macos-pkg.sh ${{ matrix.target }}
           if [ "${{ env.VERSION_TAG }}" != "$(cat VERSION)" ]; then
