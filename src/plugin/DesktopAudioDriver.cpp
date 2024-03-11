@@ -246,16 +246,35 @@ SERVER_EXPORT jack_driver_desc_t* driver_get_descriptor()
 {
     printf("%03d:%s\n", __LINE__, __FUNCTION__);
     jack_driver_desc_filler_t filler;
-    return jack_driver_descriptor_construct("desktop", JackDriverMaster, "MOD Desktop plugin audio backend", &filler);
+    jack_driver_param_value_t value;
+
+    jack_driver_desc_t* const desc = jack_driver_descriptor_construct("desktop", JackDriverMaster, "MOD Desktop plugin audio backend", &filler);
+
+    value.ui = 48000U;
+    jack_driver_descriptor_add_parameter(desc, &filler, "rate", 'r', JackDriverParamUInt, &value, NULL, "Sample rate", NULL);
+
+    return desc;
 }
 
 SERVER_EXPORT Jack::JackDriverClientInterface* driver_initialize(Jack::JackLockedEngine* engine, Jack::JackSynchro* table, const JSList* params)
 {
-    printf("zzz %03d:%s\n", __LINE__, __FUNCTION__);
-    Jack::JackDriverClientInterface* driver = new Jack::DesktopAudioDriver("system", "mod-desktop", engine, table);
-    printf("zzz %03d:%s\n", __LINE__, __FUNCTION__);
+    jack_nframes_t srate = 48000;
 
-    if (driver->Open(128, 48000, true, true, 2, 2, false, "", "", 0, 0) == 0)
+    for (const JSList* node = params; node; node = jack_slist_next(node))
+    {
+        const jack_driver_param_t* const param = (const jack_driver_param_t *) node->data;
+
+        switch (param->character)
+        {
+        case 'r':
+            srate = param->value.ui;
+            break;
+        }
+    }
+
+    Jack::JackDriverClientInterface* driver = new Jack::DesktopAudioDriver("system", "mod-desktop", engine, table);
+
+    if (driver->Open(128, srate, true, true, 2, 2, false, "", "", 0, 0) == 0)
     {
         printf("%03d:%s OK\n", __LINE__, __FUNCTION__);
         return driver;

@@ -190,12 +190,14 @@ public:
           stop();
     }
 
-    bool start()
+    bool start(const uint32_t sampleRate)
     {
+        const String sampleRateStr(sampleRate);
+
         #define P "/home/falktx/Source/MOD/mod-app/build"
 
-        static constexpr const char* const args[] = {
-            "jackd", "-R", "-S", "-n", "mod-desktop", "-C", P "/jack/jack-session.conf", "-d", "desktop", nullptr
+        const char* const args[] = {
+            "jackd", "-R", "-S", "-n", "mod-desktop", "-C", P "/jack/jack-session.conf", "-d", "desktop", "-r", sampleRateStr.buffer(), nullptr
         };
 
         // FIXME
@@ -314,11 +316,10 @@ public:
         if (isDummyInstance())
             return;
 
-        if (shm.init() && jackd.start())
+        if (shm.init() && jackd.start(getSampleRate()))
         {
-            shm.getAudioData(fInBuffers);
             processing = true;
-
+            shm.getAudioData(fInBuffers);
             bufferSizeChanged(getBufferSize());
         }
     }
@@ -549,6 +550,15 @@ protected:
         fOutBuffers[1] = new float[bufferSize + 256];
         std::memset(fOutBuffers[0], 0, sizeof(float) * (bufferSize + 256));
         std::memset(fOutBuffers[1], 0, sizeof(float) * (bufferSize + 256));
+    }
+
+    void sampleRateChanged(const double sampleRate) override
+    {
+        if (processing)
+        {
+            jackd.stop();
+            jackd.start(sampleRate);
+        }
     }
 
     // -------------------------------------------------------------------------------------------------------
