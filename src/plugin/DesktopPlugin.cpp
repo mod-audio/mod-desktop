@@ -3,280 +3,14 @@
 
 #include "DistrhoPlugin.hpp"
 
-#include "extra/Sleep.hpp"
+#include "Time.hpp"
 
-#include <cerrno>
-#include <ctime>
-
-#include <fcntl.h>
-#include <signal.h>
-#include <syscall.h>
-#include <sys/mman.h>
-#include <sys/time.h>
-#include <sys/wait.h>
-#include <linux/futex.h>
+#include "ChildProcess.hpp"
+#include "SharedMemory.hpp"
 
 START_NAMESPACE_DISTRHO
 
 // -----------------------------------------------------------------------------------------------------------
-
-/*
- * Get a monotonically-increasing time in milliseconds.
- */
-static inline
-uint32_t d_gettime_ms() noexcept
-{
-   #if defined(DISTRHO_OS_MAC)
-    static const time_t s = clock_gettime_nsec_np(CLOCK_UPTIME_RAW) / 1000000;
-    return (clock_gettime_nsec_np(CLOCK_UPTIME_RAW) / 1000000) - s;
-   #elif defined(DISTRHO_OS_WINDOWS)
-    return static_cast<uint32_t>(timeGetTime());
-   #else
-    static struct {
-        timespec ts;
-        int r;
-        uint32_t ms;
-    } s = { {}, clock_gettime(CLOCK_MONOTONIC, &s.ts), static_cast<uint32_t>(s.ts.tv_sec * 1000 +
-                                                                             s.ts.tv_nsec / 1000000) };
-    timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (ts.tv_sec * 1000 + ts.tv_nsec / 1000000) - s.ms;
-   #endif
-}
-
-// -----------------------------------------------------------------------------------------------------------
-
-struct SharedMemoryData {
-    uint32_t magic;
-    int32_t sem1;
-    int32_t sem2;
-    int32_t padding1;
-    // uint8_t sem[32];
-    uint16_t midiEventCount;
-    uint16_t midiFrames[511];
-    uint8_t midiData[511 * 4];
-    uint8_t padding2[4];
-    float audio[];
-};
-
-const size_t kSharedMemoryDataSize = sizeof(SharedMemoryData) + sizeof(float) * 128 * 2;
-
-static inline
-void shm_sem_rt_post(SharedMemoryData* const data)
-{
-    const bool unlocked = __sync_bool_compare_and_swap(&data->sem1, 0, 1);
-    DISTRHO_SAFE_ASSERT_RETURN(unlocked,);
-    ::syscall(__NR_futex, &data->sem1, FUTEX_WAKE, 1, nullptr, nullptr, 0);
-}
-
-static inline
-bool shm_sem_rt_wait(SharedMemoryData* const data)
-{
-    const timespec timeout = { 1, 0 };
-
-    for (;;)
-    {
-        if (__sync_bool_compare_and_swap(&data->sem2, 1, 0))
-            return true;
-
-        if (::syscall(__NR_futex, &data->sem2, FUTEX_WAIT, 0, &timeout, nullptr, 0) != 0)
-            if (errno != EAGAIN && errno != EINTR)
-                return false;
-    }
-}
-
-class SharedMemory {
-    SharedMemoryData* data = nullptr;
-    int fd = -1;
-
-public:
-    SharedMemory()
-    {
-    }
-
-    ~SharedMemory()
-    {
-        deinit();
-    }
-
-    bool init()
-    {
-        fd = shm_open("/mod-desktop-test1", O_CREAT|O_EXCL|O_RDWR, 0600);
-        DISTRHO_SAFE_ASSERT_RETURN(fd >= 0, false);
-
-        {
-            const int ret = ::ftruncate(fd, static_cast<off_t>(kSharedMemoryDataSize));
-            DISTRHO_SAFE_ASSERT_RETURN(ret == 0, false);
-        }
-
-        {
-            void* const ptr = ::mmap(nullptr, kSharedMemoryDataSize, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_LOCKED, fd, 0);
-            DISTRHO_SAFE_ASSERT_RETURN(ptr != nullptr, false);
-            DISTRHO_SAFE_ASSERT_RETURN(ptr != MAP_FAILED, false);
-
-            data = static_cast<SharedMemoryData*>(ptr);
-        }
-
-        std::memset(data, 0, kSharedMemoryDataSize);
-        data->magic = 1337;
-
-        return true;
-    }
-
-    void deinit()
-    {
-        if (data != nullptr)
-        {
-            ::munmap(data, kSharedMemoryDataSize);
-            data = nullptr;
-        }
-
-        if (fd >= 0)
-        {
-            close(fd);
-            shm_unlink("/mod-desktop-test1");
-            fd = -1;
-        }
-    }
-
-    void getAudioData(float* audio[2])
-    {
-        DISTRHO_SAFE_ASSERT_RETURN(data != nullptr,);
-
-        audio[0] = data->audio;
-        audio[1] = data->audio + 128;
-    }
-
-    void reset()
-    {
-        if (data == nullptr)
-            return;
-
-        data->midiEventCount = 0;
-        std::memset(data->audio, 0, sizeof(float) * 128 * 2);
-    }
-
-    bool process(float** output, const uint32_t outputOffset)
-    {
-        // unlock RT waiter
-        shm_sem_rt_post(data);
-
-        // wait for processing
-        if (! shm_sem_rt_wait(data))
-            return false;
-
-        // copy processed buffer
-        std::memcpy(output[0] + outputOffset, data->audio, sizeof(float) * 128);
-        std::memcpy(output[1] + outputOffset, data->audio + 128, sizeof(float) * 128);
-
-        return true;
-    }
-};
-
-// -----------------------------------------------------------------------------------------------------------
-
-class ChildProcess
-{
-    pid_t pid = 0;
-
-public:
-    ChildProcess()
-    {
-    }
-
-    ~ChildProcess()
-    {
-        if (pid != 0)
-          stop();
-    }
-
-    bool start(const char* const args[])
-    {
-        const pid_t ret = pid = vfork();
-
-        switch (ret)
-        {
-        // child process
-        case 0:
-            execvp(args[0], const_cast<char* const*>(args));
-
-            d_stderr2("exec failed: %d:%s", errno, std::strerror(errno));
-            _exit(1);
-            break;
-
-        // error
-        case -1:
-            d_stderr2("vfork() failed: %d:%s", errno, std::strerror(errno));
-            break;
-        }
-
-        return ret > 0;
-    }
-
-    void stop()
-    {
-        DISTRHO_SAFE_ASSERT_RETURN(pid != 0,);
-
-        const uint32_t timeout = d_gettime_ms() + 2000;
-        const pid_t opid = pid;
-        pid_t ret;
-        bool sendTerminate = true;
-        pid = 0;
-
-        for (;;)
-        {
-            try {
-                ret = ::waitpid(opid, nullptr, WNOHANG);
-            } DISTRHO_SAFE_EXCEPTION_BREAK("waitpid");
-
-            switch (ret)
-            {
-            case -1:
-                if (errno == ECHILD)
-                {
-                    // success, child doesn't exist
-                    return;
-                }
-                else
-                {
-                    d_stderr("ChildProcess::stop() - waitpid failed: %d:%s", errno, std::strerror(errno));
-                    return;
-                }
-                break;
-
-            case 0:
-                if (sendTerminate)
-                {
-                    sendTerminate = false;
-                    ::kill(opid, SIGTERM);
-                }
-                if (d_gettime_ms() < timeout)
-                {
-                    d_msleep(5);
-                    continue;
-                }
-                d_stderr("ChildProcess::stop() - timed out");
-                ::kill(opid, SIGKILL);
-                ::waitpid(opid, nullptr, WNOHANG);
-                break;
-
-            default:
-                if (ret == opid)
-                {
-                    // success
-                    return;
-                }
-                else
-                {
-                    d_stderr("ChildProcess::stop() - got wrong pid %i (requested was %i)", int(ret), int(opid));
-                    return;
-                }
-            }
-
-            break;
-        }
-    }
-};
 
 class DesktopPlugin : public Plugin
 {
@@ -284,12 +18,12 @@ class DesktopPlugin : public Plugin
     ChildProcess mod_ui;
     SharedMemory shm;
     bool processing = false;
-    float fParameters[24] = {};
-    float* fInBuffers[2] = {};
-    float* fOutBuffers[2] = {};
-    uint32_t fNumTempInFrames = 0;
-    uint32_t fNumTempOutFrames = 0;
-    bool fFirstTimeProcessing = true;
+    bool firstTimeProcessing = true;
+    float parameters[24] = {};
+    float* shmBuffers[2] = {};
+    float* tmpBuffers[2] = {};
+    uint32_t numFramesInShmBuffer = 0;
+    uint32_t numFramesInTmpBuffer = 0;
 
 public:
     DesktopPlugin()
@@ -297,17 +31,6 @@ public:
     {
         if (isDummyInstance())
             return;
-
-        #define P "/home/falktx/Source/MOD/mod-app/build"
-
-        // FIXME
-        setenv("LD_LIBRARY_PATH", P, 1);
-        setenv("JACK_DRIVER_DIR", P "/jack", 1);
-        setenv("MOD_DATA_DIR", P "/data", 1);
-        setenv("MOD_FACTORY_PEDALBOARDS_DIR", P "/pedalboards", 1);
-        setenv("MOD_DESKTOP", "1", 1);
-        setenv("LANG", "en_US.UTF-8", 1);
-        setenv("LV2_PATH", P "/plugins", 1);
 
         const String sampleRateStr(static_cast<int>(getSampleRate()));
         const char* const jackd_args[] = {
@@ -320,7 +43,7 @@ public:
         if (shm.init() && jackd.start(jackd_args) && mod_ui.start(mod_ui_args))
         {
             processing = true;
-            shm.getAudioData(fInBuffers);
+            shm.getAudioData(shmBuffers);
             bufferSizeChanged(getBufferSize());
         }
     }
@@ -331,8 +54,8 @@ public:
         jackd.stop();
         shm.deinit();
 
-        delete[] fOutBuffers[0];
-        delete[] fOutBuffers[1];
+        delete[] tmpBuffers[0];
+        delete[] tmpBuffers[1];
     }
 
 protected:
@@ -435,7 +158,7 @@ protected:
     */
     float getParameterValue(const uint32_t index) const override
     {
-        return fParameters[index];
+        return parameters[index];
     }
 
    /**
@@ -443,7 +166,7 @@ protected:
     */
     void setParameterValue(const uint32_t index, const float value) override
     {
-        fParameters[index] = value;
+        parameters[index] = value;
     }
 
    /**
@@ -460,8 +183,8 @@ protected:
     {
         shm.reset();
 
-        fFirstTimeProcessing = true;
-        fNumTempInFrames = fNumTempOutFrames = 0;
+        firstTimeProcessing = true;
+        numFramesInShmBuffer = numFramesInTmpBuffer = 0;
     }
 
     void deactivate()
@@ -480,20 +203,20 @@ protected:
             return;
         }
 
-        uint32_t ti = fNumTempInFrames;
-        uint32_t to = fNumTempOutFrames;
+        uint32_t ti = numFramesInShmBuffer;
+        uint32_t to = numFramesInTmpBuffer;
         uint32_t framesDone = 0;
 
         for (uint32_t i = 0; i < frames; ++i)
         {
-            fInBuffers[0][ti] = inputs[0][i];
-            fInBuffers[1][ti] = inputs[1][i];
+            shmBuffers[0][ti] = inputs[0][i];
+            shmBuffers[1][ti] = inputs[1][i];
 
             if (++ti == 128)
             {
                 ti = 0;
 
-                if (! shm.process(fOutBuffers, to))
+                if (! shm.process(tmpBuffers, to))
                 {
                     d_stdout("shm processing failed");
                     processing = false;
@@ -504,27 +227,27 @@ protected:
 
                 to += 128;
 
-                if (fFirstTimeProcessing)
+                if (firstTimeProcessing)
                 {
-                    fFirstTimeProcessing = false;
+                    firstTimeProcessing = false;
                     std::memset(outputs[0], 0, sizeof(float) * i);
                     std::memset(outputs[1], 0, sizeof(float) * i);
                 }
                 else
                 {
                     const uint32_t framesToCopy = std::min(128u, frames - framesDone);
-                    std::memcpy(outputs[0] + framesDone, fOutBuffers[0], sizeof(float) * framesToCopy);
-                    std::memcpy(outputs[1] + framesDone, fOutBuffers[1], sizeof(float) * framesToCopy);
+                    std::memcpy(outputs[0] + framesDone, tmpBuffers[0], sizeof(float) * framesToCopy);
+                    std::memcpy(outputs[1] + framesDone, tmpBuffers[1], sizeof(float) * framesToCopy);
 
                     to -= framesToCopy;
                     framesDone += framesToCopy;
-                    std::memmove(fOutBuffers[0], fOutBuffers[0] + framesToCopy, sizeof(float) * to);
-                    std::memmove(fOutBuffers[1], fOutBuffers[1] + framesToCopy, sizeof(float) * to);
+                    std::memmove(tmpBuffers[0], tmpBuffers[0] + framesToCopy, sizeof(float) * to);
+                    std::memmove(tmpBuffers[1], tmpBuffers[1] + framesToCopy, sizeof(float) * to);
                 }
             }
         }
 
-        if (fFirstTimeProcessing)
+        if (firstTimeProcessing)
         {
             std::memset(outputs[0], 0, sizeof(float) * frames);
             std::memset(outputs[1], 0, sizeof(float) * frames);
@@ -532,26 +255,26 @@ protected:
         else if (framesDone != frames)
         {
             const uint32_t framesToCopy = frames - framesDone;
-            std::memcpy(outputs[0] + framesDone, fOutBuffers[0], sizeof(float) * framesToCopy);
-            std::memcpy(outputs[1] + framesDone, fOutBuffers[1], sizeof(float) * framesToCopy);
+            std::memcpy(outputs[0] + framesDone, tmpBuffers[0], sizeof(float) * framesToCopy);
+            std::memcpy(outputs[1] + framesDone, tmpBuffers[1], sizeof(float) * framesToCopy);
 
             to -= framesToCopy;
-            std::memmove(fOutBuffers[0], fOutBuffers[0] + framesToCopy, sizeof(float) * to);
-            std::memmove(fOutBuffers[1], fOutBuffers[1] + framesToCopy, sizeof(float) * to);
+            std::memmove(tmpBuffers[0], tmpBuffers[0] + framesToCopy, sizeof(float) * to);
+            std::memmove(tmpBuffers[1], tmpBuffers[1] + framesToCopy, sizeof(float) * to);
         }
 
-        fNumTempInFrames = ti;
-        fNumTempOutFrames = to;
+        numFramesInShmBuffer = ti;
+        numFramesInTmpBuffer = to;
     }
 
     void bufferSizeChanged(const uint32_t bufferSize) override
     {
-        delete[] fOutBuffers[0];
-        delete[] fOutBuffers[1];
-        fOutBuffers[0] = new float[bufferSize + 256];
-        fOutBuffers[1] = new float[bufferSize + 256];
-        std::memset(fOutBuffers[0], 0, sizeof(float) * (bufferSize + 256));
-        std::memset(fOutBuffers[1], 0, sizeof(float) * (bufferSize + 256));
+        delete[] tmpBuffers[0];
+        delete[] tmpBuffers[1];
+        tmpBuffers[0] = new float[bufferSize + 256];
+        tmpBuffers[1] = new float[bufferSize + 256];
+        std::memset(tmpBuffers[0], 0, sizeof(float) * (bufferSize + 256));
+        std::memset(tmpBuffers[1], 0, sizeof(float) * (bufferSize + 256));
     }
 
     void sampleRateChanged(const double sampleRate) override
