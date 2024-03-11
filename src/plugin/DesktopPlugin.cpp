@@ -103,7 +103,7 @@ public:
     {
         fd = shm_open("/mod-desktop-test1", O_CREAT|O_EXCL|O_RDWR, 0600);
         DISTRHO_SAFE_ASSERT_RETURN(fd >= 0, false);
-        
+
         {
             const int ret = ::ftruncate(fd, static_cast<off_t>(kSharedMemoryDataSize));
             DISTRHO_SAFE_ASSERT_RETURN(ret == 0, false);
@@ -139,14 +139,25 @@ public:
         }
     }
 
-    bool process(const float** const input, float** output)
+    void getAudioData(float* audio[2])
     {
-        DISTRHO_SAFE_ASSERT_RETURN(data != nullptr, false);
+        DISTRHO_SAFE_ASSERT_RETURN(data != nullptr,);
 
-        // place audio buffer
-        std::memcpy(data->audio, input[0], sizeof(float) * 128);
-        std::memcpy(data->audio + 128, input[1], sizeof(float) * 128);
+        audio[0] = data->audio;
+        audio[1] = data->audio + 128;
+    }
 
+    void reset()
+    {
+        if (data == nullptr)
+            return;
+
+        data->midiEventCount = 0;
+        std::memset(data->audio, 0, sizeof(float) * 128 * 2);
+    }
+
+    bool process(float** output, const uint32_t outputOffset)
+    {
         // unlock RT waiter
         shm_sem_rt_post(data);
 
@@ -154,9 +165,9 @@ public:
         if (! shm_sem_rt_wait(data))
             return false;
 
-        // copy processed buffers
-        std::memcpy(output[0], data->audio, sizeof(float) * 128);
-        std::memcpy(output[1], data->audio + 128, sizeof(float) * 128);
+        // copy processed buffer
+        std::memcpy(output[0] + outputOffset, data->audio, sizeof(float) * 128);
+        std::memcpy(output[1] + outputOffset, data->audio + 128, sizeof(float) * 128);
 
         return true;
     }
@@ -290,6 +301,11 @@ class DesktopPlugin : public Plugin
     SharedMemory shm;
     bool processing = false;
     float fParameters[24] = {};
+    float* fInBuffers[2] = {};
+    float* fOutBuffers[2] = {};
+    uint32_t fNumTempInFrames = 0;
+    uint32_t fNumTempOutFrames = 0;
+    bool fFirstTimeProcessing = true;
 
 public:
     DesktopPlugin()
@@ -299,13 +315,21 @@ public:
             return;
 
         if (shm.init() && jackd.start())
+        {
+            shm.getAudioData(fInBuffers);
             processing = true;
+
+            bufferSizeChanged(getBufferSize());
+        }
     }
 
     ~DesktopPlugin()
     {
         jackd.stop();
         shm.deinit();
+
+        delete[] fOutBuffers[0];
+        delete[] fOutBuffers[1];
     }
 
 protected:
@@ -429,24 +453,102 @@ protected:
    /* --------------------------------------------------------------------------------------------------------
     * Process */
 
+    void activate()
+    {
+        shm.reset();
+
+        fFirstTimeProcessing = true;
+        fNumTempInFrames = fNumTempOutFrames = 0;
+    }
+
+    void deactivate()
+    {
+    }
+
    /**
       Run/process function for plugins without MIDI input.
     */
     void run(const float** const inputs, float** const outputs, const uint32_t frames) override
     {
-        if (processing)
+        if (! processing)
         {
-            if (frames != 128)
-                d_stdout("frames != 128");
-            else if (shm.process(inputs, outputs))
-                return;
-
-            d_stdout("shm processing failed");
-            processing = false;
+            std::memset(outputs[0], 0, sizeof(float) * frames);
+            std::memset(outputs[1], 0, sizeof(float) * frames);
+            return;
         }
 
-        std::memset(outputs[0], 0, sizeof(float) * frames);
-        std::memset(outputs[1], 0, sizeof(float) * frames);
+        uint32_t ti = fNumTempInFrames;
+        uint32_t to = fNumTempOutFrames;
+        uint32_t framesDone = 0;
+
+        for (uint32_t i = 0; i < frames; ++i)
+        {
+            fInBuffers[0][ti] = inputs[0][i];
+            fInBuffers[1][ti] = inputs[1][i];
+
+            if (++ti == 128)
+            {
+                ti = 0;
+
+                if (! shm.process(fOutBuffers, to))
+                {
+                    d_stdout("shm processing failed");
+                    processing = false;
+                    std::memset(outputs[0], 0, sizeof(float) * frames);
+                    std::memset(outputs[1], 0, sizeof(float) * frames);
+                    return;
+                }
+
+                to += 128;
+
+                if (fFirstTimeProcessing)
+                {
+                    fFirstTimeProcessing = false;
+                    std::memset(outputs[0], 0, sizeof(float) * i);
+                    std::memset(outputs[1], 0, sizeof(float) * i);
+                }
+                else
+                {
+                    const uint32_t framesToCopy = std::min(128u, frames - framesDone);
+                    std::memcpy(outputs[0] + framesDone, fOutBuffers[0], sizeof(float) * framesToCopy);
+                    std::memcpy(outputs[1] + framesDone, fOutBuffers[1], sizeof(float) * framesToCopy);
+
+                    to -= framesToCopy;
+                    framesDone += framesToCopy;
+                    std::memmove(fOutBuffers[0], fOutBuffers[0] + framesToCopy, sizeof(float) * to);
+                    std::memmove(fOutBuffers[1], fOutBuffers[1] + framesToCopy, sizeof(float) * to);
+                }
+            }
+        }
+
+        if (fFirstTimeProcessing)
+        {
+            std::memset(outputs[0], 0, sizeof(float) * frames);
+            std::memset(outputs[1], 0, sizeof(float) * frames);
+        }
+        else if (framesDone != frames)
+        {
+            const uint32_t framesToCopy = frames - framesDone;
+            std::memcpy(outputs[0] + framesDone, fOutBuffers[0], sizeof(float) * framesToCopy);
+            std::memcpy(outputs[1] + framesDone, fOutBuffers[1], sizeof(float) * framesToCopy);
+
+            to -= framesToCopy;
+            std::memmove(fOutBuffers[0], fOutBuffers[0] + framesToCopy, sizeof(float) * to);
+            std::memmove(fOutBuffers[1], fOutBuffers[1] + framesToCopy, sizeof(float) * to);
+        }
+
+        fNumTempInFrames = ti;
+        fNumTempOutFrames = to;
+    }
+
+    void bufferSizeChanged(const uint32_t bufferSize) override
+    {
+        delete[] fOutBuffers[0];
+        delete[] fOutBuffers[1];
+        fOutBuffers[0] = new float[bufferSize + 256];
+        fOutBuffers[1] = new float[bufferSize + 256];
+        std::memset(fOutBuffers[0], 0, sizeof(float) * (bufferSize + 256));
+        std::memset(fOutBuffers[1], 0, sizeof(float) * (bufferSize + 256));
     }
 
     // -------------------------------------------------------------------------------------------------------
