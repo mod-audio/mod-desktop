@@ -11,9 +11,7 @@ NAME = MOD-Desktop
 # Files to build
 
 FILES_DSP = \
-	DesktopPlugin.cpp \
-	zita-resampler/resampler.cc \
-	zita-resampler/resampler-table.cc
+	DesktopPlugin.cpp
 
 FILES_UI  = \
 	DesktopUI.cpp

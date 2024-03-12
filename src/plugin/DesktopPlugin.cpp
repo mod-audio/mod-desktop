@@ -179,7 +179,7 @@ protected:
    /* --------------------------------------------------------------------------------------------------------
     * Process */
 
-    void activate()
+    void activate() override
     {
         shm.reset();
 
@@ -187,7 +187,7 @@ protected:
         numFramesInShmBuffer = numFramesInTmpBuffer = 0;
     }
 
-    void deactivate()
+    void deactivate() override
     {
     }
 

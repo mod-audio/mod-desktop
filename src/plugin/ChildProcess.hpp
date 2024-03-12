@@ -24,7 +24,12 @@
 START_NAMESPACE_DISTRHO
 
 // FIXME
-#define P "/home/falktx/Source/MOD/mod-app/build"
+#if defined(DISTRHO_OS_MAC)
+# define P "/Users/falktx/Source/MOD/mod-app/build/mod-desktop.app/Contents"
+#elif defined(DISTRHO_OS_WINDOWS)
+#else
+# define P "/home/falktx/Source/MOD/mod-app/build"
+#endif
 
 // -----------------------------------------------------------------------------------------------------------
 
@@ -32,7 +37,7 @@ class ChildProcess
 {
    #ifdef _WIN32
    #else
-    pid_t pid = 0;
+    pid_t pid = -1;
    #endif
 
 public:
@@ -49,13 +54,22 @@ public:
     {
         // FIXME
         const char* const envp[] = {
+            "MOD_DESKTOP=1",
+            "LANG=en_US.UTF-8",
+           #if defined(DISTRHO_OS_MAC)
+            "DYLD_LIBRARY_PATH=" P "/MacOS",
+            "JACK_DRIVER_DIR=" P "/MacOS/jack",
+            "MOD_DATA_DIR=/Users/falktx/Documents/MOD Desktop",
+            "MOD_FACTORY_PEDALBOARDS_DIR=" P "/Resources/pedalboards",
+            "LV2_PATH=" P "/PlugIns/LV2", // FIXME
+           #elif defined(DISTRHO_OS_WINDOWS)
+           #else
             "LD_LIBRARY_PATH=" P,
             "JACK_DRIVER_DIR=" P "/jack",
             "MOD_DATA_DIR=" P "/data",
             "MOD_FACTORY_PEDALBOARDS_DIR=" P "/pedalboards",
-            "MOD_DESKTOP=1",
-            "LANG=en_US.UTF-8",
             "LV2_PATH=" P "/plugins",
+           #endif
             nullptr
         };
 
@@ -82,14 +96,14 @@ public:
 
     void stop(const uint32_t timeoutInMilliseconds = 2000)
     {
-        if (pid == 0)
+        if (pid <= 0)
             return;
 
         const uint32_t timeout = d_gettime_ms() + timeoutInMilliseconds;
         const pid_t opid = pid;
         pid_t ret;
         bool sendTerminate = true;
-        pid = 0;
+        pid = -1;
 
         for (;;)
         {
