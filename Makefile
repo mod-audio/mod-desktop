@@ -79,7 +79,7 @@ PAWPAW_PREFIX = $(PAWPAW_DIR)/targets/$(PAWPAW_TARGET)$(PAWPAW_SUFFIX)
 # ---------------------------------------------------------------------------------------------------------------------
 # List of files created by PawPaw bootstrap, to ensure we have run it at least once
 
-BOOTSTRAP_FILES  = $(PAWPAW_PREFIX)/bin/cxfreeze
+BOOTSTRAP_FILES  = $(PAWPAW_PREFIX)/bin/cxfreeze-quickstart
 BOOTSTRAP_FILES += $(PAWPAW_PREFIX)/bin/jackd$(APP_EXT)
 BOOTSTRAP_FILES += $(PAWPAW_PREFIX)/include/armadillo
 
@@ -144,6 +144,7 @@ TARGETS += build/pedalboards
 TARGETS += build/VERSION
 ifeq ($(WINDOWS),true)
 TARGETS += build/jack/jack_dummy.dll
+TARGETS += build/jack/jack_desktop.dll
 TARGETS += build/jack/jack_portaudio.dll
 TARGETS += build/jack/jack_winmme.dll
 TARGETS += build/libjack64.dll
@@ -276,10 +277,13 @@ TARGETS += $(foreach PLUGIN,$(PLUGINS),$(call PLUGIN_STAMP,$(PLUGIN)))
 # ---------------------------------------------------------------------------------------------------------------------
 
 all: $(TARGETS)
+	$(MAKE) -C src/plugin
 
 clean:
+	$(MAKE) clean -C src/DPF
 	$(MAKE) clean -C src/mod-host
 	$(MAKE) clean -C src/mod-ui/utils
+	$(MAKE) clean -C src/plugin
 	$(MAKE) clean -C src/systray
 	rm -rf build
 	rm -rf build-midi-merger
@@ -319,6 +323,9 @@ win64-app:
 
 win64-bootstrap:
 	./src/PawPaw/bootstrap-mod.sh win64
+
+win64-plugin:
+	./utils/run.sh win64 $(MAKE) -C src/plugin
 
 win64-plugins:
 	$(MAKE) PAWPAW_TARGET=win64 plugins

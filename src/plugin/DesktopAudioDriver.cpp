@@ -4,6 +4,8 @@
 #include "JackAudioDriver.h"
 #include "JackDriverLoader.h"
 #include "JackEngineControl.h"
+#include "JackLockedEngine.h"
+#include "JackMidiPort.h"
 #include "JackTools.h"
 
 #ifdef _WIN32
@@ -53,7 +55,9 @@ class DesktopAudioDriver : public JackAudioDriver
 
     Data* fShmData;
 
-   #ifndef _WIN32
+   #ifdef _WIN32
+    HANDLE fShm;
+   #else
     int fShmFd;
    #endif
 
@@ -75,19 +79,20 @@ class DesktopAudioDriver : public JackAudioDriver
    #elif defined(_WIN32)
     void post()
     {
+        ReleaseSemaphore(fShmData->sem2, 1, nullptr);
     }
 
     bool wait()
     {
-        return false;
+        return WaitForSingleObject(fShmData->sem1, 1000) == WAIT_OBJECT_0;
     }
    #else
     void post()
     {
-        const bool unlocked = __sync_bool_compare_and_swap(&data->sem2, 0, 1);
+        const bool unlocked = __sync_bool_compare_and_swap(&fShmData->sem2, 0, 1);
         if (! unlocked)
             return;
-        ::syscall(__NR_futex, &data->sem2, FUTEX_WAKE, 1, nullptr, nullptr, 0);
+        ::syscall(__NR_futex, &fShmData->sem2, FUTEX_WAKE, 1, nullptr, nullptr, 0);
     }
 
     bool wait()
@@ -96,10 +101,10 @@ class DesktopAudioDriver : public JackAudioDriver
 
         for (;;)
         {
-            if (__sync_bool_compare_and_swap(&data->sem1, 1, 0))
+            if (__sync_bool_compare_and_swap(&fShmData->sem1, 1, 0))
                 return true;
 
-            if (::syscall(__NR_futex, &data->sem1, FUTEX_WAIT, 0, &timeout, nullptr, 0) != 0)
+            if (::syscall(__NR_futex, &fShmData->sem1, FUTEX_WAIT, 0, &timeout, nullptr, 0) != 0)
                 if (errno != EAGAIN && errno != EINTR)
                     return false;
         }
@@ -107,6 +112,8 @@ class DesktopAudioDriver : public JackAudioDriver
    #endif
 
     jack_native_thread_t fProcessThread;
+    int fCaptureMidiPort;
+    int fPlaybackMidiPort;
     bool fIsProcessing, fIsRunning;
 
     static void* on_process(void* const arg)
@@ -136,13 +143,16 @@ class DesktopAudioDriver : public JackAudioDriver
     }
 
 public:
-
     DesktopAudioDriver(const char* name, const char* alias, JackLockedEngine* engine, JackSynchro* table)
         : JackAudioDriver(name, alias, engine, table),
           fShmData(nullptr),
-         #ifndef _WIN32
+         #ifdef _WIN32
+          fShm(nullptr),
+         #else
           fShmFd(-1),
          #endif
+          fCaptureMidiPort(0),
+          fPlaybackMidiPort(0),
           fIsProcessing(false),
           fIsRunning(false)
     {
@@ -172,8 +182,27 @@ public:
             return -1;
         }
 
-       #ifdef _WIN32
-       #else
+        void* ptr;
+
+      #ifdef _WIN32
+        fShm = OpenFileMappingA(FILE_MAP_ALL_ACCESS, FALSE, "/mod-desktop-test1");
+        if (fShm == nullptr)
+        {
+            Close();
+            jack_error("Can't open default MOD Desktop driver 1");
+            return -1;
+        }
+
+        ptr = MapViewOfFile(fShm, FILE_MAP_ALL_ACCESS, 0, 0, kDataSize);
+        if (ptr == nullptr)
+        {
+            Close();
+            jack_error("Can't open default MOD Desktop driver 2");
+            return -1;
+        }
+
+        VirtualLock(ptr, kDataSize);
+      #else
         fShmFd = shm_open("/mod-desktop-test1", O_RDWR, 0);
         if (fShmFd < 0)
         {
@@ -181,8 +210,6 @@ public:
             jack_error("Can't open default MOD Desktop driver 1");
             return -1;
         }
-
-        void* ptr;
 
        #ifdef MAP_LOCKED
         ptr = mmap(nullptr, kDataSize, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_LOCKED, fShmFd, 0);
@@ -202,9 +229,9 @@ public:
        #ifndef MAP_LOCKED
         mlock(ptr, kDataSize);
        #endif
+      #endif
 
         fShmData = static_cast<Data*>(ptr);
-       #endif
 
         if (fShmData->magic != 1337)
         {
@@ -235,6 +262,32 @@ public:
         }
        #endif
 
+        jack_port_id_t port_index;
+        JackPort* port;
+        if (fEngine->PortRegister(fClientControl.fRefNum, "system:midi_capture_1", JACK_DEFAULT_MIDI_TYPE,
+                                  CaptureDriverFlags, fEngineControl->fBufferSize, &port_index) < 0)
+        {
+            Close();
+            jack_error("Can't open default MOD Desktop driver 6");
+            return -1;
+        }
+        fCaptureMidiPort = port_index;
+        port = fGraphManager->GetPort(port_index);
+        port->SetAlias("MOD Desktop MIDI Capture");
+
+        if (fEngine->PortRegister(fClientControl.fRefNum, "system:midi_playback_1", JACK_DEFAULT_MIDI_TYPE,
+                                  PlaybackDriverFlags, fEngineControl->fBufferSize, &port_index) < 0)
+        {
+        {
+            Close();
+            jack_error("Can't open default MOD Desktop driver 7");
+            return -1;
+        }
+        }
+        fPlaybackMidiPort = port_index;
+        port = fGraphManager->GetPort(port_index);
+        port->SetAlias("MOD Desktop MIDI Playback");
+
         return 0;
     }
 
@@ -258,10 +311,21 @@ public:
        #endif
 
        #ifdef _WIN32
+        if (fShmData != nullptr)
+        {
+            UnmapViewOfFile(fShmData);
+            fShmData = nullptr;
+        }
+
+        if (fShm != nullptr)
+        {
+            CloseHandle(fShm);
+            fShm = nullptr;
+        }
        #else
         if (fShmData != nullptr)
         {
-            ::munmap(fShmData, kDataSize);
+            munmap(fShmData, kDataSize);
             fShmData = nullptr;
         }
 
@@ -292,7 +356,7 @@ public:
        #endif
 
         fIsProcessing = fIsRunning = true;
-        return JackPosixThread::StartImp(&fProcessThread, 0, 0, on_process, this);
+        return JackThread::StartImp(&fProcessThread, 80, 1, on_process, this);
     }
 
     int Stop() override
@@ -303,7 +367,7 @@ public:
         if (fIsRunning)
         {
             fIsRunning = false;
-            JackPosixThread::StopImp(fProcessThread);
+            JackThread::StopImp(fProcessThread);
         }
 
         return JackAudioDriver::Stop();
@@ -311,15 +375,37 @@ public:
 
     int Read() override
     {
-        memcpy(GetInputBuffer(0), fShmData->audio, sizeof(float) * 128);
-        memcpy(GetInputBuffer(1), fShmData->audio + 128, sizeof(float) * 128);
+        memcpy(GetInputBuffer(0), fShmData->audio, sizeof(float) * fEngineControl->fBufferSize);
+        memcpy(GetInputBuffer(1), fShmData->audio + fEngineControl->fBufferSize, sizeof(float) * fEngineControl->fBufferSize);
+
+        JackMidiBuffer* cbuf = (JackMidiBuffer*)fGraphManager->GetBuffer(fCaptureMidiPort, fEngineControl->fBufferSize);
+        JackMidiBuffer* pbuf = (JackMidiBuffer*)fGraphManager->GetBuffer(fPlaybackMidiPort, fEngineControl->fBufferSize);
+        pbuf->Reset(fEngineControl->fBufferSize);
+
+        for (uint16_t i = 0; i < fShmData->midiEventCount; ++i)
+        {
+            if (jack_midi_data_t* const data = pbuf->ReserveEvent(fShmData->midiFrames[i], 4))
+            {
+                memcpy(data, fShmData->midiData + (i * 4), 4);
+                continue;
+            }
+
+            break;
+        }
+
         return 0;
     }
 
     int Write() override
     {
-        memcpy(fShmData->audio, GetOutputBuffer(0), sizeof(float) * 128);
-        memcpy(fShmData->audio + 128, GetOutputBuffer(1), sizeof(float) * 128);
+        memcpy(fShmData->audio, GetOutputBuffer(0), sizeof(float) * fEngineControl->fBufferSize);
+        memcpy(fShmData->audio + fEngineControl->fBufferSize, GetOutputBuffer(1), sizeof(float) * fEngineControl->fBufferSize);
+
+        JackMidiBuffer* cbuf = (JackMidiBuffer*)fGraphManager->GetBuffer(fCaptureMidiPort, fEngineControl->fBufferSize);
+        cbuf->Reset(fEngineControl->fBufferSize);
+
+        fShmData->midiEventCount = 0;
+
         return 0;
     }
 

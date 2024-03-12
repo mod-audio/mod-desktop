@@ -12,6 +12,9 @@
 #endif
 
 #ifdef DISTRHO_OS_WINDOWS
+# include <string>
+# include <winsock2.h>
+# include <windows.h>
 #else
 # include <cerrno>
 # include <ctime>
@@ -27,6 +30,7 @@ START_NAMESPACE_DISTRHO
 #if defined(DISTRHO_OS_MAC)
 # define P "/Users/falktx/Source/MOD/mod-app/build/mod-desktop.app/Contents"
 #elif defined(DISTRHO_OS_WINDOWS)
+# define P "Z:\\home\\falktx\\Source\\MOD\\mod-app\\build"
 #else
 # define P "/home/falktx/Source/MOD/mod-app/build"
 #endif
@@ -36,6 +40,7 @@ START_NAMESPACE_DISTRHO
 class ChildProcess
 {
    #ifdef _WIN32
+    PROCESS_INFORMATION process = { INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE, 0, 0 };
    #else
     pid_t pid = -1;
    #endif
@@ -53,6 +58,13 @@ public:
     bool start(const char* const args[])
     {
         // FIXME
+       #ifdef DISTRHO_OS_WINDOWS
+        const CHAR* const envp = (
+            "MOD_DATA_DIR=" P "\\data\0"
+            "MOD_FACTORY_PEDALBOARDS_DIR=" P "\\pedalboards\0"
+            "LV2_PATH=" P "\\plugins\0"
+            "\0");
+       #else
         const char* const envp[] = {
             "MOD_DESKTOP=1",
             "LANG=en_US.UTF-8",
@@ -61,8 +73,7 @@ public:
             "JACK_DRIVER_DIR=" P "/MacOS/jack",
             "MOD_DATA_DIR=/Users/falktx/Documents/MOD Desktop",
             "MOD_FACTORY_PEDALBOARDS_DIR=" P "/Resources/pedalboards",
-            "LV2_PATH=" P "/PlugIns/LV2", // FIXME
-           #elif defined(DISTRHO_OS_WINDOWS)
+            "LV2_PATH=" P "/LV2",
            #else
             "LD_LIBRARY_PATH=" P,
             "JACK_DRIVER_DIR=" P "/jack",
@@ -72,7 +83,35 @@ public:
            #endif
             nullptr
         };
+       #endif
 
+       #ifdef _WIN32
+        std::string cmd;
+
+        for (uint i = 0; args[i] != nullptr; ++i)
+        {
+            if (i != 0)
+                cmd += " ";
+
+            cmd += args[i];
+        }
+
+        STARTUPINFOA si = {};
+        si.cb = sizeof(si);
+
+        d_stdout("will start process with args '%s'", cmd.data());
+
+        return CreateProcessA(nullptr,    // lpApplicationName
+                              &cmd[0],    // lpCommandLine
+                              nullptr,    // lpProcessAttributes
+                              nullptr,    // lpThreadAttributes
+                              TRUE,       // bInheritHandles
+                              0, // CREATE_NO_WINDOW /*| CREATE_UNICODE_ENVIRONMENT*/, // dwCreationFlags
+                              const_cast<LPSTR>(envp), // lpEnvironment
+                              nullptr,    // lpCurrentDirectory
+                              &si,        // lpStartupInfo
+                              &process) != FALSE;
+       #else
         const pid_t ret = pid = vfork();
 
         switch (ret)
@@ -92,20 +131,57 @@ public:
         }
 
         return ret > 0;
+       #endif
     }
 
     void stop(const uint32_t timeoutInMilliseconds = 2000)
     {
+        const uint32_t timeout = d_gettime_ms() + timeoutInMilliseconds;
+        bool sendTerminate = true;
+
+       #ifdef _WIN32
+        if (process.hProcess == INVALID_HANDLE_VALUE)
+            return;
+
+        const PROCESS_INFORMATION oprocess = process;
+        process = { INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE, 0, 0 };
+
+        for (;;)
+        {
+            switch (WaitForSingleObject(oprocess.hProcess, 0))
+            {
+            case WAIT_OBJECT_0:
+            case WAIT_FAILED:
+                CloseHandle(oprocess.hThread);
+                CloseHandle(oprocess.hProcess);
+                return;
+            }
+
+            if (sendTerminate)
+            {
+                sendTerminate = false;
+                TerminateProcess(oprocess.hProcess, 15);
+            }
+            if (d_gettime_ms() < timeout)
+            {
+                d_msleep(5);
+                continue;
+            }
+            d_stderr("ChildProcess::stop() - timed out");
+            TerminateProcess(oprocess.hProcess, 9);
+            d_msleep(5);
+            CloseHandle(oprocess.hThread);
+            CloseHandle(oprocess.hProcess);
+            break;
+        }
+       #else
         if (pid <= 0)
             return;
 
-        const uint32_t timeout = d_gettime_ms() + timeoutInMilliseconds;
         const pid_t opid = pid;
-        pid_t ret;
-        bool sendTerminate = true;
         pid = -1;
 
-        for (;;)
+        for (pid_t ret;;)
         {
             try {
                 ret = ::waitpid(opid, nullptr, WNOHANG);
@@ -130,16 +206,17 @@ public:
                 if (sendTerminate)
                 {
                     sendTerminate = false;
-                    ::kill(opid, SIGTERM);
+                    kill(opid, SIGTERM);
                 }
                 if (d_gettime_ms() < timeout)
                 {
                     d_msleep(5);
                     continue;
                 }
+
                 d_stderr("ChildProcess::stop() - timed out");
-                ::kill(opid, SIGKILL);
-                ::waitpid(opid, nullptr, WNOHANG);
+                kill(opid, SIGKILL);
+                waitpid(opid, nullptr, WNOHANG);
                 break;
 
             default:
@@ -157,6 +234,7 @@ public:
 
             break;
         }
+       #endif
     }
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ChildProcess)

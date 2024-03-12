@@ -19,7 +19,14 @@ FILES_UI  = \
 # ---------------------------------------------------------------------------------------------------------------------
 # Do some magic
 
+DPF_BUILD_DIR = ../../build-plugin/build
+DPF_TARGET_DIR = ../../build-plugin
+
 include ../DPF/Makefile.plugins.mk
+
+ifeq ($(WINDOWS),true)
+LINK_FLAGS += -lwinmm
+endif
 
 all: jack vst2
 

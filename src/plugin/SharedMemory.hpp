@@ -28,6 +28,26 @@ START_NAMESPACE_DISTRHO
 class SharedMemory
 {
 public:
+    struct Data {
+        uint32_t magic;
+        int32_t padding1;
+       #if defined(DISTRHO_OS_MAC)
+        char bootname1[32];
+        char bootname2[32];
+       #elif defined(DISTRHO_OS_WINDOWS)
+        HANDLE sem1;
+        HANDLE sem2;
+       #else
+        int32_t sem1;
+        int32_t sem2;
+       #endif
+        uint16_t midiEventCount;
+        uint16_t midiFrames[511];
+        uint8_t midiData[511 * 4];
+        uint8_t padding2[4];
+        float audio[];
+    }* data = nullptr;
+
     SharedMemory()
     {
     }
@@ -39,42 +59,52 @@ public:
 
     bool init()
     {
-       #ifdef DISTRHO_OS_WINDOWS
-       #else
-        fd = shm_open("/mod-desktop-test1", O_CREAT|O_EXCL|O_RDWR, 0600);
-        DISTRHO_SAFE_ASSERT_RETURN(fd >= 0, false);
+        void* ptr;
 
-        {
-            const int ret = ftruncate(fd, static_cast<off_t>(kDataSize));
-            DISTRHO_SAFE_ASSERT_RETURN(ret == 0, fail_deinit());
-        }
+      #ifdef DISTRHO_OS_WINDOWS
+        SECURITY_ATTRIBUTES sa = {};
+        sa.nLength = sizeof(sa);
+        sa.bInheritHandle = TRUE;
 
-        {
-            void* ptr;
+        shm = CreateFileMappingA(INVALID_HANDLE_VALUE,
+                                 &sa,
+                                 PAGE_READWRITE|SEC_COMMIT,
+                                 0,
+                                 static_cast<DWORD>(kDataSize),
+                                 "/mod-desktop-test1");
+        DISTRHO_SAFE_ASSERT_RETURN(shm != nullptr, false);
 
-           #ifdef MAP_LOCKED
-            ptr = mmap(nullptr, kDataSize, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_LOCKED, fd, 0);
-            if (ptr == nullptr || ptr == MAP_FAILED)
-           #endif
-            {
-                ptr = mmap(nullptr, kDataSize, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-            }
+        ptr = MapViewOfFile(shm, FILE_MAP_ALL_ACCESS, 0, 0, kDataSize);
+        DISTRHO_SAFE_ASSERT_RETURN(ptr != nullptr, fail_deinit());
 
-            DISTRHO_SAFE_ASSERT_RETURN(ptr != nullptr, fail_deinit());
-            DISTRHO_SAFE_ASSERT_RETURN(ptr != MAP_FAILED, fail_deinit());
+        VirtualLock(ptr, kDataSize);
+      #else
+        shmfd = shm_open("/mod-desktop-test1", O_CREAT|O_EXCL|O_RDWR, 0600);
+        DISTRHO_SAFE_ASSERT_RETURN(shmfd >= 0, false);
 
-           #ifndef MAP_LOCKED
-            mlock(ptr, kDataSize);
-           #endif
+        DISTRHO_SAFE_ASSERT_RETURN(ftruncate(shmfd, static_cast<off_t>(kDataSize)) == 0, fail_deinit());
 
-            data = static_cast<Data*>(ptr);
-        }
+       #ifdef MAP_LOCKED
+        ptr = mmap(nullptr, kDataSize, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_LOCKED, shmfd, 0);
+        if (ptr == nullptr || ptr == MAP_FAILED)
        #endif
+        {
+            ptr = mmap(nullptr, kDataSize, PROT_READ|PROT_WRITE, MAP_SHARED, shmfd, 0);
+        }
+        DISTRHO_SAFE_ASSERT_RETURN(ptr != nullptr, fail_deinit());
+        DISTRHO_SAFE_ASSERT_RETURN(ptr != MAP_FAILED, fail_deinit());
+
+       #ifndef MAP_LOCKED
+        mlock(ptr, kDataSize);
+       #endif
+      #endif
+
+        data = static_cast<Data*>(ptr);
 
         std::memset(data, 0, kDataSize);
         data->magic = 1337;
 
-       #ifdef DISTRHO_OS_MAC
+      #if defined(DISTRHO_OS_MAC)
         task = mach_task_self();
 
         mach_port_t bootport1, bootport2;
@@ -93,6 +123,12 @@ public:
         DISTRHO_SAFE_ASSERT_RETURN(bootstrap_register(bootport1, data->bootname1, sem1) == KERN_SUCCESS, fail_deinit());
         DISTRHO_SAFE_ASSERT_RETURN(bootstrap_register(bootport2, data->bootname2, sem2) == KERN_SUCCESS, fail_deinit());
        #pragma clang diagnostic pop
+      #elif defined(DISTRHO_OS_WINDOWS)
+        data->sem1 = CreateSemaphoreA(&sa, 0, 1, nullptr);
+        DISTRHO_SAFE_ASSERT_RETURN(data->sem1 != nullptr, fail_deinit());
+
+        data->sem2 = CreateSemaphoreA(&sa, 0, 1, nullptr);
+        DISTRHO_SAFE_ASSERT_RETURN(data->sem2 != nullptr, fail_deinit());
       #endif
 
         return true;
@@ -100,7 +136,7 @@ public:
 
     void deinit()
     {
-       #ifdef DISTRHO_OS_MAC
+       #if defined(DISTRHO_OS_MAC)
         if (sem1 != MACH_PORT_NULL)
         {
             semaphore_destroy(task, sem1);
@@ -115,6 +151,29 @@ public:
        #endif
 
        #ifdef DISTRHO_OS_WINDOWS
+        if (data != nullptr)
+        {
+            if (data->sem1 != nullptr)
+            {
+                CloseHandle(data->sem1);
+                data->sem1 = nullptr;
+            }
+
+            if (data->sem2 != nullptr)
+            {
+                CloseHandle(data->sem2);
+                data->sem2 = nullptr;
+            }
+
+            UnmapViewOfFile(data);
+            data = nullptr;
+        }
+
+        if (shm != nullptr)
+        {
+            CloseHandle(shm);
+            shm = nullptr;
+        }
        #else
         if (data != nullptr)
         {
@@ -122,24 +181,16 @@ public:
             data = nullptr;
         }
 
-        if (fd >= 0)
+        if (shmfd >= 0)
         {
-            close(fd);
+            close(shmfd);
             shm_unlink("/mod-desktop-test1");
-            fd = -1;
+            shmfd = -1;
         }
        #endif
     }
 
     // ----------------------------------------------------------------------------------------------------------------
-
-    void getAudioData(float* audio[2])
-    {
-        DISTRHO_SAFE_ASSERT_RETURN(data != nullptr,);
-
-        audio[0] = data->audio;
-        audio[1] = data->audio + 128;
-    }
 
     void reset()
     {
@@ -169,34 +220,15 @@ public:
     // ----------------------------------------------------------------------------------------------------------------
 
 private:
-    struct Data {
-        uint32_t magic;
-        int32_t padding1;
-       #if defined(DISTRHO_OS_MAC)
-        char bootname1[32];
-        char bootname2[32];
-       #elif defined(DISTRHO_OS_WINDOWS)
-        HANDLE sem1;
-        HANDLE sem2;
-       #else
-        int32_t sem1;
-        int32_t sem2;
-       #endif
-        uint16_t midiEventCount;
-        uint16_t midiFrames[511];
-        uint8_t midiData[511 * 4];
-        uint8_t padding2[4];
-        float audio[];
-    }* data = nullptr;
-
     static constexpr const size_t kDataSize = sizeof(Data) + sizeof(float) * 128 * 2;
 
     // ----------------------------------------------------------------------------------------------------------------
     // shared memory details
 
    #ifdef DISTRHO_OS_WINDOWS
+    HANDLE shm;
    #else
-    int fd = -1;
+    int shmfd = -1;
    #endif
 
    #ifdef DISTRHO_OS_MAC

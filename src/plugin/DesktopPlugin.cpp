@@ -20,7 +20,6 @@ class DesktopPlugin : public Plugin
     bool processing = false;
     bool firstTimeProcessing = true;
     float parameters[24] = {};
-    float* shmBuffers[2] = {};
     float* tmpBuffers[2] = {};
     uint32_t numFramesInShmBuffer = 0;
     uint32_t numFramesInTmpBuffer = 0;
@@ -36,14 +35,18 @@ public:
         const char* const jackd_args[] = {
            #if defined(DISTRHO_OS_MAC)
             P "/MacOS/jackd",
+           #elif defined(DISTRHO_OS_WINDOWS)
+            P "\\jackd.exe",
            #else
             P "/jackd",
            #endif
             "-R",
             "-S",
             "-n", "mod-desktop", "-C",
-           #ifdef DISTRHO_OS_MAC
+           #if defined(DISTRHO_OS_MAC)
             P "/MacOS/jack/jack-session.conf",
+           #elif defined(DISTRHO_OS_WINDOWS)
+            P "\\jack\\jack-session.conf",
            #else
             P "/jack/jack-session.conf",
            #endif
@@ -52,6 +55,8 @@ public:
         const char* const mod_ui_args[] = {
            #if defined(DISTRHO_OS_MAC)
             P "/MacOS/mod-ui",
+           #elif defined(DISTRHO_OS_WINDOWS)
+            P "\\mod-ui.exe",
            #else
             P "/mod-ui",
            #endif
@@ -61,7 +66,6 @@ public:
         if (shm.init() && jackd.start(jackd_args))
         {
             processing = true;
-            shm.getAudioData(shmBuffers);
             bufferSizeChanged(getBufferSize());
 
             d_msleep(500);
@@ -215,7 +219,8 @@ protected:
    /**
       Run/process function for plugins without MIDI input.
     */
-    void run(const float** const inputs, float** const outputs, const uint32_t frames) override
+    void run(const float** const inputs, float** const outputs, const uint32_t frames,
+             const MidiEvent* midiEvents, uint32_t midiEventCount) override
     {
         if (! processing)
         {
@@ -230,12 +235,42 @@ protected:
 
         for (uint32_t i = 0; i < frames; ++i)
         {
-            shmBuffers[0][ti] = inputs[0][i];
-            shmBuffers[1][ti] = inputs[1][i];
+            shm.data->audio[ti] = inputs[0][i];
+            shm.data->audio[128 + ti] = inputs[1][i];
 
             if (++ti == 128)
             {
                 ti = 0;
+
+                if (midiEventCount != 0)
+                {
+                    uint16_t mec = shm.data->midiEventCount;
+
+                    while (midiEventCount != 0 && mec != 511)
+                    {
+                        if (midiEvents->size > 4)
+                        {
+                            --midiEventCount;
+                            ++midiEvents;
+                            continue;
+                        }
+
+                        if (midiEvents->frame >= i)
+                            break;
+
+                        shm.data->midiFrames[mec] = ti + (midiEvents->frame - i);
+                        shm.data->midiData[mec * 4 + 0] = midiEvents->data[0];
+                        shm.data->midiData[mec * 4 + 1] = midiEvents->data[1];
+                        shm.data->midiData[mec * 4 + 2] = midiEvents->data[2];
+                        shm.data->midiData[mec * 4 + 3] = midiEvents->data[3];
+
+                        --midiEventCount;
+                        ++midiEvents;
+                        ++mec;
+                    }
+
+                    shm.data->midiEventCount = mec;
+                }
 
                 if (! shm.process(tmpBuffers, to))
                 {
@@ -244,6 +279,24 @@ protected:
                     std::memset(outputs[0], 0, sizeof(float) * frames);
                     std::memset(outputs[1], 0, sizeof(float) * frames);
                     return;
+                }
+
+                for (uint16_t j = 0; j < shm.data->midiEventCount; ++j)
+                {
+                    MidiEvent midiEvent = {
+                        4,
+                        i + shm.data->midiFrames[j],
+                        {
+                            shm.data->midiData[j * 4 + 0],
+                            shm.data->midiData[j * 4 + 1],
+                            shm.data->midiData[j * 4 + 2],
+                            shm.data->midiData[j * 4 + 3],
+                        },
+                        nullptr
+                    };
+
+                    if (! writeMidiEvent(midiEvent))
+                        break;
                 }
 
                 to += 128;
@@ -307,14 +360,18 @@ protected:
         const char* const jackd_args[] = {
            #if defined(DISTRHO_OS_MAC)
             P "/MacOS/jackd",
+           #elif defined(DISTRHO_OS_WINDOWS)
+            P "\\jackd.exe",
            #else
             P "/jackd",
            #endif
             "-R",
             "-S",
             "-n", "mod-desktop", "-C",
-           #ifdef DISTRHO_OS_MAC
+           #if defined(DISTRHO_OS_MAC)
             P "/MacOS/jack/jack-session.conf",
+           #elif defined(DISTRHO_OS_WINDOWS)
+            P "\\jack\\jack-session.conf",
            #else
             P "/jack/jack-session.conf",
            #endif
