@@ -34,17 +34,38 @@ public:
 
         const String sampleRateStr(static_cast<int>(getSampleRate()));
         const char* const jackd_args[] = {
-            P "/jackd", "-R", "-S", "-n", "mod-desktop", "-C", P "/jack/jack-session.conf", "-d", "desktop", "-r", sampleRateStr.buffer(), nullptr
+           #if defined(DISTRHO_OS_MAC)
+            P "/MacOS/jackd",
+           #else
+            P "/jackd",
+           #endif
+            "-R",
+            "-S",
+            "-n", "mod-desktop", "-C",
+           #ifdef DISTRHO_OS_MAC
+            P "/MacOS/jack/jack-session.conf",
+           #else
+            P "/jack/jack-session.conf",
+           #endif
+            "-d", "desktop", "-r", sampleRateStr.buffer(), nullptr
         };
         const char* const mod_ui_args[] = {
-            P "/mod-ui", nullptr
+           #if defined(DISTRHO_OS_MAC)
+            P "/MacOS/mod-ui",
+           #else
+            P "/mod-ui",
+           #endif
+            nullptr
         };
 
-        if (shm.init() && jackd.start(jackd_args) && mod_ui.start(mod_ui_args))
+        if (shm.init() && jackd.start(jackd_args))
         {
             processing = true;
             shm.getAudioData(shmBuffers);
             bufferSizeChanged(getBufferSize());
+
+            d_msleep(500);
+            mod_ui.start(mod_ui_args);
         }
     }
 
@@ -284,7 +305,20 @@ protected:
 
         const String sampleRateStr(static_cast<int>(sampleRate));
         const char* const jackd_args[] = {
-            P "/jackd", "-R", "-S", "-n", "mod-desktop", "-C", P "/jack/jack-session.conf", "-d", "desktop", "-r", sampleRateStr.buffer(), nullptr
+           #if defined(DISTRHO_OS_MAC)
+            P "/MacOS/jackd",
+           #else
+            P "/jackd",
+           #endif
+            "-R",
+            "-S",
+            "-n", "mod-desktop", "-C",
+           #ifdef DISTRHO_OS_MAC
+            P "/MacOS/jack/jack-session.conf",
+           #else
+            P "/jack/jack-session.conf",
+           #endif
+            "-d", "desktop", "-r", sampleRateStr.buffer(), nullptr
         };
 
         jackd.stop();

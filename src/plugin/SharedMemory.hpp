@@ -63,11 +63,11 @@ public:
             DISTRHO_SAFE_ASSERT_RETURN(ptr != nullptr, fail_deinit());
             DISTRHO_SAFE_ASSERT_RETURN(ptr != MAP_FAILED, fail_deinit());
 
-            data = static_cast<Data*>(ptr);
-
            #ifndef MAP_LOCKED
-            mlock(data, kDataSize);
+            mlock(ptr, kDataSize);
            #endif
+
+            data = static_cast<Data*>(ptr);
         }
        #endif
 

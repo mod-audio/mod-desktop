@@ -101,6 +101,7 @@ TARGETS += build/mod-desktop.app/Contents/MacOS/jackd
 TARGETS += build/mod-desktop.app/Contents/MacOS/jack/jack-session.conf
 TARGETS += build/mod-desktop.app/Contents/MacOS/jack/jack_coreaudio.so
 TARGETS += build/mod-desktop.app/Contents/MacOS/jack/jack_coremidi.so
+TARGETS += build/mod-desktop.app/Contents/MacOS/jack/jack_desktop.so
 TARGETS += build/mod-desktop.app/Contents/MacOS/jack/jack_dummy.so
 TARGETS += build/mod-desktop.app/Contents/MacOS/jack/mod-host.so
 TARGETS += build/mod-desktop.app/Contents/MacOS/jack/mod-midi-broadcaster.so

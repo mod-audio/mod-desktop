@@ -6,15 +6,20 @@
 #include "JackEngineControl.h"
 #include "JackTools.h"
 
-#if defined(__APPLE__)
-#elif defined(_WIN32)
+#ifdef _WIN32
 #else
-#include <cerrno>
-#include <fcntl.h>
-#include <syscall.h>
-#include <sys/mman.h>
-#include <sys/time.h>
-#include <linux/futex.h>
+# include <fcntl.h>
+# include <sys/mman.h>
+# ifdef __APPLE__
+#  include <mach/mach.h>
+#  include <mach/semaphore.h>
+#  include <servers/bootstrap.h>
+# else
+#  include <cerrno>
+#  include <syscall.h>
+#  include <sys/time.h>
+#  include <linux/futex.h>
+# endif
 #endif
 
 namespace Jack
@@ -26,29 +31,46 @@ class DesktopAudioDriver : public JackAudioDriver
 {
     struct Data {
         uint32_t magic;
+        int32_t padding1;
+       #if defined(__APPLE__)
+        char bootname1[32];
+        char bootname2[32];
+       #elif defined(_WIN32)
+        HANDLE sem1;
+        HANDLE sem2;
+       #else
         int32_t sem1;
         int32_t sem2;
-        int32_t padding1;
-        // uint8_t sem[32];
+       #endif
         uint16_t midiEventCount;
         uint16_t midiFrames[511];
         uint8_t midiData[511 * 4];
         uint8_t padding2[4];
         float audio[];
-    }* data = nullptr;
+    };
 
     static constexpr const size_t kDataSize = sizeof(Data) + sizeof(float) * 128 * 2;
 
     Data* fShmData;
 
+   #ifndef _WIN32
+    int fShmFd;
+   #endif
+
    #if defined(__APPLE__)
+    mach_port_t task = MACH_PORT_NULL;
+    semaphore_t sem1 = MACH_PORT_NULL;
+    semaphore_t sem2 = MACH_PORT_NULL;
+
     void post()
     {
+        semaphore_signal(sem2);
     }
 
     bool wait()
     {
-        return false;
+        const mach_timespec timeout = { 1, 0 };
+        return semaphore_timedwait(sem1, timeout) == KERN_SUCCESS;
     }
    #elif defined(_WIN32)
     void post()
@@ -60,8 +82,6 @@ class DesktopAudioDriver : public JackAudioDriver
         return false;
     }
    #else
-    int fShmFd;
-
     void post()
     {
         const bool unlocked = __sync_bool_compare_and_swap(&data->sem2, 0, 1);
@@ -120,9 +140,7 @@ public:
     DesktopAudioDriver(const char* name, const char* alias, JackLockedEngine* engine, JackSynchro* table)
         : JackAudioDriver(name, alias, engine, table),
           fShmData(nullptr),
-         #if defined(__APPLE__)
-         #elif defined(_WIN32)
-         #else
+         #ifndef _WIN32
           fShmFd(-1),
          #endif
           fIsProcessing(false),
@@ -154,8 +172,7 @@ public:
             return -1;
         }
 
-       #if defined(__APPLE__)
-       #elif defined(_WIN32)
+       #ifdef _WIN32
        #else
         fShmFd = shm_open("/mod-desktop-test1", O_RDWR, 0);
         if (fShmFd < 0)
@@ -165,13 +182,26 @@ public:
             return -1;
         }
 
-        void* const ptr = ::mmap(nullptr, kDataSize, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_LOCKED, fShmFd, 0);
+        void* ptr;
+
+       #ifdef MAP_LOCKED
+        ptr = mmap(nullptr, kDataSize, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_LOCKED, fShmFd, 0);
+        if (ptr == nullptr || ptr == MAP_FAILED)
+       #endif
+        {
+            ptr = mmap(nullptr, kDataSize, PROT_READ|PROT_WRITE, MAP_SHARED, fShmFd, 0);
+        }
+
         if (ptr == nullptr || ptr == MAP_FAILED)
         {
             Close();
             jack_error("Can't open default MOD Desktop driver 2");
             return -1;
         }
+
+       #ifndef MAP_LOCKED
+        mlock(ptr, kDataSize);
+       #endif
 
         fShmData = static_cast<Data*>(ptr);
        #endif
@@ -183,6 +213,28 @@ public:
             return -1;
         }
 
+       #ifdef __APPLE__
+        task = mach_task_self();
+
+        mach_port_t bootport1;
+        if (task_get_bootstrap_port(task, &bootport1) != KERN_SUCCESS ||
+            bootstrap_look_up(bootport1, fShmData->bootname1, &sem1) != KERN_SUCCESS)
+        {
+            Close();
+            jack_error("Can't open default MOD Desktop driver 4");
+            return -1;
+        }
+
+        mach_port_t bootport2;
+        if (task_get_bootstrap_port(task, &bootport2) != KERN_SUCCESS ||
+            bootstrap_look_up(bootport2, fShmData->bootname2, &sem2) != KERN_SUCCESS)
+        {
+            Close();
+            jack_error("Can't open default MOD Desktop driver 5");
+            return -1;
+        }
+       #endif
+
         return 0;
     }
 
@@ -191,8 +243,21 @@ public:
         printf("%03d:%s\n", __LINE__, __FUNCTION__);
         JackAudioDriver::Close();
 
-       #if defined(__APPLE__)
-       #elif defined(_WIN32)
+       #ifdef __APPLE__
+        if (sem1 != MACH_PORT_NULL)
+        {
+            semaphore_destroy(task, sem1);
+            sem1 = MACH_PORT_NULL;
+        }
+
+        if (sem2 != MACH_PORT_NULL)
+        {
+            semaphore_destroy(task, sem2);
+            sem2 = MACH_PORT_NULL;
+        }
+       #endif
+
+       #ifdef _WIN32
        #else
         if (fShmData != nullptr)
         {
@@ -220,7 +285,7 @@ public:
         if (JackAudioDriver::Start() != 0)
             return -1;
 
-       #ifdef __APPLE__
+       #if 0 // def __APPLE__
         fEngineControl->fPeriod = fEngineControl->fPeriodUsecs * 1000;
         fEngineControl->fComputation = JackTools::ComputationMicroSec(fEngineControl->fBufferSize) * 1000;
         fEngineControl->fConstraint = fEngineControl->fPeriodUsecs * 1000;
