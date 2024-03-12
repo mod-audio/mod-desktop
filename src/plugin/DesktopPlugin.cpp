@@ -255,10 +255,10 @@ protected:
                             continue;
                         }
 
-                        if (midiEvents->frame >= i)
+                        if (midiEvents->frame >= framesDone + 128)
                             break;
 
-                        shm.data->midiFrames[mec] = ti + (midiEvents->frame - i);
+                        shm.data->midiFrames[mec] = midiEvents->frame - framesDone;
                         shm.data->midiData[mec * 4 + 0] = midiEvents->data[0];
                         shm.data->midiData[mec * 4 + 1] = midiEvents->data[1];
                         shm.data->midiData[mec * 4 + 2] = midiEvents->data[2];
@@ -284,8 +284,8 @@ protected:
                 for (uint16_t j = 0; j < shm.data->midiEventCount; ++j)
                 {
                     MidiEvent midiEvent = {
+                        framesDone + shm.data->midiFrames[j] - to,
                         4,
-                        i + shm.data->midiFrames[j],
                         {
                             shm.data->midiData[j * 4 + 0],
                             shm.data->midiData[j * 4 + 1],
@@ -325,6 +325,33 @@ protected:
         {
             std::memset(outputs[0], 0, sizeof(float) * frames);
             std::memset(outputs[1], 0, sizeof(float) * frames);
+
+            if (midiEventCount != 0)
+            {
+                uint16_t mec = shm.data->midiEventCount;
+
+                while (midiEventCount != 0 && mec != 511)
+                {
+                    if (midiEvents->size > 4)
+                    {
+                        --midiEventCount;
+                        ++midiEvents;
+                        continue;
+                    }
+
+                    shm.data->midiFrames[mec] = midiEvents->frame;
+                    shm.data->midiData[mec * 4 + 0] = midiEvents->data[0];
+                    shm.data->midiData[mec * 4 + 1] = midiEvents->data[1];
+                    shm.data->midiData[mec * 4 + 2] = midiEvents->data[2];
+                    shm.data->midiData[mec * 4 + 3] = midiEvents->data[3];
+
+                    --midiEventCount;
+                    ++midiEvents;
+                    ++mec;
+                }
+
+                shm.data->midiEventCount = mec;
+            }
         }
         else if (framesDone != frames)
         {
@@ -335,6 +362,33 @@ protected:
             to -= framesToCopy;
             std::memmove(tmpBuffers[0], tmpBuffers[0] + framesToCopy, sizeof(float) * to);
             std::memmove(tmpBuffers[1], tmpBuffers[1] + framesToCopy, sizeof(float) * to);
+
+            if (midiEventCount != 0)
+            {
+                uint16_t mec = shm.data->midiEventCount;
+
+                while (midiEventCount != 0 && mec != 511)
+                {
+                    if (midiEvents->size > 4)
+                    {
+                        --midiEventCount;
+                        ++midiEvents;
+                        continue;
+                    }
+
+                    shm.data->midiFrames[mec] = ti + framesDone - midiEvents->frame;
+                    shm.data->midiData[mec * 4 + 0] = midiEvents->data[0];
+                    shm.data->midiData[mec * 4 + 1] = midiEvents->data[1];
+                    shm.data->midiData[mec * 4 + 2] = midiEvents->data[2];
+                    shm.data->midiData[mec * 4 + 3] = midiEvents->data[3];
+
+                    --midiEventCount;
+                    ++midiEvents;
+                    ++mec;
+                }
+
+                shm.data->midiEventCount = mec;
+            }
         }
 
         numFramesInShmBuffer = ti;

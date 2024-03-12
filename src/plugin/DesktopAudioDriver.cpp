@@ -384,12 +384,11 @@ public:
 
         for (uint16_t i = 0; i < fShmData->midiEventCount; ++i)
         {
-            if (jack_midi_data_t* const data = pbuf->ReserveEvent(fShmData->midiFrames[i], 4))
+            if (jack_midi_data_t* const data = cbuf->ReserveEvent(fShmData->midiFrames[i], 4))
             {
                 memcpy(data, fShmData->midiData + (i * 4), 4);
                 continue;
             }
-
             break;
         }
 
@@ -402,9 +401,27 @@ public:
         memcpy(fShmData->audio + fEngineControl->fBufferSize, GetOutputBuffer(1), sizeof(float) * fEngineControl->fBufferSize);
 
         JackMidiBuffer* cbuf = (JackMidiBuffer*)fGraphManager->GetBuffer(fCaptureMidiPort, fEngineControl->fBufferSize);
+        JackMidiBuffer* pbuf = (JackMidiBuffer*)fGraphManager->GetBuffer(fPlaybackMidiPort, fEngineControl->fBufferSize);
         cbuf->Reset(fEngineControl->fBufferSize);
 
-        fShmData->midiEventCount = 0;
+        uint16_t mec = 0;
+        for (uint32_t i = 0; i < pbuf->event_count; ++i)
+        {
+            JackMidiEvent& ev(pbuf->events[i]);
+
+            if (ev.size > 4)
+                continue;
+
+            fShmData->midiFrames[mec] = ev.time;
+            memcpy(fShmData->midiData + (mec * 4), ev.GetData(pbuf), ev.size);
+
+            for (uint8_t j = ev.size; j < 4; ++j)
+                fShmData->midiData[mec * 4 + j] = 0;
+
+            if (++mec == 511)
+                break;
+        }
+        fShmData->midiEventCount = mec;
 
         return 0;
     }
@@ -430,15 +447,19 @@ SERVER_EXPORT jack_driver_desc_t* driver_get_descriptor()
 
     jack_driver_desc_t* const desc = jack_driver_descriptor_construct("desktop", JackDriverMaster, "MOD Desktop plugin audio backend", &filler);
 
-    value.ui = 48000U;
-    jack_driver_descriptor_add_parameter(desc, &filler, "rate", 'r', JackDriverParamUInt, &value, NULL, "Sample rate", NULL);
+    value.ui = 48000;
+    jack_driver_descriptor_add_parameter(desc, &filler, "rate", 'r', JackDriverParamUInt, &value, nullptr, "Sample rate", nullptr);
+
+    value.ui = 128;
+    jack_driver_descriptor_add_parameter(desc, &filler, "period", 'p', JackDriverParamUInt, &value, nullptr, "Frames per period", nullptr);
 
     return desc;
 }
 
 SERVER_EXPORT Jack::JackDriverClientInterface* driver_initialize(Jack::JackLockedEngine* engine, Jack::JackSynchro* table, const JSList* params)
 {
-    jack_nframes_t srate = 48000;
+    jack_nframes_t rate = 48000;
+    jack_nframes_t period = 128;
 
     for (const JSList* node = params; node; node = jack_slist_next(node))
     {
@@ -447,14 +468,17 @@ SERVER_EXPORT Jack::JackDriverClientInterface* driver_initialize(Jack::JackLocke
         switch (param->character)
         {
         case 'r':
-            srate = param->value.ui;
+            rate = param->value.ui;
+            break;
+        case 'p':
+            period = param->value.ui;
             break;
         }
     }
 
     Jack::JackDriverClientInterface* driver = new Jack::DesktopAudioDriver("system", "mod-desktop", engine, table);
 
-    if (driver->Open(128, srate, true, true, 2, 2, false, "", "", 0, 0) == 0)
+    if (driver->Open(period, rate, true, true, 2, 2, false, "", "", 0, 0) == 0)
     {
         printf("%03d:%s OK\n", __LINE__, __FUNCTION__);
         return driver;
