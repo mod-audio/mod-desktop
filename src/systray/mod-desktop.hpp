@@ -10,7 +10,6 @@
 #include <QtCore/QProcess>
 #include <QtCore/QSettings>
 #include <QtCore/QTimer>
-#include <QtGui/QDesktopServices>
 #include <QtWidgets/QMessageBox>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QSystemTrayIcon>

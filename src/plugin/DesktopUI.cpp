@@ -2,14 +2,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 #include "DistrhoUI.hpp"
+#include "WebView.hpp"
 
 START_NAMESPACE_DISTRHO
-
-// -----------------------------------------------------------------------------------------------------------
-
-void* addWebView(void* view);
-void reloadWebView(void* webview);
-void resizeWebView(void* webview, uint offset, uint width, uint height);
 
 // -----------------------------------------------------------------------------------------------------------
 
@@ -21,7 +16,7 @@ public:
     DesktopUI()
         : UI(DISTRHO_UI_DEFAULT_WIDTH, DISTRHO_UI_DEFAULT_HEIGHT)
     {
-        webview = addWebView(reinterpret_cast<void*>(getWindow().getNativeWindowHandle()));
+        webview = addWebView(getWindow().getNativeWindowHandle());
 
         const double scaleFactor = getScaleFactor();
 
@@ -39,6 +34,7 @@ public:
 
     ~DesktopUI() override
     {
+        destroyWebView(webview);
     }
 
 protected:
@@ -85,7 +81,7 @@ protected:
     {
         UI::onResize(ev);
 
-        uint offset = 20;
+        uint offset = kVerticalOffset;
         uint width = ev.size.getWidth();
         uint height = ev.size.getHeight() - offset;
 

@@ -5,6 +5,8 @@
 
 #include <QtWidgets/QWidget>
 
+class QMainWindow;
+
 static inline
 QWidget* getLastParentOrSelf(QWidget* const w) noexcept
 {

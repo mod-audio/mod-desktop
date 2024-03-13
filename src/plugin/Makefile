@@ -15,6 +15,8 @@ FILES_UI = DesktopUI.cpp
 
 ifeq ($(MACOS),true)
 FILES_UI += WebView.mm
+else ifeq ($(LINUX),true)
+FILES_UI += WebViewX11.cpp
 endif
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -29,8 +31,27 @@ ifeq ($(MACOS),true)
 LINK_FLAGS += -framework WebKit
 else ifeq ($(WINDOWS),true)
 LINK_FLAGS += -lwinmm
+else ifeq ($(LINUX),true)
+LINK_FLAGS += -ldl
 endif
 
-all: jack vst2
+TARGETS = jack vst2
 
 # ---------------------------------------------------------------------------------------------------------------------
+
+ifeq ($(LINUX),true)
+
+TARGETS += $(TARGET_DIR)/MOD-Desktop-WebView
+
+$(TARGET_DIR)/MOD-Desktop-WebView: $(BUILD_DIR)/WebViewQt.cpp.o
+	$(CXX) $^ $(LINK_FLAGS) $(shell $(PKG_CONFIG) --libs Qt5WebEngineWidgets) -o $@
+
+$(BUILD_DIR)/WebViewQt.cpp.o: BUILD_CXX_FLAGS += -std=gnu++14 $(shell $(PKG_CONFIG) --cflags Qt5WebEngineWidgets)
+
+include $(BUILD_DIR)/WebViewQt.cpp.d
+
+endif
+
+# ---------------------------------------------------------------------------------------------------------------------
+
+all: $(TARGETS)

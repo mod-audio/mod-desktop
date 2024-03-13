@@ -164,7 +164,7 @@ public:
         printf("%03d:%s\n", __LINE__, __FUNCTION__);
     }
 
-    int Open(jack_nframes_t buffer_size,
+    int Open(jack_nframes_t buffersize,
              jack_nframes_t samplerate,
              bool capturing,
              bool playing,
@@ -177,7 +177,7 @@ public:
              jack_nframes_t playback_latency) override
     {
         printf("%03d:%s\n", __LINE__, __FUNCTION__);
-        if (JackAudioDriver::Open(buffer_size, samplerate, capturing, playing, chan_in, chan_out, monitor,
+        if (JackAudioDriver::Open(buffersize, samplerate, capturing, playing, chan_in, chan_out, monitor,
             capture_driver_name, playback_driver_name, capture_latency, playback_latency) != 0) {
             return -1;
         }

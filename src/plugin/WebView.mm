@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2023-2024 MOD Audio UG
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-#include "DistrhoUtils.hpp"
+#include "WebView.hpp"
 
 #import <Cocoa/Cocoa.h>
 #import <WebKit/WebKit.h>
@@ -10,14 +10,16 @@ START_NAMESPACE_DISTRHO
 
 // -----------------------------------------------------------------------------------------------------------
 
-void* addWebView(void* view);
-void reloadWebView(void* webview);
-void resizeWebView(void* webview, uint offset, uint width, uint height);
-
-void* addWebView(void* const viewptr)
+void* addWebView(const uintptr_t viewptr)
 {
-    NSView* const view = static_cast<NSView*>(viewptr);
-    WKWebView* const webview = [[WKWebView alloc] initWithFrame: CGRectMake(0, 25, 225, 300)];
+    NSView* const view = reinterpret_cast<NSView*>(viewptr);
+
+    cosnt CGRect rect = CGRectMake(0,
+                                   kVerticalOffset,
+                                   DISTRHO_UI_DEFAULT_WIDTH,
+                                   DISTRHO_UI_DEFAULT_HEIGHT - kVerticalOffset);
+
+    WKWebView* const webview = [[WKWebView alloc] initWithFrame: rect];
 
     [[[webview configuration] preferences] setValue: @(true) forKey: @"developerExtrasEnabled"];
 

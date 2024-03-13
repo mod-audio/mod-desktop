@@ -22,3 +22,5 @@
 #define DISTRHO_UI_DEFAULT_WIDTH        1170
 #define DISTRHO_UI_DEFAULT_HEIGHT       600
 #define DISTRHO_UI_USER_RESIZABLE       1
+
+static const constexpr unsigned int kVerticalOffset = 25;

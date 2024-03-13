@@ -134,6 +134,29 @@ public:
        #endif
     }
 
+    bool start2(const char* const args[])
+    {
+        const pid_t ret = pid = vfork();
+
+        switch (ret)
+        {
+        // child process
+        case 0:
+            execvp(args[0], const_cast<char* const*>(args));
+
+            d_stderr2("exec failed: %d:%s", errno, std::strerror(errno));
+            _exit(1);
+            break;
+
+        // error
+        case -1:
+            d_stderr2("vfork() failed: %d:%s", errno, std::strerror(errno));
+            break;
+        }
+
+        return ret > 0;
+    }
+
     void stop(const uint32_t timeoutInMilliseconds = 2000)
     {
         const uint32_t timeout = d_gettime_ms() + timeoutInMilliseconds;
@@ -237,7 +260,7 @@ public:
        #endif
     }
 
-    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ChildProcess)
+    DISTRHO_DECLARE_NON_COPYABLE(ChildProcess)
 };
 
 // -----------------------------------------------------------------------------------------------------------

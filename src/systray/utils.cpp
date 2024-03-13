@@ -8,6 +8,7 @@
 #include <QtCore/QJsonObject>
 #include <QtCore/QMessageAuthenticationCode>
 #include <QtCore/QSettings>
+#include <QtGui/QDesktopServices>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QStyleFactory>
 
@@ -92,7 +93,7 @@ void initEvironment()
         }
     }
 
-    if (char* const c = strrchr(appDir, '/'))
+    if (char* const c = std::strrchr(appDir, '/'))
         *c = 0;
    #endif
 
