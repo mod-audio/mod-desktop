@@ -3,6 +3,8 @@
 
 #include "WebView.hpp"
 
+#include "DistrhoPluginInfo.h"
+
 #import <Cocoa/Cocoa.h>
 #import <WebKit/WebKit.h>
 
@@ -14,12 +16,12 @@ void* addWebView(const uintptr_t viewptr)
 {
     NSView* const view = reinterpret_cast<NSView*>(viewptr);
 
-    cosnt CGRect rect = CGRectMake(0,
+    const CGRect rect = CGRectMake(0,
                                    kVerticalOffset,
                                    DISTRHO_UI_DEFAULT_WIDTH,
                                    DISTRHO_UI_DEFAULT_HEIGHT - kVerticalOffset);
 
-    WKWebView* const webview = [[[WKWebView alloc] initWithFrame: rect] retain];
+    WKWebView* const webview = [[WKWebView alloc] initWithFrame: rect];
 
     [[[webview configuration] preferences] setValue: @(true) forKey: @"developerExtrasEnabled"];
 
@@ -34,7 +36,6 @@ void destroyWebView(void* const webviewptr)
     WKWebView* const webview = static_cast<WKWebView*>(webviewptr);
 
     [webview setHidden:YES];
-    [[webview dealloc] release];
 }
 
 void reloadWebView(void* const webviewptr)

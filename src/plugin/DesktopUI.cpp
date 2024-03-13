@@ -2,23 +2,59 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 #include "DistrhoUI.hpp"
+#include "DistrhoPluginUtils.hpp"
+#include "NanoButton.hpp"
 #include "WebView.hpp"
+
+#include "utils.hpp"
 
 START_NAMESPACE_DISTRHO
 
 // -----------------------------------------------------------------------------------------------------------
 
-class DesktopUI : public UI
+class DesktopUI : public UI,
+                  public ButtonEventHandler::Callback
 {
+    Button buttonRefresh;
+    Button buttonOpenWebGui;
+    Button buttonOpenUserFilesDir;
+    String label;
     void* webview = nullptr;
 
 public:
     DesktopUI()
-        : UI(DISTRHO_UI_DEFAULT_WIDTH, DISTRHO_UI_DEFAULT_HEIGHT)
+        : UI(DISTRHO_UI_DEFAULT_WIDTH, DISTRHO_UI_DEFAULT_HEIGHT),
+          buttonRefresh(this, this),
+          buttonOpenWebGui(this, this),
+          buttonOpenUserFilesDir(this, this)
     {
-        webview = addWebView(getWindow().getNativeWindowHandle());
+        loadSharedResources();
 
         const double scaleFactor = getScaleFactor();
+
+        buttonRefresh.setId(1);
+        buttonRefresh.setLabel("Refresh");
+        buttonRefresh.setFontScale(scaleFactor);
+        buttonRefresh.setAbsolutePos(2 * scaleFactor, 2 * scaleFactor);
+        buttonRefresh.setSize(70 * scaleFactor, 26 * scaleFactor);
+
+        buttonOpenWebGui.setId(2);
+        buttonOpenWebGui.setLabel("Open in Web Browser");
+        buttonOpenWebGui.setFontScale(scaleFactor);
+        buttonOpenWebGui.setAbsolutePos(74 * scaleFactor, 2 * scaleFactor);
+        buttonOpenWebGui.setSize(150 * scaleFactor, 26 * scaleFactor);
+
+        buttonOpenUserFilesDir.setId(3);
+        buttonOpenUserFilesDir.setLabel("Open User Files Dir");
+        buttonOpenUserFilesDir.setFontScale(scaleFactor);
+        buttonOpenUserFilesDir.setAbsolutePos(226 * scaleFactor, 2 * scaleFactor);
+        buttonOpenUserFilesDir.setSize(140 * scaleFactor, 26 * scaleFactor);
+
+        label = "MOD Desktop ";
+        label += getPluginFormatName();
+        label += " v" VERSION;
+
+        webview = addWebView(getWindow().getNativeWindowHandle());
 
         if (d_isNotEqual(scaleFactor, 1.0))
         {
@@ -45,8 +81,13 @@ protected:
       A parameter has changed on the plugin side.
       This is called by the host to inform the UI about parameter changes.
     */
-    void parameterChanged(uint32_t, float) override
+    void parameterChanged(const uint32_t index, const float value) override
     {
+        if (index == kParameterBasePortNumber)
+        {
+            // TODO set port
+            reloadWebView(webview);
+        }
     }
 
    /**
@@ -64,29 +105,43 @@ protected:
    /**
       The drawing function.
     */
-    void onDisplay() override
+    void onNanoDisplay() override
     {
+        const double scaleFactor = getScaleFactor();
+
+        fillColor(255, 255, 255, 255);
+        fontSize(14 * scaleFactor);
+        textAlign(ALIGN_CENTER | ALIGN_MIDDLE);
+        text(getWidth() / 2, kVerticalOffset * scaleFactor / 2, label, nullptr);
     }
 
-    bool onMouse(const MouseEvent& ev) override
+    void buttonClicked(SubWidget* const widget, int button) override
     {
-        if (UI::onMouse(ev))
-            return true;
-
-        reloadWebView(webview);
-        return true;
+        switch (widget->getId())
+        {
+        case 1:
+            reloadWebView(webview);
+            break;
+        case 2:
+            openWebGui();
+            break;
+        case 3:
+            openUserFilesDir();
+            break;
+        }
     }
 
     void onResize(const ResizeEvent& ev) override
     {
         UI::onResize(ev);
 
-        uint offset = kVerticalOffset;
+        const double scaleFactor = getScaleFactor();
+
+        uint offset = kVerticalOffset * scaleFactor;
         uint width = ev.size.getWidth();
         uint height = ev.size.getHeight() - offset;
 
        #ifdef DISTRHO_OS_MAC
-        const double scaleFactor = getScaleFactor();
         offset /= scaleFactor;
         width /= scaleFactor;
         height /= scaleFactor;

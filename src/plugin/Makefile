@@ -10,8 +10,8 @@ NAME = MOD-Desktop
 # ---------------------------------------------------------------------------------------------------------------------
 # Files to build
 
-FILES_DSP = DesktopPlugin.cpp
-FILES_UI = DesktopUI.cpp
+FILES_DSP = DesktopPlugin.cpp utils.cpp
+FILES_UI = DesktopUI.cpp NanoButton.cpp
 
 ifeq ($(MACOS),true)
 FILES_UI += WebView.mm
@@ -27,8 +27,10 @@ DPF_TARGET_DIR = ../../build-plugin
 
 include ../DPF/Makefile.plugins.mk
 
+BUILD_CXX_FLAGS += -DVERSION='"$(shell cat ../../VERSION)"'
+
 ifeq ($(MACOS),true)
-LINK_FLAGS += -framework WebKit
+LINK_FLAGS += -framework IOKit -framework WebKit
 else ifeq ($(WINDOWS),true)
 LINK_FLAGS += -lwinmm
 else ifeq ($(LINUX),true)

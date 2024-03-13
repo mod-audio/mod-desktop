@@ -26,15 +26,6 @@
 
 START_NAMESPACE_DISTRHO
 
-// FIXME
-#if defined(DISTRHO_OS_MAC)
-# define P "/Users/falktx/Source/MOD/mod-app/build/mod-desktop.app/Contents"
-#elif defined(DISTRHO_OS_WINDOWS)
-# define P "Z:\\home\\falktx\\Source\\MOD\\mod-app\\build"
-#else
-# define P "/home/falktx/Source/MOD/mod-app/build"
-#endif
-
 // -----------------------------------------------------------------------------------------------------------
 
 class ChildProcess

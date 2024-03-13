@@ -47,6 +47,7 @@ constexpr uint8_t char2u8(const uint8_t c)
         : 0;
 }
 
+// NOTE this needs to match getEvironment from plugin side
 void initEvironment()
 {
     // base environment details
@@ -264,7 +265,6 @@ void initEvironment()
 
    #if !(defined(__APPLE__) || defined(_WIN32))
     // special handling for PipeWire JACK, need to find full path to shared lib
-    bool usingPipeWire = false;
     if (void* const pwlib = dlmopen(LM_ID_NEWLM, "libjack.so.0", RTLD_NOW|RTLD_LOCAL))
     {
         typedef int (*jacksym)(void);
@@ -276,7 +276,6 @@ void initEvironment()
             Dl_info info = {};
             dladdr(sym2, &info);
             setenv("JACKBRIDGE_FILENAME", info.dli_fname, 1);
-            usingPipeWire = true;
             fprintf(stdout, "MOD Desktop DEBUG: jacklib syms %p %p | %d | using pipewire with filename '%s'\n", sym1, sym2, sym1(), info.dli_fname);
         }
         else
@@ -288,7 +287,7 @@ void initEvironment()
         dlclose(pwlib);
     }
 
-    // if LD_LIBRARY_PATH is set, add our custom lib path on top to make sure jackd can run
+    // add our custom lib path on top of LD_LIBRARY_PATH to make sure jackd can run
     if (const char* const ldpath = getenv("LD_LIBRARY_PATH"))
     {
         std::memcpy(path, appDir, appDirLen);
@@ -296,8 +295,7 @@ void initEvironment()
         std::strncpy(path + appDirLen + 1, ldpath, PATH_MAX - appDirLen - 2);
         setenv("LD_LIBRARY_PATH", path, 1);
     }
-    // always set path in case of PipeWire
-    else if (usingPipeWire)
+    else
     {
         setenv("LD_LIBRARY_PATH", appDir, 1);
     }

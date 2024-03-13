@@ -3,120 +3,55 @@
 
 #include "DistrhoPlugin.hpp"
 
-#include "Time.hpp"
-
 #include "ChildProcess.hpp"
 #include "SharedMemory.hpp"
+#include "extra/Runner.hpp"
+
+#include "utils.hpp"
 
 START_NAMESPACE_DISTRHO
 
 // -----------------------------------------------------------------------------------------------------------
 
-class DesktopPlugin : public Plugin
+class DesktopPlugin : public Plugin,
+                      public Runner
 {
     ChildProcess jackd;
     ChildProcess mod_ui;
     SharedMemory shm;
     bool processing = false;
     bool firstTimeProcessing = true;
-    float parameters[24] = {};
+    float parameters[kParameterCount] = {};
     float* tmpBuffers[2] = {};
     uint32_t numFramesInShmBuffer = 0;
     uint32_t numFramesInTmpBuffer = 0;
 
    #ifdef DISTRHO_OS_WINDOWS
-    const CHAR* envp;
+    const WCHAR* envp;
    #else
-    char** envp;
+    char* const* envp;
    #endif
 
 public:
     DesktopPlugin()
-        : Plugin(0, 0, 0)
+        : Plugin(kParameterCount, 0, 0),
+          envp(nullptr)
     {
         if (isDummyInstance())
             return;
 
-      #ifdef DISTRHO_OS_WINDOWS
-        envp = (
-            "MOD_DATA_DIR=" P "\\data\0"
-            "MOD_FACTORY_PEDALBOARDS_DIR=" P "\\pedalboards\0"
-            "LV2_PATH=" P "\\plugins\0"
-            "\0"
-        );
-      #else
-        uint envsize = 0;
-        while (environ[envsize] != nullptr)
-            ++envsize;
+        envp = getEvironment();
 
-        envp = new char*[envsize + 8];
+        if (shm.init() && run())
+            startRunner(500);
 
-        for (uint i = 0; i < envsize; ++i)
-            envp[i] = strdup(environ[i]);
-
-        envp[envsize] = strdup("MOD_DESKTOP=1");
-        envp[envsize + 1] = strdup("LANG=en_US.UTF-8");
-       #ifdef DISTRHO_OS_MAC
-        envp[envsize + 2] = strdup("DYLD_LIBRARY_PATH=" P "/MacOS");
-        envp[envsize + 3] = strdup("JACK_DRIVER_DIR=" P "/MacOS/jack");
-        envp[envsize + 4] = strdup("MOD_DATA_DIR=/Users/falktx/Documents/MOD Desktop");
-        envp[envsize + 5] = strdup("MOD_FACTORY_PEDALBOARDS_DIR=" P "/Resources/pedalboards");
-        envp[envsize + 6] = strdup("LV2_PATH=" P "/LV2");
-        envp[envsize + 7] = nullptr;
-       #else
-        envp[envsize + 2] = strdup("LD_LIBRARY_PATH=" P);
-        envp[envsize + 3] = strdup("JACK_DRIVER_DIR=" P "/jack");
-        envp[envsize + 4] = strdup("MOD_DATA_DIR=" P "/data");
-        envp[envsize + 5] = strdup("MOD_FACTORY_PEDALBOARDS_DIR=" P "/pedalboards");
-        envp[envsize + 6] = strdup("LV2_PATH=" P "/plugins");
-        envp[envsize + 7] = nullptr;
-       #endif
-      #endif
-
-        const String sampleRateStr(static_cast<int>(getSampleRate()));
-        const char* const jackd_args[] = {
-           #if defined(DISTRHO_OS_MAC)
-            P "/MacOS/jackd",
-           #elif defined(DISTRHO_OS_WINDOWS)
-            P "\\jackd.exe",
-           #else
-            P "/jackd",
-           #endif
-            "-R",
-            "-S",
-            "-n", "mod-desktop", "-C",
-           #if defined(DISTRHO_OS_MAC)
-            P "/MacOS/jack/jack-session.conf",
-           #elif defined(DISTRHO_OS_WINDOWS)
-            P "\\jack\\jack-session.conf",
-           #else
-            P "/jack/jack-session.conf",
-           #endif
-            "-d", "desktop", "-r", sampleRateStr.buffer(), nullptr
-        };
-        const char* const mod_ui_args[] = {
-           #if defined(DISTRHO_OS_MAC)
-            P "/MacOS/mod-ui",
-           #elif defined(DISTRHO_OS_WINDOWS)
-            P "\\mod-ui.exe",
-           #else
-            P "/mod-ui",
-           #endif
-            nullptr
-        };
-
-        if (shm.init() && jackd.start(jackd_args, envp))
-        {
-            processing = true;
-            bufferSizeChanged(getBufferSize());
-
-            d_msleep(500);
-            mod_ui.start(mod_ui_args, envp);
-        }
+        bufferSizeChanged(getBufferSize());
     }
 
     ~DesktopPlugin()
     {
+        stopRunner();
+
         if (processing && jackd.isRunning())
             shm.stopWait();
 
@@ -128,16 +63,76 @@ public:
         delete[] tmpBuffers[0];
         delete[] tmpBuffers[1];
 
-       #ifdef DISTRHO_OS_WINDOWS
-       #else
-        for (uint i = 0; envp[i] != nullptr; ++i)
-            std::free(envp[i]);
+        if (envp != nullptr)
+        {
+           #ifndef DISTRHO_OS_WINDOWS
+            for (uint i = 0; envp[i] != nullptr; ++i)
+                std::free(envp[i]);
+           #endif
 
-        delete[] envp;
-       #endif
+            delete[] envp;
+        }
     }
 
 protected:
+   /* --------------------------------------------------------------------------------------------------------
+    * Keep services running */
+
+    bool run() override
+    {
+       #ifdef DISTRHO_OS_WINDOWS
+        #define APP_EXT ".ext"
+       #else
+        #define APP_EXT ""
+       #endif
+
+        if (! jackd.isRunning())
+        {
+            const String appDir(getAppDir());
+            const String jackdStr(appDir + DISTRHO_OS_SEP_STR "jackd" APP_EXT);
+            const String jacksessionStr(appDir + DISTRHO_OS_SEP_STR "jack" DISTRHO_OS_SEP_STR "jack-session.conf");
+            const String sampleRateStr(static_cast<int>(getSampleRate()));
+
+            const char* const jackd_args[] = {
+                jackdStr.buffer(),
+                "-R",
+                "-S",
+                "-n", "mod-desktop",
+                "-C",
+                jacksessionStr.buffer(),
+                "-d", "desktop",
+                "-r", sampleRateStr.buffer(),
+                nullptr
+            };
+
+            return jackd.start(jackd_args, envp);
+        }
+
+        if (! processing)
+        {
+            if (shm.sync())
+                processing = true;
+
+            return true;
+        }
+
+        if (! mod_ui.isRunning())
+        {
+            const String appDir(getAppDir());
+            const String moduiStr(appDir + DISTRHO_OS_SEP_STR "mod-ui" APP_EXT);
+
+            const char* const mod_ui_args[] = {
+                moduiStr.buffer(),
+                nullptr
+            };
+
+            return mod_ui.start(mod_ui_args, envp);
+        }
+
+        parameters[kParameterBasePortNumber] = 1;
+        return true;
+    }
+
    /* --------------------------------------------------------------------------------------------------------
     * Information */
 
@@ -213,10 +208,16 @@ protected:
     */
     void initParameter(uint32_t index, Parameter& parameter) override
     {
-        parameter.hints = kParameterIsAutomatable;
-
         switch (index)
         {
+        case kParameterBasePortNumber:
+            parameter.hints = kParameterIsOutput | kParameterIsInteger;
+            parameter.name = "base port number";
+            parameter.symbol = "base_port_num";
+            parameter.ranges.min = 0.f;
+            parameter.ranges.max = 512.f;
+            parameter.ranges.def = 0.f;
+            break;
         }
     }
 
@@ -245,7 +246,7 @@ protected:
     */
     void setParameterValue(const uint32_t index, const float value) override
     {
-        parameters[index] = value;
+        // parameters[index] = value;
     }
 
    /**
@@ -459,35 +460,16 @@ protected:
         std::memset(tmpBuffers[1], 0, sizeof(float) * (bufferSize + 256));
     }
 
-    void sampleRateChanged(const double sampleRate) override
+    void sampleRateChanged(double) override
     {
-        if (! processing)
-            return;
+        if (jackd.isRunning())
+        {
+            stopRunner();
+            jackd.stop();
 
-        const String sampleRateStr(static_cast<int>(sampleRate));
-        const char* const jackd_args[] = {
-           #if defined(DISTRHO_OS_MAC)
-            P "/MacOS/jackd",
-           #elif defined(DISTRHO_OS_WINDOWS)
-            P "\\jackd.exe",
-           #else
-            P "/jackd",
-           #endif
-            "-R",
-            "-S",
-            "-n", "mod-desktop", "-C",
-           #if defined(DISTRHO_OS_MAC)
-            P "/MacOS/jack/jack-session.conf",
-           #elif defined(DISTRHO_OS_WINDOWS)
-            P "\\jack\\jack-session.conf",
-           #else
-            P "/jack/jack-session.conf",
-           #endif
-            "-d", "desktop", "-r", sampleRateStr.buffer(), nullptr
-        };
-
-        jackd.stop();
-        jackd.start(jackd_args);
+            if (run())
+                startRunner(500);
+        }
     }
 
     // -------------------------------------------------------------------------------------------------------

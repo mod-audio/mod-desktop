@@ -204,6 +204,16 @@ public:
         std::memset(data->audio, 0, sizeof(float) * 128 * 2);
     }
 
+    bool sync()
+    {
+        if (data == nullptr)
+            return false;
+
+        reset();
+        post();
+        return wait();
+    }
+
     void stopWait()
     {
         if (data == nullptr)
