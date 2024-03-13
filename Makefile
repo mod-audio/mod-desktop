@@ -79,7 +79,11 @@ PAWPAW_PREFIX = $(PAWPAW_DIR)/targets/$(PAWPAW_TARGET)$(PAWPAW_SUFFIX)
 # ---------------------------------------------------------------------------------------------------------------------
 # List of files created by PawPaw bootstrap, to ensure we have run it at least once
 
+ifeq ($(MACOS),true)
+BOOTSTRAP_FILES  = $(PAWPAW_PREFIX)/bin/cxfreeze
+else
 BOOTSTRAP_FILES  = $(PAWPAW_PREFIX)/bin/cxfreeze-quickstart
+endif
 BOOTSTRAP_FILES += $(PAWPAW_PREFIX)/bin/jackd$(APP_EXT)
 BOOTSTRAP_FILES += $(PAWPAW_PREFIX)/include/armadillo
 

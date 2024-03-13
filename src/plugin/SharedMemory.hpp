@@ -79,6 +79,9 @@ public:
 
         VirtualLock(ptr, kDataSize);
       #else
+        // FIXME
+        shm_unlink("/mod-desktop-test1");
+
         shmfd = shm_open("/mod-desktop-test1", O_CREAT|O_EXCL|O_RDWR, 0600);
         DISTRHO_SAFE_ASSERT_RETURN(shmfd >= 0, false);
 
