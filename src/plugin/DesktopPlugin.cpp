@@ -24,12 +24,54 @@ class DesktopPlugin : public Plugin
     uint32_t numFramesInShmBuffer = 0;
     uint32_t numFramesInTmpBuffer = 0;
 
+   #ifdef DISTRHO_OS_WINDOWS
+    const CHAR* envp;
+   #else
+    char** envp;
+   #endif
+
 public:
     DesktopPlugin()
         : Plugin(0, 0, 0)
     {
         if (isDummyInstance())
             return;
+
+      #ifdef DISTRHO_OS_WINDOWS
+        envp = (
+            "MOD_DATA_DIR=" P "\\data\0"
+            "MOD_FACTORY_PEDALBOARDS_DIR=" P "\\pedalboards\0"
+            "LV2_PATH=" P "\\plugins\0"
+            "\0"
+        );
+      #else
+        uint envsize = 0;
+        while (environ[envsize] != nullptr)
+            ++envsize;
+
+        envp = new char*[envsize + 8];
+
+        for (uint i = 0; i < envsize; ++i)
+            envp[i] = strdup(environ[i]);
+
+        envp[envsize] = strdup("MOD_DESKTOP=1");
+        envp[envsize + 1] = strdup("LANG=en_US.UTF-8");
+       #ifdef DISTRHO_OS_MAC
+        envp[envsize + 2] = strdup("DYLD_LIBRARY_PATH=" P "/MacOS");
+        envp[envsize + 3] = strdup("JACK_DRIVER_DIR=" P "/MacOS/jack");
+        envp[envsize + 4] = strdup("MOD_DATA_DIR=/Users/falktx/Documents/MOD Desktop");
+        envp[envsize + 5] = strdup("MOD_FACTORY_PEDALBOARDS_DIR=" P "/Resources/pedalboards");
+        envp[envsize + 6] = strdup("LV2_PATH=" P "/LV2");
+        envp[envsize + 7] = nullptr;
+       #else
+        envp[envsize + 2] = strdup("LD_LIBRARY_PATH=" P);
+        envp[envsize + 3] = strdup("JACK_DRIVER_DIR=" P "/jack");
+        envp[envsize + 4] = strdup("MOD_DATA_DIR=" P "/data");
+        envp[envsize + 5] = strdup("MOD_FACTORY_PEDALBOARDS_DIR=" P "/pedalboards");
+        envp[envsize + 6] = strdup("LV2_PATH=" P "/plugins");
+        envp[envsize + 7] = nullptr;
+       #endif
+      #endif
 
         const String sampleRateStr(static_cast<int>(getSampleRate()));
         const char* const jackd_args[] = {
@@ -63,24 +105,36 @@ public:
             nullptr
         };
 
-        if (shm.init() && jackd.start(jackd_args))
+        if (shm.init() && jackd.start(jackd_args, envp))
         {
             processing = true;
             bufferSizeChanged(getBufferSize());
 
             d_msleep(500);
-            mod_ui.start(mod_ui_args);
+            mod_ui.start(mod_ui_args, envp);
         }
     }
 
     ~DesktopPlugin()
     {
-        mod_ui.stop();
+        if (processing && jackd.isRunning())
+            shm.stopWait();
+
         jackd.stop();
+        mod_ui.stop();
+
         shm.deinit();
 
         delete[] tmpBuffers[0];
         delete[] tmpBuffers[1];
+
+       #ifdef DISTRHO_OS_WINDOWS
+       #else
+        for (uint i = 0; envp[i] != nullptr; ++i)
+            std::free(envp[i]);
+
+        delete[] envp;
+       #endif
     }
 
 protected:

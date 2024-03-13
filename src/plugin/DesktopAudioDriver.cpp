@@ -133,6 +133,13 @@ class DesktopAudioDriver : public JackAudioDriver
             if (! wait())
                 continue;
 
+            if (fShmData->magic == 7331)
+            {
+                fIsProcessing = false;
+                post();
+                return;
+            }
+
             CycleTakeBeginTime();
 
             if (Process() != 0)
@@ -157,11 +164,13 @@ public:
           fIsRunning(false)
     {
         printf("%03d:%s\n", __LINE__, __FUNCTION__);
+        fflush(stdout);
     }
 
     ~DesktopAudioDriver() override
     {
         printf("%03d:%s\n", __LINE__, __FUNCTION__);
+        fflush(stdout);
     }
 
     int Open(jack_nframes_t buffersize,
@@ -177,6 +186,7 @@ public:
              jack_nframes_t playback_latency) override
     {
         printf("%03d:%s\n", __LINE__, __FUNCTION__);
+        fflush(stdout);
         if (JackAudioDriver::Open(buffersize, samplerate, capturing, playing, chan_in, chan_out, monitor,
             capture_driver_name, playback_driver_name, capture_latency, playback_latency) != 0) {
             return -1;
@@ -262,38 +272,14 @@ public:
         }
        #endif
 
-        jack_port_id_t port_index;
-        JackPort* port;
-        if (fEngine->PortRegister(fClientControl.fRefNum, "system:midi_capture_1", JACK_DEFAULT_MIDI_TYPE,
-                                  CaptureDriverFlags, fEngineControl->fBufferSize, &port_index) < 0)
-        {
-            Close();
-            jack_error("Can't open default MOD Desktop driver 6");
-            return -1;
-        }
-        fCaptureMidiPort = port_index;
-        port = fGraphManager->GetPort(port_index);
-        port->SetAlias("MOD Desktop MIDI Capture");
-
-        if (fEngine->PortRegister(fClientControl.fRefNum, "system:midi_playback_1", JACK_DEFAULT_MIDI_TYPE,
-                                  PlaybackDriverFlags, fEngineControl->fBufferSize, &port_index) < 0)
-        {
-        {
-            Close();
-            jack_error("Can't open default MOD Desktop driver 7");
-            return -1;
-        }
-        }
-        fPlaybackMidiPort = port_index;
-        port = fGraphManager->GetPort(port_index);
-        port->SetAlias("MOD Desktop MIDI Playback");
-
         return 0;
     }
 
     int Close() override
     {
         printf("%03d:%s\n", __LINE__, __FUNCTION__);
+        fflush(stdout);
+
         JackAudioDriver::Close();
 
        #ifdef __APPLE__
@@ -339,13 +325,60 @@ public:
         return 0;
     }
 
-//         int Attach() override
-//         {
-//         }
+    int Attach() override
+    {
+        printf("%03d:%s | %u\n", __LINE__, __FUNCTION__, fShmData->magic);
+        fflush(stdout);
+
+        if (JackAudioDriver::Attach() != 0)
+            return -1;
+
+        jack_port_id_t port_index;
+        JackPort* port;
+        if (fEngine->PortRegister(fClientControl.fRefNum, "system:midi_capture_1", JACK_DEFAULT_MIDI_TYPE,
+                                  CaptureDriverFlags, fEngineControl->fBufferSize, &port_index) < 0)
+        {
+            Close();
+            jack_error("Can't open default MOD Desktop driver 6");
+            return -1;
+        }
+        fCaptureMidiPort = port_index;
+        port = fGraphManager->GetPort(port_index);
+        port->SetAlias("MOD Desktop MIDI Capture");
+
+        if (fEngine->PortRegister(fClientControl.fRefNum, "system:midi_playback_1", JACK_DEFAULT_MIDI_TYPE,
+                                  PlaybackDriverFlags, fEngineControl->fBufferSize, &port_index) < 0)
+        {
+        {
+            Close();
+            jack_error("Can't open default MOD Desktop driver 7");
+            return -1;
+        }
+        }
+        fPlaybackMidiPort = port_index;
+        port = fGraphManager->GetPort(port_index);
+        port->SetAlias("MOD Desktop MIDI Playback");
+
+        return 0;
+    }
+
+    int Detach() override
+    {
+        printf("%03d:%s | %u\n", __LINE__, __FUNCTION__, fShmData->magic);
+        fflush(stdout);
+
+        if (JackAudioDriver::Detach() != 0)
+            return -1;
+
+        fEngine->PortUnRegister(fClientControl.fRefNum, fCaptureMidiPort);
+        fEngine->PortUnRegister(fClientControl.fRefNum, fPlaybackMidiPort);
+        return 0;
+    }
 
     int Start() override
     {
         printf("%03d:%s\n", __LINE__, __FUNCTION__);
+        fflush(stdout);
         if (JackAudioDriver::Start() != 0)
             return -1;
 
@@ -361,7 +394,9 @@ public:
 
     int Stop() override
     {
-        printf("%03d:%s\n", __LINE__, __FUNCTION__);
+        printf("%03d:%s | %u\n", __LINE__, __FUNCTION__, fShmData->magic);
+        fflush(stdout);
+
         fIsProcessing = false;
 
         if (fIsRunning)

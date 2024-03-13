@@ -19,7 +19,7 @@ void* addWebView(const uintptr_t viewptr)
                                    DISTRHO_UI_DEFAULT_WIDTH,
                                    DISTRHO_UI_DEFAULT_HEIGHT - kVerticalOffset);
 
-    WKWebView* const webview = [[WKWebView alloc] initWithFrame: rect];
+    WKWebView* const webview = [[[WKWebView alloc] initWithFrame: rect] retain];
 
     [[[webview configuration] preferences] setValue: @(true) forKey: @"developerExtrasEnabled"];
 
@@ -27,6 +27,14 @@ void* addWebView(const uintptr_t viewptr)
     [webview setHidden:NO];
 
     return webview;
+}
+
+void destroyWebView(void* const webviewptr)
+{
+    WKWebView* const webview = static_cast<WKWebView*>(webviewptr);
+
+    [webview setHidden:YES];
+    [[webview dealloc] release];
 }
 
 void reloadWebView(void* const webviewptr)

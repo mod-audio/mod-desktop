@@ -55,36 +55,8 @@ public:
         stop();
     }
 
-    bool start(const char* const args[])
+    bool start(const char* const args[], char* const* const envp = nullptr)
     {
-        // FIXME
-       #ifdef DISTRHO_OS_WINDOWS
-        const CHAR* const envp = (
-            "MOD_DATA_DIR=" P "\\data\0"
-            "MOD_FACTORY_PEDALBOARDS_DIR=" P "\\pedalboards\0"
-            "LV2_PATH=" P "\\plugins\0"
-            "\0");
-       #else
-        const char* const envp[] = {
-            "MOD_DESKTOP=1",
-            "LANG=en_US.UTF-8",
-           #if defined(DISTRHO_OS_MAC)
-            "DYLD_LIBRARY_PATH=" P "/MacOS",
-            "JACK_DRIVER_DIR=" P "/MacOS/jack",
-            "MOD_DATA_DIR=/Users/falktx/Documents/MOD Desktop",
-            "MOD_FACTORY_PEDALBOARDS_DIR=" P "/Resources/pedalboards",
-            "LV2_PATH=" P "/LV2",
-           #else
-            "LD_LIBRARY_PATH=" P,
-            "JACK_DRIVER_DIR=" P "/jack",
-            "MOD_DATA_DIR=" P "/data",
-            "MOD_FACTORY_PEDALBOARDS_DIR=" P "/pedalboards",
-            "LV2_PATH=" P "/plugins",
-           #endif
-            nullptr
-        };
-       #endif
-
        #ifdef _WIN32
         std::string cmd;
 
@@ -93,6 +65,7 @@ public:
             if (i != 0)
                 cmd += " ";
 
+            // TODO quoted
             cmd += args[i];
         }
 
@@ -118,7 +91,10 @@ public:
         {
         // child process
         case 0:
-            execve(args[0], const_cast<char* const*>(args), const_cast<char* const*>(envp));
+            if (envp != nullptr)
+                execve(args[0], const_cast<char* const*>(args), envp);
+            else
+                execvp(args[0], const_cast<char* const*>(args));
 
             d_stderr2("exec failed: %d:%s", errno, std::strerror(errno));
             _exit(1);
@@ -132,29 +108,6 @@ public:
 
         return ret > 0;
        #endif
-    }
-
-    bool start2(const char* const args[])
-    {
-        const pid_t ret = pid = vfork();
-
-        switch (ret)
-        {
-        // child process
-        case 0:
-            execvp(args[0], const_cast<char* const*>(args));
-
-            d_stderr2("exec failed: %d:%s", errno, std::strerror(errno));
-            _exit(1);
-            break;
-
-        // error
-        case -1:
-            d_stderr2("vfork() failed: %d:%s", errno, std::strerror(errno));
-            break;
-        }
-
-        return ret > 0;
     }
 
     void stop(const uint32_t timeoutInMilliseconds = 2000)
@@ -257,6 +210,57 @@ public:
 
             break;
         }
+       #endif
+    }
+
+    bool isRunning()
+    {
+       #ifdef _WIN32
+        if (process.hProcess == INVALID_HANDLE_VALUE)
+            return false;
+
+        if (WaitForSingleObject(process.hProcess, 0) == WAIT_FAILED)
+        {
+            const PROCESS_INFORMATION oprocess = process;
+            process = { INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE, 0, 0 };
+            CloseHandle(oprocess.hThread);
+            CloseHandle(oprocess.hProcess);
+            return false;
+        }
+
+        return true;
+       #else
+        if (pid <= 0)
+            return false;
+        
+        const pid_t ret = ::waitpid(pid, nullptr, WNOHANG);
+
+        if (ret == -1 && errno == ECHILD)
+        {
+            pid = 0;
+            return false;
+        }
+
+        return true;
+       #endif
+    }
+
+   #ifndef _WIN32
+    void signal(const int sig)
+    {
+        if (pid > 0)
+            kill(pid, sig);
+    }
+   #endif
+
+    void terminate()
+    {
+       #ifdef _WIN32
+        if (process.hProcess != INVALID_HANDLE_VALUE)
+            TerminateProcess(process.hProcess, 15);
+       #else
+        if (pid > 0)
+            kill(pid, SIGTERM);
        #endif
     }
 

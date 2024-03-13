@@ -26,16 +26,7 @@ struct WebViewIPC {
 
 void* addWebView(uintptr_t viewptr)
 {
-    ::Display* const display = XOpenDisplay(nullptr);
-    DISTRHO_SAFE_ASSERT_RETURN(display != nullptr, nullptr);
-
-    WebViewIPC* const ipc = new WebViewIPC();
-    ipc->display = display;
-    ipc->childWindow = 0;
-    ipc->ourWindow = viewptr;
-
     char webviewTool[PATH_MAX] = {};
-
     {
         Dl_info info = {};
         dladdr((void*)addWebView, &info);
@@ -55,16 +46,25 @@ void* addWebView(uintptr_t viewptr)
         {
             std::strncpy(webviewTool, info.dli_fname, PATH_MAX - 1);
         }
+
+        char* const lastsep = std::strrchr(webviewTool, '/');
+        DISTRHO_SAFE_ASSERT_RETURN(lastsep != nullptr, nullptr);
+
+        *lastsep = '\0';
+        std::strncat(webviewTool, "/MOD-Desktop-WebView", PATH_MAX - 1);
     }
 
-    if (char* const c = std::strrchr(webviewTool, '/'))
-        *c = 0;
+    ::Display* const display = XOpenDisplay(nullptr);
+    DISTRHO_SAFE_ASSERT_RETURN(display != nullptr, nullptr);
 
-    std::strncat(webviewTool, "/MOD-Desktop-WebView", PATH_MAX - 1);
+    WebViewIPC* const ipc = new WebViewIPC();
+    ipc->display = display;
+    ipc->childWindow = 0;
+    ipc->ourWindow = viewptr;
 
     const String viewStr(viewptr);
     const char* const args[] = { webviewTool, "-platform", "xcb", "-xembed", viewStr.buffer(), nullptr };
-    ipc->p.start2(args);
+    ipc->p.start(args);
 
     return ipc;
 }
@@ -79,6 +79,9 @@ void destroyWebView(void* const webviewptr)
 
 void reloadWebView(void* const webviewptr)
 {
+    WebViewIPC* const ipc = static_cast<WebViewIPC*>(webviewptr);
+
+    ipc->p.signal(SIGUSR1);
 }
 
 void resizeWebView(void* const webviewptr, const uint offset, const uint width, const uint height)

@@ -204,6 +204,16 @@ public:
         std::memset(data->audio, 0, sizeof(float) * 128 * 2);
     }
 
+    void stopWait()
+    {
+        if (data == nullptr)
+            return;
+
+        data->magic = 7331;
+        post();
+        wait();
+    }
+
     bool process(float** output, const uint32_t offset)
     {
         // unlock RT waiter
