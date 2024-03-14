@@ -19,7 +19,9 @@ FILES_UI = DesktopUI.cpp NanoButton.cpp
 
 ifeq ($(MACOS),true)
 FILES_UI += WebView.mm
-else ifeq ($(LINUX),true)
+else ifeq ($(WINDOWS),true)
+FILES_UI += WebViewWin32.cpp
+else
 FILES_UI += WebViewX11.cpp
 endif
 
@@ -32,6 +34,9 @@ DPF_TARGET_DIR = ../../build-plugin
 include ../DPF/Makefile.plugins.mk
 
 BUILD_CXX_FLAGS += -DVERSION='"$(shell cat ../../VERSION)"'
+
+BUILD_CXX_FLAGS += -pthread
+LINK_FLAGS += -pthread
 
 ifeq ($(MACOS),true)
 LINK_FLAGS += -framework IOKit -framework WebKit

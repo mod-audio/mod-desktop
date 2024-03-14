@@ -3,9 +3,20 @@
 
 #include "utils.hpp"
 
-#include <pthread.h>
-
 #ifdef _WIN32
+#include <winsock2.h>
+#include <windows.h>
+#include <direct.h>
+#include <shlobj.h>
+// FIXME
+namespace std {
+    using ::wcschr;
+    using ::wcslen;
+    using ::wcsncat;
+    using ::wcsncmp;
+    using ::wcsncpy;
+    using ::snwprintf;
+}
 #else
 #include <sys/stat.h>
 #include <unistd.h>
@@ -18,6 +29,10 @@
 #elif defined(__linux__)
 #include <linux/limits.h>
 #endif
+
+#include <cstdio>
+#include <cstring>
+#include <pthread.h>
 
 START_NAMESPACE_DISTRHO
 
@@ -39,9 +54,9 @@ constexpr uint8_t char2u8(const uint8_t c)
 
 // FIXME share with systray
 #ifdef _WIN32
-static WCHAR char* getDataDirW()
+static const wchar_t* getDataDirW()
 {
-    static WCHAR dataDir[MAX_PATH] = {};
+    static wchar_t dataDir[MAX_PATH] = {};
 
     if (dataDir[0] == 0)
     {
@@ -79,15 +94,16 @@ static const char* getDataDir()
 // -----------------------------------------------------------------------------------------------------------
 
 #ifdef _WIN32
-static const WCHAR* getAppDirW()
+static const wchar_t* getAppDirW()
 {
-    static WCHAR appDir[MAX_PATH] = {};
+    static wchar_t appDir[MAX_PATH] = {};
 
     if (appDir[0] == 0)
     {
-        // TODO
-        SHGetSpecialFolderPathW(nullptr, dataDir, CSIDL_MYDOCUMENTS, false);
-        std::wcsncat(dataDir, L"\\MOD Desktop", MAX_PATH - 1);
+        // SHGetSpecialFolderPathW(nullptr, appDir, CSIDL_PROGRAM_FILES, false);
+        // std::wcsncat(appDir, L"\\MOD Desktop", MAX_PATH - 1);
+
+        std::wcsncat(appDir, L"Z:\\home\\falktx\\Source\\MOD\\mod-desktop\\build", MAX_PATH - 1);
     }
 
     return appDir;
@@ -103,10 +119,8 @@ const char* getAppDir()
 
     if (appDir[0] == 0)
     {
-       #if defined(_WIN32)
-        const WCHAR* const appDirW = getAppDirW();
-
-        // TODO
+       #ifdef _WIN32
+        WideCharToMultiByte(CP_UTF8, 0, getAppDirW(), -1, appDir, PATH_MAX, nullptr, nullptr);
        #else
         std::strncpy(appDir, getDataDir(), PATH_MAX - 1);
         std::strncat(appDir, "/.last-known-location-" VERSION, PATH_MAX - 1);
@@ -140,6 +154,46 @@ const char* getAppDir()
 
 // -----------------------------------------------------------------------------------------------------------
 
+#ifdef _WIN32
+static void set_envp_value(wchar_t** envp, const wchar_t* const fullvalue)
+{
+    const size_t keylen = (std::wcschr(fullvalue, L'=') - fullvalue) / sizeof(wchar_t);
+
+    for (; *envp != nullptr; ++envp)
+    {
+        if (std::wcsncmp(*envp, fullvalue, keylen + 1) == 0)
+        {
+            const size_t fulllen = std::wcslen(fullvalue);
+            *envp = static_cast<wchar_t*>(std::realloc(*envp, (fulllen + 1) * sizeof(wchar_t)));
+            std::memcpy(*envp + (keylen + 1), fullvalue + (keylen + 1), (fulllen - keylen) * sizeof(wchar_t));
+            return;
+        }
+    }
+
+    *envp = _wcsdup(fullvalue);
+}
+
+static void set_envp_value(wchar_t** envp, const wchar_t* const key, const wchar_t* const value)
+{
+    const size_t keylen = std::wcslen(key);
+    const size_t valuelen = std::wcslen(value);
+
+    for (; *envp != nullptr; ++envp)
+    {
+        if (std::wcsncmp(*envp, key, keylen) == 0 && (*envp)[keylen] == L'=')
+        {
+            *envp = static_cast<wchar_t*>(std::realloc(*envp, (keylen + valuelen + 2) * sizeof(wchar_t)));
+            std::memcpy(*envp + (keylen + 1), value, (valuelen + 1) * sizeof(wchar_t));
+            return;
+        }
+    }
+
+    *envp = static_cast<wchar_t*>(std::malloc((keylen + valuelen + 2) * sizeof(wchar_t)));
+    std::memcpy(*envp, key, keylen * sizeof(wchar_t));
+    std::memcpy(*envp + (keylen + 1), value, (valuelen + 1) * sizeof(wchar_t));
+    (*envp)[keylen] = '=';
+}
+#else
 static void set_envp_value(char** envp, const char* const fullvalue)
 {
     const size_t keylen = std::strchr(fullvalue, '=') - fullvalue;
@@ -178,15 +232,20 @@ static void set_envp_value(char** envp, const char* const key, const char* const
     std::memcpy(*envp + (keylen + 1), value, valuelen + 1);
     (*envp)[keylen] = '=';
 }
+#endif
 
 // -----------------------------------------------------------------------------------------------------------
 
 // NOTE this needs to match initEvironment from systray side
+#ifdef _WIN32
+const wchar_t* getEvironment(const uint portBaseNum)
+#else
 char* const* getEvironment(const uint portBaseNum)
+#endif
 {
     // get directory of the mod-desktop application
    #ifdef _WIN32
-    const WCHAR* const appDir = getAppDirW();
+    const wchar_t* const appDir = getAppDirW();
    #else
     const char* const appDir = getAppDir();
    #endif
@@ -205,12 +264,34 @@ char* const* getEvironment(const uint portBaseNum)
 
     uint envsize = 0;
    #ifdef _WIN32
-    envp = (
-        "MOD_DATA_DIR=" P "\\data\0"
-        "MOD_FACTORY_PEDALBOARDS_DIR=" P "\\pedalboards\0"
-        "LV2_PATH=" P "\\plugins\0"
-        "\0"
-    );
+    wchar_t** envpl;
+
+    if (wchar_t* const envs = GetEnvironmentStringsW())
+    {
+        for (wchar_t* envsi = envs; *envsi != '\0'; envsi += (std::wcslen(envsi) + 1))
+            ++envsize;
+
+        envpl = new wchar_t*[envsize + 32];
+
+        uint i = 0;
+        for (wchar_t* envsi = envs; *envsi != '\0'; envsi += (std::wcslen(envsi) + 1))
+            envpl[i] = _wcsdup(envsi);
+
+        FreeEnvironmentStringsW(envs);
+    }
+    else
+    {
+        envpl = new wchar_t*[32];
+    }
+
+    for (uint i = 0; i < 32; ++i)
+        envpl[envsize + i] = nullptr;
+
+    // base environment details
+    set_envp_value(envpl, L"LANG=en_US.UTF-8");
+    set_envp_value(envpl, L"MOD_DESKTOP=1");
+    set_envp_value(envpl, L"MOD_DESKTOP_PLUGIN=1");
+    set_envp_value(envpl, L"PYTHONUNBUFFERED=1");
    #else
     while (environ[envsize] != nullptr)
         ++envsize;
@@ -232,8 +313,8 @@ char* const* getEvironment(const uint portBaseNum)
 
     // get and set directory to our documents and settings, under "user documents"; also make sure it exists
    #ifdef _WIN32
-    const WCHAR* const dataDir = getDataDirW();
-    set_envp_value(envp, L"MOD_DATA_DIR", dataDir);
+    const wchar_t* const dataDir = getDataDirW();
+    set_envp_value(envpl, L"MOD_DATA_DIR", dataDir);
    #else
     const char* const dataDir = getDataDir();
     set_envp_value(envp, "MOD_DATA_DIR", dataDir);
@@ -241,7 +322,7 @@ char* const* getEvironment(const uint portBaseNum)
 
     // reusable
    #ifdef _WIN32
-    WCHAR path[MAX_PATH] = {};
+    wchar_t path[MAX_PATH] = {};
     const size_t appDirLen = std::wcslen(appDir);
     const size_t dataDirLen = std::wcslen(dataDir);
    #else
@@ -317,7 +398,7 @@ char* const* getEvironment(const uint portBaseNum)
   #ifdef _WIN32
     std::memcpy(path, appDir, appDirLen * sizeof(WCHAR));
     std::wcsncpy(path + appDirLen, L"\\pedalboards", MAX_PATH - appDirLen - 1);
-    set_envp_value(envp, L"MOD_FACTORY_PEDALBOARDS_DIR", path);
+    set_envp_value(envpl, L"MOD_FACTORY_PEDALBOARDS_DIR", path);
   #else
     std::memcpy(path, appDir, appDirLen);
    #ifdef __APPLE__
@@ -333,7 +414,7 @@ char* const* getEvironment(const uint portBaseNum)
     std::memcpy(path, dataDir, dataDirLen * sizeof(WCHAR));
     std::wcsncpy(path + dataDirLen, L"\\user-files", MAX_PATH - dataDirLen - 1);
     _wmkdir(path);
-    set_envp_value(envp, L"MOD_USER_FILES_DIR", path);
+    set_envp_value(envpl, L"MOD_USER_FILES_DIR", path);
    #else
     std::memcpy(path, dataDir, dataDirLen);
     std::strncpy(path + dataDirLen, "/user-files", PATH_MAX - dataDirLen - 1);
@@ -346,7 +427,7 @@ char* const* getEvironment(const uint portBaseNum)
    #ifdef _WIN32
     std::memcpy(path, dataDir, dataDirLen * sizeof(WCHAR));
     std::wcsncpy(path + dataDirLen, L"\\keys\\", MAX_PATH - dataDirLen - 1);
-    set_envp_value(envp, L"MOD_KEYS_PATH", path);
+    set_envp_value(envpl, L"MOD_KEYS_PATH", path);
    #else
     std::memcpy(path, dataDir, dataDirLen);
     std::strncpy(path + dataDirLen, "/keys/", PATH_MAX - dataDirLen - 1);
@@ -359,7 +440,7 @@ char* const* getEvironment(const uint portBaseNum)
     std::wcsncpy(path + dataDirLen, L"\\lv2;", MAX_PATH - dataDirLen - 1);
     std::wcsncat(path, appDir, MAX_PATH - 1);
     std::wcsncat(path, L"\\plugins", MAX_PATH - 1);
-    set_envp_value(envp, L"LV2_PATH", path);
+    set_envp_value(envpl, L"LV2_PATH", path);
   #else
     std::memcpy(path, dataDir, dataDirLen);
     std::strncpy(path + dataDirLen, "/lv2:", PATH_MAX - dataDirLen - 1);
@@ -397,6 +478,14 @@ char* const* getEvironment(const uint portBaseNum)
 
     // plugin-specific port details
    #ifdef _WIN32
+    std::snwprintf(path, PATH_MAX - 1, L"MOD_DESKTOP_SERVER_NAME=mod-desktop-%u", portBaseNum);
+    set_envp_value(envpl, path);
+
+    std::snwprintf(path, PATH_MAX - 1, L"MOD_DEVICE_HOST_PORT=%u", kPortNumOffset + portBaseNum + 1);
+    set_envp_value(envpl, path);
+
+    std::snwprintf(path, PATH_MAX - 1, L"MOD_DEVICE_WEBSERVER_PORT=%u", kPortNumOffset + portBaseNum);
+    set_envp_value(envpl, path);
    #else
     std::snprintf(path, PATH_MAX - 1, "MOD_DESKTOP_SERVER_NAME=mod-desktop-%u", portBaseNum);
     set_envp_value(envp, path);
@@ -406,6 +495,25 @@ char* const* getEvironment(const uint portBaseNum)
 
     std::snprintf(path, PATH_MAX - 1, "MOD_DEVICE_WEBSERVER_PORT=%u", kPortNumOffset + portBaseNum);
     set_envp_value(envp, path);
+   #endif
+
+   #ifdef _WIN32
+    // merge env var list into single string
+    envsize = 0;
+    for (uint i = 0; envpl[i] != nullptr; ++i)
+        envsize += std::wcslen(envpl[i]) + 1;
+
+    wchar_t* const envp = new wchar_t[envsize + 1];
+
+    envsize = 0;
+    for (uint i = 0; envpl[i] != nullptr; ++i)
+    {
+        const uint len = std::wcslen(envpl[i]) + 1;
+        std::memcpy(envp + envsize, envpl[i], len * sizeof(wchar_t));
+        std::free(envpl[i]);
+        envsize += len;
+    }
+    envp[envsize] = 0;
    #endif
 
     return envp;
@@ -421,7 +529,7 @@ static void* _openWebGui(void* const arg)
 
   #ifdef _WIN32
     WCHAR url[32] = {};
-    std::wsnprintf(url, 31, "http://127.0.0.1:%u", port);
+    std::snwprintf(url, 31, L"http://127.0.0.1:%u", port);
     ShellExecuteW(nullptr, L"open", url, nullptr, nullptr, SW_SHOWDEFAULT);
   #else
    #ifdef __APPLE__

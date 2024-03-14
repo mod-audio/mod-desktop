@@ -95,7 +95,7 @@ protected:
     bool run() override
     {
        #ifdef DISTRHO_OS_WINDOWS
-        #define APP_EXT ".ext"
+        #define APP_EXT ".exe"
        #else
         #define APP_EXT ""
        #endif
@@ -121,7 +121,7 @@ protected:
                 "-S",
                 "-n", servernameStr.buffer(),
                 "-C", jacksessionStr.buffer(),
-                "-d", "desktop",
+                "-d", "mod-desktop",
                 "-r", sampleRateStr.buffer(),
                 nullptr
             };

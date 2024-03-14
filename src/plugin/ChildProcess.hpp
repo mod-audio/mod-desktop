@@ -60,17 +60,29 @@ public:
             if (i != 0)
                 cmd += " ";
 
-            // TODO quoted
-            cmd += args[i];
+            if (std::strchr(args[i], ' ') != nullptr)
+            {
+                cmd += "\"";
+                cmd += args[i];
+                cmd += "\"";
+            }
+            else
+            {
+                cmd += args[i];
+            }
         }
 
-        STARTUPINFOA si = {};
+        wchar_t wcmd[PATH_MAX];
+        if (MultiByteToWideChar(CP_UTF8, 0, cmd.data(), -1, wcmd, PATH_MAX) <= 0)
+            return false;
+
+        STARTUPINFOW si = {};
         si.cb = sizeof(si);
 
         d_stdout("will start process with args '%s'", cmd.data());
 
-        return CreateProcessA(nullptr,    // lpApplicationName
-                              &cmd[0],    // lpCommandLine
+        return CreateProcessW(nullptr,    // lpApplicationName
+                              wcmd,       // lpCommandLine
                               nullptr,    // lpProcessAttributes
                               nullptr,    // lpThreadAttributes
                               TRUE,       // bInheritHandles
