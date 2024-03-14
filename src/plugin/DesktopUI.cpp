@@ -173,7 +173,7 @@ protected:
         }
     }
 
-    void buttonClicked(SubWidget* const widget, int button) override
+    void buttonClicked(SubWidget* const widget, int) override
     {
         switch (widget->getId())
         {

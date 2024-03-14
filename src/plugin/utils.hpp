@@ -15,7 +15,11 @@ const char* getAppDir();
 
 /* Get environment to be used for a child process.
  */
+#ifdef _WIN32
+const WCHAR* getEvironment(uint portBaseNum);
+#else
 char* const* getEvironment(uint portBaseNum);
+#endif
 
 /* Open a web browser with the mod-ui URL as address.
  */

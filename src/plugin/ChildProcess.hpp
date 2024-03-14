@@ -46,7 +46,11 @@ public:
         stop();
     }
 
+   #ifdef _WIN32
+    bool start(const char* const args[], const WCHAR* const envp)
+   #else
     bool start(const char* const args[], char* const* const envp = nullptr)
+   #endif
     {
        #ifdef _WIN32
         std::string cmd;
@@ -70,8 +74,8 @@ public:
                               nullptr,    // lpProcessAttributes
                               nullptr,    // lpThreadAttributes
                               TRUE,       // bInheritHandles
-                              0, // CREATE_NO_WINDOW /*| CREATE_UNICODE_ENVIRONMENT*/, // dwCreationFlags
-                              const_cast<LPSTR>(envp), // lpEnvironment
+                              /* CREATE_NO_WINDOW | */ CREATE_UNICODE_ENVIRONMENT, // dwCreationFlags
+                              const_cast<LPWSTR>(envp), // lpEnvironment
                               nullptr,    // lpCurrentDirectory
                               &si,        // lpStartupInfo
                               &process) != FALSE;

@@ -281,7 +281,7 @@ TARGETS += $(foreach PLUGIN,$(PLUGINS),$(call PLUGIN_STAMP,$(PLUGIN)))
 # ---------------------------------------------------------------------------------------------------------------------
 
 all: $(TARGETS)
-	$(MAKE) -C src/plugin
+	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) -C src/plugin
 
 clean:
 	$(MAKE) clean -C src/DPF
