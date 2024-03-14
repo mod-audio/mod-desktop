@@ -109,7 +109,7 @@ const char* getAppDir()
         // TODO
        #else
         std::strncpy(appDir, getDataDir(), PATH_MAX - 1);
-        std::strncat(appDir, "/.last-known-location", PATH_MAX - 1);
+        std::strncat(appDir, "/.last-known-location-" VERSION, PATH_MAX - 1);
 
         if (FILE* const f = std::fopen(appDir, "r"))
         {

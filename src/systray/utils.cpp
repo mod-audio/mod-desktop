@@ -151,7 +151,7 @@ void initEvironment()
     if (access(dataDir, F_OK) == 0)
     {
         std::memcpy(path, dataDir, dataDirLen);
-        std::strncpy(path + dataDirLen, "/.last-known-location", PATH_MAX - dataDirLen - 1);
+        std::strncpy(path + dataDirLen, "/.last-known-location-" VERSION, PATH_MAX - dataDirLen - 1);
 
         if (FILE* const f = std::fopen(path, "w"))
         {
