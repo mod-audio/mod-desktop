@@ -12,9 +12,17 @@ START_NAMESPACE_DISTRHO
 
 // -----------------------------------------------------------------------------------------------------------
 
-void* addWebView(const uintptr_t viewptr)
+struct WebViewImpl {
+    NSView* const view;
+    WKWebView* const webview;
+    NSURLRequest* const urlreq;
+};
+
+// -----------------------------------------------------------------------------------------------------------
+
+void* addWebView(const uintptr_t parentWinId, const uint port)
 {
-    NSView* const view = reinterpret_cast<NSView*>(viewptr);
+    NSView* const view = reinterpret_cast<NSView*>(parentWinId);
 
     const CGRect rect = CGRectMake(0,
                                    kVerticalOffset,
@@ -22,34 +30,47 @@ void* addWebView(const uintptr_t viewptr)
                                    DISTRHO_UI_DEFAULT_HEIGHT - kVerticalOffset);
 
     WKWebView* const webview = [[WKWebView alloc] initWithFrame: rect];
-
     [[[webview configuration] preferences] setValue: @(true) forKey: @"developerExtrasEnabled"];
-
     [view addSubview:webview];
+
+    char url[32];
+    std::snprintf(url, 31, "http://127.0.0.1:%u/", port);
+    NSString* const nsurl = [[NSString alloc]
+        initWithBytes:url
+               length:std::strlen(url)
+             encoding:NSUTF8StringEncoding];
+    NSURLRequest* const urlreq = [[NSURLRequest alloc] initWithURL: [NSURL URLWithString: nsurl]];
+    [nsurl release];
+
+    [webview loadRequest: urlreq];
     [webview setHidden:NO];
 
-    return webview;
+    return new WebViewImpl{view, webview, urlreq};
 }
 
-void destroyWebView(void* const webviewptr)
+void destroyWebView(void* const webview)
 {
-    WKWebView* const webview = static_cast<WKWebView*>(webviewptr);
+    WebViewImpl* const impl = static_cast<WebViewImpl*>(webview);
 
-    [webview setHidden:YES];
+    [impl->webview setHidden:YES];
+    [impl->webview removeFromSuperview];
+    [impl->urlreq release];
+
+    delete impl;
 }
 
-void reloadWebView(void* const webviewptr)
+void reloadWebView(void* const webview)
 {
-    WKWebView* const webview = static_cast<WKWebView*>(webviewptr);
+    WebViewImpl* const impl = static_cast<WebViewImpl*>(webview);
 
-    [webview loadRequest: [NSURLRequest requestWithURL: [NSURL URLWithString:@"http://127.0.0.1:18181/"]]];
+    [impl->webview loadRequest: impl->urlreq];
 }
 
-void resizeWebView(void* const webviewptr, const uint offset, const uint width, const uint height)
+void resizeWebView(void* const webview, const uint offset, const uint width, const uint height)
 {
-    WKWebView* const webview = static_cast<WKWebView*>(webviewptr);
+    WebViewImpl* const impl = static_cast<WebViewImpl*>(webview);
 
-    [webview setFrame:CGRectMake(0, offset, width, height)];
+    [impl->webview setFrame:CGRectMake(0, offset, width, height)];
 }
 
 // -----------------------------------------------------------------------------------------------------------

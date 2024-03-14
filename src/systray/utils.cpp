@@ -55,11 +55,15 @@ void initEvironment()
     SetEnvironmentVariableW(L"JACK_NO_START_SERVER", L"1");
     SetEnvironmentVariableW(L"LANG", L"en_US.UTF-8");
     SetEnvironmentVariableW(L"MOD_DESKTOP", L"1");
+    SetEnvironmentVariableW(L"MOD_DEVICE_HOST_PORT", L"18182");
+    SetEnvironmentVariableW(L"MOD_DEVICE_WEBSERVER_PORT", L"18181");
     SetEnvironmentVariableW(L"PYTHONUNBUFFERED", L"1");
    #else
     setenv("JACK_NO_START_SERVER", "1", 1);
     setenv("LANG", "en_US.UTF-8", 1);
     setenv("MOD_DESKTOP", "1", 1);
+    setenv("MOD_DEVICE_HOST_PORT", "18182", 1);
+    setenv("MOD_DEVICE_WEBSERVER_PORT", "18181", 1);
     setenv("PYTHONUNBUFFERED", "1", 1);
    #endif
 

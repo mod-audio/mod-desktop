@@ -78,9 +78,45 @@ const char* getAppDir()
    #endif
 }
 
-// -----------------------------------------------------------------------------------------------------------
+#ifdef _WIN32
+WCHAR char* getDataDirW()
+{
+    static WCHAR dataDir[MAX_PATH] = {};
 
-static const char* gMOD_USER_FILES_DIR = nullptr;
+    if (dataDir[0] == 0)
+    {
+        SHGetSpecialFolderPathW(nullptr, dataDir, CSIDL_MYDOCUMENTS, false);
+        _wmkdir(dataDir);
+
+        std::wcsncat(dataDir, L"\\MOD Desktop", MAX_PATH - 1);
+        _wmkdir(dataDir);
+    }
+
+    return dataDir;
+}
+#else
+const char* getDataDir()
+{
+    static char dataDir[PATH_MAX] = {};
+
+    if (dataDir[0] == 0)
+    {
+        // TODO
+        std::strncpy(dataDir, getenv("HOME"), PATH_MAX - 1);
+        mkdir(dataDir, 0777);
+
+        std::strncat(dataDir, "/Documents", PATH_MAX - 1);
+        mkdir(dataDir, 0777);
+
+        std::strncat(dataDir, "/MOD Desktop", PATH_MAX - 1);
+        mkdir(dataDir, 0777);
+    }
+
+    return dataDir;
+}
+#endif
+
+// -----------------------------------------------------------------------------------------------------------
 
 static void set_envp_value(char** envp, const char* const fullvalue)
 {
@@ -100,7 +136,7 @@ static void set_envp_value(char** envp, const char* const fullvalue)
     *envp = strdup(fullvalue);
 }
 
-static const char* set_envp_value(char** envp, const char* const key, const char* const value)
+static void set_envp_value(char** envp, const char* const key, const char* const value)
 {
     const size_t keylen = std::strlen(key);
     const size_t valuelen = std::strlen(value);
@@ -111,7 +147,7 @@ static const char* set_envp_value(char** envp, const char* const key, const char
         {
             *envp = static_cast<char*>(std::realloc(*envp, keylen + valuelen + 2));
             std::memcpy(*envp + (keylen + 1), value, valuelen + 1);
-            return *envp + (keylen + 1);
+            return;
         }
     }
 
@@ -119,13 +155,12 @@ static const char* set_envp_value(char** envp, const char* const key, const char
     std::memcpy(*envp, key, keylen);
     std::memcpy(*envp + (keylen + 1), value, valuelen + 1);
     (*envp)[keylen] = '=';
-    return *envp + (keylen + 1);
 }
 
 // -----------------------------------------------------------------------------------------------------------
 
 // NOTE this needs to match initEvironment from systray side
-char* const* getEvironment()
+char* const* getEvironment(const uint portBaseNum)
 {
    #ifdef DISTRHO_OS_MAC
     const char* const* const* const environptr = _NSGetEnviron();
@@ -147,12 +182,12 @@ char* const* getEvironment()
     while (environ[envsize] != nullptr)
         ++envsize;
 
-    char** const envp = new char*[envsize + 13];
+    char** const envp = new char*[envsize + 32];
 
     for (uint i = 0; i < envsize; ++i)
         envp[i] = strdup(environ[i]);
 
-    for (uint i = 0; i < 13; ++i)
+    for (uint i = 0; i < 32; ++i)
         envp[envsize + i] = nullptr;
 
     // base environment details
@@ -171,28 +206,10 @@ char* const* getEvironment()
 
     // get and set directory to our documents and settings, under "user documents"; also make sure it exists
    #ifdef _WIN32
-    WCHAR dataDir[MAX_PATH] = {};
-    SHGetSpecialFolderPathW(nullptr, dataDir, CSIDL_MYDOCUMENTS, false);
-
-    _wmkdir(dataDir);
-    std::wcsncat(dataDir, L"\\MOD Desktop", MAX_PATH - 1);
-    _wmkdir(dataDir);
-
+    const WCHAR* const dataDir = getDataDirW();
     set_envp_value(envp, L"MOD_DATA_DIR", dataDir);
    #else
-    char dataDir[PATH_MAX] = {};
-
-    // NOTE a generic implementation is a bit complex, let Qt do it for us this time
-    // const QByteArray docsDir(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation).toUtf8());
-    // std::strncpy(dataDir, docsDir.constData(), PATH_MAX - 1);
-    // TODO
-    std::strncpy(dataDir, getenv("HOME"), PATH_MAX - 1);
-    std::strncat(dataDir, "/Documents", PATH_MAX - 1);
-
-    mkdir(dataDir, 0777);
-    std::strncat(dataDir, "/MOD Desktop", PATH_MAX - 1);
-    mkdir(dataDir, 0777);
-
+    const char* const dataDir = getDataDir();
     set_envp_value(envp, "MOD_DATA_DIR", dataDir);
    #endif
 
@@ -290,12 +307,12 @@ char* const* getEvironment()
     std::memcpy(path, dataDir, dataDirLen * sizeof(WCHAR));
     std::wcsncpy(path + dataDirLen, L"\\user-files", MAX_PATH - dataDirLen - 1);
     _wmkdir(path);
-    gMOD_USER_FILES_DIR = set_envp_value(envp, L"MOD_USER_FILES_DIR", path);
+    set_envp_value(envp, L"MOD_USER_FILES_DIR", path);
    #else
     std::memcpy(path, dataDir, dataDirLen);
     std::strncpy(path + dataDirLen, "/user-files", PATH_MAX - dataDirLen - 1);
     mkdir(path, 0777);
-    gMOD_USER_FILES_DIR = set_envp_value(envp, "MOD_USER_FILES_DIR", path);
+    set_envp_value(envp, "MOD_USER_FILES_DIR", path);
    #endif
 
     // set path to MOD keys (plugin licenses)
@@ -352,30 +369,61 @@ char* const* getEvironment()
     set_envp_value(envp, "JACK_DRIVER_DIR", path);
    #endif
 
+    // plugin-specific port details
+   #ifdef _WIN32
+   #else
+    std::snprintf(path, PATH_MAX - 1, "MOD_DESKTOP_SERVER_NAME=mod-desktop-%u", portBaseNum);
+    set_envp_value(envp, path);
+
+    std::snprintf(path, PATH_MAX - 1, "MOD_DEVICE_HOST_PORT=%u", kPortNumOffset + portBaseNum + 1);
+    set_envp_value(envp, path);
+
+    std::snprintf(path, PATH_MAX - 1, "MOD_DEVICE_WEBSERVER_PORT=%u", kPortNumOffset + portBaseNum);
+    set_envp_value(envp, path);
+   #endif
+
     return envp;
 }
 
 // -----------------------------------------------------------------------------------------------------------
 
-static void* _openWebGui(void*)
+static void* _openWebGui(void* const arg)
 {
-   #if defined(_WIN32)
-    ShellExecuteW(nullptr, L"open", L"http://127.0.0.1:18181", nullptr, nullptr, SW_SHOWDEFAULT);
-   #elif defined(__APPLE__)
-    std::system("open \"http://127.0.0.1:18181\"");
+    const uint* const portptr = static_cast<uint*>(arg);
+    const uint port = *portptr;
+    delete portptr;
+
+  #ifdef _WIN32
+    WCHAR url[32] = {};
+    std::wsnprintf(url, 31, "http://127.0.0.1:%u", port);
+    ShellExecuteW(nullptr, L"open", url, nullptr, nullptr, SW_SHOWDEFAULT);
+  #else
+   #ifdef __APPLE__
+    String cmd("open \"http://127.0.0.1:");
    #else
-    std::system("xdg-open \"http://127.0.0.1:18181\"");
+    String cmd("xdg-open \"http://127.0.0.1:");
    #endif
+    cmd += String(port);
+    cmd += "/\"";
+    std::system(cmd);
+  #endif
+
     return nullptr;
 }
 
-void openWebGui()
+void openWebGui(const uint port)
 {
+    uint* const portptr = new uint;
+    *portptr = port;
+
     pthread_t thread;
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, 1);
-    pthread_create(&thread, &attr, _openWebGui, nullptr);
+
+    if (pthread_create(&thread, &attr, _openWebGui, portptr) != 0)
+        delete portptr;
+
     pthread_attr_destroy(&attr);
 }
 
@@ -383,18 +431,19 @@ void openWebGui()
 
 static void* _openUserFilesDir(void*)
 {
-   #if defined(_WIN32)
-    ShellExecuteW(NULL, L"explore", gMOD_USER_FILES_DIR, nullptr, nullptr, SW_SHOWDEFAULT);
-   #elif defined(__APPLE__)
+  #ifdef _WIN32
+    ShellExecuteW(NULL, L"explore", getDataDirW(), nullptr, nullptr, SW_SHOWDEFAULT);
+  #else
+   #ifdef __APPLE__
     String cmd("open \"");
-    cmd += gMOD_USER_FILES_DIR;
-    cmd += "\"";
-    std::system(cmd);
    #else
     String cmd("xdg-open \"");
-    cmd += gMOD_USER_FILES_DIR;
-    cmd += "\"";
    #endif
+    cmd += getDataDir();
+    cmd += "\"";
+    std::system(cmd);
+  #endif
+
     return nullptr;
 }
 

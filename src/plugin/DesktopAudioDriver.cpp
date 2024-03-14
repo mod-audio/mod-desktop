@@ -13,12 +13,14 @@
 # include <fcntl.h>
 # include <sys/mman.h>
 # ifdef __APPLE__
+#  include <dispatch/dispatch.h>
 #  include <mach/mach.h>
 #  include <mach/semaphore.h>
 #  include <servers/bootstrap.h>
 # else
 #  include <cerrno>
 #  include <syscall.h>
+#  include <sys/prctl.h>
 #  include <sys/time.h>
 #  include <linux/futex.h>
 # endif
@@ -26,6 +28,33 @@
 
 namespace Jack
 {
+
+// -----------------------------------------------------------------------------------------------------------
+
+#ifdef __APPLE__
+static void terminateHandler(void*)
+{
+    printf("Desktop driver parent has died, terminating ourselves now\n");
+    fflush(stdout);
+    kill(getpid(), SIGTERM);
+}
+#endif
+
+static void terminateOnParentExit() noexcept
+{
+#if defined(__APPLE__)
+    const dispatch_source_t source = dispatch_source_create(DISPATCH_SOURCE_TYPE_PROC,
+                                                            getppid(),
+                                                            DISPATCH_PROC_EXIT,
+                                                            nullptr);
+
+    dispatch_source_set_event_handler_f(source, terminateHandler);
+
+    dispatch_resume(source);
+#elif !defined(_WIN32)
+    prctl(PR_SET_PDEATHSIG, SIGTERM);
+#endif
+}
 
 // -----------------------------------------------------------------------------------------------------------
 
@@ -516,6 +545,7 @@ SERVER_EXPORT Jack::JackDriverClientInterface* driver_initialize(Jack::JackLocke
     if (driver->Open(period, rate, true, true, 2, 2, false, "", "", 0, 0) == 0)
     {
         printf("%03d:%s OK\n", __LINE__, __FUNCTION__);
+        Jack::terminateOnParentExit();
         return driver;
     }
 

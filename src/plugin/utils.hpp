@@ -15,11 +15,11 @@ const char* getAppDir();
 
 /* Get environment to be used for a child process.
  */
-char* const* getEvironment();
+char* const* getEvironment(uint portBaseNum);
 
 /* Open a web browser with the mod-ui URL as address.
  */
-void openWebGui();
+void openWebGui(uint port);
 
 /* Open the "user files" directory in a file manager/explorer.
  */

@@ -70,6 +70,8 @@ else
 fi
 export LV2_PATH
 
+export MOD_DESKTOP=1
+export MOD_DEVICE_HOST_PORT=18182
 export MOD_KEYS_PATH="$(convert_path "${DOCS_DIR}/MOD Desktop/keys/")"
 export MOD_USER_FILES_DIR="$(convert_path "${DOCS_DIR}/MOD Desktop/user-files")"
 

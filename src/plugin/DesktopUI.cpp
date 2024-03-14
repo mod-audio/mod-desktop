@@ -19,6 +19,7 @@ class DesktopUI : public UI,
     Button buttonOpenWebGui;
     Button buttonOpenUserFilesDir;
     String label;
+    uint port = 0;
     void* webview = nullptr;
 
 public:
@@ -54,8 +55,6 @@ public:
         label += getPluginFormatName();
         label += " v" VERSION;
 
-        webview = addWebView(getWindow().getNativeWindowHandle());
-
         if (d_isNotEqual(scaleFactor, 1.0))
         {
             setGeometryConstraints((DISTRHO_UI_DEFAULT_WIDTH - 100) * scaleFactor,
@@ -70,7 +69,8 @@ public:
 
     ~DesktopUI() override
     {
-        destroyWebView(webview);
+        if (webview != nullptr)
+            destroyWebView(webview);
     }
 
 protected:
@@ -85,8 +85,17 @@ protected:
     {
         if (index == kParameterBasePortNumber)
         {
-            // TODO set port
-            reloadWebView(webview);
+            if (webview != nullptr)
+            {
+                destroyWebView(webview);
+                webview = nullptr;
+            }
+
+            port = d_roundToUnsignedInt(value);
+            DISTRHO_SAFE_ASSERT_RETURN(port != 0,);
+
+            port += kPortNumOffset;
+            webview = addWebView(getWindow().getNativeWindowHandle(), port);
         }
     }
 
@@ -120,10 +129,11 @@ protected:
         switch (widget->getId())
         {
         case 1:
-            reloadWebView(webview);
+            if (webview != nullptr)
+                reloadWebView(webview);
             break;
         case 2:
-            openWebGui();
+            openWebGui(port);
             break;
         case 3:
             openUserFilesDir();
@@ -134,6 +144,9 @@ protected:
     void onResize(const ResizeEvent& ev) override
     {
         UI::onResize(ev);
+
+        if (webview == nullptr)
+            return;
 
         const double scaleFactor = getScaleFactor();
 

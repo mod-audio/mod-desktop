@@ -25,6 +25,7 @@ class DesktopPlugin : public Plugin,
     float* tmpBuffers[2] = {};
     uint32_t numFramesInShmBuffer = 0;
     uint32_t numFramesInTmpBuffer = 0;
+    uint portBaseNum = 0;
 
    #ifdef DISTRHO_OS_WINDOWS
     const WCHAR* envp;
@@ -40,7 +41,10 @@ public:
         if (isDummyInstance())
             return;
 
-        envp = getEvironment();
+        // TODO check available ports
+        portBaseNum = 1;
+
+        envp = getEvironment(portBaseNum);
 
         if (shm.init() && run())
             startRunner(500);
@@ -91,15 +95,15 @@ protected:
             const String appDir(getAppDir());
             const String jackdStr(appDir + DISTRHO_OS_SEP_STR "jackd" APP_EXT);
             const String jacksessionStr(appDir + DISTRHO_OS_SEP_STR "jack" DISTRHO_OS_SEP_STR "jack-session.conf");
+            const String servernameStr("mod-desktop-" + String(portBaseNum));
             const String sampleRateStr(static_cast<int>(getSampleRate()));
 
             const char* const jackd_args[] = {
                 jackdStr.buffer(),
                 "-R",
                 "-S",
-                "-n", "mod-desktop",
-                "-C",
-                jacksessionStr.buffer(),
+                "-n", servernameStr.buffer(),
+                "-C", jacksessionStr.buffer(),
                 "-d", "desktop",
                 "-r", sampleRateStr.buffer(),
                 nullptr
@@ -129,7 +133,7 @@ protected:
             return mod_ui.start(mod_ui_args, envp);
         }
 
-        parameters[kParameterBasePortNumber] = 1;
+        parameters[kParameterBasePortNumber] = portBaseNum;
         return true;
     }
 

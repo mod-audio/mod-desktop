@@ -25,6 +25,7 @@
 #define DISTRHO_UI_USER_RESIZABLE       1
 
 static const constexpr unsigned int kVerticalOffset = 30;
+static const constexpr unsigned int kPortNumOffset = 18190;
 
 enum Parameters {
     kParameterBasePortNumber,
