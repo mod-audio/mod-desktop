@@ -27,6 +27,13 @@
 static const constexpr unsigned int kVerticalOffset = 30;
 static const constexpr unsigned int kPortNumOffset = 18190;
 
+enum Error {
+    kErrorAppDirNotFound = 1,
+    kErrorJackdExecFailed,
+    kErrorModUiExecFailed,
+    kErrorUndefined
+};
+
 enum Parameters {
     kParameterBasePortNumber,
     kParameterCount

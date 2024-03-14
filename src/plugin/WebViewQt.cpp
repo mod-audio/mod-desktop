@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
 
     printf("'%s' '%s'\n", argv[1], argv[2]);
 
-    if (argc == 3 && std::strcmp(argv[1], "-xembed") == 0)
+    if (argc == 4 && std::strcmp(argv[1], "-xembed") == 0)
     {
         const uintptr_t parentId = std::atoll(argv[2]);
         QWindow* const parentWindow = QWindow::fromWinId(parentId);
@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
         webview.setFixedSize(DISTRHO_UI_DEFAULT_WIDTH, DISTRHO_UI_DEFAULT_HEIGHT - kVerticalOffset);
         webview.winId();
         webview.windowHandle()->setParent(parentWindow);
-        webview.setUrl(QUrl("http://127.0.0.1:18181/"));
+        webview.setUrl(QUrl(QString::fromLocal8Bit("http://127.0.0.1:") + QString::fromLocal8Bit(argv[3])));
         webview.show();
         return app.exec();
     }

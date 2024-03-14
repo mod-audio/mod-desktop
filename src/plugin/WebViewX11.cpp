@@ -24,7 +24,7 @@ struct WebViewIPC {
 
 // -----------------------------------------------------------------------------------------------------------
 
-void* addWebView(uintptr_t viewptr)
+void* addWebView(const uintptr_t parentWinId, const uint port)
 {
     char webviewTool[PATH_MAX] = {};
     {
@@ -60,10 +60,17 @@ void* addWebView(uintptr_t viewptr)
     WebViewIPC* const ipc = new WebViewIPC();
     ipc->display = display;
     ipc->childWindow = 0;
-    ipc->ourWindow = viewptr;
+    ipc->ourWindow = parentWinId;
 
-    const String viewStr(viewptr);
-    const char* const args[] = { webviewTool, "-platform", "xcb", "-xembed", viewStr.buffer(), nullptr };
+    const String embedIdStr(parentWinId);
+    const String portStr(port);
+    const char* const args[] = {
+        webviewTool,
+        "-platform", "xcb",
+        "-xembed", embedIdStr.buffer(),
+        portStr.buffer(),
+        nullptr
+    };
     ipc->p.start(args);
 
     return ipc;

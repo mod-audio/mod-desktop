@@ -1,5 +1,9 @@
 #!/usr/bin/make -f
 
+export DISTRHO_NAMESPACE = DesktopDISTRHO
+export DGL_NAMESPACE = DesktopDGL
+export NVG_FONT_TEXTURE_FLAGS = NVG_IMAGE_NEAREST
+
 include ../DPF/Makefile.base.mk
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -50,7 +54,7 @@ $(TARGET_DIR)/MOD-Desktop-WebView: $(BUILD_DIR)/WebViewQt.cpp.o
 
 $(BUILD_DIR)/WebViewQt.cpp.o: BUILD_CXX_FLAGS += -std=gnu++14 $(shell $(PKG_CONFIG) --cflags Qt5WebEngineWidgets)
 
-include $(BUILD_DIR)/WebViewQt.cpp.d
+-include $(BUILD_DIR)/WebViewQt.cpp.d
 
 endif
 

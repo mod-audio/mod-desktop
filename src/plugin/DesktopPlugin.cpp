@@ -19,6 +19,8 @@ class DesktopPlugin : public Plugin,
     ChildProcess jackd;
     ChildProcess mod_ui;
     SharedMemory shm;
+    bool startingJackd = false;
+    bool startingModUI = false;
     bool processing = false;
     bool firstTimeProcessing = true;
     float parameters[kParameterCount] = {};
@@ -42,9 +44,17 @@ public:
             return;
 
         // TODO check available ports
-        portBaseNum = 1;
+        int availablePortNum = 1;
 
-        envp = getEvironment(portBaseNum);
+        envp = getEvironment(availablePortNum);
+
+        if (envp == nullptr)
+        {
+            parameters[kParameterBasePortNumber] = -kErrorAppDirNotFound;
+            return;
+        }
+
+        portBaseNum = availablePortNum;
 
         if (shm.init() && run())
             startRunner(500);
@@ -92,6 +102,13 @@ protected:
 
         if (! jackd.isRunning())
         {
+            if (startingJackd)
+            {
+                startingJackd = false;
+                parameters[kParameterBasePortNumber] = -kErrorJackdExecFailed;
+                return false;
+            }
+
             const String appDir(getAppDir());
             const String jackdStr(appDir + DISTRHO_OS_SEP_STR "jackd" APP_EXT);
             const String jacksessionStr(appDir + DISTRHO_OS_SEP_STR "jack" DISTRHO_OS_SEP_STR "jack-session.conf");
@@ -109,8 +126,15 @@ protected:
                 nullptr
             };
 
-            return jackd.start(jackd_args, envp);
+            startingJackd = true;
+            if (jackd.start(jackd_args, envp))
+                return true;
+
+            parameters[kParameterBasePortNumber] = -kErrorJackdExecFailed;
+            return false;
         }
+
+        startingJackd = false;
 
         if (! processing)
         {
@@ -122,6 +146,13 @@ protected:
 
         if (! mod_ui.isRunning())
         {
+            if (startingModUI)
+            {
+                startingModUI = false;
+                parameters[kParameterBasePortNumber] = -kErrorModUiExecFailed;
+                return false;
+            }
+
             const String appDir(getAppDir());
             const String moduiStr(appDir + DISTRHO_OS_SEP_STR "mod-ui" APP_EXT);
 
@@ -130,8 +161,15 @@ protected:
                 nullptr
             };
 
-            return mod_ui.start(mod_ui_args, envp);
+            startingModUI = true;
+            if (mod_ui.start(mod_ui_args, envp))
+                return true;
+
+            parameters[kParameterBasePortNumber] = -kErrorModUiExecFailed;
+            return false;
         }
+
+        startingModUI = false;
 
         parameters[kParameterBasePortNumber] = portBaseNum;
         return true;
@@ -218,7 +256,7 @@ protected:
             parameter.hints = kParameterIsOutput | kParameterIsInteger;
             parameter.name = "base port number";
             parameter.symbol = "base_port_num";
-            parameter.ranges.min = 0.f;
+            parameter.ranges.min = -kErrorUndefined;
             parameter.ranges.max = 512.f;
             parameter.ranges.def = 0.f;
             break;

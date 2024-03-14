@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 MOD Audio UG
+// SPDX-FileCopyrightText: 2023-2024 MOD Audio UG
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 #include "utils.hpp"
@@ -146,6 +146,21 @@ void initEvironment()
     const size_t dataDirLen = std::strlen(dataDir);
    #endif
 
+    // write our location to disk so the plugin version knows where to find us
+   #ifdef __linux__
+    if (access(dataDir, F_OK) == 0)
+    {
+        std::memcpy(path, dataDir, dataDirLen);
+        std::strncpy(path + dataDirLen, "/.last-known-location", PATH_MAX - dataDirLen - 1);
+
+        if (FILE* const f = std::fopen(path, "w"))
+        {
+            std::fwrite(appDir, appDirLen, 1, f);
+            std::fclose(f);
+        }
+    }
+   #endif
+
     // generate UID
     uint8_t key[16] = {};
    #if defined(__APPLE__)
@@ -178,9 +193,9 @@ void initEvironment()
    #elif defined(_WIN32)
     // TODO
    #else
-    if (FILE* const f = fopen("/etc/machine-id", "r"))
+    if (FILE* const f = std::fopen("/etc/machine-id", "r"))
     {
-        if (fread(path, PATH_MAX - 1, 1, f) == 0 && strlen(path) >= 33)
+        if (std::fread(path, PATH_MAX - 1, 1, f) == 0 && std::strlen(path) >= 33)
         {
             for (int i=0; i<16; ++i)
             {
@@ -188,7 +203,7 @@ void initEvironment()
                 key[i] |= char2u8(path[i*2+1]) << 0;
             }
         }
-        fclose(f);
+        std::fclose(f);
     }
    #endif
 

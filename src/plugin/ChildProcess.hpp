@@ -223,10 +223,10 @@ public:
        #else
         if (pid <= 0)
             return false;
-        
+
         const pid_t ret = ::waitpid(pid, nullptr, WNOHANG);
 
-        if (ret == -1 && errno == ECHILD)
+        if (ret == pid || (ret == -1 && errno == ECHILD))
         {
             pid = 0;
             return false;

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 MOD Audio UG
+// SPDX-FileCopyrightText: 2023-2024 MOD Audio UG
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 #include "utils.hpp"
@@ -8,7 +8,7 @@
 #ifdef _WIN32
 #else
 #include <sys/stat.h>
-// #include <unistd.h>
+#include <unistd.h>
 #endif
 
 #if defined(__APPLE__)
@@ -34,6 +34,47 @@ constexpr uint8_t char2u8(const uint8_t c)
         : c >= 'A' && c <= 'F' ? 0xa + c - 'A'
         : 0;
 }
+
+// -----------------------------------------------------------------------------------------------------------
+
+// FIXME share with systray
+#ifdef _WIN32
+static WCHAR char* getDataDirW()
+{
+    static WCHAR dataDir[MAX_PATH] = {};
+
+    if (dataDir[0] == 0)
+    {
+        SHGetSpecialFolderPathW(nullptr, dataDir, CSIDL_MYDOCUMENTS, false);
+        _wmkdir(dataDir);
+
+        std::wcsncat(dataDir, L"\\MOD Desktop", MAX_PATH - 1);
+        _wmkdir(dataDir);
+    }
+
+    return dataDir;
+}
+#else
+static const char* getDataDir()
+{
+    static char dataDir[PATH_MAX] = {};
+
+    if (dataDir[0] == 0)
+    {
+        // TODO
+        std::strncpy(dataDir, getenv("HOME"), PATH_MAX - 1);
+        mkdir(dataDir, 0777);
+
+        std::strncat(dataDir, "/Documents", PATH_MAX - 1);
+        mkdir(dataDir, 0777);
+
+        std::strncat(dataDir, "/MOD Desktop", PATH_MAX - 1);
+        mkdir(dataDir, 0777);
+    }
+
+    return dataDir;
+}
+#endif
 
 // -----------------------------------------------------------------------------------------------------------
 
@@ -63,58 +104,39 @@ const char* getAppDir()
     if (appDir[0] == 0)
     {
        #if defined(_WIN32)
-       #else
-        char appDir[PATH_MAX] = {};
+        const WCHAR* const appDirW = getAppDirW();
 
         // TODO
-        std::strncpy(appDir, filename, PATH_MAX - 1);
+       #else
+        std::strncpy(appDir, getDataDir(), PATH_MAX - 1);
+        std::strncat(appDir, "/.last-known-location", PATH_MAX - 1);
 
-        if (char* const c = std::strrchr(appDir, '/'))
-            *c = 0;
+        if (FILE* const f = std::fopen(appDir, "r"))
+        {
+            std::memset(appDir, 0, PATH_MAX - 1);
+
+            if (std::fread(appDir, PATH_MAX - 1, 1, f) != 0)
+                appDir[0] = 0;
+
+            else if (access(appDir, F_OK) != 0)
+                appDir[0] = 0;
+
+            std::fclose(f);
+        }
+        else
+        {
+            appDir[0] = 0;
+            return nullptr;
+        }
+
+        if (appDir[0] == 0)
+            return nullptr;
        #endif
     }
 
     return appDir;
    #endif
 }
-
-#ifdef _WIN32
-WCHAR char* getDataDirW()
-{
-    static WCHAR dataDir[MAX_PATH] = {};
-
-    if (dataDir[0] == 0)
-    {
-        SHGetSpecialFolderPathW(nullptr, dataDir, CSIDL_MYDOCUMENTS, false);
-        _wmkdir(dataDir);
-
-        std::wcsncat(dataDir, L"\\MOD Desktop", MAX_PATH - 1);
-        _wmkdir(dataDir);
-    }
-
-    return dataDir;
-}
-#else
-const char* getDataDir()
-{
-    static char dataDir[PATH_MAX] = {};
-
-    if (dataDir[0] == 0)
-    {
-        // TODO
-        std::strncpy(dataDir, getenv("HOME"), PATH_MAX - 1);
-        mkdir(dataDir, 0777);
-
-        std::strncat(dataDir, "/Documents", PATH_MAX - 1);
-        mkdir(dataDir, 0777);
-
-        std::strncat(dataDir, "/MOD Desktop", PATH_MAX - 1);
-        mkdir(dataDir, 0777);
-    }
-
-    return dataDir;
-}
-#endif
 
 // -----------------------------------------------------------------------------------------------------------
 
@@ -162,6 +184,17 @@ static void set_envp_value(char** envp, const char* const key, const char* const
 // NOTE this needs to match initEvironment from systray side
 char* const* getEvironment(const uint portBaseNum)
 {
+    // get directory of the mod-desktop application
+   #ifdef _WIN32
+    const WCHAR* const appDir = getAppDirW();
+   #else
+    const char* const appDir = getAppDir();
+   #endif
+
+    // can be null, in case of not found
+    if (appDir == nullptr)
+        return nullptr;
+
    #ifdef DISTRHO_OS_MAC
     const char* const* const* const environptr = _NSGetEnviron();
     DISTRHO_SAFE_ASSERT_RETURN(environptr != nullptr, nullptr);
@@ -195,13 +228,6 @@ char* const* getEvironment(const uint portBaseNum)
     set_envp_value(envp, "MOD_DESKTOP=1");
     set_envp_value(envp, "MOD_DESKTOP_PLUGIN=1");
     set_envp_value(envp, "PYTHONUNBUFFERED=1");
-   #endif
-
-    // get directory of the mod-desktop application
-   #ifdef _WIN32
-    const WCHAR* const appDir = getAppDirW();
-   #else
-    const char* const appDir = getAppDir();
    #endif
 
     // get and set directory to our documents and settings, under "user documents"; also make sure it exists

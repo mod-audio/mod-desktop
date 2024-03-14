@@ -19,6 +19,8 @@ class DesktopUI : public UI,
     Button buttonOpenWebGui;
     Button buttonOpenUserFilesDir;
     String label;
+    String error;
+    String errorDetail;
     uint port = 0;
     void* webview = nullptr;
 
@@ -85,6 +87,41 @@ protected:
     {
         if (index == kParameterBasePortNumber)
         {
+            if (d_isZero(value))
+                return;
+
+            if (value < 0.f)
+            {
+                switch (-d_roundToIntNegative(value))
+                {
+                case kErrorAppDirNotFound:
+                    error = "Error: MOD Desktop application directory not found";
+                    errorDetail = "Make sure to install the standalone and run it at least once";
+                    break;
+                case kErrorJackdExecFailed:
+                    error = "Error: Failed to start jackd";
+                    errorDetail = "";
+                    break;
+                case kErrorModUiExecFailed:
+                    error = "Error: Failed to start mod-ui";
+                    errorDetail = "";
+                    break;
+                case kErrorUndefined:
+                    error = "Error initializing MOD Desktop plugin";
+                    errorDetail = "";
+                    break;
+                }
+                repaint();
+                return;
+            }
+
+            if (error.isNotEmpty())
+            {
+                error.clear();
+                errorDetail.clear();
+                repaint();
+            }
+
             if (webview != nullptr)
             {
                 destroyWebView(webview);
@@ -119,9 +156,21 @@ protected:
         const double scaleFactor = getScaleFactor();
 
         fillColor(255, 255, 255, 255);
-        fontSize(14 * scaleFactor);
+        fontSize(18 * scaleFactor);
         textAlign(ALIGN_CENTER | ALIGN_MIDDLE);
         text(getWidth() / 2, kVerticalOffset * scaleFactor / 2, label, nullptr);
+
+        if (error.isNotEmpty())
+        {
+            fontSize(36 * scaleFactor);
+            text(getWidth() / 2, getHeight() / 2 - 18 * scaleFactor, error, nullptr);
+
+            if (errorDetail.isNotEmpty())
+            {
+                fontSize(18 * scaleFactor);
+                text(getWidth() / 2, getHeight() / 2 + 18 * scaleFactor, errorDetail, nullptr);
+            }
+        }
     }
 
     void buttonClicked(SubWidget* const widget, int button) override
