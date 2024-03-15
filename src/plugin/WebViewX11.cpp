@@ -17,6 +17,7 @@
 #include <clocale>
 #include <cstdio>
 #include <dlfcn.h>
+#include <functional>
 #include <linux/limits.h>
 #include <X11/Xlib.h>
 
@@ -24,7 +25,7 @@ START_NAMESPACE_DISTRHO
 
 // -----------------------------------------------------------------------------------------------------------
 
-struct WebViewIPC {
+struct WebViewX11 {
     ChildProcess p;
     ::Display* display;
     ::Window childWindow;
@@ -66,12 +67,12 @@ void* addWebView(const uintptr_t parentWinId, const double scaleFactor, const ui
     while (environ[envsize] != nullptr)
         ++envsize;
 
-    char** const envp = new char*[envsize + 32];
+    char** const envp = new char*[envsize + 5];
 
     for (uint i = 0; i < envsize; ++i)
         envp[i] = strdup(environ[i]);
 
-    for (uint i = 0; i < 32; ++i)
+    for (uint i = 0; i < 5; ++i)
         envp[envsize + i] = nullptr;
 
     set_envp_value(envp, "LANG=en_US.UTF-8");
@@ -79,7 +80,7 @@ void* addWebView(const uintptr_t parentWinId, const double scaleFactor, const ui
     set_envp_value(envp, "DPF_WEBVIEW_SCALE_FACTOR", String(scaleFactor));
     set_envp_value(envp, "DPF_WEBVIEW_WIN_ID", String(parentWinId));
 
-    WebViewIPC* const ipc = new WebViewIPC();
+    WebViewX11* const ipc = new WebViewX11();
     ipc->display = display;
     ipc->childWindow = 0;
     ipc->ourWindow = parentWinId;
@@ -96,7 +97,7 @@ void* addWebView(const uintptr_t parentWinId, const double scaleFactor, const ui
 
 void destroyWebView(void* const webviewptr)
 {
-    WebViewIPC* const ipc = static_cast<WebViewIPC*>(webviewptr);
+    WebViewX11* const ipc = static_cast<WebViewX11*>(webviewptr);
 
     XCloseDisplay(ipc->display);
     delete ipc;
@@ -104,14 +105,14 @@ void destroyWebView(void* const webviewptr)
 
 void reloadWebView(void* const webviewptr)
 {
-    WebViewIPC* const ipc = static_cast<WebViewIPC*>(webviewptr);
+    WebViewX11* const ipc = static_cast<WebViewX11*>(webviewptr);
 
     ipc->p.signal(SIGUSR1);
 }
 
 void resizeWebView(void* const webviewptr, const uint offset, const uint width, const uint height)
 {
-    WebViewIPC* const ipc = static_cast<WebViewIPC*>(webviewptr);
+    WebViewX11* const ipc = static_cast<WebViewX11*>(webviewptr);
 
     if (ipc->childWindow == 0)
     {
@@ -132,6 +133,10 @@ void resizeWebView(void* const webviewptr, const uint offset, const uint width, 
     XMoveResizeWindow(ipc->display, ipc->childWindow, 0, offset, width, height);
     XFlush(ipc->display);
 }
+
+// -----------------------------------------------------------------------------------------------------------
+
+static std::function<void()> reloadFn;
 
 // -----------------------------------------------------------------------------------------------------------
 
@@ -253,7 +258,7 @@ static bool gtk3(Display* const display, const Window winId, double scaleFactor,
     GtkWidget* const webview = webkit_web_view_new_with_settings(settings);
     DISTRHO_SAFE_ASSERT_RETURN(webview != nullptr, false);
 
-    webkit_web_view_load_uri (WEBKIT_WEB_VIEW (webview), url);
+    webkit_web_view_load_uri(WEBKIT_WEB_VIEW (webview), url);
 
     gtk_container_add(GTK_CONTAINER(window), webview);
 
@@ -262,6 +267,10 @@ static bool gtk3(Display* const display, const Window winId, double scaleFactor,
     Window wid = gtk_plug_get_id(GTK_PLUG(window));
     XMapWindow(display, wid);
     XFlush(display);
+
+    reloadFn = [=](){
+        webkit_web_view_load_uri(WEBKIT_WEB_VIEW (webview), url);
+    };
 
     gtk_main();
 
@@ -359,6 +368,10 @@ static bool qt5webengine(const Window winId, const double scaleFactor, const cha
     QWebEngineView_setUrl(webview, *qurl);
     QWebEngineView_show(webview);
 
+    reloadFn = [=](){
+        QWebEngineView_setUrl(webview, *qurl);
+    };
+
     QApplication_exec();
 
     dlclose(lib);
@@ -455,6 +468,11 @@ static bool qt6webengine(const Window winId, const double scaleFactor, const cha
     QWebEngineView_setUrl(webview, *qurl);
     QWebEngineView_show(webview);
 
+    reloadFn = [=](){
+        QWebEngineView_setUrl(webview, *qurl);
+    };
+
+
     QApplication_exec();
 
     dlclose(lib);
@@ -470,7 +488,7 @@ static void signalHandler(const int sig)
 {
     DISTRHO_SAFE_ASSERT_RETURN(sig == SIGUSR1,);
 
-    d_stdout("TODO: refresh web view");
+    reloadFn();
 }
 
 DISTRHO_PLUGIN_EXPORT
