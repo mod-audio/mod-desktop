@@ -3,63 +3,93 @@
 
 // TODO split build
 
-#include <QtGui/QWindow>
-#include <QtWidgets/QApplication>
-#include <QtWebEngineWidgets/QWebEngineView>
+#include <QtCore/QChar>
+#include <QtCore/QPoint>
+#include <QtCore/QSize>
 
 #undef signals
-
-#include <gtk/gtkx.h>
-#include <webkit2/webkit2.h>
 
 #include <clocale>
 #include <cstdio>
 #include <dlfcn.h>
-#include <new>
 #include <X11/Xlib.h>
 
 #include "DistrhoPluginInfo.h"
 #include "DistrhoUtils.hpp"
 
-// #include "../systray/qrc_mod-desktop.hpp"
-// #include "../systray/utils.cpp"
+struct GtkContainer;
+struct GtkPlug;
+struct GtkWidget;
+struct GtkWindow;
+struct WebKitSettings;
+struct WebKitWebView;
+
+#define GTK_CONTAINER(p) reinterpret_cast<GtkContainer*>(p)
+#define GTK_PLUG(p) reinterpret_cast<GtkPlug*>(p)
+#define GTK_WINDOW(p) reinterpret_cast<GtkWindow*>(p)
+#define WEBKIT_WEB_VIEW(p) reinterpret_cast<WebKitWebView*>(p)
+
+struct QApplication;
+struct QUrl;
+struct QWebEngineView;
+struct QWindow;
 
 // -----------------------------------------------------------------------------------------------------------
 
 #define JOIN(A, B) A ## B
 
-#define GTK3SYM(S) \
+#define AUTOSYM(S) \
     using JOIN(gtk3_, S) = decltype(&S); \
     JOIN(gtk3_, S) S = reinterpret_cast<JOIN(gtk3_, S)>(dlsym(nullptr, #S)); \
     DISTRHO_SAFE_ASSERT_RETURN(S != nullptr, false);
+
+#define CSYM(S, NAME) \
+    S NAME = reinterpret_cast<S>(dlsym(nullptr, #NAME)); \
+    DISTRHO_SAFE_ASSERT_RETURN(NAME != nullptr, false);
+
+#define CPPSYM(S, NAME, SN) \
+    S NAME = reinterpret_cast<S>(dlsym(nullptr, #SN)); \
+    DISTRHO_SAFE_ASSERT_RETURN(NAME != nullptr, false);
 
 // -----------------------------------------------------------------------------------------------------------
 // gtk3 variant
 
 static bool gtk3(Display* const display, const Window winId, double scaleFactor, const char* const url)
 {
-    void* const lib = dlopen("libwebkit2gtk-4.0.so.37_____", RTLD_NOW|RTLD_GLOBAL);
-    DISTRHO_SAFE_ASSERT_RETURN(lib != nullptr, false);
+    void* lib;
+    if ((lib = dlopen("libwebkit2gtk-4.0.so.37", RTLD_NOW|RTLD_GLOBAL)) == nullptr ||
+        (lib = dlopen("libwebkit2gtk-4.0.so", RTLD_NOW|RTLD_GLOBAL)) == nullptr)
+        return false;
 
-    GTK3SYM(g_type_check_instance_cast)
-    GTK3SYM(gdk_set_allowed_backends)
-    GTK3SYM(gtk_container_add)
-    GTK3SYM(gtk_container_get_type)
-    GTK3SYM(gtk_init_check)
-    GTK3SYM(gtk_main)
-    GTK3SYM(gtk_plug_get_id)
-    GTK3SYM(gtk_plug_get_type)
-    GTK3SYM(gtk_plug_new)
-    GTK3SYM(gtk_widget_show_all)
-    GTK3SYM(gtk_window_get_type)
-    GTK3SYM(gtk_window_move)
-    GTK3SYM(gtk_window_set_default_size)
-    GTK3SYM(webkit_settings_new)
-    GTK3SYM(webkit_settings_set_hardware_acceleration_policy)
-    GTK3SYM(webkit_settings_set_javascript_can_access_clipboard)
-    GTK3SYM(webkit_web_view_get_type)
-    GTK3SYM(webkit_web_view_load_uri)
-    GTK3SYM(webkit_web_view_new_with_settings)
+    using gdk_set_allowed_backends_t = void (*)(const char*);
+    using gtk_container_add_t = void (*)(GtkContainer*, GtkWidget*);
+    using gtk_init_check_t = bool (*)(int*, char***);
+    using gtk_main_t = void (*)();
+    using gtk_plug_get_id_t = Window (*)(GtkPlug*);
+    using gtk_plug_new_t = GtkWidget* (*)(Window);
+    using gtk_widget_show_all_t = void (*)(GtkWidget*);
+    using gtk_window_move_t = void (*)(GtkWindow*, int, int);
+    using gtk_window_set_default_size_t = void (*)(GtkWindow*, int, int);
+    using webkit_settings_new_t = WebKitSettings* (*)();
+    using webkit_settings_set_hardware_acceleration_policy_t = void (*)(WebKitSettings*, int);
+    using webkit_settings_set_javascript_can_access_clipboard_t = void (*)(WebKitSettings*, bool);
+    using webkit_web_view_load_uri_t = void (*)(WebKitWebView*, const char*);
+    using webkit_web_view_new_with_settings_t = GtkWidget* (*)(WebKitSettings*);
+
+    CSYM(gdk_set_allowed_backends_t, gdk_set_allowed_backends)
+    CSYM(gtk_container_add_t, gtk_container_add)
+    CSYM(gtk_init_check_t, gtk_init_check)
+    CSYM(gtk_main_t, gtk_main)
+    CSYM(gtk_plug_get_id_t, gtk_plug_get_id)
+    CSYM(gtk_plug_new_t, gtk_plug_new)
+    CSYM(gtk_widget_show_all_t, gtk_widget_show_all)
+    CSYM(gtk_window_move_t, gtk_window_move)
+    CSYM(gtk_window_set_default_size_t, gtk_window_set_default_size)
+    CSYM(webkit_settings_new_t, webkit_settings_new)
+    CSYM(webkit_settings_set_hardware_acceleration_policy_t, webkit_settings_set_hardware_acceleration_policy)
+    CSYM(webkit_settings_set_javascript_can_access_clipboard_t, webkit_settings_set_javascript_can_access_clipboard)
+    CSYM(webkit_web_view_load_uri_t, webkit_web_view_load_uri)
+    CSYM(webkit_web_view_new_with_settings_t, webkit_web_view_new_with_settings)
 
     const int gdkScale = std::fmod(scaleFactor, 1.0) >= 0.75
                        ? static_cast<int>(scaleFactor + 0.5)
@@ -100,7 +130,7 @@ static bool gtk3(Display* const display, const Window winId, double scaleFactor,
     DISTRHO_SAFE_ASSERT_RETURN(settings != nullptr, false);
 
     webkit_settings_set_javascript_can_access_clipboard(settings, true);
-    webkit_settings_set_hardware_acceleration_policy(settings, WEBKIT_HARDWARE_ACCELERATION_POLICY_NEVER);
+    webkit_settings_set_hardware_acceleration_policy(settings, 2 /* WEBKIT_HARDWARE_ACCELERATION_POLICY_NEVER */);
 
     GtkWidget* const webview = webkit_web_view_new_with_settings(settings);
     DISTRHO_SAFE_ASSERT_RETURN(webview != nullptr, false);
@@ -124,33 +154,42 @@ static bool gtk3(Display* const display, const Window winId, double scaleFactor,
 // -----------------------------------------------------------------------------------------------------------
 // qt5webengine variant
 
-// using _QApplication_QApplication = decltype(QApplication::QApplication);
-
-#define QT5SYM(S, NAME, SN) \
-    using SN = decltype(&S); \
-    SN NAME = reinterpret_cast<SN>(dlsym(nullptr, #SN)); \
-    DISTRHO_SAFE_ASSERT_RETURN(NAME != nullptr, false);
-
 static bool qt5webengine(const Window winId, const double scaleFactor, const char* const url)
 {
-    void* const lib = dlopen("libQt5WebEngineWidgets.so.5", RTLD_NOW|RTLD_GLOBAL);
-    DISTRHO_SAFE_ASSERT_RETURN(lib != nullptr, false);
+    void* lib;
+    if ((lib = dlopen("libQt5WebEngineWidgets.so.5", RTLD_NOW|RTLD_GLOBAL)) == nullptr ||
+        (lib = dlopen("libQt5WebEngineWidgets.so", RTLD_NOW|RTLD_GLOBAL)) == nullptr)
+        return false;
 
-//     qOverload<int, QProcess::ExitStatus>(
-//     using qt5webengine_qapp = decltype(&QApplication::QApplication);
-//     qt5webengine_qapp qapp = reinterpret_cast<qt5webengine_qapp>(dlsym(nullptr, "QApplication::QApplication"));
-//     DISTRHO_SAFE_ASSERT_RETURN(qapp != nullptr, false);
+    using QApplication__init_t = void (*)(QApplication*, int&, char**, int);
+    using QApplication_exec_t = void (*)();
+    using QApplication_setAttribute_t = void (*)(Qt::ApplicationAttribute, bool);
+    using QString__init_t = void (*)(void*, const QChar*, qsizetype);
+    using QUrl__init_t = void (*)(void*, const QString&, int /* QUrl::ParsingMode */);
+    using QWebEngineView__init_t = void (*)(QWebEngineView*, void*);
+    using QWebEngineView_move_t = void (*)(QWebEngineView*, const QPoint&);
+    using QWebEngineView_resize_t = void (*)(QWebEngineView*, const QSize&);
+    using QWebEngineView_setUrl_t = void (*)(QWebEngineView*, const QUrl&);
+    using QWebEngineView_show_t = void (*)(QWebEngineView*);
+    using QWebEngineView_winId_t = ulonglong (*)(QWebEngineView*);
+    using QWebEngineView_windowHandle_t = QWindow* (*)(QWebEngineView*);
+    using QWindow_fromWinId_t = QWindow* (*)(ulonglong);
+    using QWindow_setParent_t = void (*)(QWindow*, void*);
 
-//     QT5SYM(QGuiApplication::QGuiApplication, QApplication_QApplication, _ZN15QGuiApplication4execEv)
-    QT5SYM(QApplication::setAttribute, QApplication_setAttribute, _ZN16QCoreApplication12setAttributeEN2Qt20ApplicationAttributeEb)
-    QT5SYM(QApplication::exec, QApplication_exec, _ZN15QGuiApplication4execEv)
-//     QT5SYM(QWebEngineView::move, QWebEngineView_move, _ZN7QWidget4moveERK6QPoint)
-//     QT5SYM(QWebEngineView::setFixedSize, QWebEngineView_setFixedSize, _ZN7QWidget12setFixedSizeEii)
-//     QT5SYM(QWebEngineView::winId, QWebEngineView_winId, _ZNK7QWidget5winIdEv)
-//     QT5SYM(QWebEngineView::windowHandle, QWebEngineView_windowHandle, _ZNK7QWidget12windowHandleEv)
-//     QT5SYM(QWebEngineView::setUrl, QWebEngineView_setUrl, _ZN14QWebEngineView6setUrlERK4QUrl)
-//     QT5SYM(QWebEngineView::show, QWebEngineView_show, _ZN7QWidget4showEv)
-    QT5SYM(QWindow::fromWinId, QWindow_fromWinId, _ZN7QWindow9fromWinIdEy)
+    CPPSYM(QApplication__init_t, QApplication__init, _ZN12QApplicationC1ERiPPci)
+    CPPSYM(QApplication_exec_t, QApplication_exec, _ZN15QGuiApplication4execEv)
+    CPPSYM(QApplication_setAttribute_t, QApplication_setAttribute, _ZN16QCoreApplication12setAttributeEN2Qt20ApplicationAttributeEb)
+    CPPSYM(QString__init_t, QString__init, _ZN7QStringC2EPK5QChari)
+    CPPSYM(QUrl__init_t, QUrl__init, _ZN4QUrlC1ERK7QStringNS_11ParsingModeE)
+    CPPSYM(QWebEngineView__init_t, QWebEngineView__init, _ZN14QWebEngineViewC1EP7QWidget)
+    CPPSYM(QWebEngineView_move_t, QWebEngineView_move, _ZN7QWidget4moveERK6QPoint)
+    CPPSYM(QWebEngineView_resize_t, QWebEngineView_resize, _ZN7QWidget6resizeERK5QSize)
+    CPPSYM(QWebEngineView_setUrl_t, QWebEngineView_setUrl, _ZN14QWebEngineView6setUrlERK4QUrl)
+    CPPSYM(QWebEngineView_show_t, QWebEngineView_show, _ZN7QWidget4showEv)
+    CPPSYM(QWebEngineView_winId_t, QWebEngineView_winId, _ZNK7QWidget5winIdEv)
+    CPPSYM(QWebEngineView_windowHandle_t, QWebEngineView_windowHandle, _ZNK7QWidget12windowHandleEv)
+    CPPSYM(QWindow_fromWinId_t, QWindow_fromWinId, _ZN7QWindow9fromWinIdEy)
+    CPPSYM(QWindow_setParent_t, QWindow_setParent, _ZN7QWindow9setParentEPS_)
 
     unsetenv("QT_FONT_DPI");
     unsetenv("QT_SCREEN_SCALE_FACTORS");
@@ -168,28 +207,137 @@ static bool qt5webengine(const Window winId, const double scaleFactor, const cha
     static int argc = 0;
     static char* argv[] = { nullptr };
 
-    uint8_t app_data[sizeof(QApplication)];
-    QApplication* const app = reinterpret_cast<QApplication*>(app_data);
-    new(app)QApplication(argc, argv);
+    uint8_t _app[64]; // sizeof(QApplication) == 16
+    QApplication* const app = reinterpret_cast<QApplication*>(_app);
+    QApplication__init(app, argc, argv, 0);
 
-    QWindow* const parentWindow = QWindow_fromWinId(winId);
+    uint8_t _qstrurl[32]; // sizeof(QString) == 8
+    QString* const qstrurl(reinterpret_cast<QString*>(_qstrurl));
 
-    uint8_t webview_data[sizeof(QWebEngineView)];
-    QWebEngineView* const webview = reinterpret_cast<QWebEngineView*>(webview_data);
-    new(webview)QWebEngineView();
+    {
+        const size_t url_len = std::strlen(url);
+        QChar* const url_qchar = new QChar[url_len + 1];
 
-    webview->move(0, kVerticalOffset);
-    webview->setFixedSize(DISTRHO_UI_DEFAULT_WIDTH,
-                          DISTRHO_UI_DEFAULT_HEIGHT - kVerticalOffset);
-    webview->winId();
-    webview->windowHandle()->setParent(parentWindow);
-    webview->setUrl(QUrl(QString::fromLocal8Bit(url)));
-    webview->show();
+        for (size_t i = 0; i < url_len; ++i)
+            url_qchar[i] = QChar(url[i]);
+
+        url_qchar[url_len] = 0;
+
+        QString__init(qstrurl, url_qchar, url_len);
+    }
+
+    uint8_t _qurl[32]; // sizeof(QUrl) == 8
+    QUrl* const qurl(reinterpret_cast<QUrl*>(_qurl));
+    QUrl__init(qurl, *qstrurl, 1 /* QUrl::StrictMode */);
+
+    uint8_t _webview[128]; // sizeof(QWebEngineView) == 56
+    QWebEngineView* const webview = reinterpret_cast<QWebEngineView*>(_webview);
+    QWebEngineView__init(webview, nullptr);
+
+    QWebEngineView_move(webview, QPoint(0, kVerticalOffset));
+    QWebEngineView_resize(webview, QSize(DISTRHO_UI_DEFAULT_WIDTH, DISTRHO_UI_DEFAULT_HEIGHT - kVerticalOffset));
+    QWebEngineView_winId(webview);
+    QWindow_setParent(QWebEngineView_windowHandle(webview), QWindow_fromWinId(winId));
+    QWebEngineView_setUrl(webview, *qurl);
+    QWebEngineView_show(webview);
 
     QApplication_exec();
 
-    webview->~QWebEngineView();
-    app->~QApplication();
+    dlclose(lib);
+    return true;
+}
+
+// -----------------------------------------------------------------------------------------------------------
+// qt6webengine variant (same as qt5 but `QString__init_t` has different arguments)
+
+static bool qt6webengine(const Window winId, const double scaleFactor, const char* const url)
+{
+    void* lib;
+    if ((lib = dlopen("libQt6WebEngineWidgets.so.6", RTLD_NOW|RTLD_GLOBAL)) == nullptr ||
+        (lib = dlopen("libQt6WebEngineWidgets.so", RTLD_NOW|RTLD_GLOBAL)) == nullptr)
+        return false;
+
+    using QApplication__init_t = void (*)(QApplication*, int&, char**, int);
+    using QApplication_exec_t = void (*)();
+    using QApplication_setAttribute_t = void (*)(Qt::ApplicationAttribute, bool);
+    using QString__init_t = void (*)(void*, const QChar*, long long);
+    using QUrl__init_t = void (*)(void*, const QString&, int /* QUrl::ParsingMode */);
+    using QWebEngineView__init_t = void (*)(QWebEngineView*, void*);
+    using QWebEngineView_move_t = void (*)(QWebEngineView*, const QPoint&);
+    using QWebEngineView_resize_t = void (*)(QWebEngineView*, const QSize&);
+    using QWebEngineView_setUrl_t = void (*)(QWebEngineView*, const QUrl&);
+    using QWebEngineView_show_t = void (*)(QWebEngineView*);
+    using QWebEngineView_winId_t = ulonglong (*)(QWebEngineView*);
+    using QWebEngineView_windowHandle_t = QWindow* (*)(QWebEngineView*);
+    using QWindow_fromWinId_t = QWindow* (*)(ulonglong);
+    using QWindow_setParent_t = void (*)(QWindow*, void*);
+
+    CPPSYM(QApplication__init_t, QApplication__init, _ZN12QApplicationC1ERiPPci)
+    CPPSYM(QApplication_exec_t, QApplication_exec, _ZN15QGuiApplication4execEv)
+    CPPSYM(QApplication_setAttribute_t, QApplication_setAttribute, _ZN16QCoreApplication12setAttributeEN2Qt20ApplicationAttributeEb)
+    CPPSYM(QString__init_t, QString__init, _ZN7QStringC2EPK5QCharx)
+    CPPSYM(QUrl__init_t, QUrl__init, _ZN4QUrlC1ERK7QStringNS_11ParsingModeE)
+    CPPSYM(QWebEngineView__init_t, QWebEngineView__init, _ZN14QWebEngineViewC1EP7QWidget)
+    CPPSYM(QWebEngineView_move_t, QWebEngineView_move, _ZN7QWidget4moveERK6QPoint)
+    CPPSYM(QWebEngineView_resize_t, QWebEngineView_resize, _ZN7QWidget6resizeERK5QSize)
+    CPPSYM(QWebEngineView_setUrl_t, QWebEngineView_setUrl, _ZN14QWebEngineView6setUrlERK4QUrl)
+    CPPSYM(QWebEngineView_show_t, QWebEngineView_show, _ZN7QWidget4showEv)
+    CPPSYM(QWebEngineView_winId_t, QWebEngineView_winId, _ZNK7QWidget5winIdEv)
+    CPPSYM(QWebEngineView_windowHandle_t, QWebEngineView_windowHandle, _ZNK7QWidget12windowHandleEv)
+    CPPSYM(QWindow_fromWinId_t, QWindow_fromWinId, _ZN7QWindow9fromWinIdEy)
+    CPPSYM(QWindow_setParent_t, QWindow_setParent, _ZN7QWindow9setParentEPS_)
+
+    unsetenv("QT_FONT_DPI");
+    unsetenv("QT_SCREEN_SCALE_FACTORS");
+    unsetenv("QT_USE_PHYSICAL_DPI");
+    setenv("QT_AUTO_SCREEN_SCALE_FACTOR", "0", 1);
+
+    char scale[8] = {};
+    std::snprintf(scale, 7, "%.2f", scaleFactor);
+    setenv("QT_SCALE_FACTOR", scale, 1);
+
+    QApplication_setAttribute(Qt::AA_X11InitThreads, true);
+    QApplication_setAttribute(Qt::AA_EnableHighDpiScaling, true);
+    QApplication_setAttribute(Qt::AA_UseHighDpiPixmaps, true);
+
+    static int argc = 0;
+    static char* argv[] = { nullptr };
+
+    uint8_t _app[64]; // sizeof(QApplication) == 16
+    QApplication* const app = reinterpret_cast<QApplication*>(_app);
+    QApplication__init(app, argc, argv, 0);
+
+    uint8_t _qstrurl[32]; // sizeof(QString) == 8
+    QString* const qstrurl(reinterpret_cast<QString*>(_qstrurl));
+
+    {
+        const size_t url_len = std::strlen(url);
+        QChar* const url_qchar = new QChar[url_len + 1];
+
+        for (size_t i = 0; i < url_len; ++i)
+            url_qchar[i] = QChar(url[i]);
+
+        url_qchar[url_len] = 0;
+
+        QString__init(qstrurl, url_qchar, url_len);
+    }
+
+    uint8_t _qurl[32]; // sizeof(QUrl) == 8
+    QUrl* const qurl(reinterpret_cast<QUrl*>(_qurl));
+    QUrl__init(qurl, *qstrurl, 1 /* QUrl::StrictMode */);
+
+    uint8_t _webview[128]; // sizeof(QWebEngineView) == 56
+    QWebEngineView* const webview = reinterpret_cast<QWebEngineView*>(_webview);
+    QWebEngineView__init(webview, nullptr);
+
+    QWebEngineView_move(webview, QPoint(0, kVerticalOffset));
+    QWebEngineView_resize(webview, QSize(DISTRHO_UI_DEFAULT_WIDTH, DISTRHO_UI_DEFAULT_HEIGHT - kVerticalOffset));
+    QWebEngineView_winId(webview);
+    QWindow_setParent(QWebEngineView_windowHandle(webview), QWindow_fromWinId(winId));
+    QWebEngineView_setUrl(webview, *qurl);
+    QWebEngineView_show(webview);
+
+    QApplication_exec();
 
     dlclose(lib);
     return true;
@@ -220,6 +368,7 @@ int main(int argc, char* argv[])
     std::snprintf(url, 31, "http://127.0.0.1:%s/", argv[3]);
 
     const bool ok = qt5webengine(winId, scaleFactor, url) ||
+                    qt6webengine(winId, scaleFactor, url) ||
                     gtk3(display, winId, scaleFactor, url);
 
     XCloseDisplay(display);

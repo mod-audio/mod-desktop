@@ -34,7 +34,6 @@ DPF_TARGET_DIR = ../../build-plugin
 include ../DPF/Makefile.plugins.mk
 
 BUILD_CXX_FLAGS += -DVERSION='"$(shell cat ../../VERSION)"'
-# BUILD_CXX_FLAGS += -std=gnu++17
 
 BUILD_CXX_FLAGS += -pthread
 LINK_FLAGS += -pthread
@@ -56,9 +55,9 @@ ifeq ($(LINUX),true)
 TARGETS += $(TARGET_DIR)/MOD-Desktop-WebView
 
 $(TARGET_DIR)/MOD-Desktop-WebView: $(BUILD_DIR)/WebViewQt.cpp.o
-	$(CXX) $^ $(LINK_FLAGS) $(shell $(PKG_CONFIG) --libs Qt5WebEngineWidgets x11) -o $@
+	$(CXX) $^ $(LINK_FLAGS) $(shell $(PKG_CONFIG) --libs x11) -o $@
 
-$(BUILD_DIR)/WebViewQt.cpp.o: BUILD_CXX_FLAGS += -std=gnu++14 $(shell $(PKG_CONFIG) --cflags Qt5WebEngineWidgets webkit2gtk-4.0 x11)
+$(BUILD_DIR)/WebViewQt.cpp.o: BUILD_CXX_FLAGS += -std=gnu++14 $(shell $(PKG_CONFIG) --cflags Qt5Widgets x11)
 
 -include $(BUILD_DIR)/WebViewQt.cpp.d
 
