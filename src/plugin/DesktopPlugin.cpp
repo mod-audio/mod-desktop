@@ -22,6 +22,7 @@ class DesktopPlugin : public Plugin,
     bool startingJackd = false;
     bool startingModUI = false;
     bool processing = false;
+    bool firstTimeActivating = true;
     bool firstTimeProcessing = true;
     float parameters[kParameterCount] = {};
     float* tmpBuffers[2] = {};
@@ -44,7 +45,9 @@ public:
             return;
 
         // TODO check available ports
-        int availablePortNum = 1;
+        static int port = 1;
+        int availablePortNum = port;
+        port += 4;
 
         envp = getEvironment(availablePortNum);
 
@@ -55,9 +58,6 @@ public:
         }
 
         portBaseNum = availablePortNum;
-
-        if (shm.init() && run())
-            startRunner(500);
 
         bufferSizeChanged(getBufferSize());
     }
@@ -303,9 +303,18 @@ protected:
 
     void activate() override
     {
-        shm.reset();
+        if (firstTimeActivating)
+        {
+            firstTimeActivating = false;
 
-        firstTimeProcessing = true;
+            if (envp != nullptr && shm.init() && run())
+                startRunner(500);
+        }
+        else
+        {
+            shm.reset();
+        }
+
         numFramesInShmBuffer = numFramesInTmpBuffer = 0;
     }
 

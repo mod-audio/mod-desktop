@@ -192,7 +192,7 @@ static void set_envp_value(wchar_t** envp, const wchar_t* const key, const wchar
     (*envp)[keylen] = '=';
 }
 #else
-static void set_envp_value(char** envp, const char* const fullvalue)
+void set_envp_value(char** envp, const char* const fullvalue)
 {
     const size_t keylen = std::strchr(fullvalue, '=') - fullvalue;
 
@@ -210,7 +210,7 @@ static void set_envp_value(char** envp, const char* const fullvalue)
     *envp = strdup(fullvalue);
 }
 
-static void set_envp_value(char** envp, const char* const key, const char* const value)
+void set_envp_value(char** envp, const char* const key, const char* const value)
 {
     const size_t keylen = std::strlen(key);
     const size_t valuelen = std::strlen(value);

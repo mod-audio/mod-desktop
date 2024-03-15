@@ -15,7 +15,7 @@ NAME = MOD-Desktop
 # Files to build
 
 FILES_DSP = DesktopPlugin.cpp utils.cpp
-FILES_UI = DesktopUI.cpp NanoButton.cpp
+FILES_UI = DesktopUI.cpp NanoButton.cpp utils.cpp
 
 ifeq ($(MACOS),true)
 FILES_UI += WebView.mm
@@ -43,25 +43,11 @@ LINK_FLAGS += -framework IOKit -framework WebKit
 else ifeq ($(WINDOWS),true)
 LINK_FLAGS += -lwinmm
 else ifeq ($(LINUX),true)
-LINK_FLAGS += -ldl
+BUILD_CXX_FLAGS += $(shell $(PKG_CONFIG) --cflags Qt5Core) -std=gnu++14
+LINK_FLAGS += -ldl -lrt
 endif
 
-TARGETS = jack vst2
-
-# ---------------------------------------------------------------------------------------------------------------------
-
-ifeq ($(LINUX),true)
-
-TARGETS += $(TARGET_DIR)/MOD-Desktop-WebView
-
-$(TARGET_DIR)/MOD-Desktop-WebView: $(BUILD_DIR)/WebViewQt.cpp.o
-	$(CXX) $^ $(LINK_FLAGS) $(shell $(PKG_CONFIG) --libs x11) -o $@
-
-$(BUILD_DIR)/WebViewQt.cpp.o: BUILD_CXX_FLAGS += -std=gnu++14 $(shell $(PKG_CONFIG) --cflags Qt5Widgets x11)
-
--include $(BUILD_DIR)/WebViewQt.cpp.d
-
-endif
+TARGETS = clap lv2_sep vst2 vst3
 
 # ---------------------------------------------------------------------------------------------------------------------
 

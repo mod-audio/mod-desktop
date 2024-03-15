@@ -19,6 +19,10 @@ const char* getAppDir();
 const wchar_t* getEvironment(uint portBaseNum);
 #else
 char* const* getEvironment(uint portBaseNum);
+
+// helpers
+void set_envp_value(char** envp, const char* const fullvalue);
+void set_envp_value(char** envp, const char* const key, const char* const value);
 #endif
 
 /* Open a web browser with the mod-ui URL as address.
