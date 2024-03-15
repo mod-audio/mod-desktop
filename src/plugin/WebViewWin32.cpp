@@ -7,7 +7,7 @@ START_NAMESPACE_DISTRHO
 
 // -----------------------------------------------------------------------------------------------------------
 
-void* addWebView(const uintptr_t parentWinId, const uint port)
+void* addWebView(const uintptr_t parentWinId, const double scaleFactor, const uint port)
 {
     return nullptr;
 }

@@ -20,7 +20,7 @@ struct WebViewImpl {
 
 // -----------------------------------------------------------------------------------------------------------
 
-void* addWebView(const uintptr_t parentWinId, const uint port)
+void* addWebView(const uintptr_t parentWinId, double, const uint port)
 {
     NSView* const view = reinterpret_cast<NSView*>(parentWinId);
 

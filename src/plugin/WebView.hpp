@@ -7,7 +7,7 @@ START_NAMESPACE_DISTRHO
 
 // -----------------------------------------------------------------------------------------------------------
 
-void* addWebView(uintptr_t parentWinId, uint port);
+void* addWebView(uintptr_t parentWinId, double scaleFactor, uint port);
 void destroyWebView(void* webview);
 void reloadWebView(void* webview);
 void resizeWebView(void* webview, uint offset, uint width, uint height);

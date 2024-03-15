@@ -100,10 +100,8 @@ static const wchar_t* getAppDirW()
 
     if (appDir[0] == 0)
     {
-        // SHGetSpecialFolderPathW(nullptr, appDir, CSIDL_PROGRAM_FILES, false);
-        // std::wcsncat(appDir, L"\\MOD Desktop", MAX_PATH - 1);
-
-        std::wcsncat(appDir, L"Z:\\home\\falktx\\Source\\MOD\\mod-desktop\\build", MAX_PATH - 1);
+        SHGetSpecialFolderPathW(nullptr, appDir, CSIDL_PROGRAM_FILES, false);
+        std::wcsncat(appDir, L"\\MOD Desktop", MAX_PATH - 1);
     }
 
     return appDir;

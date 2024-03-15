@@ -132,7 +132,7 @@ protected:
             DISTRHO_SAFE_ASSERT_RETURN(port != 0,);
 
             port += kPortNumOffset;
-            webview = addWebView(getWindow().getNativeWindowHandle(), port);
+            webview = addWebView(getWindow().getNativeWindowHandle(), getScaleFactor(), port);
         }
     }
 
