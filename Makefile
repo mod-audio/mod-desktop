@@ -79,7 +79,11 @@ PAWPAW_PREFIX = $(PAWPAW_DIR)/targets/$(PAWPAW_TARGET)$(PAWPAW_SUFFIX)
 # ---------------------------------------------------------------------------------------------------------------------
 # List of files created by PawPaw bootstrap, to ensure we have run it at least once
 
+ifeq ($(MACOS),true)
 BOOTSTRAP_FILES  = $(PAWPAW_PREFIX)/bin/cxfreeze
+else
+BOOTSTRAP_FILES  = $(PAWPAW_PREFIX)/bin/cxfreeze-quickstart
+endif
 BOOTSTRAP_FILES += $(PAWPAW_PREFIX)/bin/jackd$(APP_EXT)
 BOOTSTRAP_FILES += $(PAWPAW_PREFIX)/include/armadillo
 
@@ -102,6 +106,7 @@ TARGETS += build/mod-desktop.app/Contents/MacOS/jack/jack-session.conf
 TARGETS += build/mod-desktop.app/Contents/MacOS/jack/jack_coreaudio.so
 TARGETS += build/mod-desktop.app/Contents/MacOS/jack/jack_coremidi.so
 TARGETS += build/mod-desktop.app/Contents/MacOS/jack/jack_dummy.so
+TARGETS += build/mod-desktop.app/Contents/MacOS/jack/jack_mod-desktop.so
 TARGETS += build/mod-desktop.app/Contents/MacOS/jack/mod-host.so
 TARGETS += build/mod-desktop.app/Contents/MacOS/jack/mod-midi-broadcaster.so
 TARGETS += build/mod-desktop.app/Contents/MacOS/jack/mod-midi-merger.so
@@ -143,6 +148,7 @@ TARGETS += build/pedalboards
 TARGETS += build/VERSION
 ifeq ($(WINDOWS),true)
 TARGETS += build/jack/jack_dummy.dll
+TARGETS += build/jack/jack_mod-desktop.dll
 TARGETS += build/jack/jack_portaudio.dll
 TARGETS += build/jack/jack_winmme.dll
 TARGETS += build/libjack64.dll
@@ -162,6 +168,7 @@ else
 TARGETS += build/jack/alsa_midi.so
 TARGETS += build/jack/jack_alsa.so
 TARGETS += build/jack/jack_dummy.so
+TARGETS += build/jack/jack_mod-desktop.so
 TARGETS += build/jack/jack_portaudio.so
 TARGETS += build/jack/jack-session-alsamidi.conf
 TARGETS += build/libjack.so.0
@@ -274,10 +281,13 @@ TARGETS += $(foreach PLUGIN,$(PLUGINS),$(call PLUGIN_STAMP,$(PLUGIN)))
 # ---------------------------------------------------------------------------------------------------------------------
 
 all: $(TARGETS)
+	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) -C src/plugin
 
 clean:
+	$(MAKE) clean -C src/DPF
 	$(MAKE) clean -C src/mod-host
 	$(MAKE) clean -C src/mod-ui/utils
+	$(MAKE) clean -C src/plugin
 	$(MAKE) clean -C src/systray
 	rm -rf build
 	rm -rf build-midi-merger
@@ -317,6 +327,9 @@ win64-app:
 
 win64-bootstrap:
 	./src/PawPaw/bootstrap-mod.sh win64
+
+win64-plugin:
+	./utils/run.sh win64 $(MAKE) -C src/plugin
 
 win64-plugins:
 	$(MAKE) PAWPAW_TARGET=win64 plugins

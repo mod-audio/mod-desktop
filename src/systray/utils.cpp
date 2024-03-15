@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 MOD Audio UG
+// SPDX-FileCopyrightText: 2023-2024 MOD Audio UG
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 #include "utils.hpp"
@@ -8,6 +8,7 @@
 #include <QtCore/QJsonObject>
 #include <QtCore/QMessageAuthenticationCode>
 #include <QtCore/QSettings>
+#include <QtGui/QDesktopServices>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QStyleFactory>
 
@@ -46,6 +47,7 @@ constexpr uint8_t char2u8(const uint8_t c)
         : 0;
 }
 
+// NOTE this needs to match getEvironment from plugin side
 void initEvironment()
 {
     // base environment details
@@ -53,11 +55,15 @@ void initEvironment()
     SetEnvironmentVariableW(L"JACK_NO_START_SERVER", L"1");
     SetEnvironmentVariableW(L"LANG", L"en_US.UTF-8");
     SetEnvironmentVariableW(L"MOD_DESKTOP", L"1");
+    SetEnvironmentVariableW(L"MOD_DEVICE_HOST_PORT", L"18182");
+    SetEnvironmentVariableW(L"MOD_DEVICE_WEBSERVER_PORT", L"18181");
     SetEnvironmentVariableW(L"PYTHONUNBUFFERED", L"1");
    #else
     setenv("JACK_NO_START_SERVER", "1", 1);
     setenv("LANG", "en_US.UTF-8", 1);
     setenv("MOD_DESKTOP", "1", 1);
+    setenv("MOD_DEVICE_HOST_PORT", "18182", 1);
+    setenv("MOD_DEVICE_WEBSERVER_PORT", "18181", 1);
     setenv("PYTHONUNBUFFERED", "1", 1);
    #endif
 
@@ -92,7 +98,7 @@ void initEvironment()
         }
     }
 
-    if (char* const c = strrchr(appDir, '/'))
+    if (char* const c = std::strrchr(appDir, '/'))
         *c = 0;
    #endif
 
@@ -140,6 +146,21 @@ void initEvironment()
     const size_t dataDirLen = std::strlen(dataDir);
    #endif
 
+    // write our location to disk so the plugin version knows where to find us
+   #ifdef __linux__
+    if (access(dataDir, F_OK) == 0)
+    {
+        std::memcpy(path, dataDir, dataDirLen);
+        std::strncpy(path + dataDirLen, "/.last-known-location-" VERSION, PATH_MAX - dataDirLen - 1);
+
+        if (FILE* const f = std::fopen(path, "w"))
+        {
+            std::fwrite(appDir, appDirLen, 1, f);
+            std::fclose(f);
+        }
+    }
+   #endif
+
     // generate UID
     uint8_t key[16] = {};
    #if defined(__APPLE__)
@@ -172,9 +193,9 @@ void initEvironment()
    #elif defined(_WIN32)
     // TODO
    #else
-    if (FILE* const f = fopen("/etc/machine-id", "r"))
+    if (FILE* const f = std::fopen("/etc/machine-id", "r"))
     {
-        if (fread(path, PATH_MAX - 1, 1, f) == 0 && strlen(path) >= 33)
+        if (std::fread(path, PATH_MAX - 1, 1, f) == 0 && std::strlen(path) >= 33)
         {
             for (int i=0; i<16; ++i)
             {
@@ -182,7 +203,7 @@ void initEvironment()
                 key[i] |= char2u8(path[i*2+1]) << 0;
             }
         }
-        fclose(f);
+        std::fclose(f);
     }
    #endif
 
@@ -263,7 +284,6 @@ void initEvironment()
 
    #if !(defined(__APPLE__) || defined(_WIN32))
     // special handling for PipeWire JACK, need to find full path to shared lib
-    bool usingPipeWire = false;
     if (void* const pwlib = dlmopen(LM_ID_NEWLM, "libjack.so.0", RTLD_NOW|RTLD_LOCAL))
     {
         typedef int (*jacksym)(void);
@@ -275,7 +295,6 @@ void initEvironment()
             Dl_info info = {};
             dladdr(sym2, &info);
             setenv("JACKBRIDGE_FILENAME", info.dli_fname, 1);
-            usingPipeWire = true;
             fprintf(stdout, "MOD Desktop DEBUG: jacklib syms %p %p | %d | using pipewire with filename '%s'\n", sym1, sym2, sym1(), info.dli_fname);
         }
         else
@@ -287,7 +306,7 @@ void initEvironment()
         dlclose(pwlib);
     }
 
-    // if LD_LIBRARY_PATH is set, add our custom lib path on top to make sure jackd can run
+    // add our custom lib path on top of LD_LIBRARY_PATH to make sure jackd can run
     if (const char* const ldpath = getenv("LD_LIBRARY_PATH"))
     {
         std::memcpy(path, appDir, appDirLen);
@@ -295,8 +314,7 @@ void initEvironment()
         std::strncpy(path + appDirLen + 1, ldpath, PATH_MAX - appDirLen - 2);
         setenv("LD_LIBRARY_PATH", path, 1);
     }
-    // always set path in case of PipeWire
-    else if (usingPipeWire)
+    else
     {
         setenv("LD_LIBRARY_PATH", appDir, 1);
     }
