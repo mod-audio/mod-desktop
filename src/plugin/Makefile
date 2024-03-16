@@ -31,6 +31,7 @@ endif
 
 DPF_BUILD_DIR = ../../build-plugin/build
 DPF_TARGET_DIR = ../../build-plugin
+USING_WEBVIEW = true
 
 include ../DPF/Makefile.plugins.mk
 

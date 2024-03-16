@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2023-2024 MOD Audio UG
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+#define QT_NO_VERSION_TAGGING
 #include <QtCore/QChar>
 #include <QtCore/QPoint>
 #include <QtCore/QSize>
@@ -88,7 +89,7 @@ void* addWebView(const uintptr_t parentWinId, const double scaleFactor, const ui
     ipc->childWindow = 0;
     ipc->ourWindow = parentWinId;
 
-    const char* const args[] = { ldlinux, filename, nullptr };
+    const char* const args[] = { ldlinux, filename, "dpf-ld-linux-webview", nullptr };
     ipc->p.start(args, envp);
 
     for (uint i = 0; envp[i] != nullptr; ++i)
@@ -294,7 +295,7 @@ static bool qt5webengine(const Window winId, const double scaleFactor, const cha
     using QApplication__init_t = void (*)(QApplication*, int&, char**, int);
     using QApplication_exec_t = void (*)();
     using QApplication_setAttribute_t = void (*)(Qt::ApplicationAttribute, bool);
-    using QString__init_t = void (*)(void*, const QChar*, qsizetype);
+    using QString__init_t = void (*)(void*, const QChar*, ptrdiff_t);
     using QUrl__init_t = void (*)(void*, const QString&, int /* QUrl::ParsingMode */);
     using QWebEngineView__init_t = void (*)(QWebEngineView*, void*);
     using QWebEngineView_move_t = void (*)(QWebEngineView*, const QPoint&);
@@ -481,8 +482,6 @@ static bool qt6webengine(const Window winId, const double scaleFactor, const cha
     return true;
 }
 
-END_NAMESPACE_DISTRHO
-
 // -----------------------------------------------------------------------------------------------------------
 // startup via ld-linux
 
@@ -493,28 +492,27 @@ static void signalHandler(const int sig)
     reloadFn();
 }
 
-DISTRHO_PLUGIN_EXPORT
-void _start()
+int dpf_webview_start(int /* argc */, char** /* argv[] */)
 {
     uselocale(newlocale(LC_NUMERIC_MASK, "C", nullptr));
 
     const char* const envPort = std::getenv("DPF_WEBVIEW_PORT");
-    DISTRHO_SAFE_ASSERT_RETURN(envPort != nullptr, exit(1));
+    DISTRHO_SAFE_ASSERT_RETURN(envPort != nullptr, 1);
 
     const char* const envScaleFactor = std::getenv("DPF_WEBVIEW_SCALE_FACTOR");
-    DISTRHO_SAFE_ASSERT_RETURN(envScaleFactor != nullptr, exit(1));
+    DISTRHO_SAFE_ASSERT_RETURN(envScaleFactor != nullptr, 1);
 
     const char* const envWinId = std::getenv("DPF_WEBVIEW_WIN_ID");
-    DISTRHO_SAFE_ASSERT_RETURN(envWinId != nullptr, exit(1));
+    DISTRHO_SAFE_ASSERT_RETURN(envWinId != nullptr, 1);
 
     const Window winId = std::strtoul(envWinId, nullptr, 10);
-    DISTRHO_SAFE_ASSERT_RETURN(winId != 0, exit(1));
+    DISTRHO_SAFE_ASSERT_RETURN(winId != 0, 1);
 
     const double scaleFactor = std::atof(envScaleFactor);
-    DISTRHO_SAFE_ASSERT_RETURN(scaleFactor > 0.0, exit(1));
+    DISTRHO_SAFE_ASSERT_RETURN(scaleFactor > 0.0, 1);
 
     Display* const display = XOpenDisplay(nullptr);
-    DISTRHO_SAFE_ASSERT_RETURN(display != nullptr, exit(1));
+    DISTRHO_SAFE_ASSERT_RETURN(display != nullptr, 1);
 
     char url[32] = {};
     std::snprintf(url, 31, "http://127.0.0.1:%s/", envPort);
@@ -531,7 +529,9 @@ void _start()
 
     XCloseDisplay(display);
 
-    exit(0);
+    return 0;
 }
 
 // -----------------------------------------------------------------------------------------------------------
+
+END_NAMESPACE_DISTRHO

@@ -62,7 +62,7 @@ jobs:
           else
             freetypepkgname="libfreetype-dev"
           fi
-          apt-get install -yqq ${freetypepkgname} libgl1-mesa-dev libx11-dev libxcursor-dev libxext-dev libxrandr-dev p7zip-full unzip wget xdg-user-dirs zip
+          apt-get install -yqq ${freetypepkgname} libgl1-mesa-dev libx11-dev libxcursor-dev libxext-dev libxrandr-dev libxxf86vm-dev p7zip-full unzip wget xdg-user-dirs zip
       - name: Set up cache
         id: cache
         uses: actions/cache@v3
@@ -157,7 +157,7 @@ jobs:
           else
             freetypepkgname="libfreetype-dev"
           fi
-          apt-get install -yqq ${freetypepkgname} libgl1-mesa-dev libx11-dev libxcursor-dev libxext-dev libxrandr-dev p7zip-full unzip wget xdg-user-dirs zip
+          apt-get install -yqq ${freetypepkgname} libgl1-mesa-dev libx11-dev libxcursor-dev libxext-dev libxrandr-dev libxxf86vm-dev p7zip-full unzip wget xdg-user-dirs zip
       - name: Set up cache
         id: cache
         uses: actions/cache@v3
