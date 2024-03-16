@@ -21,7 +21,11 @@ Name: "normal"; Description: "Full installation";
 
 [Components]
 Name: pedalboards; Description: "Factory pedalboards"; Types: normal; Flags: fixed;
-Name: plugins; Description: "LV2 plugins"; Types: normal; Flags: fixed;
+Name: plugins; Description: "Built-in plugins"; Types: normal; Flags: fixed;
+Name: clap; Description: "CLAP plugin"; Types: normal;
+Name: lv2; Description: "LV2 plugin"; Types: normal;
+Name: vst2; Description: "VST2 plugin"; Types: normal;
+Name: vst3; Description: "VST3 plugin"; Types: normal;
 
 [Files]
 ; icon
@@ -156,6 +160,11 @@ Source: "..\..\build\mod-desktop-asio.dll"; DestDir: "{win}\System32"; Flags: ig
 ; misc
 Source: "..\..\build\mod-hardware-descriptor.json"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "..\..\build\VERSION"; DestDir: "{app}"; Flags: ignoreversion;
+; plugin variants
+Source: "..\..\build-plugin\MOD-Desktop.clap"; DestDir: "{commoncf64}\CLAP"; Components: clap; Flags: ignoreversion;
+Source: "..\..\build-plugin\MOD-Desktop.lv2\*.*"; DestDir: "{commoncf64}\LV2\MOD-Desktop.lv2"; Components: lv2; Flags: ignoreversion;
+Source: "..\..\build-plugin\MOD-Desktop-vst.dll"; DestDir: "{code:GetVST2Dir}\"; Components: vst2; Flags: ignoreversion;
+Source: "..\..\build-plugin\MOD-Desktop.vst3\Contents\x86_64-win\*.*"; DestDir: "{commoncf64}\VST3\MOD-Desktop.vst3\Contents\x86_64-win"; Components: vst3; Flags: ignoreversion;
 ; pedalboards
 #include "win64-pedalboards.iss"
 ; plugins
@@ -163,3 +172,61 @@ Source: "..\..\build\VERSION"; DestDir: "{app}"; Flags: ignoreversion;
 
 [Icons]
 Name: "{commonprograms}\MOD Desktop"; Filename: "{app}\mod-desktop.exe"; IconFilename: "{app}\mod-logo.ico"; WorkingDir: "{app}"; Comment: "MOD Desktop";
+
+; based on https://www.kvraudio.com/forum/viewtopic.php?t=501615
+[Code]
+var
+  VST2DirPage: TInputDirWizardPage;
+  TypesComboOnChangePrev: TNotifyEvent;
+procedure ComponentsListCheckChanges;
+begin
+  WizardForm.NextButton.Enabled := (WizardSelectedComponents(False) <> '');
+end;
+procedure ComponentsListClickCheck(Sender: TObject);
+begin
+  ComponentsListCheckChanges;
+end;
+procedure TypesComboOnChange(Sender: TObject);
+begin
+  TypesComboOnChangePrev(Sender);
+  ComponentsListCheckChanges;
+end;
+procedure InitializeWizard;
+begin
+  WizardForm.ComponentsList.OnClickCheck := @ComponentsListClickCheck;
+  TypesComboOnChangePrev := WizardForm.TypesCombo.OnChange;
+  WizardForm.TypesCombo.OnChange := @TypesComboOnChange;
+  VST2DirPage := CreateInputDirPage(wpSelectComponents,
+  'Confirm VST2 Plugin Directory', '',
+  'Select the folder in which setup should install the VST2 Plugin, then click Next.',
+  False, '');
+  VST2DirPage.Add('VST2 Plugin Directory');
+  VST2DirPage.Values[0] := ExpandConstant('{reg:HKLM\SOFTWARE\VST,VSTPluginsPath|{commonpf64}\VSTPlugins}');
+end;
+procedure CurPageChanged(CurPageID: Integer);
+begin
+  if CurPageID = VST2DirPage.ID then
+  begin
+    VST2DirPage.Buttons[0].Enabled := WizardIsComponentSelected('vst2');
+    VST2DirPage.PromptLabels[0].Enabled := VST2DirPage.Buttons[0].Enabled;
+    VST2DirPage.Edits[0].Enabled := VST2DirPage.Buttons[0].Enabled;
+  end;
+  if CurPageID = wpSelectComponents then
+  begin
+    ComponentsListCheckChanges;
+  end;
+end;
+function ShouldSkipPage(PageID: Integer): Boolean;
+begin
+  if PageID = VST2DirPage.ID then
+  begin
+    If (not WizardIsComponentSelected('vst2'))then
+      begin
+        Result := True
+      end;
+  end;
+end;
+function GetVST2Dir(Param: string): string;
+begin
+    Result := VST2DirPage.Values[0];
+end;

@@ -278,10 +278,13 @@ BUNDLES = $(filter-out $(UNWANTED_BUNDLES),$(foreach PLUGIN,$(PLUGINS),$($(call 
 # add plugins to build target
 TARGETS += $(foreach PLUGIN,$(PLUGINS),$(call PLUGIN_STAMP,$(PLUGIN)))
 
+TARGETS += src/DPF/utils/lv2_ttl_generator$(APP_EXT)
+
 # ---------------------------------------------------------------------------------------------------------------------
 
 all: $(TARGETS)
 	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) -C src/plugin
+	./utils/run.sh $(PAWPAW_TARGET) $(CURDIR)/src/DPF/utils/generate-ttl.sh build-plugin
 
 clean:
 	$(MAKE) clean -C src/DPF
@@ -295,6 +298,9 @@ clean:
 	rm -rf build-plugin-stamps
 	rm -rf build-pedalboard
 	rm -rf build-ui
+
+src/DPF/utils/lv2_ttl_generator$(APP_EXT):
+	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) -C src/DPF/utils/lv2-ttl-generator
 
 plugins: $(foreach PLUGIN,$(PLUGINS),$(call PLUGIN_STAMP,$(PLUGIN)))
 
