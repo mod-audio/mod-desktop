@@ -283,7 +283,7 @@ TARGETS += src/DPF/utils/lv2_ttl_generator$(APP_EXT)
 # ---------------------------------------------------------------------------------------------------------------------
 
 all: $(TARGETS)
-	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) -C src/plugin
+	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) NOOPT=true -C src/plugin
 	./utils/run.sh $(PAWPAW_TARGET) $(CURDIR)/src/DPF/utils/generate-ttl.sh build-plugin
 
 clean:
@@ -300,7 +300,7 @@ clean:
 	rm -rf build-ui
 
 src/DPF/utils/lv2_ttl_generator$(APP_EXT):
-	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) -C src/DPF/utils/lv2-ttl-generator
+	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) NOOPT=true -C src/DPF/utils/lv2-ttl-generator
 
 plugins: $(foreach PLUGIN,$(PLUGINS),$(call PLUGIN_STAMP,$(PLUGIN)))
 

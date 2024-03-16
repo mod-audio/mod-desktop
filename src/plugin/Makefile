@@ -48,7 +48,7 @@ BUILD_CXX_FLAGS += $(shell $(PKG_CONFIG) --cflags Qt5Core)
 LINK_FLAGS += -ldl -lrt
 endif
 
-TARGETS = clap lv2_sep vst2 vst3
+TARGETS = au clap lv2_sep vst2 vst3
 
 # ---------------------------------------------------------------------------------------------------------------------
 

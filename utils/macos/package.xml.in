@@ -6,10 +6,30 @@
     <options customize="always" hostArchitectures="arm64,x86_64" require-scripts="false" rootVolumeOnly="true" />
     <pkg-ref id="audio.mod.desktop" />
     <welcome file="@builddir@/../utils/macos/welcome.txt" mime-type="text/plain" />
-    <choice id="audio.mod.desktop-pkg" title="MOD Desktop" description='MOD Desktop macOS bundle' visible="true" enabled="false" selected="true">
+    <choice id="audio.mod.desktop-pkg" title="MOD Desktop" description='MOD Desktop application' visible="true" enabled="false" selected="true">
         <pkg-ref id="audio.mod.desktop-pkg" version="0">mod-desktop.pkg</pkg-ref>
+    </choice>
+    <choice id="audio.mod.desktop-au" title="AU plugin" description="Install AU plugin" selected="true" visible="true">
+        <pkg-ref id="audio.mod.desktop-components" version="0">mod-desktop-components.pkg</pkg-ref>
+    </choice>
+    <choice id="audio.mod.desktop-clap" title="CLAP plugin" description="Install CLAP plugin" selected="true" visible="true">
+        <pkg-ref id="audio.mod.desktop-clapbundles" version="0">mod-desktop-clapbundles.pkg</pkg-ref>
+    </choice>
+    <choice id="audio.mod.desktop-lv2" title="LV2 plugin" description="Install LV2 plugin" selected="true" visible="true">
+        <pkg-ref id="audio.mod.desktop-lv2bundles" version="0">mod-desktop-lv2bundles.pkg</pkg-ref>
+    </choice>
+    <choice id="audio.mod.desktop-vst2" title="VST2 plugin" description="Install VST2 plugin" selected="true" visible="true">
+        <pkg-ref id="audio.mod.desktop-vst2bundles" version="0">mod-desktop-vst2bundles.pkg</pkg-ref>
+    </choice>
+    <choice id="audio.mod.desktop-vst3" title="VST3 plugin" description="Install VST3 plugin" selected="true" visible="true">
+        <pkg-ref id="audio.mod.desktop-vst3bundles" version="0">mod-desktop-vst3bundles.pkg</pkg-ref>
     </choice>
     <choices-outline>
        <line choice="audio.mod.desktop-pkg"/>
+       <line choice="audio.mod.desktop-au"/>
+       <line choice="audio.mod.desktop-clap"/>
+       <line choice="audio.mod.desktop-lv2"/>
+       <line choice="audio.mod.desktop-vst2"/>
+       <line choice="audio.mod.desktop-vst3"/>
     </choices-outline>
 </installer-gui-script>
