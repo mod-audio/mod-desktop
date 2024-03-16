@@ -2,6 +2,7 @@
 
 export DISTRHO_NAMESPACE = DesktopDISTRHO
 export DGL_NAMESPACE = DesktopDGL
+export FILE_BROWSER_DISABLED = true
 export NVG_FONT_TEXTURE_FLAGS = NVG_IMAGE_NEAREST
 
 include ../DPF/Makefile.base.mk
@@ -48,7 +49,7 @@ BUILD_CXX_FLAGS += $(shell $(PKG_CONFIG) --cflags Qt5Core)
 LINK_FLAGS += -ldl -lrt
 endif
 
-TARGETS = au clap lv2_sep vst2 vst3
+TARGETS = features au clap lv2_sep vst2 vst3
 
 # ---------------------------------------------------------------------------------------------------------------------
 
