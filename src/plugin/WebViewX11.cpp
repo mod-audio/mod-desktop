@@ -472,7 +472,6 @@ static bool qt6webengine(const Window winId, const double scaleFactor, const cha
         QWebEngineView_setUrl(webview, *qurl);
     };
 
-
     QApplication_exec();
 
     dlclose(lib);

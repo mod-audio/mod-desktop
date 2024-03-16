@@ -19,6 +19,7 @@ class DesktopPlugin : public Plugin,
     ChildProcess jackd;
     ChildProcess mod_ui;
     SharedMemory shm;
+    String currentPedalboard;
     bool startingJackd = false;
     bool startingModUI = false;
     bool processing = false;
@@ -28,7 +29,7 @@ class DesktopPlugin : public Plugin,
     float* tmpBuffers[2] = {};
     uint32_t numFramesInShmBuffer = 0;
     uint32_t numFramesInTmpBuffer = 0;
-    uint portBaseNum = 0;
+    int portBaseNum = 0;
 
    #ifdef DISTRHO_OS_WINDOWS
     const WCHAR* envp;
@@ -38,11 +39,14 @@ class DesktopPlugin : public Plugin,
 
 public:
     DesktopPlugin()
-        : Plugin(kParameterCount, 0, 0),
+        : Plugin(kParameterCount, 0, 1),
           envp(nullptr)
     {
         if (isDummyInstance())
+        {
+            portBaseNum = -kErrorUndefined;
             return;
+        }
 
         // TODO check available ports
         static int port = 1;
@@ -53,7 +57,7 @@ public:
 
         if (envp == nullptr)
         {
-            parameters[kParameterBasePortNumber] = -kErrorAppDirNotFound;
+            parameters[kParameterBasePortNumber] = portBaseNum = -kErrorAppDirNotFound;
             return;
         }
 
@@ -67,11 +71,13 @@ public:
         stopRunner();
 
         if (processing && jackd.isRunning())
+        {
+            processing = false;
             shm.stopWait();
+        }
 
         jackd.stop();
         mod_ui.stop();
-
         shm.deinit();
 
         delete[] tmpBuffers[0];
@@ -100,12 +106,18 @@ protected:
         #define APP_EXT ""
        #endif
 
+        if (shm.data == nullptr && ! shm.init())
+        {
+            parameters[kParameterBasePortNumber] = portBaseNum = -kErrorShmSetupFailed;
+            return false;
+        }
+
         if (! jackd.isRunning())
         {
             if (startingJackd)
             {
                 startingJackd = false;
-                parameters[kParameterBasePortNumber] = -kErrorJackdExecFailed;
+                parameters[kParameterBasePortNumber] = portBaseNum = -kErrorJackdExecFailed;
                 return false;
             }
 
@@ -130,7 +142,7 @@ protected:
             if (jackd.start(jackd_args, envp))
                 return true;
 
-            parameters[kParameterBasePortNumber] = -kErrorJackdExecFailed;
+            parameters[kParameterBasePortNumber] = portBaseNum = -kErrorJackdExecFailed;
             return false;
         }
 
@@ -149,7 +161,7 @@ protected:
             if (startingModUI)
             {
                 startingModUI = false;
-                parameters[kParameterBasePortNumber] = -kErrorModUiExecFailed;
+                parameters[kParameterBasePortNumber] = portBaseNum = -kErrorModUiExecFailed;
                 return false;
             }
 
@@ -165,7 +177,7 @@ protected:
             if (mod_ui.start(mod_ui_args, envp))
                 return true;
 
-            parameters[kParameterBasePortNumber] = -kErrorModUiExecFailed;
+            parameters[kParameterBasePortNumber] = portBaseNum = -kErrorModUiExecFailed;
             return false;
         }
 
@@ -225,6 +237,7 @@ protected:
     */
     uint32_t getVersion() const override
     {
+        // return d_version(VERSION[0]-'0', VERSION[2]-'0', VERSION[4]-'0');
         return d_version(1, 0, 0);
     }
 
@@ -267,9 +280,12 @@ protected:
       Set a state key and default value.
       This function will be called once, shortly after the plugin is created.
     */
-    void initState(uint32_t, String&, String&) override
+    void initState(uint32_t, State& state) override
     {
-        // we are using states but don't want them saved in the host
+        state.hints = kStateIsFilenamePath | kStateIsOnlyForDSP;
+        state.key = "pedalboard";
+        state.defaultValue = "";
+        state.label = "Pedalboard";
     }
 
    /* --------------------------------------------------------------------------------------------------------
@@ -292,10 +308,24 @@ protected:
     }
 
    /**
+      Get the value of an internal state.
+      The host may call this function from any non-realtime context.
+    */
+    String getState(const char* const key) const override
+    {
+        if (std::strcmp(key, "pedalboard") == 0)
+            return currentPedalboard;
+
+        return String();
+    }
+
+   /**
       Change an internal state.
     */
-    void setState(const char*, const char*) override
+    void setState(const char* const key, const char* const value) override
     {
+        if (std::strcmp(key, "pedalboard") == 0)
+            currentPedalboard = value;
     }
 
    /* --------------------------------------------------------------------------------------------------------
@@ -307,7 +337,7 @@ protected:
         {
             firstTimeActivating = false;
 
-            if (envp != nullptr && shm.init() && run())
+            if (run())
                 startRunner(500);
         }
         else
@@ -315,6 +345,7 @@ protected:
             shm.reset();
         }
 
+        firstTimeProcessing = true;
         numFramesInShmBuffer = numFramesInTmpBuffer = 0;
     }
 
@@ -513,14 +544,21 @@ protected:
 
     void sampleRateChanged(double) override
     {
-        if (jackd.isRunning())
-        {
-            stopRunner();
-            jackd.stop();
+        if (portBaseNum < 0 || shm.data == nullptr)
+            return;
 
-            if (run())
-                startRunner(500);
+        stopRunner();
+
+        if (processing && jackd.isRunning())
+        {
+            processing = false;
+            shm.stopWait();
         }
+
+        jackd.stop();
+        shm.deinit();
+
+        firstTimeActivating = true;
     }
 
     // -------------------------------------------------------------------------------------------------------

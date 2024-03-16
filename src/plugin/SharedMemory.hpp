@@ -222,6 +222,7 @@ public:
         data->magic = 7331;
         post();
         wait();
+        data->magic = 1337;
     }
 
     bool process(float** output, const uint32_t offset)

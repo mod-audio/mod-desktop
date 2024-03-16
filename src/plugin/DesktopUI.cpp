@@ -41,17 +41,18 @@ public:
         buttonRefresh.setAbsolutePos(2 * scaleFactor, 2 * scaleFactor);
         buttonRefresh.setSize(70 * scaleFactor, 26 * scaleFactor);
 
-        buttonOpenWebGui.setId(2);
-        buttonOpenWebGui.setLabel("Open in Web Browser");
-        buttonOpenWebGui.setFontScale(scaleFactor);
-        buttonOpenWebGui.setAbsolutePos(74 * scaleFactor, 2 * scaleFactor);
-        buttonOpenWebGui.setSize(150 * scaleFactor, 26 * scaleFactor);
-
-        buttonOpenUserFilesDir.setId(3);
+        buttonOpenUserFilesDir.setId(2);
         buttonOpenUserFilesDir.setLabel("Open User Files Dir");
         buttonOpenUserFilesDir.setFontScale(scaleFactor);
-        buttonOpenUserFilesDir.setAbsolutePos(226 * scaleFactor, 2 * scaleFactor);
+        buttonOpenUserFilesDir.setAbsolutePos(74 * scaleFactor, 2 * scaleFactor);
         buttonOpenUserFilesDir.setSize(140 * scaleFactor, 26 * scaleFactor);
+
+        buttonOpenWebGui.setId(3);
+        buttonOpenWebGui.setLabel("Open in Web Browser");
+        buttonOpenWebGui.setFontScale(scaleFactor);
+        buttonOpenWebGui.setAbsolutePos(216 * scaleFactor, 2 * scaleFactor);
+        buttonOpenWebGui.setSize(150 * scaleFactor, 26 * scaleFactor);
+        buttonOpenWebGui.hide();
 
         label = "MOD Desktop ";
         label += getPluginFormatName();
@@ -92,6 +93,13 @@ protected:
 
             if (value < 0.f)
             {
+                if (webview != nullptr)
+                {
+                    destroyWebView(webview);
+                    webview = nullptr;
+                    buttonOpenWebGui.hide();
+                }
+
                 switch (-d_roundToIntNegative(value))
                 {
                 case kErrorAppDirNotFound:
@@ -106,11 +114,16 @@ protected:
                     error = "Error: Failed to start mod-ui";
                     errorDetail = "";
                     break;
+                case kErrorShmSetupFailed:
+                    error = "Error initializing MOD Desktop plugin";
+                    errorDetail = "Shared memory setup failed";
+                    break;
                 case kErrorUndefined:
                     error = "Error initializing MOD Desktop plugin";
                     errorDetail = "";
                     break;
                 }
+
                 repaint();
                 return;
             }
@@ -126,13 +139,20 @@ protected:
             {
                 destroyWebView(webview);
                 webview = nullptr;
+
+                buttonOpenWebGui.hide();
+                repaint();
             }
 
             port = d_roundToUnsignedInt(value);
             DISTRHO_SAFE_ASSERT_RETURN(port != 0,);
 
             port += kPortNumOffset;
+            d_stderr("webview port is %d", port);
             webview = addWebView(getWindow().getNativeWindowHandle(), getScaleFactor(), port);
+
+            buttonOpenWebGui.show();
+            repaint();
         }
     }
 
@@ -182,10 +202,10 @@ protected:
                 reloadWebView(webview);
             break;
         case 2:
-            openWebGui(port);
+            openUserFilesDir();
             break;
         case 3:
-            openUserFilesDir();
+            openWebGui(port);
             break;
         }
     }

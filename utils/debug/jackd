@@ -60,6 +60,9 @@ else
     export LD_BIND_NOW=1
     export LD_LIBRARY_PATH="${PAWPAW_PREFIX}/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
     export JACK_DRIVER_DIR="$(pwd)/jack"
+    if [ -e "/usr/lib/x86_64-linux-gnu/pipewire-0.3/jack/libjack.so.0" ] && [ -e "/etc/ld.so.conf.d/pipewire-jack-x86_64-linux-gnu.conf" ]; then
+        export JACKBRIDGE_FILENAME="/usr/lib/x86_64-linux-gnu/pipewire-0.3/jack/libjack.so.0"
+    fi
 fi
 
 LV2_PATH="$(convert_path "${DOCS_DIR}/MOD Desktop/lv2")"

@@ -86,7 +86,7 @@ public:
                               nullptr,    // lpProcessAttributes
                               nullptr,    // lpThreadAttributes
                               TRUE,       // bInheritHandles
-                              /* CREATE_NO_WINDOW | */ CREATE_UNICODE_ENVIRONMENT, // dwCreationFlags
+                              CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT, // dwCreationFlags
                               const_cast<LPWSTR>(envp), // lpEnvironment
                               nullptr,    // lpCurrentDirectory
                               &si,        // lpStartupInfo

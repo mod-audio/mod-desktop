@@ -291,6 +291,7 @@ clean:
 	$(MAKE) clean -C src/systray
 	rm -rf build
 	rm -rf build-midi-merger
+	rm -rf build-plugin
 	rm -rf build-plugin-stamps
 	rm -rf build-pedalboard
 	rm -rf build-ui

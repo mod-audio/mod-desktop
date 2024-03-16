@@ -241,10 +241,9 @@ jobs:
         run: |
           make PAWPAW_TARGET=${{ matrix.target }}
       - name: Validate plugins
-        if: false
-        #if: steps.cache.outputs.cache-hit == 'true'
+        if: steps.cache.outputs.cache-hit == 'true'
         run: |
-          # ./utils/plugin-builder/validate-plugins.sh ${{ matrix.target }}
+          ./utils/plugin-builder/validate-plugins.sh ${{ matrix.target }}
           # FIXME dirty carla leaves temp folders around
           rm -rf *.tmp
       - name: Set version tag for release

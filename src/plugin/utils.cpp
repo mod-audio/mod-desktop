@@ -289,6 +289,7 @@ char* const* getEvironment(const uint portBaseNum)
     set_envp_value(envpl, L"LANG=en_US.UTF-8");
     set_envp_value(envpl, L"MOD_DESKTOP=1");
     set_envp_value(envpl, L"MOD_DESKTOP_PLUGIN=1");
+    set_envp_value(envpl, L"MOD_LOG=0");
     set_envp_value(envpl, L"PYTHONUNBUFFERED=1");
    #else
     while (environ[envsize] != nullptr)
@@ -306,6 +307,7 @@ char* const* getEvironment(const uint portBaseNum)
     set_envp_value(envp, "LANG=en_US.UTF-8");
     set_envp_value(envp, "MOD_DESKTOP=1");
     set_envp_value(envp, "MOD_DESKTOP_PLUGIN=1");
+    set_envp_value(envp, "MOD_LOG=0");
     set_envp_value(envp, "PYTHONUNBUFFERED=1");
    #endif
 

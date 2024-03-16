@@ -39,11 +39,12 @@ BUILD_CXX_FLAGS += -pthread
 LINK_FLAGS += -pthread
 
 ifeq ($(MACOS),true)
-LINK_FLAGS += -framework IOKit -framework WebKit
+LINK_FLAGS += -framework CoreFoundation -framework IOKit -framework WebKit
 else ifeq ($(WINDOWS),true)
 LINK_FLAGS += -lwinmm
 else ifeq ($(LINUX),true)
-BUILD_CXX_FLAGS += $(shell $(PKG_CONFIG) --cflags Qt5Core) -std=gnu++14
+BUILD_CXX_FLAGS += $(shell $(PKG_CONFIG) --cflags Qt5Core)
+# -std=gnu++14
 LINK_FLAGS += -ldl -lrt
 endif
 
