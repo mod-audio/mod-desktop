@@ -57,7 +57,10 @@ void* addWebView(const uintptr_t parentWinId, const double scaleFactor, const ui
             std::strncpy(ldlinux, info.dli_fname, PATH_MAX - 1);
         }
     }
+    const char* const filename = getBinaryFilename();
+
     d_stdout("ld-linux is '%s'", ldlinux);
+    d_stdout("filename is '%s'", filename);
 
     ::Display* const display = XOpenDisplay(nullptr);
     DISTRHO_SAFE_ASSERT_RETURN(display != nullptr, nullptr);
@@ -85,7 +88,7 @@ void* addWebView(const uintptr_t parentWinId, const double scaleFactor, const ui
     ipc->childWindow = 0;
     ipc->ourWindow = parentWinId;
 
-    const char* const args[] = { ldlinux, getBinaryFilename(), nullptr };
+    const char* const args[] = { ldlinux, filename, nullptr };
     ipc->p.start(args, envp);
 
     for (uint i = 0; envp[i] != nullptr; ++i)

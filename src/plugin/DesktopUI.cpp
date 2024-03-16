@@ -21,7 +21,7 @@ class DesktopUI : public UI,
     String label;
     String error;
     String errorDetail;
-    uint port = 0;
+    int port = 0;
     void* webview = nullptr;
 
 public:
@@ -93,6 +93,14 @@ protected:
 
             if (value < 0.f)
             {
+                const int nport = d_roundToIntNegative(value);
+                DISTRHO_SAFE_ASSERT_RETURN(nport != 0,);
+
+                if (nport == port)
+                    return;
+
+                port = nport;
+
                 if (webview != nullptr)
                 {
                     destroyWebView(webview);
@@ -100,7 +108,7 @@ protected:
                     buttonOpenWebGui.hide();
                 }
 
-                switch (-d_roundToIntNegative(value))
+                switch (-nport)
                 {
                 case kErrorAppDirNotFound:
                     error = "Error: MOD Desktop application directory not found";
@@ -128,6 +136,12 @@ protected:
                 return;
             }
 
+            const int nport = d_roundToUnsignedInt(value);
+            DISTRHO_SAFE_ASSERT_RETURN(nport != 0,);
+
+            if (nport == port)
+                return;
+
             if (error.isNotEmpty())
             {
                 error.clear();
@@ -144,12 +158,9 @@ protected:
                 repaint();
             }
 
-            port = d_roundToUnsignedInt(value);
-            DISTRHO_SAFE_ASSERT_RETURN(port != 0,);
-
-            port += kPortNumOffset;
-            d_stderr("webview port is %d", port);
-            webview = addWebView(getWindow().getNativeWindowHandle(), getScaleFactor(), port);
+            port = nport;
+            d_stderr("webview port is %d", port + kPortNumOffset);
+            webview = addWebView(getWindow().getNativeWindowHandle(), getScaleFactor(), port + kPortNumOffset);
 
             buttonOpenWebGui.show();
             repaint();
@@ -205,7 +216,7 @@ protected:
             openUserFilesDir();
             break;
         case 3:
-            openWebGui(port);
+            openWebGui(port + kPortNumOffset);
             break;
         }
     }

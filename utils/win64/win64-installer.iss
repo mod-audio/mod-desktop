@@ -161,10 +161,10 @@ Source: "..\..\build\mod-desktop-asio.dll"; DestDir: "{win}\System32"; Flags: ig
 Source: "..\..\build\mod-hardware-descriptor.json"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "..\..\build\VERSION"; DestDir: "{app}"; Flags: ignoreversion;
 ; plugin variants
-Source: "..\..\build-plugin\MOD-Desktop.clap"; DestDir: "{commoncf64}\CLAP"; Components: clap; Flags: ignoreversion;
-Source: "..\..\build-plugin\MOD-Desktop.lv2\*.*"; DestDir: "{commoncf64}\LV2\MOD-Desktop.lv2"; Components: lv2; Flags: ignoreversion;
-Source: "..\..\build-plugin\MOD-Desktop-vst.dll"; DestDir: "{code:GetVST2Dir}\"; Components: vst2; Flags: ignoreversion;
-Source: "..\..\build-plugin\MOD-Desktop.vst3\Contents\x86_64-win\*.*"; DestDir: "{commoncf64}\VST3\MOD-Desktop.vst3\Contents\x86_64-win"; Components: vst3; Flags: ignoreversion;
+Source: "..\..\build-plugin\mod-desktop.clap"; DestDir: "{commoncf64}\CLAP"; Components: clap; Flags: ignoreversion;
+Source: "..\..\build-plugin\mod-desktop.lv2\*.*"; DestDir: "{commoncf64}\LV2\mod-desktop.lv2"; Components: lv2; Flags: ignoreversion;
+Source: "..\..\build-plugin\mod-desktop-vst.dll"; DestDir: "{code:GetVST2Dir}\"; Components: vst2; Flags: ignoreversion;
+Source: "..\..\build-plugin\mod-desktop.vst3\Contents\x86_64-win\*.*"; DestDir: "{commoncf64}\VST3\mod-desktop.vst3\Contents\x86_64-win"; Components: vst3; Flags: ignoreversion;
 ; pedalboards
 #include "win64-pedalboards.iss"
 ; plugins
