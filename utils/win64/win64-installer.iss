@@ -35,12 +35,7 @@ Source: "..\..\build\jackd.exe"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "..\..\build\libjack64.dll"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "..\..\build\libjackserver64.dll"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "..\..\build\jack\jack-session.conf"; DestDir: "{app}\jack"; Flags: ignoreversion;
-Source: "..\..\build\jack\jack_dummy.dll"; DestDir: "{app}\jack"; Flags: ignoreversion;
-Source: "..\..\build\jack\jack_portaudio.dll"; DestDir: "{app}\jack"; Flags: ignoreversion;
-Source: "..\..\build\jack\jack_winmme.dll"; DestDir: "{app}\jack"; Flags: ignoreversion;
-Source: "..\..\build\jack\mod-host.dll"; DestDir: "{app}\jack"; Flags: ignoreversion;
-Source: "..\..\build\jack\mod-midi-broadcaster.dll"; DestDir: "{app}\jack"; Flags: ignoreversion;
-Source: "..\..\build\jack\mod-midi-merger.dll"; DestDir: "{app}\jack"; Flags: ignoreversion;
+Source: "..\..\build\jack\*.dll"; DestDir: "{app}\jack"; Flags: ignoreversion;
 ; mod-desktop + qt5
 Source: "..\..\build\mod-desktop.exe"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "..\..\build\Qt5*.dll"; DestDir: "{app}"; Flags: ignoreversion;
