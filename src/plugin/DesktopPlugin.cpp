@@ -366,6 +366,14 @@ protected:
             return;
         }
 
+        // FIXME not quite right, crashes
+        if (getBufferSize() != frames)
+        {
+            std::memset(outputs[0], 0, sizeof(float) * frames);
+            std::memset(outputs[1], 0, sizeof(float) * frames);
+            return;
+        }
+
         uint32_t ti = numFramesInShmBuffer;
         uint32_t to = numFramesInTmpBuffer;
         uint32_t framesDone = 0;
