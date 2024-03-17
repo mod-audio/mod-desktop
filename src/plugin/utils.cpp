@@ -481,19 +481,19 @@ char* const* getEvironment(const uint portBaseNum)
     std::snwprintf(path, PATH_MAX - 1, L"MOD_DESKTOP_SERVER_NAME=mod-desktop-%u", portBaseNum);
     set_envp_value(envpl, path);
 
-    std::snwprintf(path, PATH_MAX - 1, L"MOD_DEVICE_HOST_PORT=%u", kPortNumOffset + portBaseNum + 1);
+    std::snwprintf(path, PATH_MAX - 1, L"MOD_DEVICE_HOST_PORT=%u", kPortNumOffset + portBaseNum * 3);
     set_envp_value(envpl, path);
 
-    std::snwprintf(path, PATH_MAX - 1, L"MOD_DEVICE_WEBSERVER_PORT=%u", kPortNumOffset + portBaseNum);
+    std::snwprintf(path, PATH_MAX - 1, L"MOD_DEVICE_WEBSERVER_PORT=%u", kPortNumOffset + portBaseNum * 3 + 2);
     set_envp_value(envpl, path);
    #else
     std::snprintf(path, PATH_MAX - 1, "MOD_DESKTOP_SERVER_NAME=mod-desktop-%u", portBaseNum);
     set_envp_value(envp, path);
 
-    std::snprintf(path, PATH_MAX - 1, "MOD_DEVICE_HOST_PORT=%u", kPortNumOffset + portBaseNum + 1);
+    std::snprintf(path, PATH_MAX - 1, "MOD_DEVICE_HOST_PORT=%u", kPortNumOffset + portBaseNum * 3);
     set_envp_value(envp, path);
 
-    std::snprintf(path, PATH_MAX - 1, "MOD_DEVICE_WEBSERVER_PORT=%u", kPortNumOffset + portBaseNum);
+    std::snprintf(path, PATH_MAX - 1, "MOD_DEVICE_WEBSERVER_PORT=%u", kPortNumOffset + portBaseNum * 3 + 2);
     set_envp_value(envp, path);
    #endif
 

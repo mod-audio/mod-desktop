@@ -159,8 +159,8 @@ protected:
             }
 
             port = nport;
-            d_stderr("webview port is %d", port + kPortNumOffset);
-            webview = addWebView(getWindow().getNativeWindowHandle(), getScaleFactor(), port + kPortNumOffset);
+            d_stderr("webview port is %d", kPortNumOffset + port * 3 + 2);
+            webview = addWebView(getWindow().getNativeWindowHandle(), getScaleFactor(), kPortNumOffset + port * 3 + 2);
 
             buttonOpenWebGui.show();
             repaint();
@@ -216,7 +216,7 @@ protected:
             openUserFilesDir();
             break;
         case 3:
-            openWebGui(port + kPortNumOffset);
+            openWebGui(kPortNumOffset + port * 3 + 2);
             break;
         }
     }

@@ -48,10 +48,21 @@ public:
             return;
         }
 
-        // TODO check available ports
-        static int port = 1;
-        int availablePortNum = port;
-        port += 4;
+        int availablePortNum = 0;
+        for (int i = 1; i < 999; ++i)
+        {
+            if (shm.canInit(i))
+            {
+                availablePortNum = i;
+                break;
+            }
+        }
+
+        if (availablePortNum == 0)
+        {
+            parameters[kParameterBasePortNumber] = portBaseNum = -kErrorShmSetupFailed;
+            return;
+        }
 
         envp = getEvironment(availablePortNum);
 

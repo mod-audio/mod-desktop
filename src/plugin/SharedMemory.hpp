@@ -100,6 +100,10 @@ public:
         float audio[];
     }* data = nullptr;
 
+   #ifndef DISTRHO_OS_WINDOWS
+    uint port = 0;
+   #endif
+
     SharedMemory()
     {
     }
@@ -109,24 +113,45 @@ public:
         deinit();
     }
 
+    static bool canInit(const uint portBaseNum)
+    {
+        char shmName[32] = {};
+
+      #ifdef DISTRHO_OS_WINDOWS
+        std::snprintf(shmName, 31, "\\Global\\mod-desktop-shm-%d", portBaseNum);
+        const HANDLE shm = OpenFileMappingA(FILE_MAP_ALL_ACCESS, FALSE, shmName);
+
+        if (shm == nullptr)
+            return true;
+
+        CloseHandle(shm);
+       #else
+        std::snprintf(shmName, 31, "/mod-desktop-shm-%d", portBaseNum);
+        const int fd = shm_open(shmName, O_RDWR, 0);
+
+        if (fd < 0)
+            return true;
+
+        close(fd);
+        shm_unlink(shmName);
+       #endif
+
+        return false;
+    }
+
     bool init(const uint portBaseNum)
     {
         void* ptr;
-        char semName[32] = {};
+        char shmName[32] = {};
 
       #ifdef DISTRHO_OS_WINDOWS
         SECURITY_ATTRIBUTES sa = {};
         sa.nLength = sizeof(sa);
         sa.bInheritHandle = TRUE;
 
-        std::snprintf(semName, 31, "\\Global\\mod-desktop-shm-%d", portBaseNum);
+        std::snprintf(shmName, 31, "Local\\mod-desktop-shm-%d", portBaseNum);
 
-        shm = CreateFileMappingA(INVALID_HANDLE_VALUE,
-                                 &sa,
-                                 PAGE_READWRITE|SEC_COMMIT,
-                                 0,
-                                 static_cast<DWORD>(kDataSize),
-                                 "/mod-desktop-test1");
+        shm = CreateFileMappingA(INVALID_HANDLE_VALUE, &sa, PAGE_READWRITE|SEC_COMMIT, 0, static_cast<DWORD>(kDataSize), shmName);
         DISTRHO_SAFE_ASSERT_RETURN(shm != nullptr, false);
 
         ptr = MapViewOfFile(shm, FILE_MAP_ALL_ACCESS, 0, 0, kDataSize);
@@ -134,12 +159,9 @@ public:
 
         VirtualLock(ptr, kDataSize);
       #else
-        std::snprintf(semName, 31, "/mod-desktop-shm-%d", portBaseNum);
+        std::snprintf(shmName, 31, "/mod-desktop-shm-%d", portBaseNum);
 
-        // FIXME
-        shm_unlink(semName);
-
-        shmfd = shm_open(semName, O_CREAT|O_EXCL|O_RDWR, 0600);
+        shmfd = shm_open(shmName, O_CREAT|O_EXCL|O_RDWR, 0600);
         DISTRHO_SAFE_ASSERT_RETURN(shmfd >= 0, false);
 
         DISTRHO_SAFE_ASSERT_RETURN(ftruncate(shmfd, static_cast<off_t>(kDataSize)) == 0, fail_deinit());
@@ -164,7 +186,7 @@ public:
         std::memset(data, 0, kDataSize);
         data->magic = 1337;
 
-      #if defined(DISTRHO_OS_MAC)
+       #ifdef DISTRHO_OS_MAC
         task = mach_task_self();
 
         mach_port_t bootport;
@@ -190,20 +212,24 @@ public:
 
         semServer1 = new SemaphoreServerRunner(port1, sem1);
         semServer2 = new SemaphoreServerRunner(port2, sem2);
-      #elif defined(DISTRHO_OS_WINDOWS)
+       #endif
+
+       #ifdef DISTRHO_OS_WINDOWS
         data->sem1 = CreateSemaphoreA(&sa, 0, 1, nullptr);
         DISTRHO_SAFE_ASSERT_RETURN(data->sem1 != nullptr, fail_deinit());
 
         data->sem2 = CreateSemaphoreA(&sa, 0, 1, nullptr);
         DISTRHO_SAFE_ASSERT_RETURN(data->sem2 != nullptr, fail_deinit());
-      #endif
+       #else
+        port = portBaseNum;
+       #endif
 
         return true;
     }
 
     void deinit()
     {
-       #if defined(DISTRHO_OS_MAC)
+       #ifdef DISTRHO_OS_MAC
         if (semServer1 != nullptr)
         {
             semServer1->invalidate();
@@ -279,8 +305,15 @@ public:
         if (shmfd >= 0)
         {
             close(shmfd);
-            shm_unlink("/mod-desktop-test1");
             shmfd = -1;
+        }
+
+        if (port != 0)
+        {
+            char shmName[32] = {};
+            std::snprintf(shmName, 31, "/mod-desktop-shm-%d", port);
+            shm_unlink(shmName);
+            port = 0;
         }
        #endif
     }
