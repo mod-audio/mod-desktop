@@ -72,9 +72,15 @@ public:
             return;
         }
 
-        portBaseNum = availablePortNum;
-
         bufferSizeChanged(getBufferSize());
+
+        if (shm.data == nullptr && ! shm.init(availablePortNum))
+        {
+            parameters[kParameterBasePortNumber] = portBaseNum = -kErrorShmSetupFailed;
+            return;
+        }
+
+        portBaseNum = availablePortNum;
     }
 
     ~DesktopPlugin()
@@ -351,7 +357,7 @@ protected:
         {
             firstTimeActivating = false;
 
-            if (run())
+            if (portBaseNum > 0 && run())
                 startRunner(500);
         }
         else

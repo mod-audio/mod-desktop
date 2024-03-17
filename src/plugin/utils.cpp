@@ -111,6 +111,7 @@ static const wchar_t* getAppDirW()
 const char* getAppDir()
 {
    #ifdef DISTRHO_OS_MAC
+    // return "/Users/falktx/Source/MOD/mod-app/build/mod-desktop.app/Contents/MacOS";
     return "/Applications/MOD Desktop.app/Contents/MacOS";
    #else
     static char appDir[PATH_MAX] = {};

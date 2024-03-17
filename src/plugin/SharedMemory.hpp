@@ -127,13 +127,12 @@ public:
         CloseHandle(shm);
        #else
         std::snprintf(shmName, 31, "/mod-desktop-shm-%d", portBaseNum);
-        const int fd = shm_open(shmName, O_RDWR, 0);
+        const int fd = shm_open(shmName, O_RDONLY, 0);
 
         if (fd < 0)
             return true;
 
         close(fd);
-        shm_unlink(shmName);
        #endif
 
         return false;
