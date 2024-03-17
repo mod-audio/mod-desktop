@@ -118,7 +118,7 @@ public:
         char shmName[32] = {};
 
       #ifdef DISTRHO_OS_WINDOWS
-        std::snprintf(shmName, 31, "\\Global\\mod-desktop-shm-%d", portBaseNum);
+        std::snprintf(shmName, 31, "Local\\mod-desktop-shm-%d", portBaseNum);
         const HANDLE shm = OpenFileMappingA(FILE_MAP_ALL_ACCESS, FALSE, shmName);
 
         if (shm == nullptr)
