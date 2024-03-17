@@ -18,6 +18,7 @@ UsePreviousAppDir=no
 
 [Types]
 Name: "normal"; Description: "Full installation";
+Name: "custom"; Description: "Custom installation"; Flags: iscustom;
 
 [Components]
 Name: pedalboards; Description: "Factory pedalboards"; Types: normal; Flags: fixed;
