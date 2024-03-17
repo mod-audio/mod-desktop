@@ -10,6 +10,8 @@
 # include <fcntl.h>
 # include <sys/mman.h>
 # ifdef DISTRHO_OS_MAC
+#  include "extra/Runner.hpp"
+#  include "extra/ScopedPointer.hpp"
 #  include <mach/mach.h>
 #  include <mach/semaphore.h>
 #  include <servers/bootstrap.h>
@@ -22,6 +24,56 @@
 #endif
 
 START_NAMESPACE_DISTRHO
+
+// --------------------------------------------------------------------------------------------------------------------
+// Based on jack2 mach semaphore implementation
+// Copyright (C) 2021 Peter Bridgman
+
+#ifdef DISTRHO_OS_MAC
+class SemaphoreServerRunner : public Runner {
+    const mach_port_t port;
+    const semaphore_t sem;
+    bool running = true;
+
+public:
+    SemaphoreServerRunner(const mach_port_t p, const semaphore_t s)
+        : Runner(),
+          port(p),
+          sem(s)
+    {
+        startRunner(0);
+    }
+
+    void invalidate()
+    {
+        running = false;
+
+        const mach_port_t task = mach_task_self();
+        mach_port_destroy(task, port);
+        semaphore_destroy(task, sem);
+
+        stopRunner();
+    }
+
+protected:
+    bool run() override
+    {
+        struct {
+            mach_msg_header_t hdr;
+            mach_msg_trailer_t trailer;
+        } msg;
+
+        if (mach_msg(&msg.hdr, MACH_RCV_MSG, 0, sizeof(msg), port, MACH_MSG_TIMEOUT_NONE, MACH_PORT_NULL) != MACH_MSG_SUCCESS)
+            return running;
+
+        msg.hdr.msgh_local_port = sem;
+        msg.hdr.msgh_bits = MACH_MSGH_BITS(MACH_MSG_TYPE_MOVE_SEND_ONCE, MACH_MSG_TYPE_COPY_SEND);
+        mach_msg(&msg.hdr, MACH_SEND_MSG, sizeof(msg.hdr), 0, MACH_PORT_NULL, MACH_MSG_TIMEOUT_NONE,MACH_PORT_NULL);
+
+        return running;
+    }
+};
+#endif
 
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -57,14 +109,17 @@ public:
         deinit();
     }
 
-    bool init()
+    bool init(const uint portBaseNum)
     {
         void* ptr;
+        char semName[32] = {};
 
       #ifdef DISTRHO_OS_WINDOWS
         SECURITY_ATTRIBUTES sa = {};
         sa.nLength = sizeof(sa);
         sa.bInheritHandle = TRUE;
+
+        std::snprintf(semName, 31, "\\Global\\mod-desktop-shm-%d", portBaseNum);
 
         shm = CreateFileMappingA(INVALID_HANDLE_VALUE,
                                  &sa,
@@ -79,10 +134,12 @@ public:
 
         VirtualLock(ptr, kDataSize);
       #else
-        // FIXME
-        shm_unlink("/mod-desktop-test1");
+        std::snprintf(semName, 31, "/mod-desktop-shm-%d", portBaseNum);
 
-        shmfd = shm_open("/mod-desktop-test1", O_CREAT|O_EXCL|O_RDWR, 0600);
+        // FIXME
+        shm_unlink(semName);
+
+        shmfd = shm_open(semName, O_CREAT|O_EXCL|O_RDWR, 0600);
         DISTRHO_SAFE_ASSERT_RETURN(shmfd >= 0, false);
 
         DISTRHO_SAFE_ASSERT_RETURN(ftruncate(shmfd, static_cast<off_t>(kDataSize)) == 0, fail_deinit());
@@ -110,22 +167,29 @@ public:
       #if defined(DISTRHO_OS_MAC)
         task = mach_task_self();
 
-        mach_port_t bootport1, bootport2;
-        DISTRHO_SAFE_ASSERT_RETURN(task_get_bootstrap_port(task, &bootport1) == KERN_SUCCESS, fail_deinit());
-        DISTRHO_SAFE_ASSERT_RETURN(task_get_bootstrap_port(task, &bootport2) == KERN_SUCCESS, fail_deinit());
+        mach_port_t bootport;
+        DISTRHO_SAFE_ASSERT_RETURN(task_get_bootstrap_port(task, &bootport) == KERN_SUCCESS, fail_deinit());
         DISTRHO_SAFE_ASSERT_RETURN(semaphore_create(task, &sem1, SYNC_POLICY_FIFO, 0) == KERN_SUCCESS, fail_deinit());
         DISTRHO_SAFE_ASSERT_RETURN(semaphore_create(task, &sem2, SYNC_POLICY_FIFO, 0) == KERN_SUCCESS, fail_deinit());
 
-        static int bootcounter = 0;
-        std::snprintf(data->bootname1, 31, "mdskt_%d_%d_%p", ++bootcounter, getpid(), &sem1);
-        std::snprintf(data->bootname2, 31, "mdskt_%d_%d_%p", ++bootcounter, getpid(), &sem2);
+        DISTRHO_SAFE_ASSERT_RETURN(mach_port_allocate(task, MACH_PORT_RIGHT_RECEIVE, &port1) == KERN_SUCCESS, fail_deinit());
+        DISTRHO_SAFE_ASSERT_RETURN(mach_port_allocate(task, MACH_PORT_RIGHT_RECEIVE, &port2) == KERN_SUCCESS, fail_deinit());
+
+        DISTRHO_SAFE_ASSERT_RETURN(mach_port_insert_right(task, port1, port1, MACH_MSG_TYPE_MAKE_SEND) == KERN_SUCCESS, fail_deinit());
+        DISTRHO_SAFE_ASSERT_RETURN(mach_port_insert_right(task, port2, port2, MACH_MSG_TYPE_MAKE_SEND) == KERN_SUCCESS, fail_deinit());
+
+        std::snprintf(data->bootname1, 31, "audio.mod.desktop.port%d.1", portBaseNum);
+        std::snprintf(data->bootname2, 31, "audio.mod.desktop.port%d.2", portBaseNum);
         data->bootname1[31] = data->bootname2[31] = '\0';
 
        #pragma clang diagnostic push
        #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-        DISTRHO_SAFE_ASSERT_RETURN(bootstrap_register(bootport1, data->bootname1, sem1) == KERN_SUCCESS, fail_deinit());
-        DISTRHO_SAFE_ASSERT_RETURN(bootstrap_register(bootport2, data->bootname2, sem2) == KERN_SUCCESS, fail_deinit());
+        DISTRHO_SAFE_ASSERT_RETURN(bootstrap_register(bootport, data->bootname1, port1) == KERN_SUCCESS, fail_deinit());
+        DISTRHO_SAFE_ASSERT_RETURN(bootstrap_register(bootport, data->bootname2, port2) == KERN_SUCCESS, fail_deinit());
        #pragma clang diagnostic pop
+
+        semServer1 = new SemaphoreServerRunner(port1, sem1);
+        semServer2 = new SemaphoreServerRunner(port2, sem2);
       #elif defined(DISTRHO_OS_WINDOWS)
         data->sem1 = CreateSemaphoreA(&sa, 0, 1, nullptr);
         DISTRHO_SAFE_ASSERT_RETURN(data->sem1 != nullptr, fail_deinit());
@@ -140,6 +204,34 @@ public:
     void deinit()
     {
        #if defined(DISTRHO_OS_MAC)
+        if (semServer1 != nullptr)
+        {
+            semServer1->invalidate();
+            port1 = MACH_PORT_NULL;
+            sem1 = MACH_PORT_NULL;
+            semServer1 = nullptr;
+        }
+
+        if (semServer2 != nullptr)
+        {
+            semServer2->invalidate();
+            port2 = MACH_PORT_NULL;
+            sem2 = MACH_PORT_NULL;
+            semServer2 = nullptr;
+        }
+
+        if (port1 != MACH_PORT_NULL)
+        {
+            mach_port_destroy(task, port1);
+            port1 = MACH_PORT_NULL;
+        }
+
+        if (port2 != MACH_PORT_NULL)
+        {
+            mach_port_destroy(task, port2);
+            port2 = MACH_PORT_NULL;
+        }
+
         if (sem1 != MACH_PORT_NULL)
         {
             semaphore_destroy(task, sem1);
@@ -257,8 +349,12 @@ private:
 
    #ifdef DISTRHO_OS_MAC
     mach_port_t task = MACH_PORT_NULL;
+    mach_port_t port1 = MACH_PORT_NULL;
+    mach_port_t port2 = MACH_PORT_NULL;
     semaphore_t sem1 = MACH_PORT_NULL;
     semaphore_t sem2 = MACH_PORT_NULL;
+    ScopedPointer<SemaphoreServerRunner> semServer1;
+    ScopedPointer<SemaphoreServerRunner> semServer2;
    #endif
 
     // ----------------------------------------------------------------------------------------------------------------

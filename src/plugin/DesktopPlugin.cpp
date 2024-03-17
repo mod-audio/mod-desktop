@@ -106,7 +106,7 @@ protected:
         #define APP_EXT ""
        #endif
 
-        if (shm.data == nullptr && ! shm.init())
+        if (shm.data == nullptr && ! shm.init(portBaseNum))
         {
             parameters[kParameterBasePortNumber] = portBaseNum = -kErrorShmSetupFailed;
             return false;
@@ -125,6 +125,7 @@ protected:
             const String jackdStr(appDir + DISTRHO_OS_SEP_STR "jackd" APP_EXT);
             const String jacksessionStr(appDir + DISTRHO_OS_SEP_STR "jack" DISTRHO_OS_SEP_STR "jack-session.conf");
             const String servernameStr("mod-desktop-" + String(portBaseNum));
+            const String shmportStr(portBaseNum);
             const String sampleRateStr(static_cast<int>(getSampleRate()));
 
             const char* const jackd_args[] = {
@@ -135,6 +136,8 @@ protected:
                 "-C", jacksessionStr.buffer(),
                 "-d", "mod-desktop",
                 "-r", sampleRateStr.buffer(),
+                "-p", "128",
+                "-s", shmportStr,
                 nullptr
             };
 
