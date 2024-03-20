@@ -107,7 +107,7 @@ void destroyWebView(void* const webviewptr)
     delete ipc;
 }
 
-void reloadWebView(void* const webviewptr)
+void reloadWebView(void* const webviewptr, uint)
 {
     WebViewX11* const ipc = static_cast<WebViewX11*>(webviewptr);
 

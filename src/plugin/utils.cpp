@@ -96,6 +96,7 @@ static const char* getDataDir()
 #ifdef _WIN32
 static const wchar_t* getAppDirW()
 {
+    // return L"Z:\\home\\falktx\\Source\\MOD\\mod-app\\build";
     static wchar_t appDir[MAX_PATH] = {};
 
     if (appDir[0] == 0)
@@ -126,7 +127,7 @@ const char* getAppDir()
 
         if (FILE* const f = std::fopen(appDir, "r"))
         {
-            std::memset(appDir, 0, PATH_MAX - 1);
+            std::memset(appDir, 0, sizeof(appDir));
 
             if (std::fread(appDir, PATH_MAX - 1, 1, f) != 0)
                 appDir[0] = 0;
@@ -250,8 +251,7 @@ char* const* getEvironment(const uint portBaseNum)
    #endif
 
     // can be null, in case of not found
-    if (appDir == nullptr)
-        return nullptr;
+    DISTRHO_SAFE_ASSERT_RETURN(appDir != nullptr, nullptr);
 
    #ifdef DISTRHO_OS_MAC
     const char* const* const* const environptr = _NSGetEnviron();
@@ -267,14 +267,14 @@ char* const* getEvironment(const uint portBaseNum)
 
     if (wchar_t* const envs = GetEnvironmentStringsW())
     {
-        for (wchar_t* envsi = envs; *envsi != '\0'; envsi += (std::wcslen(envsi) + 1))
+        for (wchar_t* s = envs; *s != 0; s += std::wcslen(s) + 1)
             ++envsize;
 
         envpl = new wchar_t*[envsize + 32];
 
         uint i = 0;
-        for (wchar_t* envsi = envs; *envsi != '\0'; envsi += (std::wcslen(envsi) + 1))
-            envpl[i] = _wcsdup(envsi);
+        for (wchar_t* s = envs; *s != 0; s += std::wcslen(s) + 1, ++i)
+            envpl[i] = _wcsdup(s);
 
         FreeEnvironmentStringsW(envs);
     }

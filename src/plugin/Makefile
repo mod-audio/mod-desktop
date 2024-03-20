@@ -52,6 +52,12 @@ endif
 
 TARGETS = features au clap lv2_sep vst2 vst3
 
+# ifeq ($(WINDOWS),true)
+# BUILD_CXX_FLAGS += -DUSING_CHOC
+# LINK_FLAGS += -lole32
+# $(BUILD_DIR)/WebViewWin32.cpp.o: BUILD_CXX_FLAGS += -std=gnu++17
+# endif
+
 # ---------------------------------------------------------------------------------------------------------------------
 
 all: $(TARGETS)

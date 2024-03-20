@@ -59,7 +59,7 @@ void destroyWebView(void* const webview)
     delete impl;
 }
 
-void reloadWebView(void* const webview)
+void reloadWebView(void* const webview, uint)
 {
     WebViewImpl* const impl = static_cast<WebViewImpl*>(webview);
 

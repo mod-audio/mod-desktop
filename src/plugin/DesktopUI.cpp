@@ -210,7 +210,7 @@ protected:
         {
         case 1:
             if (webview != nullptr)
-                reloadWebView(webview);
+                reloadWebView(webview, kPortNumOffset + port * 3 + 2);
             break;
         case 2:
             openUserFilesDir();
