@@ -32,8 +32,7 @@ void* addWebView(const uintptr_t parentWinId, const double scaleFactor, const ui
                  0, kVerticalOffset * scaleFactor,
                  DISTRHO_UI_DEFAULT_WIDTH * scaleFactor,
                  (DISTRHO_UI_DEFAULT_HEIGHT - kVerticalOffset) * scaleFactor,
-                 SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
-    ShowWindow(handle, SW_SHOW);
+                 SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED | SWP_SHOWWINDOW);
 
     return webview.release();
 }
