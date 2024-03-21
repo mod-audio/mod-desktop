@@ -567,7 +567,10 @@ void openWebGui(const uint port)
 static void* _openUserFilesDir(void*)
 {
   #ifdef _WIN32
-    ShellExecuteW(NULL, L"explore", getDataDirW(), nullptr, nullptr, SW_SHOWDEFAULT);
+    wchar_t userFilesDir[MAX_PATH] = {};
+    std::wcsncpy(userFilesDir, getDataDirW(), MAX_PATH - 1);
+    std::wcsncat(userFilesDir, L"\\user-files", MAX_PATH - 1);
+    ShellExecuteW(NULL, L"explore", userFilesDir, nullptr, nullptr, SW_SHOWDEFAULT);
   #else
    #ifdef __APPLE__
     String cmd("open \"");
@@ -575,7 +578,7 @@ static void* _openUserFilesDir(void*)
     String cmd("xdg-open \"");
    #endif
     cmd += getDataDir();
-    cmd += "\"";
+    cmd += "/user-files\"";
     std::system(cmd);
   #endif
 

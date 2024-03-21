@@ -162,6 +162,18 @@ protected:
             d_stderr("webview port is %d", kPortNumOffset + port * 3 + 2);
             webview = addWebView(getWindow().getNativeWindowHandle(), getScaleFactor(), kPortNumOffset + port * 3 + 2);
 
+            if (webview == nullptr)
+            {
+                error = "Error: Failed to create web view";
+               #if defined(DISTRHO_OS_MAC)
+                // no path for failure on macOS
+               #elif defined(DISTRHO_OS_WINDOWS)
+                errorDetail = "Please install the Microsoft Edge WebView2 Runtime";
+               #else
+                errorDetail = "Could not initialize X11";
+               #endif
+            }
+
             buttonOpenWebGui.show();
             repaint();
         }
