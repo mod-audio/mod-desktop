@@ -53,10 +53,8 @@ public:
 
     unsigned int         inp_count;
     unsigned int         out_count;
-    float               *inp_data;
-    float               *out_data;
-    float              **inp_list;
-    float              **out_list;
+    const float *const  *inp_data;
+    float*              *out_data;
 
 private:
 

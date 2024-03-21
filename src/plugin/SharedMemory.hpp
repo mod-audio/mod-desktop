@@ -119,20 +119,20 @@ public:
 
       #ifdef DISTRHO_OS_WINDOWS
         std::snprintf(shmName, 31, "Local\\mod-desktop-shm-%d", portBaseNum);
-        const HANDLE shm = OpenFileMappingA(FILE_MAP_ALL_ACCESS, FALSE, shmName);
+        const HANDLE testshm = OpenFileMappingA(FILE_MAP_ALL_ACCESS, FALSE, shmName);
 
-        if (shm == nullptr)
+        if (testshm == nullptr)
             return true;
 
-        CloseHandle(shm);
+        CloseHandle(testshm);
        #else
         std::snprintf(shmName, 31, "/mod-desktop-shm-%d", portBaseNum);
-        const int fd = shm_open(shmName, O_RDONLY, 0);
+        const int testshmfd = shm_open(shmName, O_RDONLY, 0);
 
-        if (fd < 0)
+        if (testshmfd < 0)
             return true;
 
-        close(fd);
+        close(testshmfd);
        #endif
 
         return false;
@@ -349,32 +349,23 @@ public:
         data->magic = 1337;
     }
 
-    bool process(float** output, const uint32_t offset)
+    bool process()
     {
         // unlock RT waiter
         post();
 
         // wait for processing
-        if (! wait())
-            return false;
-
-        // copy processed buffer
-        std::memcpy(output[0] + offset, data->audio, sizeof(float) * 128);
-        std::memcpy(output[1] + offset, data->audio + 128, sizeof(float) * 128);
-
-        return true;
+        return wait();
     }
 
     // ----------------------------------------------------------------------------------------------------------------
 
 private:
-    static constexpr const size_t kDataSize = sizeof(Data) + sizeof(float) * 128 * 2;
-
     // ----------------------------------------------------------------------------------------------------------------
     // shared memory details
 
    #ifdef DISTRHO_OS_WINDOWS
-    HANDLE shm;
+    HANDLE shm = nullptr;
    #else
     int shmfd = -1;
    #endif
@@ -389,40 +380,32 @@ private:
     ScopedPointer<SemaphoreServerRunner> semServer2;
    #endif
 
+    static constexpr const size_t kDataSize = sizeof(Data) + sizeof(float) * 128 * 2;
+
     // ----------------------------------------------------------------------------------------------------------------
     // semaphore details
 
-   #if defined(DISTRHO_OS_MAC)
     void post()
     {
+       #if defined(DISTRHO_OS_MAC)
         semaphore_signal(sem1);
-    }
-
-    bool wait()
-    {
-        const mach_timespec timeout = { 1, 0 };
-        return semaphore_timedwait(sem2, timeout) == KERN_SUCCESS;
-    }
-   #elif defined(DISTRHO_OS_WINDOWS)
-    void post()
-    {
+       #elif defined(DISTRHO_OS_WINDOWS)
         ReleaseSemaphore(data->sem1, 1, nullptr);
-    }
-
-    bool wait()
-    {
-        return WaitForSingleObject(data->sem2, 1000) == WAIT_OBJECT_0;
-    }
-   #else
-    void post()
-    {
+       #else
         const bool unlocked = __sync_bool_compare_and_swap(&data->sem1, 0, 1);
         DISTRHO_SAFE_ASSERT_RETURN(unlocked,);
         syscall(__NR_futex, &data->sem1, FUTEX_WAKE, 1, nullptr, nullptr, 0);
+       #endif
     }
 
     bool wait()
     {
+       #if defined(DISTRHO_OS_MAC)
+        const mach_timespec timeout = { 1, 0 };
+        return semaphore_timedwait(sem2, timeout) == KERN_SUCCESS;
+       #elif defined(DISTRHO_OS_WINDOWS)
+        return WaitForSingleObject(data->sem2, 1000) == WAIT_OBJECT_0;
+       #else
         const timespec timeout = { 1, 0 };
 
         for (;;)
@@ -434,8 +417,8 @@ private:
                 if (errno != EAGAIN && errno != EINTR)
                     return false;
         }
+       #endif
     }
-   #endif
 
    bool fail_deinit()
    {

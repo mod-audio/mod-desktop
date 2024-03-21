@@ -15,7 +15,12 @@ NAME = mod-desktop
 # ---------------------------------------------------------------------------------------------------------------------
 # Files to build
 
-FILES_DSP = DesktopPlugin.cpp utils.cpp
+FILES_DSP = \
+	DesktopPlugin.cpp \
+	utils.cpp \
+	zita-resampler/resampler.cc \
+	zita-resampler/resampler-table.cc
+
 FILES_UI = DesktopUI.cpp NanoButton.cpp utils.cpp
 
 ifeq ($(MACOS),true)

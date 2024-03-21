@@ -197,7 +197,7 @@ bool Resampler::reset (void) noexcept
 
 bool Resampler::process (void)
 {
-    unsigned int   hl, np, ph, dp, in, nr, nz, di, i, j, n;
+    unsigned int   hl, np, ph, dp, in, nr, nz, di, i, j, n, inp_i, outp_i;
     float          *c1, *c2, *p1, *p2, *q1, *q2;
 
     if (!_table) return false;
@@ -212,102 +212,93 @@ bool Resampler::process (void)
     p1 = _buff + in;
     p2 = p1 + 2 * hl - nr;
     di = 2 * hl + _inmax;
+    inp_i = outp_i = 0;
 
     while (out_count)
     {
         while (nr && inp_count)
         {
-            if (inp_data)
-            {
-                for (j = 0; j < _nchan; j++) p2 [j * di] = inp_data [j];
-                inp_data += _nchan;
-                nz = 0;
-            }
-            else
-            {
-                for (j = 0; j < _nchan; j++) p2 [j * di] = 0;
-                if (nz < 2 * hl) nz++;
-            }
-            p2++;
-            nr--;
-            inp_count--;
+            for (j = 0; j < _nchan; j++) p2 [j * di] = inp_data[j][inp_i];
+            nz = 0;
+            ++p2;
+            --nr;
+            --inp_count;
+            ++inp_i;
         }
         if (nr) break;
 
-        if (out_data)
+        if (nz < 2 * hl)
         {
-            if (nz < 2 * hl)
-            {
-                c1 = _table->_ctab + hl * ph;
-                c2 = _table->_ctab + hl * (np - ph);
+            c1 = _table->_ctab + hl * ph;
+            c2 = _table->_ctab + hl * (np - ph);
 
 #if defined(__SSE2_MATH__) && !defined(_WIN32)
-                __m128 C1, C2, Q1, Q2, S;
-                for (j = 0; j < _nchan; j++)
+            __m128 C1, C2, Q1, Q2, S;
+            for (j = 0; j < _nchan; j++)
+            {
+                q1 = p1 + j * di;
+                q2 = p2 + j * di;
+                S = _mm_setzero_ps ();
+                for (i = 0; i < hl; i += 4)
                 {
-                    q1 = p1 + j * di;
-                    q2 = p2 + j * di;
-                    S = _mm_setzero_ps ();
-                    for (i = 0; i < hl; i += 4)
-                    {
-                        C1 = _mm_load_ps (c1 + i);
-                        Q1 = _mm_loadu_ps (q1);
-                        q2 -= 4;
-                        S = _mm_add_ps (S, _mm_mul_ps (C1, Q1));
-                        C2 = _mm_loadr_ps (c2 + i);
-                        Q2 = _mm_loadu_ps (q2);
-                        q1 += 4;
-                        S = _mm_add_ps (S, _mm_mul_ps (C2, Q2));
-                    }
-                    *out_data++ = S [0] + S [1] + S [2] + S [3];
+                    C1 = _mm_load_ps (c1 + i);
+                    Q1 = _mm_loadu_ps (q1);
+                    q2 -= 4;
+                    S = _mm_add_ps (S, _mm_mul_ps (C1, Q1));
+                    C2 = _mm_loadr_ps (c2 + i);
+                    Q2 = _mm_loadu_ps (q2);
+                    q1 += 4;
+                    S = _mm_add_ps (S, _mm_mul_ps (C2, Q2));
                 }
+                out_data[j][outp_i] = S [0] + S [1] + S [2] + S [3];
+            }
 
 #elif (defined(__ARM_NEON) || defined(__ARM_NEON__)) && !defined(_WIN32)
-                // ARM64 version by Nicolas Belin <nbelin@baylibre.com>
-                float32x4_t *C1 = (float32x4_t *)c1;
-                float32x4_t *C2 = (float32x4_t *)c2;
-                float32x4_t S, T;
-                for (j = 0; j < _nchan; j++)
+            // ARM64 version by Nicolas Belin <nbelin@baylibre.com>
+            float32x4_t *C1 = (float32x4_t *)c1;
+            float32x4_t *C2 = (float32x4_t *)c2;
+            float32x4_t S, T;
+            for (j = 0; j < _nchan; j++)
+            {
+                q1 = p1 + j * di;
+                q2 = p2 + j * di - 4;
+                T = vrev64q_f32 (vld1q_f32 (q2));
+                S = vmulq_f32 (vextq_f32 (T, T, 2), C2 [0]);
+                S = vmlaq_f32 (S, vld1q_f32(q1), C1 [0]);
+                for (i = 1; i < (hl>>2); i++)
                 {
-                    q1 = p1 + j * di;
-                    q2 = p2 + j * di - 4;
+                    q2 -= 4;
+                    q1 += 4;
                     T = vrev64q_f32 (vld1q_f32 (q2));
-                    S = vmulq_f32 (vextq_f32 (T, T, 2), C2 [0]);
-                    S = vmlaq_f32 (S, vld1q_f32(q1), C1 [0]);
-                    for (i = 1; i < (hl>>2); i++)
-                    {
-                        q2 -= 4;
-                        q1 += 4;
-                        T = vrev64q_f32 (vld1q_f32 (q2));
-                        S = vmlaq_f32 (S, vextq_f32 (T, T, 2), C2 [i]);
-                        S = vmlaq_f32 (S, vld1q_f32 (q1), C1 [i]);
-                    }
-                    *out_data++ = S [0] + S [1] + S [2] + S [3];
+                    S = vmlaq_f32 (S, vextq_f32 (T, T, 2), C2 [i]);
+                    S = vmlaq_f32 (S, vld1q_f32 (q1), C1 [i]);
                 }
+                out_data[j][outp_i] = S [0] + S [1] + S [2] + S [3];
+            }
 
 #else
-                float s;
-                for (j = 0; j < _nchan; j++)
-                {
-                    q1 = p1 + j * di;
-                    q2 = p2 + j * di;
-                    s = 1e-30f;
-                    for (i = 0; i < hl; i++)
-                    {
-                        q2--;
-                        s += *q1 * c1 [i] + *q2 * c2 [i];
-                        q1++;
-                    }
-                    *out_data++ = s - 1e-30f;
-                }
-#endif
-            }
-            else
+            float s;
+            for (j = 0; j < _nchan; j++)
             {
-                for (j = 0; j < _nchan; j++) *out_data++ = 0;
+                q1 = p1 + j * di;
+                q2 = p2 + j * di;
+                s = 1e-30f;
+                for (i = 0; i < hl; i++)
+                {
+                    q2--;
+                    s += *q1 * c1 [i] + *q2 * c2 [i];
+                    q1++;
+                }
+                out_data[j][outp_i] = s - 1e-30f;
             }
+#endif
         }
-        out_count--;
+        else
+        {
+            for (j = 0; j < _nchan; j++) out_data[j][outp_i] = 0;
+        }
+        --out_count;
+        ++outp_i;
 
         ph += dp;
         if (ph >= np)

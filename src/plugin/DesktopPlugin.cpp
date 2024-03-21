@@ -3,11 +3,13 @@
 
 #include "DistrhoPlugin.hpp"
 
+#include "AudioRingBuffer.hpp"
 #include "ChildProcess.hpp"
 #include "SharedMemory.hpp"
 #include "extra/Runner.hpp"
-
+#include "extra/ScopedPointer.hpp"
 #include "utils.hpp"
+#include "zita-resampler/resampler.h"
 
 START_NAMESPACE_DISTRHO
 
@@ -23,13 +25,16 @@ class DesktopPlugin : public Plugin,
     bool startingJackd = false;
     bool startingModUI = false;
     bool processing = false;
-    bool firstTimeActivating = true;
-    bool firstTimeProcessing = true;
+    bool shouldStartRunner = true;
     float parameters[kParameterCount] = {};
-    float* tmpBuffers[2] = {};
-    uint32_t numFramesInShmBuffer = 0;
-    uint32_t numFramesInTmpBuffer = 0;
+    float* tempBuffers[2] = {};
+    uint numSamplesInTempBuffers = 0;
+    uint numSamplesUntilProcessing = 0;
     int portBaseNum = 0;
+    AudioRingBuffer audioBufferIn;
+    AudioRingBuffer audioBufferOut;
+    ScopedPointer<Resampler> resamplerTo48kHz;
+    ScopedPointer<Resampler> resamplerFrom48kHz;
 
    #ifdef DISTRHO_OS_WINDOWS
     const WCHAR* envp;
@@ -79,7 +84,8 @@ public:
         }
 
         portBaseNum = availablePortNum;
-        bufferSizeChanged(getBufferSize());
+
+        setupResampler(getSampleRate());
     }
 
     ~DesktopPlugin()
@@ -96,8 +102,8 @@ public:
         mod_ui.stop();
         shm.deinit();
 
-        delete[] tmpBuffers[0];
-        delete[] tmpBuffers[1];
+        delete[] tempBuffers[0];
+        delete[] tempBuffers[1];
 
         if (envp != nullptr)
         {
@@ -142,7 +148,6 @@ protected:
             const String jacksessionStr(appDir + DISTRHO_OS_SEP_STR "jack" DISTRHO_OS_SEP_STR "jack-session.conf");
             const String servernameStr("mod-desktop-" + String(portBaseNum));
             const String shmportStr(portBaseNum);
-            const String sampleRateStr(static_cast<int>(getSampleRate()));
 
             const char* const jackd_args[] = {
                 jackdStr.buffer(),
@@ -151,7 +156,7 @@ protected:
                 "-n", servernameStr.buffer(),
                 "-C", jacksessionStr.buffer(),
                 "-d", "mod-desktop",
-                "-r", sampleRateStr.buffer(),
+                "-r", "48000",
                 "-p", "128",
                 "-s", shmportStr,
                 nullptr
@@ -352,9 +357,9 @@ protected:
 
     void activate() override
     {
-        if (firstTimeActivating)
+        if (shouldStartRunner)
         {
-            firstTimeActivating = false;
+            shouldStartRunner = false;
 
             if (portBaseNum > 0 && run())
                 startRunner(500);
@@ -364,12 +369,39 @@ protected:
             shm.reset();
         }
 
-        firstTimeProcessing = true;
-        numFramesInShmBuffer = numFramesInTmpBuffer = 0;
+        // make sure we have enough space to cover everything
+        const double sampleRate = getSampleRate();
+        const uint32_t bufferSize = getBufferSize();
+        const uint32_t bufferSizeInput = bufferSize * (sampleRate / 48000.0);
+        const uint32_t bufferSizeOutput = bufferSize * (48000.0 / sampleRate);
+
+        audioBufferIn.createBuffer(2, (bufferSizeInput + 8192) * 2);
+        audioBufferOut.createBuffer(2, (bufferSizeOutput + 8192) * 2);
+
+        numSamplesInTempBuffers = d_nextPowerOf2((std::max(bufferSizeInput, bufferSizeOutput) + 256) * 2);
+        delete[] tempBuffers[0];
+        delete[] tempBuffers[1];
+        tempBuffers[0] = new float[numSamplesInTempBuffers];
+        tempBuffers[1] = new float[numSamplesInTempBuffers];
+        std::memset(tempBuffers[0], 0, sizeof(float) * numSamplesInTempBuffers);
+        std::memset(tempBuffers[1], 0, sizeof(float) * numSamplesInTempBuffers);
+
+        numSamplesUntilProcessing = d_isNotEqual(sampleRate, 48000.0)
+                                  ? d_nextPowerOf2(128.0 * (sampleRate / 48000.0))
+                                  : 128;
+
+        setLatency(numSamplesUntilProcessing);
     }
 
     void deactivate() override
     {
+        audioBufferIn.deleteBuffer();
+        audioBufferOut.deleteBuffer();
+
+        delete[] tempBuffers[0];
+        delete[] tempBuffers[1];
+        tempBuffers[0] = tempBuffers[1] = nullptr;
+        numSamplesInTempBuffers = 0;
     }
 
    /**
@@ -385,6 +417,82 @@ protected:
             return;
         }
 
+        if (resamplerTo48kHz != nullptr)
+        {
+            resamplerTo48kHz->inp_count = frames;
+            resamplerTo48kHz->out_count = numSamplesInTempBuffers;
+            resamplerTo48kHz->inp_data = inputs;
+            resamplerTo48kHz->out_data = tempBuffers;
+            resamplerTo48kHz->process();
+            DISTRHO_SAFE_ASSERT(resamplerTo48kHz->inp_count == 0);
+
+            audioBufferIn.write(tempBuffers, numSamplesInTempBuffers - resamplerTo48kHz->out_count);
+        }
+        else
+        {
+            audioBufferIn.write(inputs, frames);
+        }
+
+        while (audioBufferIn.getNumReadableSamples() >= 128)
+        {
+            float* shmbuffers[2] = { shm.data->audio, shm.data->audio + 128 };
+
+            audioBufferIn.read(shmbuffers, 128);
+
+            if (! shm.process())
+            {
+                d_stdout("shm processing failed");
+                processing = false;
+                std::memset(outputs[0], 0, sizeof(float) * frames);
+                std::memset(outputs[1], 0, sizeof(float) * frames);
+                return;
+            }
+
+            if (resamplerFrom48kHz != nullptr)
+            {
+                resamplerFrom48kHz->inp_count = 128;
+                resamplerFrom48kHz->out_count = numSamplesInTempBuffers;
+                resamplerFrom48kHz->inp_data = shmbuffers;
+                resamplerFrom48kHz->out_data = tempBuffers;
+                resamplerFrom48kHz->process();
+                DISTRHO_SAFE_ASSERT(resamplerFrom48kHz->inp_count == 0);
+
+                audioBufferOut.write(tempBuffers, numSamplesInTempBuffers - resamplerFrom48kHz->out_count);
+            }
+            else
+            {
+                audioBufferOut.write(shmbuffers, 128);
+            }
+        }
+
+        if (numSamplesUntilProcessing >= frames)
+        {
+            numSamplesUntilProcessing -= frames;
+            std::memset(outputs[0], 0, sizeof(float) * frames);
+            std::memset(outputs[1], 0, sizeof(float) * frames);
+            return;
+        }
+
+        if (numSamplesUntilProcessing != 0)
+        {
+            const uint32_t start = numSamplesUntilProcessing;
+            const uint32_t remaining = frames - start;
+            numSamplesUntilProcessing = 0;
+
+            std::memset(outputs[0], 0, sizeof(float) * start);
+            std::memset(outputs[1], 0, sizeof(float) * start);
+
+            float* offsetbuffers[2] = {
+                outputs[0] + start,
+                outputs[1] + start,
+            };
+            audioBufferOut.read(offsetbuffers, remaining);
+            return;
+        }
+
+        audioBufferOut.read(outputs, frames);
+
+#if 0
         // FIXME not quite right, crashes
         if (getBufferSize() != frames)
         {
@@ -557,19 +665,10 @@ protected:
 
         numFramesInShmBuffer = ti;
         numFramesInTmpBuffer = to;
+#endif
     }
 
-    void bufferSizeChanged(const uint32_t bufferSize) override
-    {
-        delete[] tmpBuffers[0];
-        delete[] tmpBuffers[1];
-        tmpBuffers[0] = new float[bufferSize + 256];
-        tmpBuffers[1] = new float[bufferSize + 256];
-        std::memset(tmpBuffers[0], 0, sizeof(float) * (bufferSize + 256));
-        std::memset(tmpBuffers[1], 0, sizeof(float) * (bufferSize + 256));
-    }
-
-    void sampleRateChanged(double) override
+    void sampleRateChanged(const double sampleRate) override
     {
         if (portBaseNum < 0 || shm.data == nullptr)
             return;
@@ -584,8 +683,25 @@ protected:
 
         jackd.stop();
         shm.deinit();
+        setupResampler(sampleRate);
 
-        firstTimeActivating = true;
+        shouldStartRunner = true;
+    }
+
+    void setupResampler(const double sampleRate)
+    {
+        if (d_isNotEqual(sampleRate, 48000.0))
+        {
+            resamplerTo48kHz = new Resampler();
+            resamplerTo48kHz->setup(sampleRate, 48000, 2, 32);
+            resamplerFrom48kHz = new Resampler();
+            resamplerFrom48kHz->setup(48000, sampleRate, 2, 32);
+        }
+        else
+        {
+            resamplerTo48kHz = nullptr;
+            resamplerFrom48kHz = nullptr;
+        }
     }
 
     // -------------------------------------------------------------------------------------------------------
