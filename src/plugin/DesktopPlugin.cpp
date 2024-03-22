@@ -65,6 +65,7 @@ public:
 
         if (availablePortNum == 0)
         {
+            d_stderr("MOD Desktop: Failed to find available ports");
             parameters[kParameterBasePortNumber] = portBaseNum = -kErrorShmSetupFailed;
             return;
         }
@@ -73,12 +74,14 @@ public:
 
         if (envp == nullptr)
         {
+            d_stderr("MOD Desktop: Failed to init environment");
             parameters[kParameterBasePortNumber] = portBaseNum = -kErrorAppDirNotFound;
             return;
         }
 
         if (! shm.init(availablePortNum))
         {
+            d_stderr("MOD Desktop: Failed to init shared memory");
             parameters[kParameterBasePortNumber] = portBaseNum = -kErrorShmSetupFailed;
             return;
         }
@@ -86,6 +89,8 @@ public:
         portBaseNum = availablePortNum;
 
         setupResampler(getSampleRate());
+
+        d_stderr("MOD Desktop: Initial init ok");
     }
 
     ~DesktopPlugin()
@@ -130,6 +135,7 @@ protected:
 
         if (shm.data == nullptr && ! shm.init(portBaseNum))
         {
+            d_stderr("MOD Desktop: Failed to init shared memory inside runner");
             parameters[kParameterBasePortNumber] = portBaseNum = -kErrorShmSetupFailed;
             return false;
         }
@@ -138,6 +144,7 @@ protected:
         {
             if (startingJackd)
             {
+                d_stderr("MOD Desktop: Failed to get jackd to run");
                 startingJackd = false;
                 parameters[kParameterBasePortNumber] = portBaseNum = -kErrorJackdExecFailed;
                 return false;
@@ -164,8 +171,12 @@ protected:
 
             startingJackd = true;
             if (jackd.start(jackd_args, envp))
+            {
+                d_stderr("MOD Desktop: jackd exec ok");
                 return true;
-
+            }
+ 
+            d_stderr("MOD Desktop: Failed to start jackd");
             parameters[kParameterBasePortNumber] = portBaseNum = -kErrorJackdExecFailed;
             return false;
         }
@@ -184,6 +195,7 @@ protected:
         {
             if (startingModUI)
             {
+                d_stderr("MOD Desktop: Failed to get mod-ui to run");
                 startingModUI = false;
                 parameters[kParameterBasePortNumber] = portBaseNum = -kErrorModUiExecFailed;
                 return false;
@@ -199,13 +211,21 @@ protected:
 
             startingModUI = true;
             if (mod_ui.start(mod_ui_args, envp))
+            {
+                d_stderr("MOD Desktop: mod-ui exec ok");
                 return true;
+            }
 
+            d_stderr("MOD Desktop: Failed to start jackd");
             parameters[kParameterBasePortNumber] = portBaseNum = -kErrorModUiExecFailed;
             return false;
         }
 
-        startingModUI = false;
+        if (startingModUI)
+        {
+            d_stderr("MOD Desktop: Runner setup ok");
+            startingModUI = false;
+        }
 
         parameters[kParameterBasePortNumber] = portBaseNum;
         return true;
@@ -491,6 +511,16 @@ protected:
         }
 
         audioBufferOut.read(outputs, frames);
+
+        for (uint32_t i = 0; i < frames; i += 32)
+        {
+            MidiEvent midiEvent = {
+                i, 1, { 0xFE, 0, 0, 0 }, nullptr
+            };
+
+            if (! writeMidiEvent(midiEvent))
+                break;
+        }
 
 #if 0
         // FIXME not quite right, crashes

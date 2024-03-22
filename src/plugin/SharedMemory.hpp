@@ -7,6 +7,7 @@
 
 #ifdef DISTRHO_OS_WINDOWS
 #else
+# include <cerrno>
 # include <fcntl.h>
 # include <sys/mman.h>
 # ifdef DISTRHO_OS_MAC
@@ -16,7 +17,6 @@
 #  include <mach/semaphore.h>
 #  include <servers/bootstrap.h>
 # else
-#  include <cerrno>
 #  include <syscall.h>
 #  include <sys/time.h>
 #  include <linux/futex.h>
@@ -122,7 +122,10 @@ public:
         const HANDLE testshm = OpenFileMappingA(FILE_MAP_ALL_ACCESS, FALSE, shmName);
 
         if (testshm == nullptr)
+        {
+            d_stderr("SharedMemory::canInit(%u) - true", portBaseNum);
             return true;
+        }
 
         CloseHandle(testshm);
        #else
@@ -130,11 +133,15 @@ public:
         const int testshmfd = shm_open(shmName, O_RDONLY, 0);
 
         if (testshmfd < 0)
+        {
+            d_stderr("SharedMemory::canInit(%u) - true", portBaseNum);
             return true;
+        }
 
         close(testshmfd);
        #endif
 
+        d_stderr("SharedMemory::canInit(%u) - false", portBaseNum);
         return false;
     }
 
@@ -160,10 +167,10 @@ public:
       #else
         std::snprintf(shmName, 31, "/mod-desktop-shm-%d", portBaseNum);
 
-        shmfd = shm_open(shmName, O_CREAT|O_EXCL|O_RDWR, 0600);
-        DISTRHO_SAFE_ASSERT_RETURN(shmfd >= 0, false);
+        shmfd = shm_open(shmName, O_CREAT|O_EXCL|O_RDWR, 0666);
+        DISTRHO_CUSTOM_SAFE_ASSERT_RETURN(std::strerror(errno), shmfd >= 0, false);
 
-        DISTRHO_SAFE_ASSERT_RETURN(ftruncate(shmfd, static_cast<off_t>(kDataSize)) == 0, fail_deinit());
+        DISTRHO_CUSTOM_SAFE_ASSERT_RETURN(std::strerror(errno), ftruncate(shmfd, static_cast<off_t>(kDataSize)) == 0, fail_deinit());
 
        #ifdef MAP_LOCKED
         ptr = mmap(nullptr, kDataSize, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_LOCKED, shmfd, 0);
@@ -172,8 +179,8 @@ public:
         {
             ptr = mmap(nullptr, kDataSize, PROT_READ|PROT_WRITE, MAP_SHARED, shmfd, 0);
         }
-        DISTRHO_SAFE_ASSERT_RETURN(ptr != nullptr, fail_deinit());
-        DISTRHO_SAFE_ASSERT_RETURN(ptr != MAP_FAILED, fail_deinit());
+        DISTRHO_CUSTOM_SAFE_ASSERT_RETURN(std::strerror(errno), ptr != nullptr, fail_deinit());
+        DISTRHO_CUSTOM_SAFE_ASSERT_RETURN(std::strerror(errno), ptr != MAP_FAILED, fail_deinit());
 
        #ifndef MAP_LOCKED
         mlock(ptr, kDataSize);
