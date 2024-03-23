@@ -326,21 +326,14 @@ public:
 
     // ----------------------------------------------------------------------------------------------------------------
 
-    void reset()
-    {
-        if (data == nullptr)
-            return;
-
-        data->midiEventCount = 0;
-        std::memset(data->audio, 0, sizeof(float) * 128 * 2);
-    }
-
     bool sync()
     {
         if (data == nullptr)
             return false;
 
-        reset();
+        data->midiEventCount = 0;
+        std::memset(data->audio, 0, sizeof(float) * 128 * 2);
+
         post();
         return wait();
     }
@@ -351,9 +344,12 @@ public:
             return;
 
         data->magic = 7331;
+        data->midiEventCount = 0;
+        std::memset(data->audio, 0, sizeof(float) * 128 * 2);
+
         post();
-        wait();
-        data->magic = 1337;
+        if (wait())
+            data->magic = 1337;
     }
 
     bool process()
@@ -364,8 +360,6 @@ public:
         // wait for processing
         return wait();
     }
-
-    // ----------------------------------------------------------------------------------------------------------------
 
 private:
     // ----------------------------------------------------------------------------------------------------------------

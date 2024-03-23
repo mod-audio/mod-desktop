@@ -11,6 +11,8 @@
 #include "utils.hpp"
 #include "zita-resampler/resampler.h"
 
+#include <atomic>
+
 START_NAMESPACE_DISTRHO
 
 // -----------------------------------------------------------------------------------------------------------
@@ -24,7 +26,7 @@ class DesktopPlugin : public Plugin,
     String currentPedalboard;
     bool startingJackd = false;
     bool startingModUI = false;
-    bool processing = false;
+    std::atomic<bool> processing { false };
     bool shouldStartRunner = true;
     float parameters[kParameterCount] = {};
     float* tempBuffers[2] = {};
@@ -384,10 +386,6 @@ protected:
             if (portBaseNum > 0 && run())
                 startRunner(500);
         }
-        else
-        {
-            shm.reset();
-        }
 
         // make sure we have enough space to cover everything
         const double sampleRate = getSampleRate();
@@ -407,7 +405,7 @@ protected:
         std::memset(tempBuffers[1], 0, sizeof(float) * numSamplesInTempBuffers);
 
         numSamplesUntilProcessing = d_isNotEqual(sampleRate, 48000.0)
-                                  ? d_nextPowerOf2(128.0 * (sampleRate / 48000.0))
+                                  ? d_roundToUnsignedInt(128.0 * (sampleRate / 48000.0))
                                   : 128;
 
         setLatency(numSamplesUntilProcessing);
@@ -458,6 +456,9 @@ protected:
             float* shmbuffers[2] = { shm.data->audio, shm.data->audio + 128 };
 
             audioBufferIn.read(shmbuffers, 128);
+
+            // TODO bring back midi
+            shm.data->midiEventCount = 0;
 
             if (! shm.process())
             {

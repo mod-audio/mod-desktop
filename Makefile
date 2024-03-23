@@ -86,6 +86,7 @@ BOOTSTRAP_FILES  = $(PAWPAW_PREFIX)/bin/cxfreeze-quickstart
 endif
 BOOTSTRAP_FILES += $(PAWPAW_PREFIX)/bin/jackd$(APP_EXT)
 BOOTSTRAP_FILES += $(PAWPAW_PREFIX)/include/armadillo
+BOOTSTRAP_FILES += $(PAWPAW_PREFIX)/lib/jack/jack_mod-desktop$(SO_EXT)
 
 # ---------------------------------------------------------------------------------------------------------------------
 # List of files for mod-desktop packaging, often symlinks to the real files
@@ -298,6 +299,9 @@ clean:
 	rm -rf build-plugin-stamps
 	rm -rf build-pedalboard
 	rm -rf build-ui
+
+jack:
+	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) HAVE_OPENGL=true NOOPT=true -C src/plugin jack
 
 src/DPF/utils/lv2_ttl_generator$(APP_EXT):
 	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) NOOPT=true -C src/DPF/utils/lv2-ttl-generator

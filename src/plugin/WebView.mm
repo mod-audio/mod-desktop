@@ -29,8 +29,8 @@ void* addWebView(const uintptr_t parentWinId, double, const uint port)
                                    DISTRHO_UI_DEFAULT_WIDTH,
                                    DISTRHO_UI_DEFAULT_HEIGHT - kVerticalOffset);
 
-    WKWebView* const webview = [[WKWebView alloc] initWithFrame: rect];
-    [[[webview configuration] preferences] setValue: @(true) forKey: @"developerExtrasEnabled"];
+    WKWebView* const webview = [[WKWebView alloc] initWithFrame:rect];
+    [[[webview configuration] preferences] setValue:@(true) forKey:@"developerExtrasEnabled"];
     [view addSubview:webview];
 
     char url[32];
@@ -42,7 +42,7 @@ void* addWebView(const uintptr_t parentWinId, double, const uint port)
     NSURLRequest* const urlreq = [[NSURLRequest alloc] initWithURL: [NSURL URLWithString: nsurl]];
     [nsurl release];
 
-    [webview loadRequest: urlreq];
+    [webview loadRequest:urlreq];
     [webview setHidden:NO];
 
     return new WebViewImpl{view, webview, urlreq};
@@ -63,7 +63,7 @@ void reloadWebView(void* const webview, uint)
 {
     WebViewImpl* const impl = static_cast<WebViewImpl*>(webview);
 
-    [impl->webview loadRequest: impl->urlreq];
+    [impl->webview loadRequest:impl->urlreq];
 }
 
 void resizeWebView(void* const webview, const uint offset, const uint width, const uint height)
