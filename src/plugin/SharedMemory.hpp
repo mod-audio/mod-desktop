@@ -5,17 +5,15 @@
 
 #include "DistrhoUtils.hpp"
 
-#ifdef DISTRHO_OS_WINDOWS
-#else
+#ifndef DISTRHO_OS_WINDOWS
 # include <cerrno>
 # include <fcntl.h>
 # include <sys/mman.h>
 # ifdef DISTRHO_OS_MAC
-#  include "extra/Runner.hpp"
-#  include "extra/ScopedPointer.hpp"
-#  include <mach/mach.h>
-#  include <mach/semaphore.h>
-#  include <servers/bootstrap.h>
+extern "C" {
+int __ulock_wait(uint32_t operation, void* addr, uint64_t value, uint32_t timeout_us);
+int __ulock_wake(uint32_t operation, void* addr, uint64_t value);
+}
 # else
 #  include <syscall.h>
 #  include <sys/time.h>
@@ -26,56 +24,6 @@
 START_NAMESPACE_DISTRHO
 
 // --------------------------------------------------------------------------------------------------------------------
-// Based on jack2 mach semaphore implementation
-// Copyright (C) 2021 Peter Bridgman
-
-#ifdef DISTRHO_OS_MAC
-class SemaphoreServerRunner : public Runner {
-    const mach_port_t port;
-    const semaphore_t sem;
-    bool running = true;
-
-public:
-    SemaphoreServerRunner(const mach_port_t p, const semaphore_t s)
-        : Runner(),
-          port(p),
-          sem(s)
-    {
-        startRunner(0);
-    }
-
-    void invalidate()
-    {
-        running = false;
-
-        const mach_port_t task = mach_task_self();
-        mach_port_destroy(task, port);
-        semaphore_destroy(task, sem);
-
-        stopRunner();
-    }
-
-protected:
-    bool run() override
-    {
-        struct {
-            mach_msg_header_t hdr;
-            mach_msg_trailer_t trailer;
-        } msg;
-
-        if (mach_msg(&msg.hdr, MACH_RCV_MSG, 0, sizeof(msg), port, MACH_MSG_TIMEOUT_NONE, MACH_PORT_NULL) != MACH_MSG_SUCCESS)
-            return running;
-
-        msg.hdr.msgh_local_port = sem;
-        msg.hdr.msgh_bits = MACH_MSGH_BITS(MACH_MSG_TYPE_MOVE_SEND_ONCE, MACH_MSG_TYPE_COPY_SEND);
-        mach_msg(&msg.hdr, MACH_SEND_MSG, sizeof(msg.hdr), 0, MACH_PORT_NULL, MACH_MSG_TIMEOUT_NONE,MACH_PORT_NULL);
-
-        return running;
-    }
-};
-#endif
-
-// --------------------------------------------------------------------------------------------------------------------
 
 class SharedMemory
 {
@@ -83,10 +31,7 @@ public:
     struct Data {
         uint32_t magic;
         int32_t padding1;
-       #if defined(DISTRHO_OS_MAC)
-        char bootname1[32];
-        char bootname2[32];
-       #elif defined(DISTRHO_OS_WINDOWS)
+       #ifdef DISTRHO_OS_WINDOWS
         HANDLE sem1;
         HANDLE sem2;
        #else
@@ -192,34 +137,6 @@ public:
         std::memset(data, 0, kDataSize);
         data->magic = 1337;
 
-       #ifdef DISTRHO_OS_MAC
-        task = mach_task_self();
-
-        mach_port_t bootport;
-        DISTRHO_SAFE_ASSERT_RETURN(task_get_bootstrap_port(task, &bootport) == KERN_SUCCESS, fail_deinit());
-        DISTRHO_SAFE_ASSERT_RETURN(semaphore_create(task, &sem1, SYNC_POLICY_FIFO, 0) == KERN_SUCCESS, fail_deinit());
-        DISTRHO_SAFE_ASSERT_RETURN(semaphore_create(task, &sem2, SYNC_POLICY_FIFO, 0) == KERN_SUCCESS, fail_deinit());
-
-        DISTRHO_SAFE_ASSERT_RETURN(mach_port_allocate(task, MACH_PORT_RIGHT_RECEIVE, &port1) == KERN_SUCCESS, fail_deinit());
-        DISTRHO_SAFE_ASSERT_RETURN(mach_port_allocate(task, MACH_PORT_RIGHT_RECEIVE, &port2) == KERN_SUCCESS, fail_deinit());
-
-        DISTRHO_SAFE_ASSERT_RETURN(mach_port_insert_right(task, port1, port1, MACH_MSG_TYPE_MAKE_SEND) == KERN_SUCCESS, fail_deinit());
-        DISTRHO_SAFE_ASSERT_RETURN(mach_port_insert_right(task, port2, port2, MACH_MSG_TYPE_MAKE_SEND) == KERN_SUCCESS, fail_deinit());
-
-        std::snprintf(data->bootname1, 31, "audio.mod.desktop.port%d.1", portBaseNum);
-        std::snprintf(data->bootname2, 31, "audio.mod.desktop.port%d.2", portBaseNum);
-        data->bootname1[31] = data->bootname2[31] = '\0';
-
-       #pragma clang diagnostic push
-       #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-        DISTRHO_SAFE_ASSERT_RETURN(bootstrap_register(bootport, data->bootname1, port1) == KERN_SUCCESS, fail_deinit());
-        DISTRHO_SAFE_ASSERT_RETURN(bootstrap_register(bootport, data->bootname2, port2) == KERN_SUCCESS, fail_deinit());
-       #pragma clang diagnostic pop
-
-        semServer1 = new SemaphoreServerRunner(port1, sem1);
-        semServer2 = new SemaphoreServerRunner(port2, sem2);
-       #endif
-
        #ifdef DISTRHO_OS_WINDOWS
         data->sem1 = CreateSemaphoreA(&sa, 0, 1, nullptr);
         DISTRHO_SAFE_ASSERT_RETURN(data->sem1 != nullptr, fail_deinit());
@@ -235,48 +152,6 @@ public:
 
     void deinit()
     {
-       #ifdef DISTRHO_OS_MAC
-        if (semServer1 != nullptr)
-        {
-            semServer1->invalidate();
-            port1 = MACH_PORT_NULL;
-            sem1 = MACH_PORT_NULL;
-            semServer1 = nullptr;
-        }
-
-        if (semServer2 != nullptr)
-        {
-            semServer2->invalidate();
-            port2 = MACH_PORT_NULL;
-            sem2 = MACH_PORT_NULL;
-            semServer2 = nullptr;
-        }
-
-        if (port1 != MACH_PORT_NULL)
-        {
-            mach_port_destroy(task, port1);
-            port1 = MACH_PORT_NULL;
-        }
-
-        if (port2 != MACH_PORT_NULL)
-        {
-            mach_port_destroy(task, port2);
-            port2 = MACH_PORT_NULL;
-        }
-
-        if (sem1 != MACH_PORT_NULL)
-        {
-            semaphore_destroy(task, sem1);
-            sem1 = MACH_PORT_NULL;
-        }
-
-        if (sem2 != MACH_PORT_NULL)
-        {
-            semaphore_destroy(task, sem2);
-            sem2 = MACH_PORT_NULL;
-        }
-       #endif
-
        #ifdef DISTRHO_OS_WINDOWS
         if (data != nullptr)
         {
@@ -371,16 +246,6 @@ private:
     int shmfd = -1;
    #endif
 
-   #ifdef DISTRHO_OS_MAC
-    mach_port_t task = MACH_PORT_NULL;
-    mach_port_t port1 = MACH_PORT_NULL;
-    mach_port_t port2 = MACH_PORT_NULL;
-    semaphore_t sem1 = MACH_PORT_NULL;
-    semaphore_t sem2 = MACH_PORT_NULL;
-    ScopedPointer<SemaphoreServerRunner> semServer1;
-    ScopedPointer<SemaphoreServerRunner> semServer2;
-   #endif
-
     static constexpr const size_t kDataSize = sizeof(Data) + sizeof(float) * 128 * 2;
 
     // ----------------------------------------------------------------------------------------------------------------
@@ -388,33 +253,40 @@ private:
 
     void post()
     {
-       #if defined(DISTRHO_OS_MAC)
-        semaphore_signal(sem1);
-       #elif defined(DISTRHO_OS_WINDOWS)
+      #if defined(DISTRHO_OS_WINDOWS)
         ReleaseSemaphore(data->sem1, 1, nullptr);
-       #else
+      #else
         const bool unlocked = __sync_bool_compare_and_swap(&data->sem1, 0, 1);
         DISTRHO_SAFE_ASSERT_RETURN(unlocked,);
+       #ifdef DISTRHO_OS_MAC
+        __ulock_wake(0x1000003, &data->sem1, 0);
+       #else
         syscall(__NR_futex, &data->sem1, FUTEX_WAKE, 1, nullptr, nullptr, 0);
        #endif
+      #endif
     }
 
     bool wait()
     {
-       #if defined(DISTRHO_OS_MAC)
-        const mach_timespec timeout = { 1, 0 };
-        return semaphore_timedwait(sem2, timeout) == KERN_SUCCESS;
-       #elif defined(DISTRHO_OS_WINDOWS)
+      #if defined(DISTRHO_OS_WINDOWS)
         return WaitForSingleObject(data->sem2, 1000) == WAIT_OBJECT_0;
+      #else
+       #ifdef DISTRHO_OS_MAC
+        const uint32_t timeout = 1000000;
        #else
         const timespec timeout = { 1, 0 };
+       #endif
 
         for (;;)
         {
             if (__sync_bool_compare_and_swap(&data->sem2, 1, 0))
                 return true;
 
+           #ifdef DISTRHO_OS_MAC
+            if (__ulock_wait(0x3, &data->sem2, 0, timeout) != 0)
+           #else
             if (syscall(__NR_futex, &data->sem2, FUTEX_WAIT, 0, &timeout, nullptr, 0) != 0)
+           #endif
                 if (errno != EAGAIN && errno != EINTR)
                     return false;
         }
