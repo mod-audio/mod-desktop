@@ -6,6 +6,7 @@
 #include "AudioRingBuffer.hpp"
 #include "ChildProcess.hpp"
 #include "SharedMemory.hpp"
+#include "extra/RingBuffer.hpp"
 #include "extra/Runner.hpp"
 #include "extra/ScopedPointer.hpp"
 #include "utils.hpp"
@@ -20,6 +21,8 @@ START_NAMESPACE_DISTRHO
 class DesktopPlugin : public Plugin,
                       public Runner
 {
+    static constexpr const uint kMaxMidiSize = 512 * 4;
+
     ChildProcess jackd;
     ChildProcess mod_ui;
     SharedMemory shm;
@@ -33,10 +36,16 @@ class DesktopPlugin : public Plugin,
     uint numSamplesInTempBuffers = 0;
     uint numSamplesUntilProcessing = 0;
     int portBaseNum = 0;
+
     AudioRingBuffer audioBufferIn;
     AudioRingBuffer audioBufferOut;
     ScopedPointer<Resampler> resamplerTo48kHz;
     ScopedPointer<Resampler> resamplerFrom48kHz;
+    double resamplerRatio = 1.0;
+
+    double midiFrameOffset = 0.0;
+    uint8_t* midiRecvBuffer = nullptr;
+    HeapRingBuffer midiRingBuffer;
 
    #ifdef DISTRHO_OS_WINDOWS
     const WCHAR* envp;
@@ -409,16 +418,23 @@ protected:
                                   : 128;
 
         setLatency(numSamplesUntilProcessing);
+
+        midiFrameOffset = 0.0;
+        midiRecvBuffer = new uint8_t[kMaxMidiSize];
+        midiRingBuffer.createBuffer(kMaxMidiSize);
     }
 
     void deactivate() override
     {
         audioBufferIn.deleteBuffer();
         audioBufferOut.deleteBuffer();
+        midiRingBuffer.deleteBuffer();
 
         delete[] tempBuffers[0];
         delete[] tempBuffers[1];
+        delete[] midiRecvBuffer;
         tempBuffers[0] = tempBuffers[1] = nullptr;
+        midiRecvBuffer = nullptr;
         numSamplesInTempBuffers = 0;
     }
 
@@ -426,7 +442,7 @@ protected:
       Run/process function for plugins without MIDI input.
     */
     void run(const float** const inputs, float** const outputs, const uint32_t frames,
-             const MidiEvent* midiEvents, uint32_t midiEventCount) override
+             const MidiEvent* const midiEvents, const uint32_t midiEventCount) override
     {
         if (! processing)
         {
@@ -434,6 +450,8 @@ protected:
             std::memset(outputs[1], 0, sizeof(float) * frames);
             return;
         }
+
+        const double resampledFrames = frames * resamplerRatio;
 
         if (resamplerTo48kHz != nullptr)
         {
@@ -451,18 +469,73 @@ protected:
             audioBufferIn.write(inputs, frames);
         }
 
+        for (uint32_t i = 0; i < midiEventCount; ++i)
+        {
+            const MidiEvent& midiEvent(midiEvents[i]);
+
+            if (midiEvent.size >= kMaxMidiSize)
+                continue;
+
+            midiRingBuffer.writeUInt(static_cast<uint>(midiFrameOffset + midiEvent.frame * resamplerRatio)) &&
+            midiRingBuffer.writeUInt(midiEvent.size) &&
+            midiRingBuffer.writeCustomData(midiEvent.size > MidiEvent::kDataSize ? midiEvent.dataExt : midiEvent.data, midiEvent.size);
+            midiRingBuffer.commitWrite();
+        }
+
+        midiFrameOffset += resampledFrames;
+        uint midiFrameOffsetLocal = 0;
+        uint lastMidiOutFrame = 0;
+
         while (audioBufferIn.getNumReadableSamples() >= 128)
         {
             float* shmbuffers[2] = { shm.data->audio, shm.data->audio + 128 };
 
             audioBufferIn.read(shmbuffers, 128);
 
-            // TODO bring back midi
-            shm.data->midiEventCount = 0;
+            uint midiFrame, midiSize, shmMidiEventCount = 0;
+            while (midiRingBuffer.isDataAvailableForReading())
+            {
+                midiFrame = midiRingBuffer.peekUInt();
+
+                if (midiFrame < midiFrameOffsetLocal)
+                    midiFrame = 0;
+                else
+                    midiFrame -= midiFrameOffsetLocal;
+
+                if (midiFrame >= 128)
+                    break;
+
+                midiRingBuffer.readUInt();
+                midiSize = midiRingBuffer.readUInt();
+                if (midiSize < kMaxMidiSize && midiRingBuffer.readCustomData(midiRecvBuffer, midiSize))
+                {
+                    // TODO
+                    if (midiSize > 4)
+                        continue;
+
+                    // TODO data pool
+                    shm.data->midiFrames[shmMidiEventCount] = midiFrame;
+                    for (uint32_t i = 0; i < midiSize; ++i)
+                        shm.data->midiData[shmMidiEventCount * 4 + i] = midiRecvBuffer[i];
+                    for (uint32_t i = midiSize; i < 4; ++i)
+                        shm.data->midiData[shmMidiEventCount * 4 + i] = 0;
+
+                    if (++shmMidiEventCount == 511)
+                        break;
+                }
+                else
+                {
+                    d_stderr("midi ringbuffer data race, ignoring future events");
+                    midiRingBuffer.flush();
+                    break;
+                }
+            }
+
+            shm.data->midiEventCount = shmMidiEventCount;
 
             if (! shm.process())
             {
-                d_stdout("shm processing failed");
+                d_stderr("shm processing failed");
                 processing = false;
                 std::memset(outputs[0], 0, sizeof(float) * frames);
                 std::memset(outputs[1], 0, sizeof(float) * frames);
@@ -484,6 +557,33 @@ protected:
             {
                 audioBufferOut.write(shmbuffers, 128);
             }
+
+            // TODO ring buffer out
+            for (uint16_t i = 0; i < shm.data->midiEventCount; ++i)
+            {
+                // so bad..
+                midiFrame = std::min<uint>(frames - 1, std::max(0.0, shm.data->midiFrames[i] + midiFrameOffsetLocal - (midiFrameOffset - resampledFrames)) / resamplerRatio);
+                lastMidiOutFrame = std::max(midiFrame, lastMidiOutFrame);
+
+                // TODO data pool
+                MidiEvent midiEvent = {
+                    midiFrame,
+                    4,
+                    {
+                        shm.data->midiData[i * 4 + 0],
+                        shm.data->midiData[i * 4 + 1],
+                        shm.data->midiData[i * 4 + 2],
+                        shm.data->midiData[i * 4 + 3],
+                    },
+                    nullptr
+                };
+
+                if (! writeMidiEvent(midiEvent))
+                    break;
+            }
+
+            midiFrameOffsetLocal += 128;
+            midiFrameOffset = std::max(0.0, midiFrameOffset - 128);
         }
 
         if (numSamplesUntilProcessing >= frames)
@@ -513,190 +613,15 @@ protected:
 
         audioBufferOut.read(outputs, frames);
 
-        for (uint32_t i = 0; i < frames; i += 32)
+        for (uint32_t i = lastMidiOutFrame; i < frames; i += 32)
         {
-            MidiEvent midiEvent = {
+            const MidiEvent midiEvent = {
                 i, 1, { 0xFE, 0, 0, 0 }, nullptr
             };
 
             if (! writeMidiEvent(midiEvent))
                 break;
         }
-
-#if 0
-        // FIXME not quite right, crashes
-        if (getBufferSize() != frames)
-        {
-            std::memset(outputs[0], 0, sizeof(float) * frames);
-            std::memset(outputs[1], 0, sizeof(float) * frames);
-            return;
-        }
-
-        uint32_t ti = numFramesInShmBuffer;
-        uint32_t to = numFramesInTmpBuffer;
-        uint32_t framesDone = 0;
-
-        for (uint32_t i = 0; i < frames; ++i)
-        {
-            shm.data->audio[ti] = inputs[0][i];
-            shm.data->audio[128 + ti] = inputs[1][i];
-
-            if (++ti == 128)
-            {
-                ti = 0;
-
-                if (midiEventCount != 0)
-                {
-                    uint16_t mec = shm.data->midiEventCount;
-
-                    while (midiEventCount != 0 && mec != 511)
-                    {
-                        if (midiEvents->size > 4)
-                        {
-                            --midiEventCount;
-                            ++midiEvents;
-                            continue;
-                        }
-
-                        if (midiEvents->frame >= framesDone + 128)
-                            break;
-
-                        shm.data->midiFrames[mec] = midiEvents->frame - framesDone;
-                        shm.data->midiData[mec * 4 + 0] = midiEvents->data[0];
-                        shm.data->midiData[mec * 4 + 1] = midiEvents->data[1];
-                        shm.data->midiData[mec * 4 + 2] = midiEvents->data[2];
-                        shm.data->midiData[mec * 4 + 3] = midiEvents->data[3];
-
-                        --midiEventCount;
-                        ++midiEvents;
-                        ++mec;
-                    }
-
-                    shm.data->midiEventCount = mec;
-                }
-
-                if (! shm.process(tmpBuffers, to))
-                {
-                    d_stdout("shm processing failed");
-                    processing = false;
-                    std::memset(outputs[0], 0, sizeof(float) * frames);
-                    std::memset(outputs[1], 0, sizeof(float) * frames);
-                    return;
-                }
-
-                for (uint16_t j = 0; j < shm.data->midiEventCount; ++j)
-                {
-                    MidiEvent midiEvent = {
-                        framesDone + shm.data->midiFrames[j] - to,
-                        4,
-                        {
-                            shm.data->midiData[j * 4 + 0],
-                            shm.data->midiData[j * 4 + 1],
-                            shm.data->midiData[j * 4 + 2],
-                            shm.data->midiData[j * 4 + 3],
-                        },
-                        nullptr
-                    };
-
-                    if (! writeMidiEvent(midiEvent))
-                        break;
-                }
-
-                to += 128;
-
-                if (firstTimeProcessing)
-                {
-                    firstTimeProcessing = false;
-                    std::memset(outputs[0], 0, sizeof(float) * i);
-                    std::memset(outputs[1], 0, sizeof(float) * i);
-                }
-                else
-                {
-                    const uint32_t framesToCopy = std::min(128u, frames - framesDone);
-                    std::memcpy(outputs[0] + framesDone, tmpBuffers[0], sizeof(float) * framesToCopy);
-                    std::memcpy(outputs[1] + framesDone, tmpBuffers[1], sizeof(float) * framesToCopy);
-
-                    to -= framesToCopy;
-                    framesDone += framesToCopy;
-                    std::memmove(tmpBuffers[0], tmpBuffers[0] + framesToCopy, sizeof(float) * to);
-                    std::memmove(tmpBuffers[1], tmpBuffers[1] + framesToCopy, sizeof(float) * to);
-                }
-            }
-        }
-
-        if (firstTimeProcessing)
-        {
-            std::memset(outputs[0], 0, sizeof(float) * frames);
-            std::memset(outputs[1], 0, sizeof(float) * frames);
-
-            if (midiEventCount != 0)
-            {
-                uint16_t mec = shm.data->midiEventCount;
-
-                while (midiEventCount != 0 && mec != 511)
-                {
-                    if (midiEvents->size > 4)
-                    {
-                        --midiEventCount;
-                        ++midiEvents;
-                        continue;
-                    }
-
-                    shm.data->midiFrames[mec] = midiEvents->frame;
-                    shm.data->midiData[mec * 4 + 0] = midiEvents->data[0];
-                    shm.data->midiData[mec * 4 + 1] = midiEvents->data[1];
-                    shm.data->midiData[mec * 4 + 2] = midiEvents->data[2];
-                    shm.data->midiData[mec * 4 + 3] = midiEvents->data[3];
-
-                    --midiEventCount;
-                    ++midiEvents;
-                    ++mec;
-                }
-
-                shm.data->midiEventCount = mec;
-            }
-        }
-        else if (framesDone != frames)
-        {
-            const uint32_t framesToCopy = frames - framesDone;
-            std::memcpy(outputs[0] + framesDone, tmpBuffers[0], sizeof(float) * framesToCopy);
-            std::memcpy(outputs[1] + framesDone, tmpBuffers[1], sizeof(float) * framesToCopy);
-
-            to -= framesToCopy;
-            std::memmove(tmpBuffers[0], tmpBuffers[0] + framesToCopy, sizeof(float) * to);
-            std::memmove(tmpBuffers[1], tmpBuffers[1] + framesToCopy, sizeof(float) * to);
-
-            if (midiEventCount != 0)
-            {
-                uint16_t mec = shm.data->midiEventCount;
-
-                while (midiEventCount != 0 && mec != 511)
-                {
-                    if (midiEvents->size > 4)
-                    {
-                        --midiEventCount;
-                        ++midiEvents;
-                        continue;
-                    }
-
-                    shm.data->midiFrames[mec] = ti + framesDone - midiEvents->frame;
-                    shm.data->midiData[mec * 4 + 0] = midiEvents->data[0];
-                    shm.data->midiData[mec * 4 + 1] = midiEvents->data[1];
-                    shm.data->midiData[mec * 4 + 2] = midiEvents->data[2];
-                    shm.data->midiData[mec * 4 + 3] = midiEvents->data[3];
-
-                    --midiEventCount;
-                    ++midiEvents;
-                    ++mec;
-                }
-
-                shm.data->midiEventCount = mec;
-            }
-        }
-
-        numFramesInShmBuffer = ti;
-        numFramesInTmpBuffer = to;
-#endif
     }
 
     void sampleRateChanged(const double sampleRate) override
@@ -727,9 +652,11 @@ protected:
             resamplerTo48kHz->setup(sampleRate, 48000, 2, 32);
             resamplerFrom48kHz = new Resampler();
             resamplerFrom48kHz->setup(48000, sampleRate, 2, 32);
+            resamplerRatio = sampleRate / 48000.0;
         }
         else
         {
+            resamplerRatio = 1.0;
             resamplerTo48kHz = nullptr;
             resamplerFrom48kHz = nullptr;
         }

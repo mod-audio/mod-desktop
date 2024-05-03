@@ -4,6 +4,7 @@
 #include "DistrhoUI.hpp"
 #include "DistrhoPluginUtils.hpp"
 #include "NanoButton.hpp"
+#include "ResizeHandle.hpp"
 #include "WebView.hpp"
 
 #include "utils.hpp"
@@ -21,6 +22,7 @@ class DesktopUI : public UI,
     String label;
     String error;
     String errorDetail;
+    ResizeHandle resizeHandle;
     int port = 0;
     void* webview = nullptr;
 
@@ -29,7 +31,8 @@ public:
         : UI(DISTRHO_UI_DEFAULT_WIDTH, DISTRHO_UI_DEFAULT_HEIGHT),
           buttonRefresh(this, this),
           buttonOpenWebGui(this, this),
-          buttonOpenUserFilesDir(this, this)
+          buttonOpenUserFilesDir(this, this),
+          resizeHandle(this)
     {
         loadSharedResources();
 
