@@ -6,11 +6,6 @@
 #include "extra/Sleep.hpp"
 #include "Time.hpp"
 
-#if defined(DISTRHO_OS_MAC)
-#elif defined(DISTRHO_OS_WINDOWS)
-#else
-#endif
-
 #ifdef DISTRHO_OS_WINDOWS
 # include <string>
 # include <winsock2.h>
@@ -22,8 +17,6 @@
 # include <sys/wait.h>
 #endif
 
-// #include <sys/time.h>
-
 START_NAMESPACE_DISTRHO
 
 // -----------------------------------------------------------------------------------------------------------
@@ -31,7 +24,7 @@ START_NAMESPACE_DISTRHO
 class ChildProcess
 {
    #ifdef _WIN32
-    PROCESS_INFORMATION process = { INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE, 0, 0 };
+    PROCESS_INFORMATION pinfo = { INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE, 0, 0 };
    #else
     pid_t pid = -1;
    #endif
@@ -60,7 +53,7 @@ public:
             if (i != 0)
                 cmd += " ";
 
-            if (std::strchr(args[i], ' ') != nullptr)
+            if (args[i][0] != '"' && std::strchr(args[i], ' ') != nullptr)
             {
                 cmd += "\"";
                 cmd += args[i];
@@ -90,7 +83,7 @@ public:
                               const_cast<LPWSTR>(envp), // lpEnvironment
                               nullptr,    // lpCurrentDirectory
                               &si,        // lpStartupInfo
-                              &process) != FALSE;
+                              &pinfo) != FALSE;
        #else
         const pid_t ret = pid = vfork();
 
@@ -123,38 +116,39 @@ public:
         bool sendTerminate = true;
 
        #ifdef _WIN32
-        if (process.hProcess == INVALID_HANDLE_VALUE)
+        if (pinfo.hProcess == INVALID_HANDLE_VALUE)
             return;
 
-        const PROCESS_INFORMATION oprocess = process;
-        process = { INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE, 0, 0 };
+        const PROCESS_INFORMATION opinfo = pinfo;
+        pinfo = { INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE, 0, 0 };
 
-        for (;;)
+        for (DWORD exitCode;;)
         {
-            switch (WaitForSingleObject(oprocess.hProcess, 0))
+            if (GetExitCodeProcess(opinfo.hProcess, &exitCode) == FALSE ||
+                exitCode != STILL_ACTIVE ||
+                WaitForSingleObject(opinfo.hProcess, 0) != WAIT_TIMEOUT)
             {
-            case WAIT_OBJECT_0:
-            case WAIT_FAILED:
-                CloseHandle(oprocess.hThread);
-                CloseHandle(oprocess.hProcess);
+                CloseHandle(opinfo.hThread);
+                CloseHandle(opinfo.hProcess);
                 return;
             }
 
             if (sendTerminate)
             {
                 sendTerminate = false;
-                TerminateProcess(oprocess.hProcess, 15);
+                TerminateProcess(opinfo.hProcess, ERROR_BROKEN_PIPE);
             }
+
             if (d_gettime_ms() < timeout)
             {
                 d_msleep(5);
                 continue;
             }
             d_stderr("ChildProcess::stop() - timed out");
-            TerminateProcess(oprocess.hProcess, 9);
+            TerminateProcess(opinfo.hProcess, 9);
             d_msleep(5);
-            CloseHandle(oprocess.hThread);
-            CloseHandle(oprocess.hProcess);
+            CloseHandle(opinfo.hThread);
+            CloseHandle(opinfo.hProcess);
             break;
         }
        #else
@@ -223,15 +217,18 @@ public:
     bool isRunning()
     {
        #ifdef _WIN32
-        if (process.hProcess == INVALID_HANDLE_VALUE)
+        if (pinfo.hProcess == INVALID_HANDLE_VALUE)
             return false;
 
-        if (WaitForSingleObject(process.hProcess, 0) == WAIT_FAILED)
+        DWORD exitCode;
+        if (GetExitCodeProcess(pinfo.hProcess, &exitCode) == FALSE ||
+            exitCode != STILL_ACTIVE ||
+            WaitForSingleObject(pinfo.hProcess, 0) != WAIT_TIMEOUT)
         {
-            const PROCESS_INFORMATION oprocess = process;
-            process = { INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE, 0, 0 };
-            CloseHandle(oprocess.hThread);
-            CloseHandle(oprocess.hProcess);
+            const PROCESS_INFORMATION opinfo = pinfo;
+            pinfo = { INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE, 0, 0 };
+            CloseHandle(opinfo.hThread);
+            CloseHandle(opinfo.hProcess);
             return false;
         }
 
@@ -263,8 +260,8 @@ public:
     void terminate()
     {
        #ifdef _WIN32
-        if (process.hProcess != INVALID_HANDLE_VALUE)
-            TerminateProcess(process.hProcess, 15);
+        if (pinfo.hProcess != INVALID_HANDLE_VALUE)
+            TerminateProcess(pinfo.hProcess, 15);
        #else
         if (pid > 0)
             kill(pid, SIGTERM);

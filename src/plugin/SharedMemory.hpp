@@ -253,17 +253,18 @@ private:
 
     void post()
     {
-      #if defined(DISTRHO_OS_WINDOWS)
+       #if defined(DISTRHO_OS_WINDOWS)
         ReleaseSemaphore(data->sem1, 1, nullptr);
-      #else
-        const bool unlocked = __sync_bool_compare_and_swap(&data->sem1, 0, 1);
-        DISTRHO_SAFE_ASSERT_RETURN(unlocked,);
-       #ifdef DISTRHO_OS_MAC
-        __ulock_wake(0x1000003, &data->sem1, 0);
        #else
-        syscall(__NR_futex, &data->sem1, FUTEX_WAKE, 1, nullptr, nullptr, 0);
+        if (__sync_bool_compare_and_swap(&data->sem1, 0, 1))
+        {
+           #ifdef DISTRHO_OS_MAC
+            __ulock_wake(0x1000003, &data->sem1, 0);
+           #else
+            syscall(__NR_futex, &data->sem1, FUTEX_WAKE, 1, nullptr, nullptr, 0);
+           #endif
+        }
        #endif
-      #endif
     }
 
     bool wait()
