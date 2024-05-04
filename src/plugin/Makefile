@@ -58,7 +58,7 @@ LINK_FLAGS += -pthread
 ifeq ($(MACOS),true)
 LINK_FLAGS += -framework CoreFoundation -framework IOKit -framework WebKit
 else ifeq ($(WINDOWS),true)
-LINK_FLAGS += -lole32 -lwinmm
+LINK_FLAGS += -lole32 -luuid -lwinmm
 else
 LINK_FLAGS += -ldl -lrt
 endif
