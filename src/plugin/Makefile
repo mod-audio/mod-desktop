@@ -24,9 +24,9 @@ FILES_DSP = \
 FILES_UI = DesktopUI.cpp NanoButton.cpp utils.cpp
 
 ifeq ($(MACOS),true)
-FILES_UI += WebView.mm
+FILES_UI += WebViewWK.mm
 else ifeq ($(WINDOWS),true)
-FILES_UI += WebViewWin32.cpp
+FILES_UI += WebViewCHOC.cpp
 else
 FILES_UI += WebViewX11.cpp
 endif
@@ -40,28 +40,30 @@ USING_WEBVIEW = true
 
 include ../DPF/Makefile.plugins.mk
 
-BUILD_CXX_FLAGS += -DVERSION='"$(shell cat ../../VERSION)"'
+TARGETS = features au clap lv2_sep vst2 vst3
 
+BUILD_CXX_FLAGS += -DVERSION='"$(shell cat ../../VERSION)"'
 BUILD_CXX_FLAGS += -pthread
+
+ifeq ($(MACOS),true)
+else ifeq ($(WINDOWS),true)
+BUILD_CXX_FLAGS += -I../CHOC
+else
+BUILD_CXX_FLAGS += $(shell $(PKG_CONFIG) --cflags Qt5Core)
+# -std=gnu++14
+endif
+
 LINK_FLAGS += -pthread
 
 ifeq ($(MACOS),true)
 LINK_FLAGS += -framework CoreFoundation -framework IOKit -framework WebKit
 else ifeq ($(WINDOWS),true)
-LINK_FLAGS += -lwinmm
-else ifeq ($(LINUX),true)
-BUILD_CXX_FLAGS += $(shell $(PKG_CONFIG) --cflags Qt5Core)
-# -std=gnu++14
+LINK_FLAGS += -lole32 -lwinmm
+else
 LINK_FLAGS += -ldl -lrt
 endif
 
-TARGETS = features au clap lv2_sep vst2 vst3
-
-ifeq ($(WINDOWS),true)
-BUILD_CXX_FLAGS += -I../CHOC
-LINK_FLAGS += -lole32
-$(BUILD_DIR)/WebViewWin32.cpp.o: BUILD_CXX_FLAGS += -std=gnu++17
-endif
+$(BUILD_DIR)/WebViewCHOC.cpp.o: BUILD_CXX_FLAGS += -std=gnu++17
 
 # ---------------------------------------------------------------------------------------------------------------------
 

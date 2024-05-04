@@ -177,7 +177,7 @@ void initEvironment()
             {
                 CFStringGetCString(uuidStr, path, PATH_MAX - 1, kCFStringEncodingUTF8);
 
-                for (int i=0, j=0; i+j<36; ++i)
+                for (int i=0, j=0; i<16 && i+j<36; ++i)
                 {
                     if (path[i*2+j] == '-')
                         ++j;

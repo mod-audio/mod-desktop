@@ -112,7 +112,7 @@ static const wchar_t* getAppDirW()
 const char* getAppDir()
 {
    #ifdef DISTRHO_OS_MAC
-    // return "/Users/falktx/Source/MOD/mod-app/build/mod-desktop.app/Contents/MacOS";
+    return "/Users/falktx/Source/MOD/mod-app/build/mod-desktop.app/Contents/MacOS";
     return "/Applications/MOD Desktop.app/Contents/MacOS";
    #else
     static char appDir[PATH_MAX] = {};
@@ -348,7 +348,7 @@ char* const* getEvironment(const uint portBaseNum)
             {
                 CFStringGetCString(uuidStr, path, PATH_MAX - 1, kCFStringEncodingUTF8);
 
-                for (int i=0, j=0; i+j<36; ++i)
+                for (int i=0, j=0; i<16 && i+j<36; ++i)
                 {
                     if (path[i*2+j] == '-')
                         ++j;
