@@ -73,11 +73,20 @@ void* addWebView(const uintptr_t parentWinId, const double scaleFactor, const ui
 
     char** const envp = new char*[envsize + 5];
 
-    for (uint i = 0; i < envsize; ++i)
-        envp[i] = strdup(environ[i]);
+    {
+        uint i = 0;
+        for (uint j = 0; j < envsize; ++j)
+        {
+            if (std::strncmp(environ[j], "LD_LIBRARY_PATH=", 16) == 0)
+                continue;
+            if (std::strncmp(environ[j], "LD_PRELOAD=", 11) == 0)
+                continue;
+            envp[i++] = strdup(environ[j]);
+        }
 
-    for (uint i = 0; i < 5; ++i)
-        envp[envsize + i] = nullptr;
+        for (; i < envsize + 5; ++i)
+            envp[i] = nullptr;
+    }
 
     set_envp_value(envp, "LANG=en_US.UTF-8");
     set_envp_value(envp, "DPF_WEBVIEW_PORT", String(port));
