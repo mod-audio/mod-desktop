@@ -195,6 +195,7 @@ PLUGINS += dragonfly-reverb
 PLUGINS += fomp
 PLUGINS += gxquack
 PLUGINS += invada-lv2
+PLUGINS += master_me
 PLUGINS += mod-ams-lv2
 PLUGINS += mod-arpeggiator
 PLUGINS += mod-audio-mixers
