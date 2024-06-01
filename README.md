@@ -31,10 +31,9 @@ Installation depends on your operating system.
 For **Linux** systems we currently provide a binary tarball, you just extract and run the startup script inside.
 Eventually we want to have MOD Desktop under Flathub, please get in touch if you want to help make that happen.
 
-For **macOS** we provide a (for the moment unsigned) pkg installer, compatible with both Intel and Apple Sillicon systems.
-You need to right-click the installer and click "open" for it to be allowed to install.
+For **macOS** we provide a signed pkg installer, compatible with both Intel and Apple Sillicon systems.
+Double-click the package to install.
 After installation you can find "MOD Desktop" under your "Applications" folder.  
-NOTE: For the final release we will sign the macOS installer so you can double-click on it as usual.
 
 And finally for **Windows** there is a simple installer executable, that shows an installer wizard as typical for most Windows applications.
 
