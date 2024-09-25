@@ -141,7 +141,6 @@ jobs:
             mv mod-desktop-*.tar.xz mod-desktop-${{ env.VERSION_TAG }}-linux-x86_64-debug.tar.xz
           fi
       - uses: actions/upload-artifact@v4
-        if: ${{ matrix.container == env.RELEASE_OS_LINUX }}
         with:
           name: mod-desktop-${{ env.VERSION_TAG }}-linux-x86_64-debug
           path: |
