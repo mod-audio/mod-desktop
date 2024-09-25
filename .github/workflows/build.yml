@@ -3,9 +3,9 @@ name: build
 on: [push, pull_request]
 
 env:
-  CACHE_VERSION_LINUX: 26
-  CACHE_VERSION_MACOS: 25
-  CACHE_VERSION_WIN64: 25
+  CACHE_VERSION_LINUX: 1
+  CACHE_VERSION_MACOS: 1
+  CACHE_VERSION_WIN64: 1
   DEBIAN_FRONTEND: noninteractive
   HOMEBREW_NO_AUTO_UPDATE: 1
   PAWPAW_FAST_MATH: 1
@@ -151,18 +151,14 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: macos-11
-            target: macos-10.15
-          - os: macos-11
-            target: macos-universal-10.15
           - os: macos-12
             target: macos-10.15
           - os: macos-12
             target: macos-universal-10.15
-          # - os: macos-13
-          #   target: macos-10.15
-          # - os: macos-13
-          #   target: macos-universal-10.15
+          - os: macos-13
+            target: macos-10.15
+          - os: macos-13
+            target: macos-universal-10.15
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
