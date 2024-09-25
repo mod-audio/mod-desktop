@@ -21,11 +21,12 @@
 #define DISTRHO_PLUGIN_WANT_STATE       1
 #define DISTRHO_PLUGIN_WANT_FULL_STATE  1
 #define DISTRHO_PLUGIN_WANT_WEBVIEW     1
-#define DISTRHO_UI_FILE_BROWSER         0
 #define DISTRHO_UI_DEFAULT_WIDTH        1170
 #define DISTRHO_UI_DEFAULT_HEIGHT       600
+#define DISTRHO_UI_FILE_BROWSER         0
 #define DISTRHO_UI_USE_NANOVG           1
 #define DISTRHO_UI_USER_RESIZABLE       1
+#define DISTRHO_UI_WEB_VIEW             1
 
 static const constexpr unsigned int kVerticalOffset = 30;
 static const constexpr unsigned int kPortNumOffset = 18190;

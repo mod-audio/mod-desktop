@@ -96,7 +96,7 @@ static const char* getDataDir()
 #ifdef _WIN32
 static const wchar_t* getAppDirW()
 {
-    // return L"Z:\\home\\falktx\\Source\\MOD\\mod-app\\build";
+    // return L"Z:\\home\\falktx\\Source\\MOD\\mod-desktop\\build";
     static wchar_t appDir[MAX_PATH] = {};
 
     if (appDir[0] == 0)
@@ -112,7 +112,7 @@ static const wchar_t* getAppDirW()
 const char* getAppDir()
 {
    #ifdef DISTRHO_OS_MAC
-    return "/Users/falktx/Source/MOD/mod-app/build/mod-desktop.app/Contents/MacOS";
+    // return "/Users/falktx/Source/MOD/mod-desktop/build/mod-desktop.app/Contents/MacOS";
     return "/Applications/MOD Desktop.app/Contents/MacOS";
    #else
     static char appDir[PATH_MAX] = {};

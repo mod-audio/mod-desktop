@@ -4,7 +4,7 @@
 #pragma once
 
 #include "extra/Sleep.hpp"
-#include "Time.hpp"
+#include "extra/Time.hpp"
 
 #ifdef DISTRHO_OS_WINDOWS
 # include <string>

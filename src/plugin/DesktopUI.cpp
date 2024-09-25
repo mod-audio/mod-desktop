@@ -5,7 +5,7 @@
 #include "DistrhoPluginUtils.hpp"
 #include "NanoButton.hpp"
 #include "ResizeHandle.hpp"
-#include "WebView.hpp"
+#include "extra/WebView.hpp"
 
 #include "utils.hpp"
 
@@ -24,7 +24,7 @@ class DesktopUI : public UI,
     String errorDetail;
     ResizeHandle resizeHandle;
     int port = 0;
-    void* webview = nullptr;
+    WebViewHandle webview = nullptr;
 
 public:
     DesktopUI()
@@ -76,7 +76,7 @@ public:
     ~DesktopUI() override
     {
         if (webview != nullptr)
-            destroyWebView(webview);
+            webViewDestroy(webview);
     }
 
 protected:
@@ -106,7 +106,7 @@ protected:
 
                 if (webview != nullptr)
                 {
-                    destroyWebView(webview);
+                    webViewDestroy(webview);
                     webview = nullptr;
                     buttonOpenWebGui.hide();
                 }
@@ -154,7 +154,7 @@ protected:
 
             if (webview != nullptr)
             {
-                destroyWebView(webview);
+                webViewDestroy(webview);
                 webview = nullptr;
 
                 buttonOpenWebGui.hide();
@@ -162,8 +162,25 @@ protected:
             }
 
             port = nport;
-            d_stderr("webview port is %d", kPortNumOffset + port * 3 + 2);
-            webview = addWebView(getWindow().getNativeWindowHandle(), getScaleFactor(), kPortNumOffset + port * 3 + 2);
+
+            const double scaleFactor = getScaleFactor();
+
+            uint offset = kVerticalOffset * scaleFactor;
+            uint width = getWidth();
+            uint height = getHeight() - offset;
+
+            WebViewOptions opts;
+            opts.offset.y = offset;
+
+            char url[32] = {};
+            std::snprintf(url, 31, "http://127.0.0.1:%u/", kPortNumOffset + port * 3 + 2);
+
+            webview = webViewCreate(url,
+                                    getWindow().getNativeWindowHandle(),
+                                    width,
+                                    height,
+                                    scaleFactor,
+                                    opts);
 
             if (webview == nullptr)
             {
@@ -225,7 +242,7 @@ protected:
         {
         case 1:
             if (webview != nullptr)
-                reloadWebView(webview, kPortNumOffset + port * 3 + 2);
+                webViewReload(webview);
             break;
         case 2:
             openUserFilesDir();
@@ -244,18 +261,11 @@ protected:
             return;
 
         const double scaleFactor = getScaleFactor();
+        const uint offset = kVerticalOffset * scaleFactor;
+        const uint width = ev.size.getWidth();
+        const uint height = ev.size.getHeight() - offset;
 
-        uint offset = kVerticalOffset * scaleFactor;
-        uint width = ev.size.getWidth();
-        uint height = ev.size.getHeight() - offset;
-
-       #ifdef DISTRHO_OS_MAC
-        offset /= scaleFactor;
-        width /= scaleFactor;
-        height /= scaleFactor;
-       #endif
-
-        resizeWebView(webview, offset, width, height);
+        webViewResize(webview, width, height, scaleFactor);
     }
 
     // -------------------------------------------------------------------------------------------------------
