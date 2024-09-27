@@ -190,16 +190,19 @@ PLUGINS += caps-lv2
 PLUGINS += carla-plugins
 PLUGINS += chow-centaur
 PLUGINS += collisiondrive
-PLUGINS += dexed
+# FIXME crashes on close https://github.com/mod-audio/mod-desktop/actions/runs/11074280005/job/30778113748
+# PLUGINS += dexed
 PLUGINS += die-plugins
 PLUGINS += dpf-plugins
 PLUGINS += dragonfly-reverb
 PLUGINS += fomp
 # FIXME use of unsupported attributes on macOS https://github.com/mod-audio/mod-desktop/actions/runs/11073258401/job/30769392843
 # PLUGINS += gxbajatubedriver
-PLUGINS += gxknightfuzz
+# FIXME use of unsupported attributes on macOS https://github.com/mod-audio/mod-desktop/actions/runs/11074280005/job/30778113413
+# PLUGINS += gxknightfuzz
 PLUGINS += gxquack
-PLUGINS += gxslowgear
+# FIXME use of unsupported attributes on macOS https://github.com/mod-audio/mod-desktop/actions/runs/11077433225/job/30782666413
+# PLUGINS += gxslowgear
 PLUGINS += gxswitchlesswah
 PLUGINS += invada-lv2
 PLUGINS += master_me
@@ -224,7 +227,8 @@ PLUGINS += setbfree-mod
 PLUGINS += shiro-plugins
 PLUGINS += sooperlooper-lv2
 PLUGINS += tap-lv2
-PLUGINS += vallsv-midi-display
+# FIXME invalid macOS linker flags https://github.com/mod-audio/mod-desktop/actions/runs/11077667941/job/30783441664
+# PLUGINS += vallsv-midi-display
 PLUGINS += wolf-shaper
 PLUGINS += x42-fil4
 PLUGINS += x42-mclk
