@@ -46,8 +46,6 @@ else
 LINK_FLAGS += -ldl -lrt
 endif
 
-$(BUILD_DIR)/WebViewCHOC.cpp.o: BUILD_CXX_FLAGS += -std=gnu++17
-
 # ---------------------------------------------------------------------------------------------------------------------
 
 all: $(TARGETS)

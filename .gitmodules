@@ -19,6 +19,3 @@
 [submodule "src/DPF"]
 	path = src/DPF
 	url = https://github.com/DISTRHO/DPF.git
-[submodule "src/CHOC"]
-	path = src/CHOC
-	url = https://github.com/Tracktion/choc.git
