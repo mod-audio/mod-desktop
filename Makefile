@@ -190,13 +190,13 @@ PLUGINS += caps-lv2
 PLUGINS += carla-plugins
 PLUGINS += chow-centaur
 PLUGINS += collisiondrive
-# TODO needs lvtk-plugin-2
-# PLUGINS += dexed
+PLUGINS += dexed
 PLUGINS += die-plugins
 PLUGINS += dpf-plugins
 PLUGINS += dragonfly-reverb
 PLUGINS += fomp
-PLUGINS += gxbajatubedriver
+# FIXME use of unsupported attributes on macOS https://github.com/mod-audio/mod-desktop/actions/runs/11073258401/job/30769392843
+# PLUGINS += gxbajatubedriver
 PLUGINS += gxknightfuzz
 PLUGINS += gxquack
 PLUGINS += gxslowgear
