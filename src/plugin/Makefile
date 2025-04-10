@@ -32,7 +32,7 @@ USING_WEBVIEW = true
 
 include ../DPF/Makefile.plugins.mk
 
-TARGETS = features au clap lv2_sep vst2 vst3
+TARGETS = features jack au clap lv2_sep vst2 vst3
 
 BUILD_CXX_FLAGS += -DVERSION='"$(shell cat ../../VERSION)"'
 BUILD_CXX_FLAGS += -pthread

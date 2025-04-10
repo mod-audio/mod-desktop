@@ -360,21 +360,88 @@ char* const* getEvironment(const uint portBaseNum)
             CFRelease(uuidRef);
             IOObjectRelease(service);
         }
+
+        // TODO check if safe
+        // CFRelease(deviceRef);
     }
    #elif defined(_WIN32)
     // TODO
    #else
-    if (FILE* const f = fopen("/etc/machine-id", "r"))
+    char uidpath[PATH_MAX] = {};
+    std::memcpy(uidpath, dataDir, dataDirLen);
+    std::strncpy(uidpath + dataDirLen, "/device/uid", PATH_MAX - dataDirLen - 1);
+
+    // read uid from dataDir if it exists
+    if (FILE* const fu = std::fopen(uidpath, "rb"))
     {
-        if (fread(path, PATH_MAX - 1, 1, f) == 0 && strlen(path) >= 33)
+        if (std::fscanf(fu,
+                        "%02hhx:%02hhX:%02hhX:%02hhX:%02hhX:%02hhX:%02hhX:%02hhX:%02hhX:%02hhX:%02hhX:%02hhX:%02hhX:%02hhX:%02hhX:%02hhX",
+                        key,
+                        key + 1,
+                        key + 2,
+                        key + 3,
+                        key + 4,
+                        key + 5,
+                        key + 6,
+                        key + 7,
+                        key + 8,
+                        key + 9,
+                        key + 10,
+                        key + 11,
+                        key + 12,
+                        key + 13,
+                        key + 14,
+                        key + 15) != 16)
+            std::memset(key, 0, sizeof(key));
+
+        std::fclose(fu);
+    }
+
+    // if no previous uid set, generate new one
+    static constexpr const uint8_t zerokey[16] = {};
+    if (std::memcmp(key, zerokey, sizeof(key)) == 0)
+    {
+        if (FILE* const f = std::fopen("/etc/machine-id", "r"))
         {
-            for (int i=0; i<16; ++i)
+            if (std::fread(path, PATH_MAX - 1, 1, f) == 0 && std::strlen(path) >= 33)
             {
-                key[i] = char2u8(path[i*2]) << 4;
-                key[i] |= char2u8(path[i*2+1]) << 0;
+                for (int i=0; i<16; ++i)
+                {
+                    key[i] = char2u8(path[i * 2]) << 4;
+                    key[i] |= char2u8(path[i * 2 + 1]) << 0;
+                }
             }
+            std::fclose(f);
         }
-        fclose(f);
+
+        if (std::memcmp(key, zerokey, sizeof(key)) == 0)
+        {
+            // TODO generate random key
+        }
+
+        // write uid to dataDir, ensuring it is persistent
+        if (FILE* const fu = std::fopen(uidpath, "wb"))
+        {
+            std::fprintf(fu,
+                         "%02hhx:%02hhX:%02hhX:%02hhX:%02hhX:%02hhX:%02hhX:%02hhX:%02hhX:%02hhX:%02hhX:%02hhX:%02hhX:%02hhX:%02hhX:%02hhX",
+                         key[0],
+                         key[1],
+                         key[2],
+                         key[3],
+                         key[4],
+                         key[5],
+                         key[6],
+                         key[7],
+                         key[8],
+                         key[9],
+                         key[10],
+                         key[11],
+                         key[12],
+                         key[13],
+                         key[14],
+                         key[15]);
+            std::fclose(fu);
+        }
     }
    #endif
 
