@@ -134,6 +134,7 @@ define $(PKG)_CONFIGURE_CMDS
 		-DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_INSTALL_LIBDIR=lib \
 		-DCMAKE_INSTALL_PREFIX='/usr' \
+		-DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
 		--no-warn-unused-cli \
 		$$($$(PKG)_CONF_OPTS)
 endef

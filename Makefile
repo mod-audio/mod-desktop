@@ -645,7 +645,7 @@ build-midi-merger/mod-midi-merger-standalone$(APP_EXT): build-midi-merger/Makefi
 	touch $@
 
 build-midi-merger/Makefile: $(BOOTSTRAP_FILES)
-	./utils/run.sh $(PAWPAW_TARGET) cmake -S src/mod-midi-merger -B build-midi-merger
+	./utils/run.sh $(PAWPAW_TARGET) cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -S src/mod-midi-merger -B build-midi-merger
 
 # ---------------------------------------------------------------------------------------------------------------------
 
