@@ -3,16 +3,16 @@
 	url = https://github.com/wineasio/wineasio.git
 [submodule "src/mod-host"]
 	path = src/mod-host
-	url = https://github.com/moddevices/mod-host.git
+	url = https://github.com/mod-audio/mod-host.git
 [submodule "src/mod-midi-merger"]
 	path = src/mod-midi-merger
-	url = https://github.com/moddevices/mod-midi-merger.git
+	url = https://github.com/mod-audio/mod-midi-merger.git
 [submodule "src/mod-plugin-builder"]
 	path = src/mod-plugin-builder
-	url = https://github.com/moddevices/mod-plugin-builder.git
+	url = https://github.com/mod-audio/mod-plugin-builder.git
 [submodule "src/mod-ui"]
 	path = src/mod-ui
-	url = https://github.com/moddevices/mod-ui.git
+	url = https://github.com/mod-audio/mod-ui.git
 [submodule "src/PawPaw"]
 	path = src/PawPaw
 	url = https://github.com/DISTRHO/PawPaw.git
