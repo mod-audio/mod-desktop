@@ -8,6 +8,7 @@
 #include "SharedMemory.hpp"
 #include "extra/RingBuffer.hpp"
 #include "extra/Runner.hpp"
+#include "extra/ScopedDenormalDisable.hpp"
 #include "extra/ScopedPointer.hpp"
 #include "utils.hpp"
 #include "zita-resampler/resampler.h"
@@ -16,9 +17,309 @@
 
 START_NAMESPACE_DISTRHO
 
+// --------------------------------------------------------------------------------------------------------------------
+
+static constexpr const uint kAudioBufferSize = 128;
+static constexpr const uint kAudioSampleRate = 48000;
+
+static constexpr const uint kMaxMidiSize = 512 * 4;
+
+template <uint numLatentFrames>
+class LatentPlugin : public Plugin
+{
+    float* latentBuffer[DISTRHO_PLUGIN_NUM_INPUTS];
+    uint32_t latentBufferPos;
+    uint32_t latentProcessedFrames;
+
+    // whether we received enough latent audio frames
+    bool latentProcessing;
+
+protected:
+    LatentPlugin(uint32_t parameterCount, uint32_t programCount, uint32_t stateCount)
+        : Plugin(parameterCount, programCount, stateCount),
+          latentBufferPos(0),
+          latentProcessedFrames(0),
+          latentProcessing(false)
+    {
+        for (uint32_t i = 0; i < DISTRHO_PLUGIN_NUM_INPUTS; ++i)
+            latentBuffer[i] = new float[numLatentFrames];
+    }
+
+    ~LatentPlugin() override
+    {
+        for (uint32_t i = 0; i < DISTRHO_PLUGIN_NUM_INPUTS; ++i)
+            delete[] latentBuffer[i];
+    }
+
+    void activate() override
+    {
+        latentBufferPos = 0;
+        latentProcessedFrames = 0;
+        latentProcessing = false;
+    }
+
+    uint32_t preRun(const float* const* const inputs, const uint32_t frames)
+    {
+        uint32_t mutedFrames = 0;
+
+        // process audio a few frames at a time, so it always fits nicely into latent blocks
+        for (uint32_t offset = 0; offset != frames;)
+        {
+            const uint32_t framesCycle = std::min<uint32_t>(numLatentFrames - latentBufferPos, frames - offset);
+
+            // copy input data into buffer
+            for (uint32_t i = 0; i < DISTRHO_PLUGIN_NUM_INPUTS; ++i)
+                std::memcpy(latentBuffer[i] + latentBufferPos, inputs[i] + offset, framesCycle * sizeof(float));
+
+            // run latent processing once input buffer is full
+            if ((latentBufferPos += framesCycle) == numLatentFrames)
+            {
+                latentBufferPos = 0;
+                latentProcessedFrames += framesCycle;
+
+                // latent processing
+                latentRun(latentBuffer);
+            }
+
+            // we have enough audio frames in the ring buffer, can give back audio to host
+            if (! latentProcessing)
+            {
+                // mute output while still capturing audio frames
+                mutedFrames += framesCycle;
+
+                if (latentProcessedFrames >= numLatentFrames)
+                    latentProcessing = true;
+            }
+
+            offset += framesCycle;
+        }
+
+        return mutedFrames;
+    }
+
+    virtual void latentRun(float** latentBuffer) = 0;
+};
+
+// --------------------------------------------------------------------------------------------------------------------
+
+#if DISTRHO_PLUGIN_NUM_INPUTS > DISTRHO_PLUGIN_NUM_OUTPUTS
+# define DISTRHO_PLUGIN_NUM_IO DISTRHO_PLUGIN_NUM_INPUTS
+#else
+# define DISTRHO_PLUGIN_NUM_IO DISTRHO_PLUGIN_NUM_OUTPUTS
+#endif
+
+template <uint numLatentFrames, uint targetSampleRate>
+class ResampledPlugin : public LatentPlugin<numLatentFrames>
+{
+    static constexpr const uint kMaxSampleRateFactor = 32;
+    static constexpr const uint kResampleQuality = 32;
+
+    float* resampledBufferOut[DISTRHO_PLUGIN_NUM_OUTPUTS];
+
+    float* resampledTmpBufferIn[DISTRHO_PLUGIN_NUM_IO];
+    float* resampledTmpBufferOut[DISTRHO_PLUGIN_NUM_IO];
+
+    ScopedPointer<Resampler> resamplerToTarget;
+    ScopedPointer<Resampler> resamplerFromTarget;
+//     double resamplerRatio = 1.0;
+
+    AudioRingBuffer audioBufferOut;
+    uint numSamplesUntilProcessing;
+
+protected:
+    ResampledPlugin(uint32_t parameterCount, uint32_t programCount, uint32_t stateCount)
+        : LatentPlugin<numLatentFrames>(parameterCount, programCount, stateCount),
+          numSamplesUntilProcessing(0)
+    {
+        for (uint32_t i = 0; i < DISTRHO_PLUGIN_NUM_OUTPUTS; ++i)
+            resampledBufferOut[i] = new float[numLatentFrames];
+
+        for (uint32_t i = 0; i < DISTRHO_PLUGIN_NUM_IO; ++i)
+        {
+            resampledTmpBufferIn[i] = new float[numLatentFrames * kMaxSampleRateFactor];
+            resampledTmpBufferOut[i] = new float[numLatentFrames * kMaxSampleRateFactor];
+        }
+    }
+
+    ~ResampledPlugin() override
+    {
+        for (uint32_t i = 0; i < DISTRHO_PLUGIN_NUM_OUTPUTS; ++i)
+            delete[] resampledBufferOut[i];
+
+        for (uint32_t i = 0; i < DISTRHO_PLUGIN_NUM_IO; ++i)
+        {
+            delete[] resampledTmpBufferIn[i];
+            delete[] resampledTmpBufferOut[i];
+        }
+
+        audioBufferOut.deleteBuffer();
+    }
+
+    void activate() override
+    {
+        LatentPlugin<numLatentFrames>::activate();
+
+        const double sampleRate = LatentPlugin<numLatentFrames>::getSampleRate();
+
+        numSamplesUntilProcessing = d_isNotEqual<double>(sampleRate, targetSampleRate)
+                                  ? d_roundToUnsignedInt(kAudioBufferSize * (sampleRate / targetSampleRate))
+                                  : kAudioBufferSize;
+
+        LatentPlugin<numLatentFrames>::setLatency(numSamplesUntilProcessing);
+    }
+
+    void run(const float** const inputs,
+             float** const outputs,
+             const uint32_t frames,
+             const MidiEvent* const midiEvents,
+             const uint32_t midiEventCount) override
+    {
+        // optimize for non-denormal usage
+        const ScopedDenormalDisable sdd;
+        for (uint32_t c = 0; c < DISTRHO_PLUGIN_NUM_INPUTS; ++c)
+        {
+            for (uint32_t i = 0; i < frames; ++i)
+            {
+                if (!std::isfinite(inputs[c][i]))
+                    __builtin_unreachable();
+                if (!std::isfinite(outputs[c][i]))
+                    __builtin_unreachable();
+            }
+        }
+
+        const float* inputs2[DISTRHO_PLUGIN_NUM_INPUTS];
+
+        resamplerToTarget->inp_data = inputs2;
+        resamplerToTarget->out_data = resampledTmpBufferIn;
+
+        for (uint32_t offset = 0; offset != frames;)
+        {
+            const uint32_t framesCycle = std::min(numLatentFrames, frames - offset);
+            const uint32_t out_count = numLatentFrames * kMaxSampleRateFactor;
+
+            resamplerToTarget->inp_count = framesCycle;
+            resamplerToTarget->out_count = out_count;
+
+            for (uint32_t c = 0; c < DISTRHO_PLUGIN_NUM_INPUTS; ++c)
+                inputs2[c] = inputs[c] + offset;
+
+            resamplerToTarget->process();
+
+            const uint32_t numProcessedFrames = out_count - resamplerToTarget->out_count;
+
+            // TESTING
+            DISTRHO_SAFE_ASSERT(numProcessedFrames != 0);
+            DISTRHO_SAFE_ASSERT(resamplerToTarget->inp_count == 0);
+
+            if (numProcessedFrames != 0)
+            {
+                if (const uint32_t mutedFrames = LatentPlugin<numLatentFrames>::preRun(resampledTmpBufferIn, numProcessedFrames))
+                {
+                    #if 0
+                    for (uint32_t i = 0; i < DISTRHO_PLUGIN_NUM_OUTPUTS; ++i)
+                        std::memset(outputs[i], 0, mutedFrames * sizeof(float));
+                    #endif
+                }
+            }
+
+            offset += framesCycle;
+        }
+
+        if (numSamplesUntilProcessing >= frames)
+        {
+            d_stderr2("--------------- numSamplesUntilProcessing %u", numSamplesUntilProcessing);
+            numSamplesUntilProcessing -= frames;
+            for (uint32_t i = 0; i < DISTRHO_PLUGIN_NUM_OUTPUTS; ++i)
+                std::memset(outputs[i], 0, frames * sizeof(float));
+            return;
+        }
+
+        if (numSamplesUntilProcessing != 0)
+        {
+            const uint32_t start = numSamplesUntilProcessing;
+            const uint32_t remaining = frames - start; // std::min(frames - start, audioBufferOut.getNumReadableSamples());
+            numSamplesUntilProcessing = 0;
+
+            // TESTING
+            DISTRHO_SAFE_ASSERT(remaining != audioBufferOut.getNumReadableSamples());
+
+            d_stderr2("--------------- ready to process! %u %u | %u", start, remaining, audioBufferOut.getNumReadableSamples());
+
+            for (uint32_t i = 0; i < DISTRHO_PLUGIN_NUM_OUTPUTS; ++i)
+                std::memset(outputs[i], 0, start * sizeof(float));
+
+            float* offsetbuffers[2] = {
+                outputs[0] + start,
+                outputs[1] + start,
+            };
+            audioBufferOut.read(offsetbuffers, remaining);
+            return;
+        }
+
+        audioBufferOut.read(outputs, frames);
+    }
+
+    void latentRun(float** const latentBuffer) override
+    {
+        resampledRun(latentBuffer, resampledBufferOut);
+
+        const uint32_t out_count = numLatentFrames * kMaxSampleRateFactor;
+        resamplerFromTarget->inp_count = numLatentFrames;
+        resamplerFromTarget->out_count = out_count;
+        resamplerFromTarget->inp_data = resampledBufferOut;
+        resamplerFromTarget->out_data = resampledTmpBufferOut;
+
+        resamplerFromTarget->process();
+
+        const uint32_t numProcessedFrames = out_count - resamplerFromTarget->out_count;
+
+        // TESTING
+        DISTRHO_SAFE_ASSERT(numProcessedFrames != 0);
+        DISTRHO_SAFE_ASSERT(resamplerFromTarget->inp_count == 0);
+
+        if (numProcessedFrames != 0)
+            audioBufferOut.write(resampledTmpBufferOut, numProcessedFrames);
+    }
+
+    void setupResampler(const double sampleRate)
+    {
+        resamplerToTarget = new Resampler();
+        resamplerToTarget->setup(sampleRate, targetSampleRate, DISTRHO_PLUGIN_NUM_INPUTS, kResampleQuality);
+        resamplerFromTarget = new Resampler();
+        resamplerFromTarget->setup(targetSampleRate, sampleRate, DISTRHO_PLUGIN_NUM_OUTPUTS, kResampleQuality);
+//         resamplerRatio = sampleRate / targetSampleRate;
+
+        // warm-up resamplers for removing latency
+        for (uint32_t i = 0; i < DISTRHO_PLUGIN_NUM_IO; ++i)
+            std::memset(resampledTmpBufferIn[i], 0, numLatentFrames * sizeof(float));
+
+        resamplerToTarget->inp_count = numLatentFrames;
+        resamplerToTarget->out_count = numLatentFrames * kMaxSampleRateFactor;
+        resamplerToTarget->inp_data = resampledTmpBufferIn;
+        resamplerToTarget->out_data = resampledTmpBufferOut;
+        resamplerToTarget->process();
+
+        resamplerFromTarget->inp_count = numLatentFrames;
+        resamplerFromTarget->out_count = numLatentFrames * kMaxSampleRateFactor;
+        resamplerFromTarget->inp_data = resampledTmpBufferIn;
+        resamplerFromTarget->out_data = resampledTmpBufferOut;
+        resamplerFromTarget->process();
+
+        // make sure we have enough space to cover everything
+        const uint32_t bufferSize = LatentPlugin<numLatentFrames>::getBufferSize();
+        const uint32_t bufferSizeOutput = bufferSize * (targetSampleRate / sampleRate);
+
+        audioBufferOut.deleteBuffer();
+        audioBufferOut.createBuffer(DISTRHO_PLUGIN_NUM_OUTPUTS, bufferSizeOutput * 2);
+    }
+
+    // JACK process here
+    virtual void resampledRun(const float* const* inBuffer, float** outBuffer) = 0;
+};
+
 // -----------------------------------------------------------------------------------------------------------
 
-class DesktopPlugin : public Plugin,
+class DesktopPlugin : public ResampledPlugin<kAudioBufferSize, kAudioSampleRate>,
                       public Runner
 {
     static constexpr const uint kMaxMidiSize = 512 * 4;
@@ -32,20 +333,20 @@ class DesktopPlugin : public Plugin,
     std::atomic<bool> processing { false };
     bool shouldStartRunner = true;
     float parameters[kParameterCount] = {};
-    float* tempBuffers[2] = {};
-    uint numSamplesInTempBuffers = 0;
-    uint numSamplesUntilProcessing = 0;
+//     float* tempBuffers[2] = {};
+//     uint numSamplesInTempBuffers = 0;
+//     uint numSamplesUntilProcessing = 0;
     int portBaseNum = 0;
 
-    AudioRingBuffer audioBufferIn;
-    AudioRingBuffer audioBufferOut;
-    ScopedPointer<Resampler> resamplerTo48kHz;
-    ScopedPointer<Resampler> resamplerFrom48kHz;
-    double resamplerRatio = 1.0;
+//     AudioRingBuffer audioBufferIn;
+//     AudioRingBuffer audioBufferOut;
+//     ScopedPointer<Resampler> resamplerTo48kHz;
+//     ScopedPointer<Resampler> resamplerFrom48kHz;
+//     double resamplerRatio = 1.0;
 
-    double midiFrameOffset = 0.0;
-    uint8_t* midiRecvBuffer = nullptr;
-    HeapRingBuffer midiRingBuffer;
+//     double midiFrameOffset = 0.0;
+//     uint8_t* midiRecvBuffer = nullptr;
+//     HeapRingBuffer midiRingBuffer;
 
    #ifdef DISTRHO_OS_WINDOWS
     const WCHAR* envp;
@@ -55,7 +356,7 @@ class DesktopPlugin : public Plugin,
 
 public:
     DesktopPlugin()
-        : Plugin(kParameterCount, 0, 1),
+        : ResampledPlugin<kAudioBufferSize, kAudioSampleRate>(kParameterCount, 0, 1),
           envp(nullptr)
     {
         if (isDummyInstance())
@@ -118,8 +419,8 @@ public:
         mod_ui.stop();
         shm.deinit();
 
-        delete[] tempBuffers[0];
-        delete[] tempBuffers[1];
+//         delete[] tempBuffers[0];
+//         delete[] tempBuffers[1];
 
         if (envp != nullptr)
         {
@@ -396,51 +697,82 @@ protected:
                 startRunner(500);
         }
 
+        ResampledPlugin::activate();
+
         // make sure we have enough space to cover everything
-        const double sampleRate = getSampleRate();
-        const uint32_t bufferSize = getBufferSize();
-        const uint32_t bufferSizeInput = bufferSize * (sampleRate / 48000.0);
-        const uint32_t bufferSizeOutput = bufferSize * (48000.0 / sampleRate);
+//         const double sampleRate = getSampleRate();
+//         const uint32_t bufferSize = getBufferSize();
+//         const uint32_t bufferSizeInput = bufferSize * (sampleRate / 48000.0);
+//         const uint32_t bufferSizeOutput = bufferSize * (48000.0 / sampleRate);
+// 
+//         audioBufferIn.createBuffer(2, (bufferSizeInput + 8192) * 2);
+//         audioBufferOut.createBuffer(2, (bufferSizeOutput + 8192) * 2);
+// 
+//         numSamplesInTempBuffers = d_nextPowerOf2((std::max(bufferSizeInput, bufferSizeOutput) + 256) * 2);
+//         delete[] tempBuffers[0];
+//         delete[] tempBuffers[1];
+//         tempBuffers[0] = new float[numSamplesInTempBuffers];
+//         tempBuffers[1] = new float[numSamplesInTempBuffers];
+//         std::memset(tempBuffers[0], 0, sizeof(float) * numSamplesInTempBuffers);
+//         std::memset(tempBuffers[1], 0, sizeof(float) * numSamplesInTempBuffers);
 
-        audioBufferIn.createBuffer(2, (bufferSizeInput + 8192) * 2);
-        audioBufferOut.createBuffer(2, (bufferSizeOutput + 8192) * 2);
+//         numSamplesUntilProcessing = d_isNotEqual<double>(sampleRate, kAudioSampleRate)
+//                                   ? d_roundToUnsignedInt(kAudioBufferSize * (sampleRate / kAudioSampleRate))
+//                                   : kAudioBufferSize;
+// 
+//         setLatency(numSamplesUntilProcessing);
 
-        numSamplesInTempBuffers = d_nextPowerOf2((std::max(bufferSizeInput, bufferSizeOutput) + 256) * 2);
-        delete[] tempBuffers[0];
-        delete[] tempBuffers[1];
-        tempBuffers[0] = new float[numSamplesInTempBuffers];
-        tempBuffers[1] = new float[numSamplesInTempBuffers];
-        std::memset(tempBuffers[0], 0, sizeof(float) * numSamplesInTempBuffers);
-        std::memset(tempBuffers[1], 0, sizeof(float) * numSamplesInTempBuffers);
-
-        numSamplesUntilProcessing = d_isNotEqual(sampleRate, 48000.0)
-                                  ? d_roundToUnsignedInt(128.0 * (sampleRate / 48000.0))
-                                  : 128;
-
-        setLatency(numSamplesUntilProcessing);
-
-        midiFrameOffset = 0.0;
-        midiRecvBuffer = new uint8_t[kMaxMidiSize];
-        midiRingBuffer.createBuffer(kMaxMidiSize);
+//         midiFrameOffset = 0.0;
+//         midiRecvBuffer = new uint8_t[kMaxMidiSize];
+//         midiRingBuffer.createBuffer(kMaxMidiSize);
     }
 
-    void deactivate() override
-    {
-        audioBufferIn.deleteBuffer();
-        audioBufferOut.deleteBuffer();
-        midiRingBuffer.deleteBuffer();
-
-        delete[] tempBuffers[0];
-        delete[] tempBuffers[1];
-        delete[] midiRecvBuffer;
-        tempBuffers[0] = tempBuffers[1] = nullptr;
-        midiRecvBuffer = nullptr;
-        numSamplesInTempBuffers = 0;
-    }
+//     void deactivate() override
+//     {
+//         audioBufferIn.deleteBuffer();
+//         audioBufferOut.deleteBuffer();
+//         midiRingBuffer.deleteBuffer();
+// 
+//         delete[] tempBuffers[0];
+//         delete[] tempBuffers[1];
+//         delete[] midiRecvBuffer;
+//         tempBuffers[0] = tempBuffers[1] = nullptr;
+//         midiRecvBuffer = nullptr;
+//         numSamplesInTempBuffers = 0;
+//     }
 
    /**
       Run/process function for plugins without MIDI input.
     */
+#if 1
+    void resampledRun(const float* const* inBuffer, float** outBuffer)
+    {
+        if (! processing)
+        {
+            for (uint32_t i = 0; i < DISTRHO_PLUGIN_NUM_IO; ++i)
+                std::memset(outBuffer[i], 0, kAudioBufferSize * sizeof(float));
+            return;
+        }
+
+        std::memcpy(shm.data->audio, inBuffer[0], kAudioBufferSize * sizeof(float));
+        std::memcpy(shm.data->audio + kAudioBufferSize, inBuffer[1], kAudioBufferSize * sizeof(float));
+
+        // TODO
+        // shm.data->midiEventCount = shmMidiEventCount;
+
+        if (! shm.process())
+        {
+            d_stderr("shm processing failed");
+            processing = false;
+            for (uint32_t i = 0; i < DISTRHO_PLUGIN_NUM_IO; ++i)
+                std::memset(outBuffer[i], 0, kAudioBufferSize * sizeof(float));
+            return;
+        }
+
+        std::memcpy(outBuffer[0], shm.data->audio, kAudioBufferSize * sizeof(float));
+        std::memcpy(outBuffer[1], shm.data->audio + kAudioBufferSize, kAudioBufferSize * sizeof(float));
+    }
+#else
     void run(const float** const inputs, float** const outputs, const uint32_t frames,
              const MidiEvent* const midiEvents, const uint32_t midiEventCount) override
     {
@@ -623,6 +955,7 @@ protected:
                 break;
         }
     }
+#endif
 
     void sampleRateChanged(const double sampleRate) override
     {
@@ -644,23 +977,23 @@ protected:
         shouldStartRunner = true;
     }
 
-    void setupResampler(const double sampleRate)
-    {
-        if (d_isNotEqual(sampleRate, 48000.0))
-        {
-            resamplerTo48kHz = new Resampler();
-            resamplerTo48kHz->setup(sampleRate, 48000, 2, 32);
-            resamplerFrom48kHz = new Resampler();
-            resamplerFrom48kHz->setup(48000, sampleRate, 2, 32);
-            resamplerRatio = sampleRate / 48000.0;
-        }
-        else
-        {
-            resamplerRatio = 1.0;
-            resamplerTo48kHz = nullptr;
-            resamplerFrom48kHz = nullptr;
-        }
-    }
+//     void setupResampler(const double sampleRate)
+//     {
+//         if (d_isNotEqual(sampleRate, 48000.0))
+//         {
+//             resamplerTo48kHz = new Resampler();
+//             resamplerTo48kHz->setup(sampleRate, 48000, 2, 32);
+//             resamplerFrom48kHz = new Resampler();
+//             resamplerFrom48kHz->setup(48000, sampleRate, 2, 32);
+//             resamplerRatio = sampleRate / 48000.0;
+//         }
+//         else
+//         {
+//             resamplerRatio = 1.0;
+//             resamplerTo48kHz = nullptr;
+//             resamplerFrom48kHz = nullptr;
+//         }
+//     }
 
     // -------------------------------------------------------------------------------------------------------
 
