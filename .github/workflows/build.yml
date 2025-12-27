@@ -12,7 +12,7 @@ env:
   PAWPAW_SKIP_LTO: 1
   PAWPAW_SKIP_TESTS: 1
   RELEASE_OS_LINUX: ubuntu:22.04
-  RELEASE_OS_MAC: macos-12
+  RELEASE_OS_MAC: macos-14
   RELEASE_OS_WIN64: ubuntu:22.04
 
 jobs:
@@ -22,7 +22,7 @@ jobs:
         include:
           - container: debian:12
           - container: ubuntu:22.04
-          #- container: ubuntu:23.10
+          - container: ubuntu:24.04
     runs-on: ubuntu-latest
     container:
       image: ${{ matrix.container }}
@@ -150,13 +150,13 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: macos-12
+          - os: macos-14
             target: macos-10.15
-          - os: macos-12
+          - os: macos-14
             target: macos-universal-10.15
-          - os: macos-13
+          - os: macos-15
             target: macos-10.15
-          - os: macos-13
+          - os: macos-15
             target: macos-universal-10.15
     runs-on: ${{ matrix.os }}
     steps:
