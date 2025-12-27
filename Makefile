@@ -504,11 +504,11 @@ build/jack/mod-host$(SO_EXT): src/mod-host/mod-host.so
 	@mkdir -p build/jack
 	ln -sf $(abspath $<) $@
 
-build/jack/mod-midi-broadcaster$(SO_EXT): build-midi-merger/mod-midi-broadcaster$(SO_EXT)
+build/jack/mod-midi-broadcaster$(SO_EXT): build-midi-merger/mod-midi-broadcaster.so
 	@mkdir -p build/jack
 	ln -sf $(abspath $<) $@
 
-build/jack/mod-midi-merger$(SO_EXT): build-midi-merger/mod-midi-merger$(SO_EXT)
+build/jack/mod-midi-merger$(SO_EXT): build-midi-merger/mod-midi-merger.so
 	@mkdir -p build/jack
 	ln -sf $(abspath $<) $@
 
@@ -634,13 +634,10 @@ src/mod-host/mod-host.so: src/mod-host/src/*.c src/mod-host/src/*.h src/mod-host
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-build-midi-merger/mod-midi-broadcaster$(SO_EXT): build-midi-merger/mod-midi-merger-standalone$(APP_EXT)
+build-midi-merger/mod-midi-merger.so: build-midi-merger/mod-midi-broadcaster.so
 	touch $@
 
-build-midi-merger/mod-midi-merger$(SO_EXT): build-midi-merger/mod-midi-merger-standalone$(APP_EXT)
-	touch $@
-
-build-midi-merger/mod-midi-merger-standalone$(APP_EXT): build-midi-merger/Makefile src/mod-midi-merger/src/*.c src/mod-midi-merger/src/*.h
+build-midi-merger/mod-midi-broadcaster.so: build-midi-merger/Makefile src/mod-midi-merger/src/*.c src/mod-midi-merger/src/*.h
 	./utils/run.sh $(PAWPAW_TARGET) cmake --build build-midi-merger
 	touch $@
 
