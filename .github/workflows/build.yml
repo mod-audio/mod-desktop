@@ -118,6 +118,7 @@ jobs:
       - name: Build
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
+          make plugins
           make DEBUG=1
       - name: Validate plugins
         if: steps.cache.outputs.cache-hit == 'true'
