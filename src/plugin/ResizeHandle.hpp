@@ -171,7 +171,7 @@ private:
         const uint margin = 0.0 * scaleFactor;
         const uint size = handleSize * scaleFactor;
 
-        area = Rectangle<uint>(getWidth() - size - margin, 30 * scaleFactor - size, size, size);
+        area = Rectangle<uint>(getWidth() - size - margin, getHeight() - size, size, size);
 
         recreateLines(area.getX(), area.getY(), size);
     }

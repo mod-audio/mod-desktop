@@ -41,19 +41,19 @@ public:
         buttonRefresh.setId(1);
         buttonRefresh.setLabel("Refresh");
         buttonRefresh.setFontScale(scaleFactor);
-        buttonRefresh.setAbsolutePos(2 * scaleFactor, 2 * scaleFactor);
+        buttonRefresh.setAbsolutePos(2 * scaleFactor, getHeight() - 28 * scaleFactor);
         buttonRefresh.setSize(70 * scaleFactor, 26 * scaleFactor);
 
         buttonOpenUserFilesDir.setId(2);
         buttonOpenUserFilesDir.setLabel("Open User Files Dir");
         buttonOpenUserFilesDir.setFontScale(scaleFactor);
-        buttonOpenUserFilesDir.setAbsolutePos(74 * scaleFactor, 2 * scaleFactor);
+        buttonOpenUserFilesDir.setAbsolutePos(74 * scaleFactor, getHeight() - 28 * scaleFactor);
         buttonOpenUserFilesDir.setSize(140 * scaleFactor, 26 * scaleFactor);
 
         buttonOpenWebGui.setId(3);
         buttonOpenWebGui.setLabel("Open in Web Browser");
         buttonOpenWebGui.setFontScale(scaleFactor);
-        buttonOpenWebGui.setAbsolutePos(216 * scaleFactor, 2 * scaleFactor);
+        buttonOpenWebGui.setAbsolutePos(216 * scaleFactor, getHeight() - 28 * scaleFactor);
         buttonOpenWebGui.setSize(150 * scaleFactor, 26 * scaleFactor);
         buttonOpenWebGui.hide();
 
@@ -61,16 +61,8 @@ public:
         label += getPluginFormatName();
         label += " v" VERSION;
 
-        if (d_isNotEqual(scaleFactor, 1.0))
-        {
-            setGeometryConstraints((DISTRHO_UI_DEFAULT_WIDTH - 100) * scaleFactor,
-                                   DISTRHO_UI_DEFAULT_HEIGHT * scaleFactor);
-            setSize(DISTRHO_UI_DEFAULT_WIDTH * scaleFactor, DISTRHO_UI_DEFAULT_HEIGHT * scaleFactor);
-        }
-        else
-        {
-            setGeometryConstraints(DISTRHO_UI_DEFAULT_WIDTH - 100, DISTRHO_UI_DEFAULT_HEIGHT);
-        }
+        setGeometryConstraints((DISTRHO_UI_DEFAULT_WIDTH - 100) * scaleFactor,
+                               (DISTRHO_UI_DEFAULT_HEIGHT - 100) * scaleFactor);
     }
 
     ~DesktopUI() override
@@ -167,7 +159,7 @@ protected:
 
             uint offset = kVerticalOffset * scaleFactor;
             uint width = getWidth();
-            uint height = getHeight() - offset;
+            uint height = getHeight() - offset * 2;
 
             WebViewOptions opts;
             opts.offset.y = offset;
@@ -257,11 +249,16 @@ protected:
     {
         UI::onResize(ev);
 
+        const int y = ev.size.getHeight() - 28 * getScaleFactor();
+        buttonRefresh.setAbsoluteY(y);
+        buttonOpenUserFilesDir.setAbsoluteY(y);
+        buttonOpenWebGui.setAbsoluteY(y);
+
         if (webview == nullptr)
             return;
 
         const double scaleFactor = getScaleFactor();
-        const uint offset = kVerticalOffset * scaleFactor;
+        const uint offset = kVerticalOffset * scaleFactor * 2;
         const uint width = ev.size.getWidth();
         const uint height = ev.size.getHeight() - offset;
 
