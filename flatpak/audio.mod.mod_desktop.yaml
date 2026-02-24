@@ -1,0 +1,63 @@
+id: audio.mod.mod_desktop
+runtime: org.kde.Platform
+runtime-version: "5.15-23.08"
+sdk: org.kde.Sdk
+
+command: mod-desktop
+finish-args:
+  # X11 + XShm access
+  - --share=ipc
+  - --socket=fallback-x11
+  # Wayland access
+  - --socket=wayland
+  # GPU acceleration
+  - --device=dri
+  # Audio
+  - --socket=pulseaudio
+  - --filesystem=xdg-run/pipewire-0
+  - --env=JACKBRIDGE_FILENAME=/usr/lib/x86_64-linux-gnu/libjack.so.0
+  # Network access
+  - --share=network
+  # DBus access
+  - --own-name=org.freedesktop.ReserveDevice1.*
+  # Audio card access
+  - --device=all
+  # Documents (data folder) access
+  - --filesystem=xdg-documents/MOD Desktop:create
+rename-desktop-file: mod-desktop.desktop
+rename-icon: mod-desktop
+modules:
+  - name: mod-desktop
+    buildsystem: simple
+    build-commands:
+      - mkdir -p ${FLATPAK_DEST}/opt
+      - mv mod-desktop ${FLATPAK_DEST}/opt/.
+      - install -Dm755 mod-desktop.sh ${FLATPAK_DEST}/bin/mod-desktop
+      - install -Dm644 mod-desktop-git/res/mod-logo.svg ${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/mod-desktop.svg
+      - install -Dm644 mod-desktop-git/utils/linux/mod-desktop.desktop ${FLATPAK_DEST}/share/applications/mod-desktop.desktop
+      - install -Dm644 ${FLATPAK_ID}.metainfo.xml ${FLATPAK_DEST}/share/metainfo/${FLATPAK_ID}.metainfo.xml
+      - desktop-file-edit --set-key Exec --set-value "mod-desktop" ${FLATPAK_DEST}/share/applications/mod-desktop.desktop
+      - desktop-file-edit --set-key Icon --set-value "mod-desktop" ${FLATPAK_DEST}/share/applications/mod-desktop.desktop
+    sources:
+      - type: archive
+        url: https://github.com/mod-audio/mod-desktop/releases/download/0.0.12/mod-desktop-0.0.12-linux-x86_64.tar.xz
+        sha256: d1faf2094641d5ef527ee9b6012f13f1255e3c2783773939b1c2449848c7c50c
+        only-arches:
+          - x86_64
+        x-checker-data:
+          type: json
+          url: https://api.github.com/repos/ibancg/lingot/releases
+          version-query: '.[].tag_name | sub("^v"; "")'
+          url-query: '.[].assets.[] | select(.name=="mod-desktop-" + $version + "-linux-x86_64.tar.xz") | .browser_download_url'
+      - type: git
+        url: https://github.com/mod-audio/mod-desktop.git
+        commit: 86bcaa3daa854440f707b15ad10a1aaaff4b54b1
+        tag: 0.0.12
+        dest: mod-desktop-git
+      - type: script
+        dest-filename: mod-desktop.sh
+        commands:
+          - cd "/app/opt/mod-desktop"
+          - exec "$(pwd)/mod-desktop"
+      - type: file
+        path: audio.mod.mod_desktop.metainfo.xml
