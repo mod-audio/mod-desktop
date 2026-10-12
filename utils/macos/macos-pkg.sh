@@ -4,7 +4,13 @@ set -e
 
 if [ ! -d build ]; then
   echo "Please run this script from the root folder"
-  exit
+  exit 1
+fi
+
+if ! find -L build/mod-desktop.app/Contents/LV2 -mindepth 1 -maxdepth 1 -type d -name '*.lv2' -print -quit 2>/dev/null | grep -q .; then
+    echo "Refusing to package: the app bundle contains no LV2 plugins" >&2
+    echo "Run 'make PAWPAW_TARGET=<macOS-target> restage-plugins' first" >&2
+    exit 1
 fi
 
 if [ "$(uname -m)" = "x86_64" ] && [ x"${1}" != x"macos-universal-10.15" ]; then

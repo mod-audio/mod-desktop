@@ -9,6 +9,9 @@
 #include <QtCore/QDir>
 #include <QtCore/QProcess>
 #include <QtCore/QSettings>
+#include <QtCore/QStandardPaths>
+#include <QtCore/QFile>
+#include <QtCore/QDateTime>
 #include <QtCore/QTimer>
 #include <QtWidgets/QMessageBox>
 #include <QtWidgets/QMenu>
@@ -524,8 +527,10 @@ public:
                     if (devName == "JackRouter" || devName == "MOD Desktop")
                         continue;
                 }
-                else if (hostApiName != "Windows WASAPI")
+                else if (hostApiName != "Windows WASAPI" && hostApiName != "Windows WDM-KS")
                 {
+                    // MME and DirectSound stay hidden (xruns); WDM-KS is offered because the jackd
+                    // PortAudio build cannot open WASAPI capture ("Invalid device"), WDM-KS duplex works
                     continue;
                 }
                #endif
@@ -534,7 +539,7 @@ public:
                     continue;
 
                #ifdef Q_OS_WIN
-                const bool canUseSeparateInput = hostApiName == "Windows WASAPI";
+                const bool canUseSeparateInput = hostApiName == "Windows WASAPI" || hostApiName == "Windows WDM-KS";
                #else
                 const bool canUseSeparateInput = false;
                #endif
@@ -646,6 +651,20 @@ private:
                           static_cast<int>(ui.rb_device_separate->isChecked() ? kDeviceModeSeparated :
                                            ui.rb_device_noinput->isChecked() ? kDeviceModeNoInput :
                                            kDeviceModeDuplex));
+    }
+
+    // persistent copy of what the launcher starts and what jackd/mod-host print, to diagnose without a debug run
+    static void appendLauncherLog(const QString& text)
+    {
+        const QString dir(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/MOD Desktop");
+        QDir().mkpath(dir);
+        QFile f(dir + "/launcher.log");
+        if (f.open(QIODevice::Append | QIODevice::Text))
+        {
+            f.write(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss ").toUtf8());
+            f.write(text.toUtf8());
+            f.write("\n");
+        }
     }
 
     void loadSettings()
@@ -951,6 +970,14 @@ private slots:
             arguments.append(devInfo.uid);
             arguments.append("-C");
             arguments.append(inputs[ui.cb_input->currentIndex()]);
+           #ifdef Q_OS_WIN
+            if (devInfo.uid.section("::", 0, 0) != inputs[ui.cb_input->currentIndex()].section("::", 0, 0))
+            {
+                showErrorMessage(tr("The input device must use the same audio API as the output device "
+                                    "(%1).").arg(devInfo.uid.section("::", 0, 0)));
+                return;
+            }
+           #endif
         }
         // playback only
         else
@@ -982,6 +1009,7 @@ private slots:
 
         ui.text_host->appendPlainText("Starting jackd using:");
         ui.text_host->appendPlainText(arguments.join(" "));
+        appendLauncherLog("Starting jackd using: " + arguments.join(" "));
 
         setStarting();
         processHost.start();
@@ -1034,6 +1062,26 @@ private slots:
         ui.rb_device_duplex->setEnabled(devInfo.canInput);
         ui.rb_device_separate->setEnabled(devInfo.canUseSeparateInput);
         ui.rb_device_noinput->setEnabled(true);
+
+       #ifdef Q_OS_WIN
+        // a separate input must belong to the same host API as the output device
+        if (devInfo.canUseSeparateInput)
+        {
+            const QString api(devInfo.uid.section("::", 0, 0) + "::");
+            const int current = ui.cb_input->currentIndex();
+            if (current < 0 || current >= inputs.size() || ! inputs[current].startsWith(api))
+            {
+                for (int i = 0; i < inputs.size(); ++i)
+                {
+                    if (inputs[i].startsWith(api))
+                    {
+                        ui.cb_input->setCurrentIndex(i);
+                        break;
+                    }
+                }
+            }
+        }
+       #endif
 
         if (! (ui.rb_device_duplex->isChecked() || ui.rb_device_separate->isChecked() || ui.rb_device_noinput->isChecked()))
             ui.rb_device_duplex->setChecked(true);
@@ -1117,6 +1165,7 @@ private slots:
             return;
 
         ui.text_host->appendPlainText(text);
+        appendLauncherLog(QString::fromUtf8(text));
 
         if (text.contains("Internal client mod-host successfully loaded"))
         {

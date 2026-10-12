@@ -115,6 +115,8 @@ Source: "..\..\build\html\img\*.png"; DestDir: "{app}\html\img"; Flags: ignoreve
 Source: "..\..\build\html\img\*.svg"; DestDir: "{app}\html\img"; Flags: ignoreversion;
 Source: "..\..\build\html\img\cloud\*.png"; DestDir: "{app}\html\img\cloud"; Flags: ignoreversion;
 Source: "..\..\build\html\img\favicon\*.png"; DestDir: "{app}\html\img\favicon"; Flags: ignoreversion;
+Source: "..\..\build\html\img\favicon\*.json"; DestDir: "{app}\html\img\favicon"; Flags: ignoreversion;
+Source: "..\..\build\html\img\desktop-app\*.jpg"; DestDir: "{app}\html\img\desktop-app"; Flags: ignoreversion;
 Source: "..\..\build\html\img\icons\*.css"; DestDir: "{app}\html\img\icons"; Flags: ignoreversion;
 Source: "..\..\build\html\img\icons\*.svg"; DestDir: "{app}\html\img\icons"; Flags: ignoreversion;
 Source: "..\..\build\html\img\icons\*.png"; DestDir: "{app}\html\img\icons"; Flags: ignoreversion;
@@ -122,9 +124,11 @@ Source: "..\..\build\html\img\icons\25\*.png"; DestDir: "{app}\html\img\icons\25
 Source: "..\..\build\html\img\icons\36\*.png"; DestDir: "{app}\html\img\icons\36"; Flags: ignoreversion;
 Source: "..\..\build\html\img\social\*.png"; DestDir: "{app}\html\img\social"; Flags: ignoreversion;
 Source: "..\..\build\html\include\*.html"; DestDir: "{app}\html\include"; Flags: ignoreversion;
+Source: "..\..\build\html\include\desktop-app\*.html"; DestDir: "{app}\html\include\desktop-app"; Flags: ignoreversion;
 Source: "..\..\build\html\js\*.js"; DestDir: "{app}\html\js"; Flags: ignoreversion;
 Source: "..\..\build\html\js\utils\*.js"; DestDir: "{app}\html\js\utils"; Flags: ignoreversion;
 Source: "..\..\build\html\js\lib\*.js"; DestDir: "{app}\html\js\lib"; Flags: ignoreversion;
+Source: "..\..\build\html\js\lib\t3k\*"; DestDir: "{app}\html\js\lib\t3k"; Flags: ignoreversion recursesubdirs;
 Source: "..\..\build\html\js\lib\slick\*.js"; DestDir: "{app}\html\js\lib\slick"; Flags: ignoreversion;
 Source: "..\..\build\html\js\lib\slick\*.css"; DestDir: "{app}\html\js\lib\slick"; Flags: ignoreversion;
 Source: "..\..\build\html\js\lib\slick\*.gif"; DestDir: "{app}\html\js\lib\slick"; Flags: ignoreversion;

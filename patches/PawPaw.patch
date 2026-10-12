@@ -1,0 +1,76 @@
+diff --git a/patches/jack2/jack2-macos-client-thread-kill.patch b/patches/jack2/jack2-macos-client-thread-kill.patch
+new file mode 100644
+index 0000000..4bb78db
+--- /dev/null
++++ b/patches/jack2/jack2-macos-client-thread-kill.patch
+@@ -0,0 +1,48 @@
++--- a/macosx/JackMachThread.mm
+++++ b/macosx/JackMachThread.mm
++@@ -162,8 +162,15 @@
++ {
++     if (fThread != (jack_native_thread_t)NULL)  { // If thread has been started
++         jack_log("JackMachThread::Kill");
+++        // Request cancellation first, then abort the mach thread so a blocking __ulock_wait returns EINTR.
+++        // JackMachFutex::Wait/TimedWait call pthread_testcancel() before each wait and on EINTR, so the thread
+++        // exits and can be joined. Without the join the client's RT thread kept cycling while the client was
+++        // being closed and crashed on the deallocated futex (mod-desktop on macOS, pedalboard load/reset).
+++        pthread_cancel(fThread);
++         mach_port_t machThread = pthread_mach_thread_np(fThread);
++         int res = (thread_abort(machThread) == KERN_SUCCESS) ? 0 : -1;
+++        void* status;
+++        pthread_join(fThread, &status);
++         fStatus = kIdle;
++         fThread = (jack_native_thread_t)NULL;
++         return res;
++--- a/macosx/JackMachFutex.cpp
+++++ b/macosx/JackMachFutex.cpp
++@@ -24,6 +24,7 @@
++ #include "JackError.h"
++ #include "promiscuous.h"
++ #include <cerrno>
+++#include <pthread.h>
++ #include <fcntl.h>
++ #include <stdio.h>
++ #include <sys/mman.h>
++@@ -124,6 +125,9 @@
++         if (__sync_bool_compare_and_swap(&fFutex->futex, 1, 0))
++             return true;
++ 
+++        // a cancelled thread (JackMachThread::Kill) must not enter or resume the wait
+++        pthread_testcancel();
+++
++         if (__ulock_wait(operation, fFutex, 0, UINT32_MAX) != 0)
++             if (errno != EAGAIN && errno != EINTR)
++                 return false;
++@@ -153,6 +157,9 @@
++         if (__sync_bool_compare_and_swap(&fFutex->futex, 1, 0))
++             return true;
++ 
+++        // a cancelled thread (JackMachThread::Kill) must not enter or resume the wait
+++        pthread_testcancel();
+++
++         if (__ulock_wait(operation, fFutex, 0, usec) != 0)
++             if (errno != EAGAIN && errno != EINTR)
++                 return false;
+diff --git a/setup/functions.sh b/setup/functions.sh
+index a1acba8..e141946 100644
+--- a/setup/functions.sh
++++ b/setup/functions.sh
+@@ -27,6 +27,8 @@ function download() {
+             local tmprepodir="${PAWPAW_TMPDIR}/${dlname}-${version}"
+             rm -rf "${tmprepodir}"
+             git clone --recursive "${dlbaseurl}" "${tmprepodir}"
++            # pinned commit may no longer be reachable from any branch; fetch the exact object first
++            git -C "${tmprepodir}" fetch origin "${version}" || true
+             git -C "${tmprepodir}" checkout "${version}"
+             git -C "${tmprepodir}" submodule update --recursive --init
+             tar --exclude=".git" -czf "${dlfile}" -C "${PAWPAW_TMPDIR}" "${dlname}-${version}"
+@@ -99,6 +101,8 @@ function git_clone() {
+         local tmprepodir="${PAWPAW_TMPDIR}/${dlname}-${hash}"
+         rm -rf "${tmprepodir}"
+         git clone --recursive "${repourl}" "${tmprepodir}"
++        # pinned commit may no longer be reachable from any branch; fetch the exact object first
++        git -C "${tmprepodir}" fetch origin "${hash}" || true
+         git -C "${tmprepodir}" checkout "${hash}"
+         git -C "${tmprepodir}" submodule update --recursive --init
+         tar --exclude=".git" -czf "${dlfile}" -C "${PAWPAW_TMPDIR}" "${dlname}-${hash}"

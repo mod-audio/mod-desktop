@@ -1,0 +1,136 @@
+diff --git a/bootstrap-common.sh b/bootstrap-common.sh
+index dd88e52..ec77347 100755
+--- a/bootstrap-common.sh
++++ b/bootstrap-common.sh
+@@ -247,10 +247,14 @@ fi
+ # ---------------------------------------------------------------------------------------------------------------------
+ # pkgconfig
+ 
+-export EXTRA_CFLAGS="-Wno-int-conversion"
++# Xcode 26 defaults to GNU C23, where `bool` is a keyword.  The bundled
++# historic GLib in pkg-config uses `bool` as a struct member, so retain the
++# GNU C17 dialect required by that dependency on current macOS runners.
++export EXTRA_CFLAGS="-std=gnu17 -Wno-int-conversion"
+ 
+ download pkg-config "${PKG_CONFIG_VERSION}" "${PKG_CONFIG_URL}"
+ build_host_autoconf pkg-config "${PKG_CONFIG_VERSION}" "--enable-indirect-deps --with-internal-glib --with-pc-path=${TARGET_PKG_CONFIG_PATH}"
++unset EXTRA_CFLAGS
+ 
+ if [ -n "${TOOLCHAIN_PREFIX_}" ] && [ ! -e "${PAWPAW_PREFIX}/bin/${TOOLCHAIN_PREFIX_}pkg-config" ]; then
+     ln -s pkg-config "${PAWPAW_PREFIX}/bin/${TOOLCHAIN_PREFIX_}pkg-config"
+diff --git a/bootstrap-mod.sh b/bootstrap-mod.sh
+index 3ad26cf..84b2dc8 100755
+--- a/bootstrap-mod.sh
++++ b/bootstrap-mod.sh
+@@ -265,10 +265,20 @@ fi
+ 
+ export AGGDRAW_FREETYPE_ROOT="${PAWPAW_PREFIX}"
+ export LDSHARED="${TARGET_CXX}"
++# distutils applies CFLAGS to aggdraw's C++ source; gnu17 is a C-only dialect.
++AGGDRAW_CFLAGS="${CFLAGS}"
++export CFLAGS="${CFLAGS//-std=gnu17/}"
+ 
+ download aggdraw "${AGGDRAW_VERSION}" "https://files.pythonhosted.org/packages/ef/29/fddf555c68920bb0aff977425af786226db2a78379e706951ff32b4492ef"
++# Its single extension contains C++ sources, while this Python's saved CFLAGS
++# include the C-only gnu17 mode needed during the historic pkg-config build.
++if ! grep -q "get_config_vars" "${PAWPAW_BUILDDIR}/aggdraw-${AGGDRAW_VERSION}/setup.py"; then
++    patch_file aggdraw "${AGGDRAW_VERSION}" "setup.py" 's/from distutils.sysconfig import get_config_var/from distutils.sysconfig import get_config_var, get_config_vars; get_config_vars()["CFLAGS"] = get_config_var("CFLAGS").replace("-std=gnu17", "")/'
++fi
+ build_python aggdraw "${AGGDRAW_VERSION}"
+ 
++export CFLAGS="${AGGDRAW_CFLAGS}"
++unset AGGDRAW_CFLAGS
+ unset AGGDRAW_FREETYPE_ROOT
+ unset LDSHARED
+ 
+diff --git a/bootstrap-python.sh b/bootstrap-python.sh
+index dcb22f2..aa037fe 100755
+--- a/bootstrap-python.sh
++++ b/bootstrap-python.sh
+@@ -157,6 +157,8 @@ function build_conf_python() {
+     export CFLAGS="$(echo ${CFLAGS} | sed -e 's/-ffast-math//')"
+     export CFLAGS="$(echo ${CFLAGS} | sed -e 's/-fno-finite-math-only//')"
+     export CFLAGS="$(echo ${CFLAGS} | sed -e 's/-fno-strict-aliasing -flto//')"
++    # Python extension setup.py files reuse CFLAGS for C++ sources; gnu17 is a C-only dialect.
++    export CFLAGS="$(echo ${CFLAGS} | sed -e 's/-std=gnu17//')"
+     export LDFLAGS="$(echo ${LDFLAGS} | sed -e 's/-Wl,-dead_strip,-dead_strip_dylibs,-x//')"
+     export LDFLAGS="$(echo ${LDFLAGS} | sed -e 's/-Wl,--gc-sections,--no-undefined//')"
+     export LDFLAGS="$(echo ${LDFLAGS} | sed -e 's/-Wl,-O1//')"
+diff --git a/bootstrap-qt.sh b/bootstrap-qt.sh
+index a6981ab..cc5cda8 100755
+--- a/bootstrap-qt.sh
++++ b/bootstrap-qt.sh
+@@ -339,6 +339,10 @@ if [ "${MACOS_UNIVERSAL}" -eq 1 ]; then
+     patch_file qtbase${qtsuffix} ${QT5_VERSION} "mkspecs/common/macx.conf" 's/QT_MAC_SDK_VERSION_MIN = 10.13/QT_MAC_SDK_VERSION_MIN = 10.12/'
+     patch_file qtbase${qtsuffix} ${QT5_VERSION} "mkspecs/common/macx.conf" 's/QT_MAC_SDK_VERSION_MAX = 10.15/QT_MAC_SDK_VERSION_MAX = 10.12/'
+     patch_file qtbase${qtsuffix} ${QT5_VERSION} "mkspecs/features/toolchain.prf" 's/-arch $$QMAKE_APPLE_DEVICE_ARCHS/-arch arm64/'
++    # AGL was removed from contemporary macOS SDKs; Qt 5.12 only needs OpenGL.framework.
++    patch_file qtbase${qtsuffix} ${QT5_VERSION} "mkspecs/common/mac.conf" 's|/System/Library/Frameworks/OpenGL.framework/Headers \\|/System/Library/Frameworks/OpenGL.framework/Headers|'
++    patch_file qtbase${qtsuffix} ${QT5_VERSION} "mkspecs/common/mac.conf" '/AGL\.framework\/Headers/d'
++    patch_file qtbase${qtsuffix} ${QT5_VERSION} "mkspecs/common/mac.conf" 's/ -framework AGL//'
+ elif [ "${MACOS_10_15}" -eq 1 ]; then
+     patch_file qtbase${qtsuffix} ${QT5_VERSION} "mkspecs/common/macx.conf" 's/QT_MAC_SDK_VERSION_MIN = 10.13/QT_MAC_SDK_VERSION_MIN = 10.15/'
+ elif [ "${MACOS}" -eq 1 ]; then
+diff --git a/setup/env.sh b/setup/env.sh
+index 5d40fe7..0e6d84a 100644
+--- a/setup/env.sh
++++ b/setup/env.sh
+@@ -176,8 +176,18 @@ fi
+ # anything that talks to db should have this
+ BUILD_FLAGS+=" -DHAVE_MIXED_SIZE_ADDRESSING"
+ 
+-TARGET_CFLAGS="${BUILD_FLAGS}"
+-TARGET_CXXFLAGS="${BUILD_FLAGS} -fvisibility-inlines-hidden"
++# Apple Clang 21 defaults C++ to C++23. PawPaw's historic C++ dependencies
++# need a pre-C++17 dialect because they use the removed `register` keyword.
++# The historic GLib in the host pkg-config build needs GNU C17, which
++# bootstrap-common scopes to that C-only build instead of leaking into C++
++# plugin and Python-extension compilation.
++if [ "${MACOS}" -eq 1 ]; then
++    TARGET_CFLAGS="${BUILD_FLAGS}"
++    TARGET_CXXFLAGS="${BUILD_FLAGS} -std=gnu++14 -fvisibility-inlines-hidden"
++else
++    TARGET_CFLAGS="${BUILD_FLAGS}"
++    TARGET_CXXFLAGS="${BUILD_FLAGS} -fvisibility-inlines-hidden"
++fi
+ 
+ ## link flags
+ 
+diff --git a/setup/functions.sh b/setup/functions.sh
+index e141946..bc9476c 100644
+--- a/setup/functions.sh
++++ b/setup/functions.sh
+@@ -27,8 +27,10 @@ function download() {
+             local tmprepodir="${PAWPAW_TMPDIR}/${dlname}-${version}"
+             rm -rf "${tmprepodir}"
+             git clone --recursive "${dlbaseurl}" "${tmprepodir}"
+-            # pinned commit may no longer be reachable from any branch; fetch the exact object first
+-            git -C "${tmprepodir}" fetch origin "${version}" || true
++            # Some historic MOD pins are retained by GitHub but are no longer
++            # reachable from the repository's default refs. Fetch the requested
++            # object explicitly before checking it out.
++            git -C "${tmprepodir}" fetch origin "${version}"
+             git -C "${tmprepodir}" checkout "${version}"
+             git -C "${tmprepodir}" submodule update --recursive --init
+             tar --exclude=".git" -czf "${dlfile}" -C "${PAWPAW_TMPDIR}" "${dlname}-${version}"
+@@ -101,8 +103,9 @@ function git_clone() {
+         local tmprepodir="${PAWPAW_TMPDIR}/${dlname}-${hash}"
+         rm -rf "${tmprepodir}"
+         git clone --recursive "${repourl}" "${tmprepodir}"
+-        # pinned commit may no longer be reachable from any branch; fetch the exact object first
+-        git -C "${tmprepodir}" fetch origin "${hash}" || true
++        # Fetch the pinned object explicitly: an ordinary clone only fetches
++        # advertised refs and can omit a still-retrievable historic commit.
++        git -C "${tmprepodir}" fetch origin "${hash}"
+         git -C "${tmprepodir}" checkout "${hash}"
+         git -C "${tmprepodir}" submodule update --recursive --init
+         tar --exclude=".git" -czf "${dlfile}" -C "${PAWPAW_TMPDIR}" "${dlname}-${hash}"
+@@ -505,6 +508,8 @@ function build_python() {
+     export CFLAGS="$(echo ${CFLAGS} | sed -e 's/-ffast-math//')"
+     export CFLAGS="$(echo ${CFLAGS} | sed -e 's/-fno-finite-math-only//')"
+     export CFLAGS="$(echo ${CFLAGS} | sed -e 's/-fno-strict-aliasing -flto//')"
++    # Python extension build scripts may compile C++ sources with CFLAGS.
++    export CFLAGS="$(echo ${CFLAGS} | sed -e 's/-std=gnu17//')"
+     export CXXFLAGS="$(echo ${CXXFLAGS} | sed -e 's/-fvisibility=hidden//')"
+     export CXXFLAGS="$(echo ${CXXFLAGS} | sed -e 's/-fvisibility-inlines-hidden//')"
+     export CXXFLAGS="$(echo ${CXXFLAGS} | sed -e 's/-fdata-sections -ffunction-sections//')"

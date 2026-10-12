@@ -73,7 +73,24 @@ TARGET_CFLAGS = $(CFLAGS)
 TARGET_CXXFLAGS = $(CXXFLAGS)
 TARGET_LDFLAGS = $(LDFLAGS)
 
+# Plugins that call pthread_mutex_* directly (zita-resampler in the brummer10 family): link winpthreads on Windows.
+WIN_PTHREAD_PLUGINS = gxsfp gxsvt gxvbass gxvmk2d gxvstb metaltone rumor fatfrog
+ifeq ($(WINDOWS),true)
+ifneq ($(filter $(pkgname),$(WIN_PTHREAD_PLUGINS)),)
+TARGET_LDFLAGS += -lwinpthread
+endif
+endif
+
 TARGET_DIR = $(PAWPAW_PREFIX)
+INSTALL = install
+
+# Rust (davemollen dm-* family): the recipes expect MOD_PLUGIN_BUILDER_RUST_* from the device builder.
+ifneq ($(MACOS),true)
+ifneq ($(WINDOWS),true)
+MOD_PLUGIN_BUILDER_RUST_TARGET = x86_64-unknown-linux-gnu
+MOD_PLUGIN_BUILDER_RUST_BUILD_FLAGS = --release --target $(MOD_PLUGIN_BUILDER_RUST_TARGET)
+endif
+endif
 
 TARGET_MAKE_ENV = env
 TARGET_MAKE_ENV += CFLAGS="$(TARGET_CFLAGS)"
@@ -175,7 +192,10 @@ STAMP_BUILT      = $($(PKG)_BUILDDIR)/.stamp_built
 STAMP_INSTALLED  = $($(PKG)_BUILDDIR)/.stamp_installed
 STAMP_PINSTALLED = $($(PKG)_BUILDDIR)/.stamp_post_installed
 
-PAWPAW_TMPDIR = /tmp/PawPaw
+# The top-level build invokes this makefile once per plugin in parallel.
+# Give each invocation an isolated Git workspace so one download cannot delete
+# another invocation's clone while it is receiving objects.
+PAWPAW_TMPDIR = /tmp/PawPaw-$(PKG)
 PAWPAW_TMPNAME = git-dl
 
 all: $(STAMP_PINSTALLED)
@@ -210,6 +230,14 @@ ifeq ($(MACOS),true)
 		sed -i -e 's/-Wl,-z,relro,-z,now//g' $(p);)
 	$(foreach p,$(wildcard $($(PKG)_BUILDDIR)/*/makefile),\
 		sed -i -e 's/-Wl,-z,noexecstack//g' $(p);)
+	# GCC-only flags and ELF section attributes that Apple clang rejects (gx*, MetalTone, FatFrog, airwindows, cabsim loader)
+	$(foreach p,$(wildcard $($(PKG)_BUILDDIR)/Makefile $($(PKG)_BUILDDIR)/*/[Mm]akefile $($(PKG)_BUILDDIR)/*/*/[Mm]akefile $($(PKG)_BUILDDIR)/*/*.mk $($(PKG)_BUILDDIR)/CMakeLists.txt),\
+		sed -i -e 's/-ffat-lto-objects//g' -e 's/-floop-parallelize-all//g' -e 's/-ftree-loop-distribution//g' -e 's/-Wl,-z,defs//g' $(p);)
+	grep -rlF '__attribute__((section(".rt.' '$($(PKG)_BUILDDIR)' --include='*.h' --include='*.cc' --include='*.cpp' --include='*.hpp' | \
+		xargs sed -i -e 's/__attribute__((section("\.rt\.[a-z]*")))//' || true
+else ifeq ($(WINDOWS),true)
+	$(foreach p,$(wildcard $($(PKG)_BUILDDIR)/Makefile $($(PKG)_BUILDDIR)/*/[Mm]akefile),\
+		sed -i -e 's/-Wl,-z,noexecstack//g' -e 's/-Wl,-z,relro,-z,now//g' -e 's/-Wl,-z,defs//g' $(p);)
 endif
 	$($(PKG)_BUILD_CMDS)
 	touch $@
@@ -240,6 +268,7 @@ $($(PKG)_DLFILE):
 ifeq ($($(PKG)_SITE_METHOD),git)
 	rm -rf '$(PAWPAW_TMPDIR)'
 	git clone '$($(PKG)_SITE)' '$(PAWPAW_TMPDIR)/$(PAWPAW_TMPNAME)' && \
+	git -C '$(PAWPAW_TMPDIR)/$(PAWPAW_TMPNAME)' fetch origin '$($(PKG)_VERSION)' && \
 	git -C '$(PAWPAW_TMPDIR)/$(PAWPAW_TMPNAME)' checkout '$($(PKG)_VERSION)' && \
 	touch '$(PAWPAW_TMPDIR)/$(PAWPAW_TMPNAME)/.gitmodules' && \
 	sed -i 's|git://github.com/|https://github.com/|g' '$(PAWPAW_TMPDIR)/$(PAWPAW_TMPNAME)/.gitmodules' && \

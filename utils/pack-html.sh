@@ -123,6 +123,7 @@ cp ${ROOT}/src/mod-ui/html/img/cloud/*.png ./img/cloud/
 
 mkdir ./img/favicon
 cp ${ROOT}/src/mod-ui/html/img/favicon/*.png ./img/favicon/
+cp ${ROOT}/src/mod-ui/html/img/favicon/manifest.json ./img/favicon/
 
 mkdir ./img/icons
 cp ${ROOT}/src/mod-ui/html/img/icons/*.css ./img/icons/
@@ -138,8 +139,14 @@ cp ${ROOT}/src/mod-ui/html/img/icons/36/*.png ./img/icons/36/
 mkdir ./img/social
 cp ${ROOT}/src/mod-ui/html/img/social/*.png ./img/social/
 
+# Desktop upsell panels use their own local JPEG assets (only present on a Desktop mod-ui branch).
+if [ -d ${ROOT}/src/mod-ui/html/img/desktop-app ]; then
+  mkdir ./img/desktop-app
+  cp ${ROOT}/src/mod-ui/html/img/desktop-app/*.jpg ./img/desktop-app/
+fi
+
 mkdir ./include
-cp ${ROOT}/src/mod-ui/html/include/*.html ./include/
+cp -a ${ROOT}/src/mod-ui/html/include/. ./include/
 
 mkdir ./js
 cp ${ROOT}/src/mod-ui/html/js/*.js ./js/
@@ -149,6 +156,10 @@ cp ${ROOT}/src/mod-ui/html/js/utils/*.js ./js/utils/
 
 mkdir ./js/lib
 cp ${ROOT}/src/mod-ui/html/js/lib/*.js ./js/lib/
+
+# Tone3000 client (community implementation on master): whole directory, it has nested logo assets.
+cp -a ${ROOT}/src/mod-ui/html/js/lib/t3k ./js/lib/
+rm -f ./js/lib/t3k/*.d.ts
 
 mkdir ./js/lib/slick
 cp ${ROOT}/src/mod-ui/html/js/lib/slick/*.js ./js/lib/slick/
