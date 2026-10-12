@@ -1,0 +1,1796 @@
+diff --git a/plugins/package/fluidplug/fluidplug.mk b/plugins/package/fluidplug/fluidplug.mk
+index e060940..2cbe52e 100644
+--- a/plugins/package/fluidplug/fluidplug.mk
++++ b/plugins/package/fluidplug/fluidplug.mk
+@@ -12,6 +12,12 @@ FLUIDPLUG_BUNDLES = Black_Pearl_4A.lv2 Black_Pearl_4B.lv2 Black_Pearl_5.lv2 Flui
+ 
+ FLUIDPLUG_TARGET_MAKE = $(TARGET_MAKE_ENV) $(TARGET_CONFIGURE_OPTS) $(MAKE) NOOPT=true -C $(@D)
+ 
++define FLUIDPLUG_POST_PATCH_HOOK
++	# The macOS system wget cannot validate the current LinuxAudio certificate chain.
++	# curl uses the system trust store and preserves the upstream basename with -O.
++	sed -i -e 's|wget https://|curl -fLO https://|g' $(@D)/Makefile
++endef
++
+ define FLUIDPLUG_BUILD_CMDS
+ 	$(FLUIDPLUG_TARGET_MAKE)
+ endef
+diff --git a/plugins/package/mod-ams-lv2/mod-ams-lv2.mk b/plugins/package/mod-ams-lv2/mod-ams-lv2.mk
+index ee1fbf0..75998ab 100644
+--- a/plugins/package/mod-ams-lv2/mod-ams-lv2.mk
++++ b/plugins/package/mod-ams-lv2/mod-ams-lv2.mk
+@@ -26,7 +26,7 @@ define MOD_AMS_LV2_BUILD_CMDS
+ endef
+ 
+ define MOD_AMS_LV2_INSTALL_TARGET_CMDS
+-        (cd $(@D); $(MOD_AMS_LV2_TARGET_WAF) install --destdir=$(TARGET_DIR))
++        (cd $(@D); $(MOD_AMS_LV2_TARGET_WAF) install -j1 --destdir=$(TARGET_DIR))
+ endef
+ 
+ $(eval $(generic-package))
+diff --git a/plugins/package/mod-audio-mixers/01_fix-win-mac-build.patch b/plugins/package/mod-audio-mixers/01_fix-win-mac-build.patch
+deleted file mode 100644
+index 7f05f77..0000000
+--- a/plugins/package/mod-audio-mixers/01_fix-win-mac-build.patch
++++ /dev/null
+@@ -1,25 +0,0 @@
+-diff --git a/Makefile b/Makefile
+-index 715cc27..4afe655 100644
+---- a/Makefile
+-+++ b/Makefile
+-@@ -28,7 +28,7 @@ plugins:
+- 	$(MAKE) all -C plugins/$(MIXER_MONO)
+- 	$(MAKE) all -C plugins/$(MIXER_STEREO)
+- 
+--ifneq ($(CROSS_COMPILING),true)
+-+ifneq ($(CROSS_COMPILING_DONT_CARE),true)
+- gen: plugins dpf/utils/lv2_ttl_generator
+- 	#@$(CURDIR)/dpf/utils/generate-ttl.sh
+- 	cp plugins/$(MIXER_MONO)/lv2-data/* bin/$(MIXER_MONO).lv2/
+-@@ -48,9 +48,9 @@ install:
+- 	install -d $(DESTDIR)$(libdir)/lv2/$(MIXER_MONO).lv2
+- 	install -d $(DESTDIR)$(libdir)/lv2/$(MIXER_STEREO).lv2
+- 
+--	install -m 644 bin/$(MIXER_MONO).lv2/*.so  $(DESTDIR)$(libdir)/lv2/$(MIXER_MONO).lv2/
+-+	install -m 644 bin/$(MIXER_MONO).lv2/*$(LIB_EXT) $(DESTDIR)$(libdir)/lv2/$(MIXER_MONO).lv2/
+- 	install -m 644 bin/$(MIXER_MONO).lv2/*.ttl $(DESTDIR)$(libdir)/lv2/$(MIXER_MONO).lv2/
+--	install -m 644 bin/$(MIXER_STEREO).lv2/*.so  $(DESTDIR)$(libdir)/lv2/$(MIXER_STEREO).lv2/
+-+	install -m 644 bin/$(MIXER_STEREO).lv2/*$(LIB_EXT) $(DESTDIR)$(libdir)/lv2/$(MIXER_STEREO).lv2/
+- 	install -m 644 bin/$(MIXER_STEREO).lv2/*.ttl $(DESTDIR)$(libdir)/lv2/$(MIXER_STEREO).lv2/
+- 
+- 
+diff --git a/plugins/package/mod-audio-mixers/02_fix-mac-build.patch b/plugins/package/mod-audio-mixers/02_fix-mac-build.patch
+deleted file mode 100644
+index 60d46d4..0000000
+--- a/plugins/package/mod-audio-mixers/02_fix-mac-build.patch
++++ /dev/null
+@@ -1,14 +0,0 @@
+-diff --git a/Makefile b/Makefile
+-index 4afe655..9cd20b5 100644
+---- a/Makefile
+-+++ b/Makefile
+-@@ -33,9 +33,6 @@ gen: plugins dpf/utils/lv2_ttl_generator
+- 	#@$(CURDIR)/dpf/utils/generate-ttl.sh
+- 	cp plugins/$(MIXER_MONO)/lv2-data/* bin/$(MIXER_MONO).lv2/
+- 	cp plugins/$(MIXER_STEREO)/lv2-data/* bin/$(MIXER_STEREO).lv2/
+--ifeq ($(MACOS),true)
+--	@$(CURDIR)/dpf/utils/generate-vst-bundles.sh
+--endif
+- 
+- dpf/utils/lv2_ttl_generator:
+- 	$(MAKE) -C dpf/utils/lv2-ttl-generator
+diff --git a/plugins/package/mod-audio-mixers/mod-audio-mixers.mk b/plugins/package/mod-audio-mixers/mod-audio-mixers.mk
+index f4fb074..80f1c03 100644
+--- a/plugins/package/mod-audio-mixers/mod-audio-mixers.mk
++++ b/plugins/package/mod-audio-mixers/mod-audio-mixers.mk
+@@ -4,7 +4,7 @@
+ #
+ ######################################
+ 
+-MOD_AUDIO_MIXERS_VERSION = 80367aa5a2ddacb19dbd85ca14123ed48fdbac6c
++MOD_AUDIO_MIXERS_VERSION = cc3ca5f7f11af5558b936c03013ba38262ccf766
+ MOD_AUDIO_MIXERS_SITE = https://github.com/moddevices/mod-audio-mixer-lv2.git
+ MOD_AUDIO_MIXERS_SITE_METHOD = git
+ MOD_AUDIO_MIXERS_BUNDLES = mod-mixer.lv2 mod-mixer-stereo.lv2
+diff --git a/plugins/package/mod-distortion/mod-distortion.mk b/plugins/package/mod-distortion/mod-distortion.mk
+index c895d55..c749dc2 100644
+--- a/plugins/package/mod-distortion/mod-distortion.mk
++++ b/plugins/package/mod-distortion/mod-distortion.mk
+@@ -4,7 +4,7 @@
+ #
+ ######################################
+ 
+-MOD_DISTORTION_VERSION = e672d5feb9d631798e3d56eb96e8958c3d2c6821
++MOD_DISTORTION_VERSION = 7e9d1580b057a3d7de9d96bd8165aad81d64f229
+ MOD_DISTORTION_SITE = $(call github,moddevices,mod-distortion,$(MOD_DISTORTION_VERSION))
+ MOD_DISTORTION_BUNDLES = mod-bigmuff.lv2 mod-ds1.lv2
+ 
+diff --git a/plugins/package/mod-pitchshifter/01_fix-win32-build.patch b/plugins/package/mod-pitchshifter/01_fix-win32-build.patch
+deleted file mode 100644
+index 177a967..0000000
+--- a/plugins/package/mod-pitchshifter/01_fix-win32-build.patch
++++ /dev/null
+@@ -1,157 +0,0 @@
+-diff --git a/2Voices/src/2Voices.cpp b/2Voices/src/2Voices.cpp
+-index e466cac..647e379 100644
+---- a/2Voices/src/2Voices.cpp
+-+++ b/2Voices/src/2Voices.cpp
+-@@ -3,6 +3,8 @@
+- #include "PitchShifterClasses.h"
+- #include "GainClass.h"
+- 
+-+#undef IN
+-+
+- /**********************************************************************************************************************************************************/
+- 
+- #define PLUGIN_URI "http://moddevices.com/plugins/mod-devel/2Voices"
+-@@ -203,4 +205,4 @@ void TwoVoices::cleanup(LV2_Handle instance)
+- const void* TwoVoices::extension_data(const char* uri)
+- {
+-     return NULL;
+--}
+-\ No newline at end of file
+-+}
+-diff --git a/Capo/src/Capo.cpp b/Capo/src/Capo.cpp
+-index 8116cc6..9cd8b2f 100644
+---- a/Capo/src/Capo.cpp
+-+++ b/Capo/src/Capo.cpp
+-@@ -3,6 +3,9 @@
+- #include "PitchShifterClasses.h"
+- #include "GainClass.h"
+- 
+-+#undef IN
+-+#undef OUT
+-+
+- /**********************************************************************************************************************************************************/
+- 
+- #define PLUGIN_URI "http://moddevices.com/plugins/mod-devel/Capo"
+-@@ -184,4 +187,4 @@ void Capo::cleanup(LV2_Handle instance)
+- const void* Capo::extension_data(const char* uri)
+- {
+-     return NULL;
+--}
+-\ No newline at end of file
+-+}
+-diff --git a/Drop/src/Drop.cpp b/Drop/src/Drop.cpp
+-index a8dbb7c..352287a 100644
+---- a/Drop/src/Drop.cpp
+-+++ b/Drop/src/Drop.cpp
+-@@ -3,6 +3,9 @@
+- #include "PitchShifterClasses.h"
+- #include "GainClass.h"
+- 
+-+#undef IN
+-+#undef OUT
+-+
+- /**********************************************************************************************************************************************************/
+- 
+- #define PLUGIN_URI "http://moddevices.com/plugins/mod-devel/Drop"
+-@@ -185,4 +188,4 @@ void Drop::cleanup(LV2_Handle instance)
+- const void* Drop::extension_data(const char* uri)
+- {
+-     return NULL;
+--}
+-\ No newline at end of file
+-+}
+-diff --git a/Harmonizer/src/Harmonizer.cpp b/Harmonizer/src/Harmonizer.cpp
+-index 8cbf270..f346ed6 100644
+---- a/Harmonizer/src/Harmonizer.cpp
+-+++ b/Harmonizer/src/Harmonizer.cpp
+-@@ -5,6 +5,8 @@
+- #include "HarmonizerLib.h"
+- #include "GainClass.h"
+- 
+-+#undef IN
+-+
+- /**********************************************************************************************************************************************************/
+- 
+- #define PLUGIN_URI "http://moddevices.com/plugins/mod-devel/Harmonizer"
+-@@ -210,4 +212,4 @@ void Harmonizer::cleanup(LV2_Handle instance)
+- const void* Harmonizer::extension_data(const char* uri)
+- {
+-     return NULL;
+--}
+-\ No newline at end of file
+-+}
+-diff --git a/Harmonizer2/src/Harmonizer2.cpp b/Harmonizer2/src/Harmonizer2.cpp
+-index 7ac19db..e990daf 100644
+---- a/Harmonizer2/src/Harmonizer2.cpp
+-+++ b/Harmonizer2/src/Harmonizer2.cpp
+-@@ -5,6 +5,8 @@
+- #include "HarmonizerLib.h"
+- #include "GainClass.h"
+- 
+-+#undef IN
+-+
+- /**********************************************************************************************************************************************************/
+- 
+- #define PLUGIN_URI "http://moddevices.com/plugins/mod-devel/Harmonizer2"
+-@@ -227,4 +229,4 @@ void Harmonizer2::cleanup(LV2_Handle instance)
+- const void* Harmonizer2::extension_data(const char* uri)
+- {
+-     return NULL;
+--}
+-\ No newline at end of file
+-+}
+-diff --git a/HarmonizerCS/src/HarmonizerCS.cpp b/HarmonizerCS/src/HarmonizerCS.cpp
+-index 4799142..a384c1a 100644
+---- a/HarmonizerCS/src/HarmonizerCS.cpp
+-+++ b/HarmonizerCS/src/HarmonizerCS.cpp
+-@@ -5,6 +5,8 @@
+- #include "HarmonizerLib.h"
+- #include "GainClass.h"
+- 
+-+#undef IN
+-+
+- /**********************************************************************************************************************************************************/
+- 
+- #define PLUGIN_URI "http://moddevices.com/plugins/mod-devel/HarmonizerCS"
+-@@ -219,4 +221,4 @@ void HarmonizerCS::cleanup(LV2_Handle instance)
+- const void* HarmonizerCS::extension_data(const char* uri)
+- {
+-     return NULL;
+--}
+-\ No newline at end of file
+-+}
+-diff --git a/SuperCapo/src/SuperCapo.cpp b/SuperCapo/src/SuperCapo.cpp
+-index 9482ab0..1f0f4d6 100644
+---- a/SuperCapo/src/SuperCapo.cpp
+-+++ b/SuperCapo/src/SuperCapo.cpp
+-@@ -3,6 +3,9 @@
+- #include "PitchShifterClasses.h"
+- #include "GainClass.h"
+- 
+-+#undef IN
+-+#undef OUT
+-+
+- /**********************************************************************************************************************************************************/
+- 
+- #define PLUGIN_URI "http://moddevices.com/plugins/mod-devel/SuperCapo"
+-diff --git a/SuperWhammy/src/SuperWhammy.cpp b/SuperWhammy/src/SuperWhammy.cpp
+-index 6ad9cb4..021fcf3 100644
+---- a/SuperWhammy/src/SuperWhammy.cpp
+-+++ b/SuperWhammy/src/SuperWhammy.cpp
+-@@ -3,6 +3,9 @@
+- #include "PitchShifterClasses.h"
+- #include "GainClass.h"
+- 
+-+#undef IN
+-+#undef OUT
+-+
+- /**********************************************************************************************************************************************************/
+- 
+- #define PLUGIN_URI "http://moddevices.com/plugins/mod-devel/SuperWhammy"
+-@@ -201,4 +204,4 @@ void SuperWhammy::cleanup(LV2_Handle instance)
+- const void* SuperWhammy::extension_data(const char* uri)
+- {
+-     return NULL;
+--}
+-\ No newline at end of file
+-+}
+diff --git a/plugins/package/mod-pitchshifter/02_fix-macos-build.patch b/plugins/package/mod-pitchshifter/02_fix-macos-build.patch
+deleted file mode 100644
+index cbf55f9..0000000
+--- a/plugins/package/mod-pitchshifter/02_fix-macos-build.patch
++++ /dev/null
+@@ -1,19 +0,0 @@
+-diff --git a/Makefile.mk b/Makefile.mk
+-index edb804b..0e9d6d8 100644
+---- a/Makefile.mk
+-+++ b/Makefile.mk
+-@@ -3,8 +3,12 @@
+- CXX ?= g++
+- 
+- # flags
+--CXXFLAGS += -O3 -ffast-math -Wall -fPIC -DPIC $(shell pkg-config --cflags fftw3f) -I. -I../Shared_files
+--LDFLAGS += -shared -Wl,-O1 -Wl,--as-needed -Wl,--no-undefined -Wl,--strip-all $(shell pkg-config --libs fftw3f) -larmadillo -lm
+-+CXXFLAGS += -O3 -ffast-math -Wall -fPIC -DPIC $(shell pkg-config --cflags fftw3f) -I. -I../Shared_files -std=gnu++11
+-+LDFLAGS += -shared $(shell pkg-config --libs fftw3f) -larmadillo -lm
+-+
+-+ifneq ($(MACOS),true)
+-+LDFLAGS += -Wl,-O1,--as-needed,--no-undefined,--strip-all
+-+endif
+- 
+- ifneq ($(NOOPT),true)
+- CXXFLAGS += -mtune=generic -msse -msse2 -mfpmath=sse
+diff --git a/plugins/package/mod-pitchshifter/mod-pitchshifter.mk b/plugins/package/mod-pitchshifter/mod-pitchshifter.mk
+index a5b2c05..303ad1c 100644
+--- a/plugins/package/mod-pitchshifter/mod-pitchshifter.mk
++++ b/plugins/package/mod-pitchshifter/mod-pitchshifter.mk
+@@ -4,7 +4,7 @@
+ #
+ ######################################
+ 
+-MOD_PITCHSHIFTER_VERSION = efd26e6b02ddf9683ffae00a59ad72b5ab59d585
++MOD_PITCHSHIFTER_VERSION = c9cc41f1bb272e71c85892d9eefca1ddee520106
+ MOD_PITCHSHIFTER_SITE = $(call github,moddevices,mod-pitchshifter,$(MOD_PITCHSHIFTER_VERSION))
+ MOD_PITCHSHIFTER_DEPENDENCIES = armadillo fftw-single host-python host-python-mpmath
+ ifneq ($(BR2_arm)$(BR2_aarch64)$(BR2_x86_64),y)
+diff --git a/plugins/package/mod-utilities/01_fix-win-mac-install.patch b/plugins/package/mod-utilities/01_fix-win-mac-install.patch
+deleted file mode 100644
+index ac41ef6..0000000
+--- a/plugins/package/mod-utilities/01_fix-win-mac-install.patch
++++ /dev/null
+@@ -1,52 +0,0 @@
+-diff --git a/SwitchBox_1-2/Makefile b/SwitchBox_1-2/Makefile
+-index 97b5ca0..6274c69 100644
+---- a/SwitchBox_1-2/Makefile
+-+++ b/SwitchBox_1-2/Makefile
+-@@ -39,7 +39,7 @@ clean:
+- install: build
+- 	install -d $(DESTDIR)$(PREFIX)/lib/lv2/$(NAME).lv2
+- 
+--	install -m 644 $(NAME).lv2/*.so  $(DESTDIR)$(PREFIX)/lib/lv2/$(NAME).lv2/
+-+	install -m 644 $(NAME).lv2/*$(LIB_EXT) $(DESTDIR)$(PREFIX)/lib/lv2/$(NAME).lv2/
+- 	install -m 644 $(NAME).lv2/*.ttl $(DESTDIR)$(PREFIX)/lib/lv2/$(NAME).lv2/
+- 
+- # --------------------------------------------------------------
+-diff --git a/SwitchBox_1-2_st/Makefile b/SwitchBox_1-2_st/Makefile
+-index 4ca3c29..36b35fb 100644
+---- a/SwitchBox_1-2_st/Makefile
+-+++ b/SwitchBox_1-2_st/Makefile
+-@@ -39,7 +39,7 @@ clean:
+- install: build
+- 	install -d $(DESTDIR)$(PREFIX)/lib/lv2/$(NAME).lv2
+- 
+--	install -m 644 $(NAME).lv2/*.so  $(DESTDIR)$(PREFIX)/lib/lv2/$(NAME).lv2/
+-+	install -m 644 $(NAME).lv2/*$(LIB_EXT) $(DESTDIR)$(PREFIX)/lib/lv2/$(NAME).lv2/
+- 	install -m 644 $(NAME).lv2/*.ttl $(DESTDIR)$(PREFIX)/lib/lv2/$(NAME).lv2/
+- 
+- # --------------------------------------------------------------
+-diff --git a/SwitchBox_2-1/Makefile b/SwitchBox_2-1/Makefile
+-index 655aeaa..47a0189 100644
+---- a/SwitchBox_2-1/Makefile
+-+++ b/SwitchBox_2-1/Makefile
+-@@ -39,7 +39,7 @@ clean:
+- install: build
+- 	install -d $(DESTDIR)$(PREFIX)/lib/lv2/$(NAME).lv2
+- 
+--	install -m 644 $(NAME).lv2/*.so  $(DESTDIR)$(PREFIX)/lib/lv2/$(NAME).lv2/
+-+	install -m 644 $(NAME).lv2/*$(LIB_EXT) $(DESTDIR)$(PREFIX)/lib/lv2/$(NAME).lv2/
+- 	install -m 644 $(NAME).lv2/*.ttl $(DESTDIR)$(PREFIX)/lib/lv2/$(NAME).lv2/
+- 
+- # --------------------------------------------------------------
+-diff --git a/SwitchBox_2-1_st/Makefile b/SwitchBox_2-1_st/Makefile
+-index a991ec2..f7c7ccf 100644
+---- a/SwitchBox_2-1_st/Makefile
+-+++ b/SwitchBox_2-1_st/Makefile
+-@@ -39,7 +39,7 @@ clean:
+- install: build
+- 	install -d $(DESTDIR)$(PREFIX)/lib/lv2/$(NAME).lv2
+- 
+--	install -m 644 $(NAME).lv2/*.so  $(DESTDIR)$(PREFIX)/lib/lv2/$(NAME).lv2/
+-+	install -m 644 $(NAME).lv2/*$(LIB_EXT) $(DESTDIR)$(PREFIX)/lib/lv2/$(NAME).lv2/
+- 	install -m 644 $(NAME).lv2/*.ttl $(DESTDIR)$(PREFIX)/lib/lv2/$(NAME).lv2/
+- 
+- # --------------------------------------------------------------
+diff --git a/plugins/package/mod-utilities/02_fix-buffer-size.patch b/plugins/package/mod-utilities/02_fix-buffer-size.patch
+deleted file mode 100644
+index 1f6b2a3..0000000
+--- a/plugins/package/mod-utilities/02_fix-buffer-size.patch
++++ /dev/null
+@@ -1,91 +0,0 @@
+-diff --git a/CrossOver2/src/CrossOver2.cpp b/CrossOver2/src/CrossOver2.cpp
+-index 57ab1c2..7cc22ec 100644
+---- a/CrossOver2/src/CrossOver2.cpp
+-+++ b/CrossOver2/src/CrossOver2.cpp
+-@@ -8,7 +8,7 @@
+- /**********************************************************************************************************************************************************/
+- 
+- #define PLUGIN_URI "http://moddevices.com/plugins/mod-devel/CrossOver2"
+--#define TAMANHO_DO_BUFFER 1024
+-+#define TAMANHO_DO_BUFFER 8192 /* FIXME use options interface */
+- enum {IN, OUT_1, OUT_2, FREQ, GAIN_1, GAIN_2, ORDER, PLUGIN_PORT_COUNT};
+- 
+- /**********************************************************************************************************************************************************/
+-diff --git a/CrossOver3/src/CrossOver3.cpp b/CrossOver3/src/CrossOver3.cpp
+-index de045be..5f3aa67 100644
+---- a/CrossOver3/src/CrossOver3.cpp
+-+++ b/CrossOver3/src/CrossOver3.cpp
+-@@ -8,7 +8,7 @@
+- /**********************************************************************************************************************************************************/
+- 
+- #define PLUGIN_URI "http://moddevices.com/plugins/mod-devel/CrossOver3"
+--#define TAMANHO_DO_BUFFER 1024
+-+#define TAMANHO_DO_BUFFER 8192 /* FIXME use options interface */
+- enum {IN, OUT_1, OUT_2, OUT_3, FREQ_1, FREQ_2, GAIN_1, GAIN_2, GAIN_3, ORDER, PLUGIN_PORT_COUNT};
+- 
+- /**********************************************************************************************************************************************************/
+-diff --git a/Gain/src/Gain.cpp b/Gain/src/Gain.cpp
+-index a629600..abf3171 100644
+---- a/Gain/src/Gain.cpp
+-+++ b/Gain/src/Gain.cpp
+-@@ -7,7 +7,7 @@
+- /**********************************************************************************************************************************************************/
+- 
+- #define PLUGIN_URI "http://moddevices.com/plugins/mod-devel/Gain"
+--#define TAMANHO_DO_BUFFER 1024
+-+#define TAMANHO_DO_BUFFER 8192 /* FIXME use options interface */
+- enum {IN, OUT_1, GAIN, PLUGIN_PORT_COUNT};
+- 
+- /**********************************************************************************************************************************************************/
+-diff --git a/Gain2x2/src/Gain2x2.cpp b/Gain2x2/src/Gain2x2.cpp
+-index e490043..ecf5cce 100644
+---- a/Gain2x2/src/Gain2x2.cpp
+-+++ b/Gain2x2/src/Gain2x2.cpp
+-@@ -7,7 +7,7 @@
+- /**********************************************************************************************************************************************************/
+- 
+- #define PLUGIN_URI "http://moddevices.com/plugins/mod-devel/Gain2x2"
+--#define TAMANHO_DO_BUFFER 1024
+-+#define TAMANHO_DO_BUFFER 8192 /* FIXME use options interface */
+- enum {IN_1, IN_2, OUT_1, OUT_2, GAIN, PLUGIN_PORT_COUNT};
+- 
+- /**********************************************************************************************************************************************************/
+-diff --git a/HighPassFilter/src/HighPassFilter.cpp b/HighPassFilter/src/HighPassFilter.cpp
+-index 99398c5..9515999 100644
+---- a/HighPassFilter/src/HighPassFilter.cpp
+-+++ b/HighPassFilter/src/HighPassFilter.cpp
+-@@ -8,7 +8,7 @@
+- /**********************************************************************************************************************************************************/
+- 
+- #define PLUGIN_URI "http://moddevices.com/plugins/mod-devel/HighPassFilter"
+--#define TAMANHO_DO_BUFFER 1024
+-+#define TAMANHO_DO_BUFFER 8192 /* FIXME use options interface */
+- enum {IN, OUT_1, FREQ, ORDER, PLUGIN_PORT_COUNT};
+- 
+- /**********************************************************************************************************************************************************/
+-diff --git a/LowPassFilter/src/LowPassFilter.cpp b/LowPassFilter/src/LowPassFilter.cpp
+-index ba7f14b..e4e22bb 100644
+---- a/LowPassFilter/src/LowPassFilter.cpp
+-+++ b/LowPassFilter/src/LowPassFilter.cpp
+-@@ -8,7 +8,7 @@
+- /**********************************************************************************************************************************************************/
+- 
+- #define PLUGIN_URI "http://moddevices.com/plugins/mod-devel/LowPassFilter"
+--#define TAMANHO_DO_BUFFER 1024
+-+#define TAMANHO_DO_BUFFER 8192 /* FIXME use options interface */
+- enum {IN, OUT_1, FREQ, ORDER, PLUGIN_PORT_COUNT};
+- 
+- /**********************************************************************************************************************************************************/
+-diff --git a/BandPassFilter/src/BandPassFilter.cpp b/BandPassFilter/src/BandPassFilter.cpp
+-index 8b71d95..b1c0c8f 100644
+---- a/BandPassFilter/src/BandPassFilter.cpp
+-+++ b/BandPassFilter/src/BandPassFilter.cpp
+-@@ -8,7 +8,7 @@
+- /**********************************************************************************************************************************************************/
+- 
+- #define PLUGIN_URI "http://moddevices.com/plugins/mod-devel/BandPassFilter"
+--#define TAMANHO_DO_BUFFER 1024
+-+#define TAMANHO_DO_BUFFER 8192 /* FIXME use options interface */
+- enum {IN, OUT_1, FREQ, Q, ORDER, PLUGIN_PORT_COUNT};
+- 
+- /**********************************************************************************************************************************************************/
+diff --git a/plugins/package/mod-utilities/mod-utilities.mk b/plugins/package/mod-utilities/mod-utilities.mk
+index 12d1c0b..5c07058 100644
+--- a/plugins/package/mod-utilities/mod-utilities.mk
++++ b/plugins/package/mod-utilities/mod-utilities.mk
+@@ -4,7 +4,7 @@
+ #
+ ######################################
+ 
+-MOD_UTILITIES_VERSION = 41ed0163ffcb8a1d75ce6b7ae9e38e24c0944414
++MOD_UTILITIES_VERSION = 46b77692ee76b670388516b1936a43175e90dbf9
+ MOD_UTILITIES_SITE = $(call github,moddevices,mod-utilities,$(MOD_UTILITIES_VERSION))
+ MOD_UTILITIES_DEPENDENCIES = alsa-lib
+ MOD_UTILITIES_BUNDLES = mod-bypass.lv2 mod-bpf.lv2 mod-crossover2.lv2 mod-crossover3.lv2 mod-gain.lv2 mod-gain2x2.lv2 mod-hpf.lv2 mod-lpf.lv2 mod-switchbox2.lv2 mod-toggleswitch4.lv2 switchbox_1-2_st.lv2 switchbox_2-1.lv2 switchbox_2-1_st.lv2
+diff --git a/plugins/package/neural-amp-modeler-lv2/01_mono-buffered-optimizations.patch b/plugins/package/neural-amp-modeler-lv2/01_mono-buffered-optimizations.patch
+deleted file mode 100644
+index 1943328..0000000
+--- a/plugins/package/neural-amp-modeler-lv2/01_mono-buffered-optimizations.patch
++++ /dev/null
+@@ -1,1095 +0,0 @@
+-diff --git a/deps/NeuralAmpModelerCore/NAM/convnet.cpp b/deps/NeuralAmpModelerCore/NAM/convnet.cpp
+-index 20b2af9..6d55303 100644
+---- a/deps/NeuralAmpModelerCore/NAM/convnet.cpp
+-+++ b/deps/NeuralAmpModelerCore/NAM/convnet.cpp
+-@@ -116,12 +116,11 @@ convnet::ConvNet::ConvNet(const double loudness, const int channels, const std::
+-   this->_reset_anti_pop_();
+- }
+- 
+--void convnet::ConvNet::_process_core_()
+-+void convnet::ConvNet::_process_core_(NAM_SAMPLE* outputs, const int num_frames)
+- {
+--  this->_update_buffers_();
+-+  this->_update_buffers_(outputs, num_frames);
+-   // Main computation!
+-   const long i_start = this->_input_buffer_offset;
+--  const long num_frames = this->_input_post_gain.size();
+-   const long i_end = i_start + num_frames;
+-   // TODO one unnecessary copy :/ #speed
+-   for (auto i = i_start; i < i_end; i++)
+-@@ -132,9 +131,9 @@ void convnet::ConvNet::_process_core_()
+-   this->_head.process_(this->_block_vals[this->_blocks.size()], this->_head_output, i_start, i_end);
+-   // Copy to required output array (TODO tighten this up)
+-   for (int s = 0; s < num_frames; s++)
+--    this->_core_dsp_output[s] = this->_head_output(s);
+-+    outputs[s] = this->_head_output(s);
+-   // Apply anti-pop
+--  this->_anti_pop_();
+-+  this->_anti_pop_(outputs, num_frames);
+- }
+- 
+- void convnet::ConvNet::_verify_params(const int channels, const std::vector<int>& dilations, const bool batchnorm,
+-@@ -143,9 +142,9 @@ void convnet::ConvNet::_verify_params(const int channels, const std::vector<int>
+-   // TODO
+- }
+- 
+--void convnet::ConvNet::_update_buffers_()
+-+void convnet::ConvNet::_update_buffers_(NAM_SAMPLE* outputs, const int num_frames)
+- {
+--  this->Buffer::_update_buffers_();
+-+  this->Buffer::_update_buffers_(outputs, num_frames);
+-   const size_t buffer_size = this->_input_buffer.size();
+-   this->_block_vals[0].resize(1, buffer_size);
+-   for (size_t i = 1; i < this->_block_vals.size(); i++)
+-@@ -172,17 +171,17 @@ void convnet::ConvNet::_rewind_buffers_()
+-   this->Buffer::_rewind_buffers_();
+- }
+- 
+--void convnet::ConvNet::_anti_pop_()
+-+void convnet::ConvNet::_anti_pop_(NAM_SAMPLE* outputs, const int num_frames)
+- {
+-   if (this->_anti_pop_countdown >= this->_anti_pop_ramp)
+-     return;
+-   const float slope = 1.0f / float(this->_anti_pop_ramp);
+--  for (size_t i = 0; i < this->_core_dsp_output.size(); i++)
+-+  for (int i = 0; i < num_frames; i++)
+-   {
+-     if (this->_anti_pop_countdown >= this->_anti_pop_ramp)
+-       break;
+-     const float gain = std::max(slope * float(this->_anti_pop_countdown), float(0.0));
+--    this->_core_dsp_output[i] *= gain;
+-+    outputs[i] *= gain;
+-     this->_anti_pop_countdown++;
+-   }
+- }
+-diff --git a/deps/NeuralAmpModelerCore/NAM/convnet.h b/deps/NeuralAmpModelerCore/NAM/convnet.h
+-index baad344..793d705 100644
+---- a/deps/NeuralAmpModelerCore/NAM/convnet.h
+-+++ b/deps/NeuralAmpModelerCore/NAM/convnet.h
+-@@ -77,10 +77,10 @@ protected:
+-   _Head _head;
+-   void _verify_params(const int channels, const std::vector<int>& dilations, const bool batchnorm,
+-                       const size_t actual_params);
+--  void _update_buffers_() override;
+-+  void _update_buffers_(NAM_SAMPLE* outputs, const int num_frames) override;
+-   void _rewind_buffers_() override;
+- 
+--  void _process_core_() override;
+-+  void _process_core_(NAM_SAMPLE* outputs, const int num_frames) override;
+- 
+-   // The net starts with random parameters inside; we need to wait for a full
+-   // receptive field to pass through before we can count on the output being
+-@@ -88,7 +88,7 @@ protected:
+-   // start.
+-   long _anti_pop_countdown;
+-   const long _anti_pop_ramp = 100;
+--  void _anti_pop_();
+-+  void _anti_pop_(NAM_SAMPLE* outputs, const int num_frames);
+-   void _reset_anti_pop_();
+- };
+- }; // namespace convnet
+-diff --git a/deps/NeuralAmpModelerCore/NAM/dsp.cpp b/deps/NeuralAmpModelerCore/NAM/dsp.cpp
+-index a4057ef..bb7f3be 100644
+---- a/deps/NeuralAmpModelerCore/NAM/dsp.cpp
+-+++ b/deps/NeuralAmpModelerCore/NAM/dsp.cpp
+-@@ -32,15 +32,12 @@ DSP::DSP(const double loudness, const double expected_sample_rate)
+- {
+- }
+- 
+--void DSP::process(NAM_SAMPLE** inputs, NAM_SAMPLE** outputs, const int num_channels, const int num_frames,
+--                  const double input_gain, const double output_gain,
+-+void DSP::process(NAM_SAMPLE* outputs, const int num_frames,
+-                   const std::unordered_map<std::string, double>& params)
+- {
+-   this->_get_params_(params);
+--  this->_apply_input_level_(inputs, num_channels, num_frames, input_gain);
+--  this->_ensure_core_dsp_output_ready_();
+--  this->_process_core_();
+--  this->_apply_output_level_(outputs, num_channels, num_frames, output_gain);
+-+  this->_process_core_(outputs, num_frames);
+-+  this->_apply_output_level_(outputs, num_frames);
+- }
+- 
+- void DSP::finalize_(const int num_frames) {}
+-@@ -60,38 +57,15 @@ void DSP::_get_params_(const std::unordered_map<std::string, double>& input_para
+-   }
+- }
+- 
+--void DSP::_apply_input_level_(NAM_SAMPLE** inputs, const int num_channels, const int num_frames, const double gain)
+-+void DSP::_apply_output_level_(NAM_SAMPLE* outputs, const int num_frames)
+- {
+--  // Must match exactly; we're going to use the size of _input_post_gain later
+--  // for num_frames.
+--  if ((int)this->_input_post_gain.size() != num_frames)
+--    this->_input_post_gain.resize(num_frames);
+--  // MONO ONLY
+--  const int channel = 0;
+--  for (int i = 0; i < num_frames; i++)
+--    this->_input_post_gain[i] = float(gain * inputs[channel][i]);
+--}
+--
+--void DSP::_ensure_core_dsp_output_ready_()
+--{
+--  if (this->_core_dsp_output.size() < this->_input_post_gain.size())
+--    this->_core_dsp_output.resize(this->_input_post_gain.size());
+--}
+--
+--void DSP::_process_core_()
+--{
+--  // Default implementation is the null operation
+--  for (size_t i = 0; i < this->_input_post_gain.size(); i++)
+--    this->_core_dsp_output[i] = this->_input_post_gain[i];
+--}
+-+  if (this->mNormalizeOutputLoudness)
+-+  {
+-+    const NAM_SAMPLE loudnessGain = pow(10.0, -(this->mLoudness - TARGET_DSP_LOUDNESS) / 20.0);
+- 
+--void DSP::_apply_output_level_(NAM_SAMPLE** outputs, const int num_channels, const int num_frames, const double gain)
+--{
+--  const double loudnessGain = pow(10.0, -(this->mLoudness - TARGET_DSP_LOUDNESS) / 20.0);
+--  const double finalGain = this->mNormalizeOutputLoudness ? gain * loudnessGain : gain;
+--  for (int c = 0; c < num_channels; c++)
+-     for (int s = 0; s < num_frames; s++)
+--      outputs[c][s] = (NAM_SAMPLE)(finalGain * this->_core_dsp_output[s]);
+-+      outputs[s] *= loudnessGain;
+-+  }
+- }
+- 
+- // Buffer =====================================================================
+-@@ -119,9 +93,8 @@ void Buffer::_set_receptive_field(const int new_receptive_field, const int input
+-   this->_reset_input_buffer();
+- }
+- 
+--void Buffer::_update_buffers_()
+-+void Buffer::_update_buffers_(NAM_SAMPLE* outputs, const int num_frames)
+- {
+--  const long int num_frames = this->_input_post_gain.size();
+-   // Make sure that the buffer is big enough for the receptive field and the
+-   // frames needed!
+-   {
+-@@ -141,7 +114,7 @@ void Buffer::_update_buffers_()
+-     this->_rewind_buffers_();
+-   // Put the new samples into the input buffer
+-   for (long i = this->_input_buffer_offset, j = 0; j < num_frames; i++, j++)
+--    this->_input_buffer[i] = this->_input_post_gain[j];
+-+    this->_input_buffer[i] = outputs[j];
+-   // And resize the output buffer:
+-   this->_output_buffer.resize(num_frames);
+- }
+-@@ -195,16 +168,16 @@ Linear::Linear(const double loudness, const int receptive_field, const bool _bia
+-   this->_bias = _bias ? params[receptive_field] : (float)0.0;
+- }
+- 
+--void Linear::_process_core_()
+-+void Linear::_process_core_(NAM_SAMPLE* outputs, const int num_frames)
+- {
+--  this->Buffer::_update_buffers_();
+-+  this->Buffer::_update_buffers_(outputs, num_frames);
+- 
+-   // Main computation!
+--  for (size_t i = 0; i < this->_input_post_gain.size(); i++)
+-+  for (int i = 0; i < num_frames; i++)
+-   {
+-     const size_t offset = this->_input_buffer_offset - this->_weight.size() + i + 1;
+-     auto input = Eigen::Map<const Eigen::VectorXf>(&this->_input_buffer[offset], this->_receptive_field);
+--    this->_core_dsp_output[i] = this->_bias + this->_weight.dot(input);
+-+    outputs[i] = this->_bias + this->_weight.dot(input);
+-   }
+- }
+- 
+-diff --git a/deps/NeuralAmpModelerCore/NAM/dsp.h b/deps/NeuralAmpModelerCore/NAM/dsp.h
+-index 776ce6a..35052ff 100644
+---- a/deps/NeuralAmpModelerCore/NAM/dsp.h
+-+++ b/deps/NeuralAmpModelerCore/NAM/dsp.h
+-@@ -57,8 +57,7 @@ public:
+-   // 3. The core DSP algorithm is run (This is what should probably be
+-   //    overridden in subclasses).
+-   // 4. The output level is applied and the result stored to `output`.
+--  virtual void process(NAM_SAMPLE** inputs, NAM_SAMPLE** outputs, const int num_channels, const int num_frames,
+--                       const double input_gain, const double output_gain,
+-+  virtual void process(NAM_SAMPLE* outputs, const int num_frames,
+-                        const std::unordered_map<std::string, double>& params);
+-   // Anything to take care of before next buffer comes in.
+-   // For example:
+-@@ -82,10 +81,6 @@ protected:
+-   std::unordered_map<std::string, double> _params;
+-   // If the params have changed since the last buffer was processed:
+-   bool _stale_params;
+--  // Where to store the samples after applying input gain
+--  std::vector<float> _input_post_gain;
+--  // Location for the output of the core DSP algorithm.
+--  std::vector<float> _core_dsp_output;
+- 
+-   // Methods
+- 
+-@@ -94,20 +89,11 @@ protected:
+-   // (TODO use "listener" approach)
+-   void _get_params_(const std::unordered_map<std::string, double>& input_params);
+- 
+--  // Apply the input gain
+--  // Result populates this->_input_post_gain
+--  void _apply_input_level_(NAM_SAMPLE** inputs, const int num_channels, const int num_frames, const double gain);
+--
+--  // i.e. ensure the size is correct.
+--  void _ensure_core_dsp_output_ready_();
+--
+-   // The core of your DSP algorithm.
+--  // Access the inputs in this->_input_post_gain
+--  // Place the outputs in this->_core_dsp_output
+--  virtual void _process_core_();
+-+  virtual void _process_core_(NAM_SAMPLE* outputs, const int num_frames) = 0;
+- 
+--  // Copy this->_core_dsp_output to output and apply the output volume
+--  void _apply_output_level_(NAM_SAMPLE** outputs, const int num_channels, const int num_frames, const double gain);
+-+  // Apply the output volume
+-+  void _apply_output_level_(NAM_SAMPLE* outputs, const int num_frames);
+- };
+- 
+- // Class where an input buffer is kept so that long-time effects can be
+-@@ -133,7 +119,7 @@ protected:
+-   void _set_receptive_field(const int new_receptive_field);
+-   void _reset_input_buffer();
+-   // Use this->_input_post_gain
+--  virtual void _update_buffers_();
+-+  virtual void _update_buffers_(NAM_SAMPLE* outputs, const int num_frames);
+-   virtual void _rewind_buffers_();
+- };
+- 
+-@@ -145,7 +131,7 @@ public:
+-          const double expected_sample_rate = -1.0);
+-   Linear(const double loudness, const int receptive_field, const bool _bias, const std::vector<float>& params,
+-          const double expected_sample_rate = -1.0);
+--  void _process_core_() override;
+-+  void _process_core_(NAM_SAMPLE* outputs, const int num_frames) override;
+- 
+- protected:
+-   Eigen::VectorXf _weight;
+-diff --git a/deps/NeuralAmpModelerCore/NAM/lstm.cpp b/deps/NeuralAmpModelerCore/NAM/lstm.cpp
+-index 2327367..ca294ab 100644
+---- a/deps/NeuralAmpModelerCore/NAM/lstm.cpp
+-+++ b/deps/NeuralAmpModelerCore/NAM/lstm.cpp
+-@@ -101,7 +101,7 @@ void lstm::LSTM::_init_parametric(nlohmann::json& parametric)
+-   this->_input_and_params.resize(1 + parametric.size()); // TODO amp parameters
+- }
+- 
+--void lstm::LSTM::_process_core_()
+-+void lstm::LSTM::_process_core_(NAM_SAMPLE* outputs, const int num_frames)
+- {
+-   // Get params into the input vector before starting
+-   if (this->_stale_params)
+-@@ -111,8 +111,8 @@ void lstm::LSTM::_process_core_()
+-     this->_stale_params = false;
+-   }
+-   // Process samples, placing results in the required output location
+--  for (size_t i = 0; i < this->_input_post_gain.size(); i++)
+--    this->_core_dsp_output[i] = this->_process_sample(this->_input_post_gain[i]);
+-+  for (int i = 0; i < num_frames; i++)
+-+    outputs[i] = this->_process_sample(outputs[i]);
+- }
+- 
+- float lstm::LSTM::_process_sample(const float x)
+-diff --git a/deps/NeuralAmpModelerCore/NAM/lstm.h b/deps/NeuralAmpModelerCore/NAM/lstm.h
+-index e855f64..a4e30a8 100644
+---- a/deps/NeuralAmpModelerCore/NAM/lstm.h
+-+++ b/deps/NeuralAmpModelerCore/NAM/lstm.h
+-@@ -58,7 +58,7 @@ public:
+- protected:
+-   Eigen::VectorXf _head_weight;
+-   float _head_bias;
+--  void _process_core_() override;
+-+  void _process_core_(NAM_SAMPLE* outputs, const int num_frames) override;
+-   std::vector<LSTMCell> _layers;
+- 
+-   float _process_sample(const float x);
+-diff --git a/deps/NeuralAmpModelerCore/NAM/wavenet.cpp b/deps/NeuralAmpModelerCore/NAM/wavenet.cpp
+-index fced659..fe5ff91 100644
+---- a/deps/NeuralAmpModelerCore/NAM/wavenet.cpp
+-+++ b/deps/NeuralAmpModelerCore/NAM/wavenet.cpp
+-@@ -272,7 +272,7 @@ wavenet::WaveNet::WaveNet(const double loudness, const std::vector<wavenet::Laye
+-   // pre-warm the model over the size of the receptive field
+-   for (long i = 0; i < receptive_field; i++)
+-   {
+--    this->process(&sample_ptr, &sample_ptr, 1, 1, 1.0, 1.0, param_dict);
+-+    this->process(sample_ptr, 1, param_dict);
+-     this->finalize_(1);
+-     sample = 0;
+-   }
+-@@ -325,9 +325,8 @@ void wavenet::WaveNet::_prepare_for_frames_(const long num_frames)
+-     this->_layer_arrays[i].prepare_for_frames_(num_frames);
+- }
+- 
+--void wavenet::WaveNet::_process_core_()
+-+void wavenet::WaveNet::_process_core_(NAM_SAMPLE* outputs, const int num_frames)
+- {
+--  const long num_frames = this->_input_post_gain.size();
+-   this->_set_num_frames_(num_frames);
+-   this->_prepare_for_frames_(num_frames);
+- 
+-@@ -335,7 +334,7 @@ void wavenet::WaveNet::_process_core_()
+-   // Clumsy...
+-   for (int j = 0; j < num_frames; j++)
+-   {
+--    this->_condition(0, j) = this->_input_post_gain[j];
+-+    this->_condition(0, j) = outputs[j];
+-     if (this->_stale_params) // Column-major assignment; good for Eigen. Let the
+-                              // compiler optimize this.
+-       for (size_t i = 0; i < this->_param_names.size(); i++)
+-@@ -360,10 +359,7 @@ void wavenet::WaveNet::_process_core_()
+-   const long final_head_array = this->_head_arrays.size() - 1;
+-   assert(this->_head_arrays[final_head_array].rows() == 1);
+-   for (int s = 0; s < num_frames; s++)
+--  {
+--    float out = this->_head_scale * this->_head_arrays[final_head_array](0, s);
+--    this->_core_dsp_output[s] = out;
+--  }
+-+    outputs[s] = this->_head_scale * this->_head_arrays[final_head_array](0, s);
+- }
+- 
+- void wavenet::WaveNet::_set_num_frames_(const long num_frames)
+-diff --git a/deps/NeuralAmpModelerCore/NAM/wavenet.h b/deps/NeuralAmpModelerCore/NAM/wavenet.h
+-index c49966f..b1806dc 100644
+---- a/deps/NeuralAmpModelerCore/NAM/wavenet.h
+-+++ b/deps/NeuralAmpModelerCore/NAM/wavenet.h
+-@@ -203,7 +203,7 @@ private:
+-   void _init_parametric_(nlohmann::json& parametric);
+-   void _prepare_for_frames_(const long num_frames);
+-   // Reminder: From ._input_post_gain to ._core_dsp_output
+--  void _process_core_() override;
+-+  void _process_core_(NAM_SAMPLE* outputs, const int num_frames) override;
+- 
+-   // Ensure that all buffer arrays are the right size for this num_frames
+-   void _set_num_frames_(const long num_frames);
+-diff --git a/deps/NeuralAmpModelerCore/dsp/RecursiveLinearFilter.cpp b/deps/NeuralAmpModelerCore/dsp/RecursiveLinearFilter.cpp
+-index 7eb69b8..908d034 100644
+---- a/deps/NeuralAmpModelerCore/dsp/RecursiveLinearFilter.cpp
+-+++ b/deps/NeuralAmpModelerCore/dsp/RecursiveLinearFilter.cpp
+-@@ -22,10 +22,9 @@ mOutputStart(outputDegree)
+-   this->mOutputCoefficients.resize(outputDegree);
+- }
+- 
+--DSP_SAMPLE** recursive_linear_filter::Base::Process(DSP_SAMPLE** inputs, const size_t numChannels,
+--                                                    const size_t numFrames)
+-+DSP_SAMPLE* recursive_linear_filter::Base::Process(DSP_SAMPLE* inputs, const size_t numFrames)
+- {
+--  this->_PrepareBuffers(numChannels, numFrames);
+-+  this->_PrepareBuffers(numFrames);
+-   long inputStart = 0;
+-   long outputStart = 0;
+-   // Degree = longest history
+-@@ -35,34 +34,33 @@ DSP_SAMPLE** recursive_linear_filter::Base::Process(DSP_SAMPLE** inputs, const s
+-   //  0,2,3,... are fine.
+-   const size_t inputDegree = this->_GetInputDegree();
+-   const size_t outputDegree = this->_GetOutputDegree();
+--  for (auto c = 0; c < numChannels; c++)
+-   {
+-     inputStart = this->mInputStart; // Should be plenty fine
+-     outputStart = this->mOutputStart;
+--    for (auto s = 0; s < numFrames; s++)
+-+    for (size_t s = 0; s < numFrames; s++)
+-     {
+-       DSP_SAMPLE out = 0.0;
+-       // Compute input terms
+-       inputStart -= 1;
+-       if (inputStart < 0)
+-         inputStart = inputDegree - 1;
+--      this->mInputHistory[c][inputStart] = inputs[c][s]; // Store current input
+--      for (auto i = 0; i < inputDegree; i++)
+--        out += this->mInputCoefficients[i] * this->mInputHistory[c][(inputStart + i) % inputDegree];
+-+      this->mInputHistory[inputStart] = inputs[s]; // Store current input
+-+      for (size_t i = 0; i < inputDegree; i++)
+-+        out += this->mInputCoefficients[i] * this->mInputHistory[(inputStart + i) % inputDegree];
+- 
+-       // Output terms
+-       outputStart -= 1;
+-       if (outputStart < 0)
+-         outputStart = outputDegree - 1;
+--      for (auto i = 1; i < outputDegree; i++)
+--        out += this->mOutputCoefficients[i] * this->mOutputHistory[c][(outputStart + i) % outputDegree];
+-+      for (size_t i = 1; i < outputDegree; i++)
+-+        out += this->mOutputCoefficients[i] * this->mOutputHistory[(outputStart + i) % outputDegree];
+-       // Prevent a NaN from jamming the filter!
+-       if (std::isnan(out))
+-         out = 0.0;
+-       // Store the output!
+-       if (outputDegree >= 1)
+--        this->mOutputHistory[c][outputStart] = out;
+--      this->mOutputs[c][s] = out;
+-+        this->mOutputHistory[outputStart] = out;
+-+      this->mOutputs[s] = out;
+-     }
+-   }
+-   this->mInputStart = inputStart;
+-@@ -70,25 +68,20 @@ DSP_SAMPLE** recursive_linear_filter::Base::Process(DSP_SAMPLE** inputs, const s
+-   return this->_GetPointers();
+- }
+- 
+--void recursive_linear_filter::Base::_PrepareBuffers(const size_t numChannels, const size_t numFrames)
+-+void recursive_linear_filter::Base::_PrepareBuffers(const size_t numFrames)
+- {
+-   // Check for new channel count *before* parent class ensures they match!
+--  const bool newChannels = this->_GetNumChannels() != numChannels;
+-+  const bool newChannels = this->_GetNumFrames() == 0;
+-   // Parent implementation takes care of mOutputs and mOutputPointers
+--  this->dsp::DSP::_PrepareBuffers(numChannels, numFrames);
+-+  this->dsp::DSP::_PrepareBuffers(numFrames);
+-   if (newChannels)
+-   {
+--    this->mInputHistory.resize(numChannels);
+--    this->mOutputHistory.resize(numChannels);
+-     const size_t inputDegree = this->_GetInputDegree();
+-     const size_t outputDegree = this->_GetOutputDegree();
+--    for (auto c = 0; c < numChannels; c++)
+--    {
+--      this->mInputHistory[c].resize(inputDegree);
+--      this->mOutputHistory[c].resize(outputDegree);
+--      std::fill(this->mInputHistory[c].begin(), this->mInputHistory[c].end(), 0.0);
+--      std::fill(this->mOutputHistory[c].begin(), this->mOutputHistory[c].end(), 0.0);
+--    }
+-+    this->mInputHistory.resize(inputDegree);
+-+    this->mOutputHistory.resize(outputDegree);
+-+    std::fill(this->mInputHistory.begin(), this->mInputHistory.end(), 0.0);
+-+    std::fill(this->mOutputHistory.begin(), this->mOutputHistory.end(), 0.0);
+-   }
+- }
+- 
+-diff --git a/deps/NeuralAmpModelerCore/dsp/RecursiveLinearFilter.h b/deps/NeuralAmpModelerCore/dsp/RecursiveLinearFilter.h
+-index 737d297..afacae1 100644
+---- a/deps/NeuralAmpModelerCore/dsp/RecursiveLinearFilter.h
+-+++ b/deps/NeuralAmpModelerCore/dsp/RecursiveLinearFilter.h
+-@@ -22,14 +22,15 @@ class Base : public dsp::DSP
+- {
+- public:
+-   Base(const size_t inputDegree, const size_t outputDegree);
+--  DSP_SAMPLE** Process(DSP_SAMPLE** inputs, const size_t numChannels, const size_t numFrames) override;
+-+  DSP_SAMPLE* Process(DSP_SAMPLE* inputs, const size_t numFrames) override;
+-+
+-+  // Additionally prepares mInputHistory and mOutputHistory.
+-+  void _PrepareBuffers(const size_t numFrames) override;
+- 
+- protected:
+-   // Methods
+-   size_t _GetInputDegree() const { return this->mInputCoefficients.size(); };
+-   size_t _GetOutputDegree() const { return this->mOutputCoefficients.size(); };
+--  // Additionally prepares mInputHistory and mOutputHistory.
+--  void _PrepareBuffers(const size_t numChannels, const size_t numFrames) override;
+- 
+-   // Coefficients for the DSP filter
+-   // [0] is for the current sample
+-@@ -43,8 +44,8 @@ protected:
+-   // First index is channel
+-   // Second index, [0] is the current input/output, [1] is the previous, [2] is
+-   // before that, etc.
+--  std::vector<std::vector<DSP_SAMPLE>> mInputHistory;
+--  std::vector<std::vector<DSP_SAMPLE>> mOutputHistory;
+-+  std::vector<DSP_SAMPLE> mInputHistory;
+-+  std::vector<DSP_SAMPLE> mOutputHistory;
+-   // Indices for history.
+-   // Designates which index is currently "0". Use modulus to wrap around.
+-   long mInputStart;
+-diff --git a/deps/NeuralAmpModelerCore/dsp/dsp.cpp b/deps/NeuralAmpModelerCore/dsp/dsp.cpp
+-index 6fc7bdd..7b0b831 100644
+---- a/deps/NeuralAmpModelerCore/dsp/dsp.cpp
+-+++ b/deps/NeuralAmpModelerCore/dsp/dsp.cpp
+-@@ -13,68 +13,24 @@
+- // Implementation of Version 2 interface
+- 
+- dsp::DSP::DSP()
+--: mOutputPointers(nullptr)
+--, mOutputPointersSize(0)
+- {
+- }
+- 
+- dsp::DSP::~DSP()
+- {
+--  this->_DeallocateOutputPointers();
+- };
+- 
+--void dsp::DSP::_AllocateOutputPointers(const size_t numChannels)
+-+DSP_SAMPLE* dsp::DSP::_GetPointers()
+- {
+--  if (this->mOutputPointers != nullptr)
+--    throw std::runtime_error("Tried to re-allocate over non-null mOutputPointers");
+--  this->mOutputPointers = new DSP_SAMPLE*[numChannels];
+--  if (this->mOutputPointers == nullptr)
+--    throw std::runtime_error("Failed to allocate pointer to output buffer!\n");
+--  this->mOutputPointersSize = numChannels;
+-+  return this->mOutputs.data();
+- }
+- 
+--void dsp::DSP::_DeallocateOutputPointers()
+--{
+--  if (this->mOutputPointers != nullptr)
+--  {
+--    delete[] this->mOutputPointers;
+--    this->mOutputPointers = nullptr;
+--  }
+--  if (this->mOutputPointers != nullptr)
+--    throw std::runtime_error("Failed to deallocate output pointer!");
+--  this->mOutputPointersSize = 0;
+--}
+--
+--DSP_SAMPLE** dsp::DSP::_GetPointers()
+--{
+--  for (auto c = 0; c < this->_GetNumChannels(); c++)
+--    this->mOutputPointers[c] = this->mOutputs[c].data();
+--  return this->mOutputPointers;
+--}
+--
+--void dsp::DSP::_PrepareBuffers(const size_t numChannels, const size_t numFrames)
+-+void dsp::DSP::_PrepareBuffers(const size_t numFrames)
+- {
+-   const size_t oldFrames = this->_GetNumFrames();
+--  const size_t oldChannels = this->_GetNumChannels();
+--
+--  const bool resizeChannels = oldChannels != numChannels;
+--  const bool resizeFrames = resizeChannels || (oldFrames != numFrames);
+--  if (resizeChannels)
+--  {
+--    this->mOutputs.resize(numChannels);
+--    this->_ResizePointers(numChannels);
+--  }
+-+  const bool resizeFrames = oldFrames != numFrames;
+-   if (resizeFrames)
+--    for (auto c = 0; c < numChannels; c++)
+--      this->mOutputs[c].resize(numFrames);
+--}
+--
+--void dsp::DSP::_ResizePointers(const size_t numChannels)
+--{
+--  if (this->mOutputPointersSize == numChannels)
+--    return;
+--  this->_DeallocateOutputPointers();
+--  this->_AllocateOutputPointers(numChannels);
+-+    this->mOutputs.resize(numFrames);
+- }
+- 
+- dsp::History::History()
+-diff --git a/deps/NeuralAmpModelerCore/dsp/dsp.h b/deps/NeuralAmpModelerCore/dsp/dsp.h
+-index faf06af..1cb8224 100644
+---- a/deps/NeuralAmpModelerCore/dsp/dsp.h
+-+++ b/deps/NeuralAmpModelerCore/dsp/dsp.h
+-@@ -32,7 +32,7 @@ public:
+-   // The output shall be a pointer-to-pointers of matching size.
+-   // This object instance will own the data referenced by the pointers and be
+-   // responsible for its allocation and deallocation.
+--  virtual DSP_SAMPLE** Process(DSP_SAMPLE** inputs, const size_t numChannels, const size_t numFrames) = 0;
+-+  virtual DSP_SAMPLE* Process(DSP_SAMPLE* inputs, const size_t numFrames) = 0;
+-   // Update the parameters of the DSP object according to the provided params.
+-   // Not declaring a pure virtual bc there's no concrete definition that can
+-   // use Params.
+-@@ -42,34 +42,20 @@ public:
+- protected:
+-   // Methods
+- 
+--  // Allocate mOutputPointers.
+--  // Assumes it's already null (Use _DeallocateOutputPointers()).
+--  void _AllocateOutputPointers(const size_t numChannels);
+--  // Ensure mOutputPointers is freed.
+--  void _DeallocateOutputPointers();
+--
+--  size_t _GetNumChannels() const { return this->mOutputs.size(); };
+--  size_t _GetNumFrames() const { return this->_GetNumChannels() > 0 ? this->mOutputs[0].size() : 0; }
+-+  size_t _GetNumFrames() const { return this->mOutputs.size(); }
+-   // Return a pointer-to-pointers for the DSP's output buffers (all channels)
+-   // Assumes that ._PrepareBuffers()  was called recently enough.
+--  DSP_SAMPLE** _GetPointers();
+-+  DSP_SAMPLE* _GetPointers();
+-   // Resize mOutputs to (numChannels, numFrames) and ensure that the raw
+-   // pointers are also keeping up.
+--  virtual void _PrepareBuffers(const size_t numChannels, const size_t numFrames);
+--  // Resize the pointer-to-pointers for the vector-of-vectors.
+--  void _ResizePointers(const size_t numChannels);
+-+  virtual void _PrepareBuffers(const size_t numFrames);
+- 
+-   // Attributes
+- 
+-   // The output array into which the DSP module's calculations will be written.
+-   // Pointers to this member's data will be returned by .Process(), and std
+-   // Will ensure proper allocation.
+--  std::vector<std::vector<DSP_SAMPLE>> mOutputs;
+--  // A pointer to pointers of which copies will be given out as the output of
+--  // .Process(). This object will ensure proper allocation and deallocation of
+--  // the first level; The second level points to .data() from mOutputs.
+--  DSP_SAMPLE** mOutputPointers;
+--  size_t mOutputPointersSize;
+-+  std::vector<DSP_SAMPLE> mOutputs;
+- };
+- 
+- // A class where a longer buffer of history is needed to correctly calculate
+-diff --git a/src/BufferedDSP.hpp b/src/BufferedDSP.hpp
+-new file mode 100644
+-index 0000000..f01c06b
+---- /dev/null
+-+++ b/src/BufferedDSP.hpp
+-@@ -0,0 +1,212 @@
+-+/*
+-+ * Buffered DSP
+-+ * Copyright (C) 2022-2023 Filipe Coelho <falktx@falktx.com>
+-+ * SPDX-License-Identifier: ISC
+-+ */
+-+
+-+#pragma once
+-+
+-+#include "NAM/dsp.h"
+-+
+-+#include <atomic>
+-+#include <pthread.h>
+-+#include <semaphore.h>
+-+#include <unistd.h>
+-+
+-+#if defined(__SSE2_MATH__)
+-+# include <xmmintrin.h>
+-+#endif
+-+
+-+class BufferedDSP
+-+{
+-+    std::unordered_map<std::string, double>& namParams;
+-+    DSP* activedsp = nullptr;
+-+    float* bufferedInput = nullptr;
+-+    float* bufferedOutput = nullptr;
+-+    uint32_t bufferSize = 0;
+-+    sem_t semBgProcStart = {};
+-+    sem_t semBgProcFinished = {};
+-+    std::atomic<bool> active{ false };
+-+
+-+    pthread_mutex_t mutexI, mutexO;
+-+    pthread_t thread = {};
+-+    volatile bool running = false;
+-+
+-+public:
+-+    BufferedDSP(std::unordered_map<std::string, double>& namParams_)
+-+        : namParams(namParams_)
+-+    {
+-+         sem_init(&semBgProcStart, 0, 0);
+-+         sem_init(&semBgProcFinished, 0, 0);
+-+
+-+         pthread_mutexattr_t attr;
+-+         pthread_mutexattr_init(&attr);
+-+         pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_INHERIT);
+-+         pthread_mutex_init(&mutexI, &attr);
+-+         pthread_mutex_init(&mutexO, &attr);
+-+         pthread_mutexattr_destroy(&attr);
+-+    }
+-+
+-+    ~BufferedDSP()
+-+    {
+-+        stop();
+-+
+-+        pthread_mutex_destroy(&mutexI);
+-+        pthread_mutex_destroy(&mutexO);
+-+        sem_destroy(&semBgProcStart);
+-+        sem_destroy(&semBgProcFinished);
+-+        delete[] bufferedInput;
+-+        delete[] bufferedOutput;
+-+    }
+-+
+-+    void setBufferSize(const uint32_t newBufferSize)
+-+    {
+-+        if (bufferSize == newBufferSize)
+-+            return;
+-+
+-+        const bool wasRunning = running;
+-+
+-+        if (wasRunning)
+-+            stop();
+-+
+-+        bufferSize = newBufferSize;
+-+
+-+        delete[] bufferedInput;
+-+        delete[] bufferedOutput;
+-+
+-+        bufferedInput = new float[newBufferSize];
+-+        bufferedOutput = new float[newBufferSize];
+-+        std::memset(bufferedOutput, 0, sizeof(float)*newBufferSize);
+-+
+-+        if (wasRunning)
+-+            start();
+-+    }
+-+
+-+    void start()
+-+    {
+-+        running = true;
+-+
+-+        struct sched_param sched_param = {};
+-+        sched_param.sched_priority = 40;
+-+
+-+       #ifdef __MOD_DEVICES__
+-+        int rtprio;
+-+        const char* const srtprio = std::getenv("MOD_PLUGIN_THREAD_PRIORITY");
+-+        if (srtprio != nullptr && (rtprio = std::atoi(srtprio)) > 0)
+-+            sched_param.sched_priority = rtprio - 1;
+-+       #endif
+-+
+-+        pthread_attr_t attr;
+-+        pthread_attr_init(&attr);
+-+        pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
+-+        pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
+-+        pthread_attr_setschedpolicy(&attr, SCHED_FIFO);
+-+        pthread_attr_setschedparam(&attr, &sched_param);
+-+
+-+        if (pthread_create(&thread, &attr, _run, this) != 0)
+-+        {
+-+            pthread_attr_destroy(&attr);
+-+            pthread_attr_init(&attr);
+-+            pthread_create(&thread, &attr, _run, this);
+-+        }
+-+
+-+        pthread_attr_destroy(&attr);
+-+    }
+-+
+-+    void stop()
+-+    {
+-+        if (!running)
+-+            return;
+-+
+-+        activedsp = nullptr;
+-+        running = false;
+-+        sem_post(&semBgProcStart);
+-+        pthread_join(thread, nullptr);
+-+        thread = {};
+-+    }
+-+
+-+    void setDSP(DSP* const dsp)
+-+    {
+-+        activedsp = dsp;
+-+
+-+        while (active.load())
+-+            usleep(1000);
+-+    }
+-+
+-+    void process(float* const output, const uint32_t len)
+-+    {
+-+        if (len > bufferSize)
+-+            return;
+-+
+-+        sem_wait(&semBgProcFinished);
+-+
+-+        pthread_mutex_lock(&mutexI);
+-+        std::memcpy(bufferedInput, output, sizeof(float)*len);
+-+        pthread_mutex_unlock(&mutexI);
+-+
+-+        pthread_mutex_lock(&mutexO);
+-+        std::memcpy(output, bufferedOutput, sizeof(float)*len);
+-+        pthread_mutex_unlock(&mutexO);
+-+
+-+        sem_post(&semBgProcStart);
+-+    }
+-+
+-+    static void* _run(void* const arg)
+-+    {
+-+        static_cast<BufferedDSP*>(arg)->run();
+-+        return nullptr;
+-+    }
+-+
+-+    void run()
+-+    {
+-+        if (bufferSize == 0)
+-+            return;
+-+
+-+        float* tmp = new float[bufferSize];
+-+        std::memset(tmp, 0, sizeof(float)*bufferSize);
+-+
+-+        // disable denormals and enable flush to zero
+-+        {
+-+           #if defined(__SSE2_MATH__)
+-+            _mm_setcsr(_mm_getcsr() | 0x8040);
+-+           #elif defined(__aarch64__)
+-+            uint64_t flags;
+-+            __asm__ __volatile__("mrs %0, fpcr" : "=r" (flags));
+-+            __asm__ __volatile__("msr fpcr, %0" :: "r" (flags | 0x1000000));
+-+           #elif defined(__arm__) && !defined(__SOFTFP__)
+-+            uint32_t flags;
+-+            __asm__ __volatile__("vmrs %0, fpscr" : "=r" (flags));
+-+            __asm__ __volatile__("vmsr fpscr, %0" :: "r" (flags | 0x1000000));
+-+           #endif
+-+        }
+-+
+-+        while (running)
+-+        {
+-+            sem_post(&semBgProcFinished);
+-+            sem_wait(&semBgProcStart);
+-+
+-+            if (!running)
+-+                break;
+-+
+-+            pthread_mutex_lock(&mutexI);
+-+            std::memcpy(tmp, bufferedInput, sizeof(float)*bufferSize);
+-+            pthread_mutex_unlock(&mutexI);
+-+
+-+            active.store(true);
+-+
+-+            if (DSP* const dsp = activedsp)
+-+            {
+-+                dsp->process(tmp, bufferSize, namParams);
+-+                dsp->finalize_(bufferSize);
+-+            }
+-+
+-+            active.store(false);
+-+
+-+            pthread_mutex_lock(&mutexO);
+-+            std::memcpy(bufferedOutput, tmp, sizeof(float)*bufferSize);
+-+            pthread_mutex_unlock(&mutexO);
+-+        }
+-+
+-+        delete[] tmp;
+-+    }
+-+};
+-diff --git a/src/nam_plugin.cpp b/src/nam_plugin.cpp
+-index 1c6143b..1af181e 100644
+---- a/src/nam_plugin.cpp
+-+++ b/src/nam_plugin.cpp
+-@@ -10,6 +10,7 @@
+- 
+- namespace NAM {
+- 	Plugin::Plugin()
+-+		: bufferedDSP(mNAMParams)
+- 	{
+- 		// prevent allocations on the audio thread
+- 		currentModelPath.reserve(MAX_FILE_NAME+1);
+-@@ -17,6 +18,7 @@ namespace NAM {
+- 
+- 	Plugin::~Plugin()
+- 	{
+-+		bufferedDSP.stop();
+- 		delete currentModel;
+- 	}
+- 
+-@@ -76,8 +78,16 @@ namespace NAM {
+- 		uris.model_Path = map->map(map->handle, MODEL_URI);
+- 
+- 		if (options != nullptr)
+-+		{
+- 			options_set(this, options);
+- 
+-+			if (maxBufferSize != 0)
+-+			{
+-+				bufferedDSP.start();
+-+				mHighPass._PrepareBuffers(maxBufferSize);
+-+			}
+-+		}
+-+
+- 		return true;
+- 	}
+- 
+-@@ -123,7 +133,7 @@ namespace NAM {
+- 							memset(buffer, 0, numSamples * sizeof(float));
+- 
+- 							std::unordered_map<std::string, double> params = {};
+--							model->process(&buffer, &buffer, 1, numSamples, 1.0, 1.0, params);
+-+							model->process(buffer, numSamples, params);
+- 							model->finalize_(numSamples);
+- 
+- 							delete[] buffer;
+-@@ -131,7 +141,6 @@ namespace NAM {
+- 					}
+- 
+- 					response.model = model;
+--
+- 					memcpy(response.path, msg->path, pathlen);
+- 				}
+- 				catch (const std::exception&)
+-@@ -177,6 +186,7 @@ namespace NAM {
+- 		LV2FreeModelMsg reply = { kWorkTypeFree, nam->currentModel };
+- 
+- 		// swap current model with new one
+-+		nam->bufferedDSP.setDSP(msg->model);
+- 		nam->currentModel = msg->model;
+- 		nam->currentModelPath = msg->path;
+- 		assert(nam->currentModelPath.capacity() >= MAX_FILE_NAME + 1);
+-@@ -254,15 +264,22 @@ namespace NAM {
+- 			}
+- 		}
+- 
+--		float** outputPtrs = &ports.audio_out;
+-+		float* outputs = ports.audio_out;
+- 
+- 		if (currentModel != nullptr)
+- 		{
+--			currentModel->process(&ports.audio_out, &ports.audio_out, 1, n_samples, 1.0, 1.0, mNAMParams);
+--			currentModel->finalize_(n_samples);
+-+			if (*ports.buffered > 0.5f)
+-+			{
+-+				bufferedDSP.process(outputs, n_samples);
+-+			}
+-+			else
+-+			{
+-+				currentModel->process(outputs, n_samples, mNAMParams);
+-+				currentModel->finalize_(n_samples);
+-+			}
+- 
+- 			// Apply a high pass filter at 5Hz to eliminate any DC offset
+--			outputPtrs = mHighPass.Process(outputPtrs, 1, n_samples);
+-+			outputs = mHighPass.Process(outputs, n_samples);
+- 		}
+- 
+- 		// convert output level from db
+-@@ -276,7 +293,7 @@ namespace NAM {
+- 				// do very basic smoothing
+- 				level = (.99f * level) + (.01f * desiredOutputLevel);
+- 
+--				ports.audio_out[i] = outputPtrs[0][i] * outputLevel;
+-+				ports.audio_out[i] = outputs[i] * outputLevel;
+- 			}
+- 			outputLevel = level;
+- 		}
+-@@ -286,7 +303,7 @@ namespace NAM {
+- 
+- 			for (unsigned int i = 0; i < n_samples; i++)
+- 			{
+--				ports.audio_out[i] = outputPtrs[0][i] * level;
+-+				ports.audio_out[i] = outputs[i] * level;
+- 			}
+- 		}
+- 	}
+-@@ -306,6 +323,7 @@ namespace NAM {
+- 			if (options[i].key == nam->uris.bufSize_maxBlockLength && options[i].type == nam->uris.atom_Int)
+- 			{
+- 				nam->maxBufferSize = *(const int32_t*)options[i].value;
+-+				nam->bufferedDSP.setBufferSize(nam->maxBufferSize);
+- 				break;
+- 			}
+- 		}
+-diff --git a/src/nam_plugin.h b/src/nam_plugin.h
+-index c1b386c..78df7d1 100644
+---- a/src/nam_plugin.h
+-+++ b/src/nam_plugin.h
+-@@ -24,6 +24,8 @@
+- #include <NAM/dsp.h>
+- #include <dsp/RecursiveLinearFilter.h>
+- 
+-+#include "BufferedDSP.hpp"
+-+
+- #define PlUGIN_URI "http://github.com/mikeoliphant/neural-amp-modeler-lv2"
+- #define MODEL_URI PlUGIN_URI "#model"
+- 
+-@@ -61,6 +63,7 @@ namespace NAM {
+- 			float* audio_out;
+- 			float* input_level;
+- 			float* output_level;
+-+			const float* buffered;
+- 		};
+- 
+- 		Ports ports = {};
+-@@ -71,6 +74,7 @@ namespace NAM {
+- 		LV2_Log_Logger logger = {};
+- 		LV2_Worker_Schedule* schedule = nullptr;
+- 
+-+		BufferedDSP bufferedDSP;
+- 		::DSP* currentModel = nullptr;
+- 		std::string currentModelPath;
+- 		recursive_linear_filter::HighPass mHighPass;
+-diff --git a/src/BufferedDSP.hpp b/src/BufferedDSP.hpp
+-index f01c06b..6881d14 100644
+---- a/src/BufferedDSP.hpp
+-+++ b/src/BufferedDSP.hpp
+-@@ -10,9 +10,15 @@
+- 
+- #include <atomic>
+- #include <pthread.h>
+--#include <semaphore.h>
+- #include <unistd.h>
+- 
+-+#ifdef __APPLE__
+-+# include <mach/mach.h>
+-+# include <mach/semaphore.h>
+-+#else
+-+# include <semaphore.h>
+-+#endif
+-+
+- #if defined(__SSE2_MATH__)
+- # include <xmmintrin.h>
+- #endif
+-@@ -24,8 +30,14 @@ class BufferedDSP
+-     float* bufferedInput = nullptr;
+-     float* bufferedOutput = nullptr;
+-     uint32_t bufferSize = 0;
+-+   #ifdef __APPLE__
+-+    mach_port_t semBgTask = {};
+-+    semaphore_t semBgProcStart = {};
+-+    semaphore_t semBgProcFinished = {};
+-+   #else
+-     sem_t semBgProcStart = {};
+-     sem_t semBgProcFinished = {};
+-+   #endif
+-     std::atomic<bool> active{ false };
+- 
+-     pthread_mutex_t mutexI, mutexO;
+-@@ -36,8 +48,14 @@ public:
+-     BufferedDSP(std::unordered_map<std::string, double>& namParams_)
+-         : namParams(namParams_)
+-     {
+-+        #ifdef __APPLE__
+-+         semBgTask = mach_task_self();
+-+         semaphore_create(semBgTask, &semBgProcStart, SYNC_POLICY_FIFO, 0);
+-+         semaphore_create(semBgTask, &semBgProcFinished, SYNC_POLICY_FIFO, 0);
+-+        #else
+-          sem_init(&semBgProcStart, 0, 0);
+-          sem_init(&semBgProcFinished, 0, 0);
+-+        #endif
+- 
+-          pthread_mutexattr_t attr;
+-          pthread_mutexattr_init(&attr);
+-@@ -53,8 +71,13 @@ public:
+- 
+-         pthread_mutex_destroy(&mutexI);
+-         pthread_mutex_destroy(&mutexO);
+-+       #ifdef __APPLE__
+-+        semaphore_destroy(semBgTask, semBgProcStart);
+-+        semaphore_destroy(semBgTask, semBgProcFinished);
+-+       #else
+-         sem_destroy(&semBgProcStart);
+-         sem_destroy(&semBgProcFinished);
+-+       #endif
+-         delete[] bufferedInput;
+-         delete[] bufferedOutput;
+-     }
+-@@ -120,7 +143,11 @@ public:
+- 
+-         activedsp = nullptr;
+-         running = false;
+-+       #ifdef __APPLE__
+-+        semaphore_signal(semBgProcStart);
+-+       #else
+-         sem_post(&semBgProcStart);
+-+       #endif
+-         pthread_join(thread, nullptr);
+-         thread = {};
+-     }
+-@@ -138,7 +165,11 @@ public:
+-         if (len > bufferSize)
+-             return;
+- 
+-+       #ifdef __APPLE__
+-+        semaphore_wait(semBgProcFinished);
+-+       #else
+-         sem_wait(&semBgProcFinished);
+-+       #endif
+- 
+-         pthread_mutex_lock(&mutexI);
+-         std::memcpy(bufferedInput, output, sizeof(float)*len);
+-@@ -148,7 +179,11 @@ public:
+-         std::memcpy(output, bufferedOutput, sizeof(float)*len);
+-         pthread_mutex_unlock(&mutexO);
+- 
+-+       #ifdef __APPLE__
+-+        semaphore_signal(semBgProcStart);
+-+       #else
+-         sem_post(&semBgProcStart);
+-+       #endif
+-     }
+- 
+-     static void* _run(void* const arg)
+-@@ -182,8 +217,13 @@ public:
+- 
+-         while (running)
+-         {
+-+           #ifdef __APPLE__
+-+            semaphore_signal(semBgProcFinished);
+-+            semaphore_wait(semBgProcStart);
+-+           #else
+-             sem_post(&semBgProcFinished);
+-             sem_wait(&semBgProcStart);
+-+           #endif
+- 
+-             if (!running)
+-                 break;
+diff --git a/plugins/package/neural-amp-modeler-lv2/02_fix-uninitialized-buffers.patch b/plugins/package/neural-amp-modeler-lv2/02_fix-uninitialized-buffers.patch
+deleted file mode 100644
+index 0890da7..0000000
+--- a/plugins/package/neural-amp-modeler-lv2/02_fix-uninitialized-buffers.patch
++++ /dev/null
+@@ -1,101 +0,0 @@
+-diff --git a/deps/NeuralAmpModelerCore/NAM/convnet.cpp b/deps/NeuralAmpModelerCore/NAM/convnet.cpp
+-index 6d55303..30f0bd2 100644
+---- a/deps/NeuralAmpModelerCore/NAM/convnet.cpp
+-+++ b/deps/NeuralAmpModelerCore/NAM/convnet.cpp
+-@@ -110,6 +110,9 @@ convnet::ConvNet::ConvNet(const double loudness, const int channels, const std::
+-   for (size_t i = 0; i < dilations.size(); i++)
+-     this->_blocks[i].set_params_(i == 0 ? 1 : channels, channels, dilations[i], batchnorm, activation, it);
+-   this->_block_vals.resize(this->_blocks.size() + 1);
+-+  for (auto& matrix : this->_block_vals)
+-+    matrix.setZero();
+-+  std::fill(this->_input_buffer.begin(), this->_input_buffer.end(), 0.0f);
+-   this->_head = _Head(channels, it);
+-   if (it != params.end())
+-     throw std::runtime_error("Didn't touch all the params when initializing wavenet");
+-@@ -146,9 +149,20 @@ void convnet::ConvNet::_update_buffers_(NAM_SAMPLE* outputs, const int num_frame
+- {
+-   this->Buffer::_update_buffers_(outputs, num_frames);
+-   const size_t buffer_size = this->_input_buffer.size();
+--  this->_block_vals[0].resize(1, buffer_size);
+-+
+-+  if (this->_block_vals[0].rows() != 1 || (size_t)this->_block_vals[0].cols() != buffer_size)
+-+  {
+-+    this->_block_vals[0].resize(1, buffer_size);
+-+    this->_block_vals[0].setZero();
+-+  }
+-+
+-   for (size_t i = 1; i < this->_block_vals.size(); i++)
+-+  {
+-+    if (this->_block_vals[i].rows() == this->_blocks[i - 1].get_out_channels() && (size_t)this->_block_vals[i].cols() == buffer_size)
+-+      continue;  // Already has correct size
+-     this->_block_vals[i].resize(this->_blocks[i - 1].get_out_channels(), buffer_size);
+-+    this->_block_vals[i].setZero();
+-+  }
+- }
+- 
+- void convnet::ConvNet::_rewind_buffers_()
+-diff --git a/deps/NeuralAmpModelerCore/NAM/dsp.cpp b/deps/NeuralAmpModelerCore/NAM/dsp.cpp
+-index bb7f3be..078c626 100644
+---- a/deps/NeuralAmpModelerCore/NAM/dsp.cpp
+-+++ b/deps/NeuralAmpModelerCore/NAM/dsp.cpp
+-@@ -90,6 +90,7 @@ void Buffer::_set_receptive_field(const int new_receptive_field, const int input
+- {
+-   this->_receptive_field = new_receptive_field;
+-   this->_input_buffer.resize(input_buffer_size);
+-+  std::fill (this->_input_buffer.begin(), this->_input_buffer.end(), 0.0f);
+-   this->_reset_input_buffer();
+- }
+- 
+-@@ -105,6 +106,7 @@ void Buffer::_update_buffers_(NAM_SAMPLE* outputs, const int num_frames)
+-       while (new_buffer_size < minimum_input_buffer_size)
+-         new_buffer_size *= 2;
+-       this->_input_buffer.resize(new_buffer_size);
+-+      std::fill (this->_input_buffer.begin(), this->_input_buffer.end(), 0.0f);
+-     }
+-   }
+- 
+-@@ -117,6 +119,7 @@ void Buffer::_update_buffers_(NAM_SAMPLE* outputs, const int num_frames)
+-     this->_input_buffer[i] = outputs[j];
+-   // And resize the output buffer:
+-   this->_output_buffer.resize(num_frames);
+-+  std::fill (this->_output_buffer.begin(), this->_output_buffer.end(), 0.0f);
+- }
+- 
+- void Buffer::_rewind_buffers_()
+-diff --git a/deps/NeuralAmpModelerCore/NAM/wavenet.cpp b/deps/NeuralAmpModelerCore/NAM/wavenet.cpp
+-index fe5ff91..5ea115a 100644
+---- a/deps/NeuralAmpModelerCore/NAM/wavenet.cpp
+-+++ b/deps/NeuralAmpModelerCore/NAM/wavenet.cpp
+-@@ -48,7 +48,11 @@ void wavenet::_Layer::process_(const Eigen::MatrixXf& input, const Eigen::Matrix
+- 
+- void wavenet::_Layer::set_num_frames_(const long num_frames)
+- {
+-+  if (this->_z.rows() == this->_conv.get_out_channels() && this->_z.cols() == num_frames)
+-+    return;  // Already has correct size
+-+
+-   this->_z.resize(this->_conv.get_out_channels(), num_frames);
+-+  this->_z.setZero();
+- }
+- 
+- // LayerArray =================================================================
+-@@ -211,7 +215,12 @@ void wavenet::_Head::process_(Eigen::MatrixXf& inputs, Eigen::MatrixXf& outputs)
+- void wavenet::_Head::set_num_frames_(const long num_frames)
+- {
+-   for (size_t i = 0; i < this->_buffers.size(); i++)
+-+  {
+-+    if (this->_buffers[i].rows() == this->_channels && this->_buffers[i].cols() == num_frames)
+-+      continue;  // Already has correct size
+-     this->_buffers[i].resize(this->_channels, num_frames);
+-+    this->_buffers[i].setZero();
+-+  }
+- }
+- 
+- void wavenet::_Head::_apply_activation_(Eigen::MatrixXf& x)
+-@@ -373,6 +382,7 @@ void wavenet::WaveNet::_set_num_frames_(const long num_frames)
+-   for (size_t i = 0; i < this->_layer_array_outputs.size(); i++)
+-     this->_layer_array_outputs[i].resize(this->_layer_array_outputs[i].rows(), num_frames);
+-   this->_head_output.resize(this->_head_output.rows(), num_frames);
+-+  this->_head_output.setZero();
+- 
+-   for (size_t i = 0; i < this->_layer_arrays.size(); i++)
+-     this->_layer_arrays[i].set_num_frames_(num_frames);
+diff --git a/plugins/package/neural-amp-modeler-lv2/04_fix-major-minor-macro-conflicts_Version3.patch b/plugins/package/neural-amp-modeler-lv2/04_fix-major-minor-macro-conflicts_Version3.patch
+new file mode 100644
+index 0000000..2c2aa24
+--- /dev/null
++++ b/plugins/package/neural-amp-modeler-lv2/04_fix-major-minor-macro-conflicts_Version3.patch
+@@ -0,0 +1,12 @@
++--- a/deps/NeuralAudio/deps/NeuralAmpModelerCore/NAM/get_dsp.h
+++++ b/deps/NeuralAudio/deps/NeuralAmpModelerCore/NAM/get_dsp.h
++@@ -5,6 +5,9 @@
++ 
++ #include "dsp.h"
++ 
+++#undef major
+++#undef minor
+++
++ namespace nam
++ {
++ enum class Supported
+\ No newline at end of file
+diff --git a/plugins/package/neural-amp-modeler-lv2/06_fix-math-approx-cmake-version.patch b/plugins/package/neural-amp-modeler-lv2/06_fix-math-approx-cmake-version.patch
+new file mode 100644
+index 0000000..a1fc4c8
+--- /dev/null
++++ b/plugins/package/neural-amp-modeler-lv2/06_fix-math-approx-cmake-version.patch
+@@ -0,0 +1,8 @@
++--- a/deps/NeuralAudio/deps/math_approx/CMakeLists.txt
+++++ b/deps/NeuralAudio/deps/math_approx/CMakeLists.txt
++@@ -1,4 +1,4 @@
++-cmake_minimum_required(VERSION 3.18)
+++cmake_minimum_required(VERSION 3.16)
++ project(math_approx VERSION 1.0.0 LANGUAGES CXX)
++
++ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/)
+diff --git a/plugins/package/neural-amp-modeler-lv2/neural-amp-modeler-lv2.mk b/plugins/package/neural-amp-modeler-lv2/neural-amp-modeler-lv2.mk
+index b714033..5ffde55 100644
+--- a/plugins/package/neural-amp-modeler-lv2/neural-amp-modeler-lv2.mk
++++ b/plugins/package/neural-amp-modeler-lv2/neural-amp-modeler-lv2.mk
+@@ -4,26 +4,59 @@
+ #
+ ######################################
+ 
+-NEURAL_AMP_MODELER_LV2_VERSION = bae8b0a6275a42ebbfe9c9d957512419700dc797
+-NEURAL_AMP_MODELER_LV2_SITE = https://github.com/mikeoliphant/neural-amp-modeler-lv2.git
++NEURAL_AMP_MODELER_LV2_VERSION = b94d28bb01091a1c22f016593a65282c7f824633
++NEURAL_AMP_MODELER_LV2_SITE = https://github.com/mod-audio/neural-amp-modeler-lv2.git
+ NEURAL_AMP_MODELER_LV2_SITE_METHOD = git
+ NEURAL_AMP_MODELER_LV2_GIT_SUBMODULES = y
+ NEURAL_AMP_MODELER_LV2_BUNDLES = neural_amp_modeler.lv2
+ 
+ # custom optimization flags
+-NEURAL_AMP_MODELER_LV2_TARGET_OPT  = $(subst ",,$(BR2_TARGET_OPTIMIZATION))
++NEURAL_AMP_MODELER_LV2_FILTERED_FLAGS = -funroll-loops #-fprefetch-loop-arrays -funsafe-loop-optimizations
++NEURAL_AMP_MODELER_LV2_TARGET_OPT = $(filter-out $(NEURAL_AMP_MODELER_LV2_FILTERED_FLAGS),$(subst ",,$(BR2_TARGET_OPTIMIZATION)))
++#NEURAL_AMP_MODELER_LV2_TARGET_OPT += -fno-unsafe-loop-optimizations
++NEURAL_AMP_MODELER_LV2_TARGET_OPT += -fno-unroll-loops
++ifeq ($(MACOS),true)
++NEURAL_AMP_MODELER_LV2_TARGET_OPT += -ftree-vectorize -fexceptions -funsafe-math-optimizations
++else
++NEURAL_AMP_MODELER_LV2_TARGET_OPT += -ftree-vectorize -fmove-loop-invariants -fexceptions -funsafe-math-optimizations
++endif
++NEURAL_AMP_MODELER_LV2_TARGET_OPT += -fdata-sections -ffunction-sections -pipe -fno-math-errno -fno-trapping-math -falign-functions=16 -falign-loops=16
++
++ifneq ($(MACOS),true)
+ NEURAL_AMP_MODELER_LV2_TARGET_OPT += -fsingle-precision-constant
++endif
+ NEURAL_AMP_MODELER_LV2_TARGET_OPT += -pthread
+ 
+ ifndef BR2_SKIP_LTO
+ NEURAL_AMP_MODELER_LV2_TARGET_OPT += -flto -ffat-lto-objects
+ endif
+ 
++# EIGEN
++#NEURAL_AMP_MODELER_LV2_TARGET_OPT += -DEIGEN_DEFAULT_L1_CACHE_SIZE=32768
++#NEURAL_AMP_MODELER_LV2_TARGET_OPT += -DEIGEN_DEFAULT_L2_CACHE_SIZE=262144
++NEURAL_AMP_MODELER_LV2_TARGET_OPT += -DEIGEN_DONT_PARALLELIZE=ON
++
+ # pass options into cmake
+ NEURAL_AMP_MODELER_LV2_CONF_OPTS += -DCMAKE_C_FLAGS="$(TARGET_CFLAGS) $(NEURAL_AMP_MODELER_LV2_TARGET_OPT)"
+ NEURAL_AMP_MODELER_LV2_CONF_OPTS += -DCMAKE_CXX_FLAGS="$(TARGET_CXXFLAGS) $(NEURAL_AMP_MODELER_LV2_TARGET_OPT)"
+ NEURAL_AMP_MODELER_LV2_CONF_OPTS += -DCMAKE_SHARED_LINKER_FLAGS="$(TARGET_LDFLAGS) $(NEURAL_AMP_MODELER_LV2_TARGET_OPT)"
+-NEURAL_AMP_MODELER_LV2_CONF_OPTS += -DDISABLE_DENORMALS:BOOL=OFF
++NEURAL_AMP_MODELER_LV2_CONF_OPTS += -DDISABLE_DENORMALS:BOOL=ON
++NEURAL_AMP_MODELER_LV2_CONF_OPTS += -DCMAKE_BUILD_TYPE=Release
++NEURAL_AMP_MODELER_LV2_CONF_OPTS += -DBUILD_UTILS=OFF
++NEURAL_AMP_MODELER_LV2_CONF_OPTS += -DBUILD_NAMCORE=ON
++NEURAL_AMP_MODELER_LV2_CONF_OPTS += -DBUILD_RTNEURAL=OFF
++NEURAL_AMP_MODELER_LV2_CONF_OPTS += -DWAVENET_FRAMES=128
++NEURAL_AMP_MODELER_LV2_CONF_OPTS += -DBUFFER_PADDING=16
++NEURAL_AMP_MODELER_LV2_CONF_OPTS += -DSMART_BYPASS_ENABLED=OFF
++NEURAL_AMP_MODELER_LV2_CONF_OPTS += -DBUILD_INTERNAL_STATIC_WAVENET=ON
++NEURAL_AMP_MODELER_LV2_CONF_OPTS += -DBUILD_INTERNAL_STATIC_LSTM=ON
++NEURAL_AMP_MODELER_LV2_CONF_OPTS += -DBUILD_STATIC_RTNEURAL=OFF
++NEURAL_AMP_MODELER_LV2_CONF_OPTS += -DWAVENET_MATH=FastMath
++NEURAL_AMP_MODELER_LV2_CONF_OPTS += -DLSTM_MATH=FastMath
++NEURAL_AMP_MODELER_LV2_CONF_OPTS += -DNAM_ENABLE_A2_FAST=ON
++NEURAL_AMP_MODELER_LV2_CONF_OPTS += -DNAM_USE_INLINE_GEMM=ON
++NEURAL_AMP_MODELER_LV2_CONF_OPTS += -DDEFAULT_QUALITY_SCALE="0.49"
++
+ 
+ # needed for submodules support
+ NEURAL_AMP_MODELER_LV2_PRE_DOWNLOAD_HOOKS += MOD_PLUGIN_BUILDER_DOWNLOAD_WITH_SUBMODULES
+@@ -31,8 +64,8 @@ NEURAL_AMP_MODELER_LV2_PRE_DOWNLOAD_HOOKS += MOD_PLUGIN_BUILDER_DOWNLOAD_WITH_SU
+ define NEURAL_AMP_MODELER_LV2_INSTALL_TARGET_CMDS
+ 	install -d $(TARGET_DIR)/usr/lib/lv2/$(NEURAL_AMP_MODELER_LV2_BUNDLES)/modgui
+ 	install -m 644 $(@D)/$(NEURAL_AMP_MODELER_LV2_BUNDLES)/*.* $(TARGET_DIR)/usr/lib/lv2/$(NEURAL_AMP_MODELER_LV2_BUNDLES)/
+-	install -m 644 $($(PKG)_PKGDIR)/$(NEURAL_AMP_MODELER_LV2_BUNDLES)/*.* $(TARGET_DIR)/usr/lib/lv2/$(NEURAL_AMP_MODELER_LV2_BUNDLES)/
+-	install -m 644 $($(PKG)_PKGDIR)/$(NEURAL_AMP_MODELER_LV2_BUNDLES)/modgui/*.* $(TARGET_DIR)/usr/lib/lv2/$(NEURAL_AMP_MODELER_LV2_BUNDLES)/modgui/
++	#install -m 644 $($(PKG)_PKGDIR)/$(NEURAL_AMP_MODELER_LV2_BUNDLES)/*.* $(TARGET_DIR)/usr/lib/lv2/$(NEURAL_AMP_MODELER_LV2_BUNDLES)/
++	install -m 644 $(@D)/resources/modgui/*.* $(TARGET_DIR)/usr/lib/lv2/$(NEURAL_AMP_MODELER_LV2_BUNDLES)/modgui/
+ endef
+ 
+ $(eval $(cmake-package))

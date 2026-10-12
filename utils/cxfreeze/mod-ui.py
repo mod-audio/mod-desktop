@@ -4,6 +4,8 @@
 # ------------------------------------------------------------------------------------------------------------
 # Imports (cx_Freeze)
 
+import os
+
 from cx_Freeze import setup, Executable
 
 # ------------------------------------------------------------------------------------------------------------
@@ -19,7 +21,20 @@ else:
 
 # ------------------------------------------------------------------------------------------------------------
 
+# This is a publishable OAuth identifier, not a secret.  Bake the build value
+# into the frozen executable so Finder-launched Desktop instances retain it.
+# A runtime MOD_TONE3000_CLIENT_ID remains the higher-priority development
+# override in mod/settings.py.
+tone3000_client_id = os.environ.get("MOD_TONE3000_CLIENT_ID", "").strip()
+if not tone3000_client_id:
+  raise RuntimeError("MOD_TONE3000_CLIENT_ID must be non-empty when freezing mod-ui")
+
 options = {
+  "constants": [f"MOD_TONE3000_CLIENT_ID={tone3000_client_id!r}"] + (
+    # "Report a problem" target for this Desktop build (its own forum topic, distinct from the OS one);
+    # optional: without it mod-ui falls back to the Beta Testing category.
+    [f"MOD_FEEDBACK_URL={os.environ['MOD_FEEDBACK_URL'].strip()!r}"] if os.environ.get("MOD_FEEDBACK_URL", "").strip() else []
+  ),
   "zip_include_packages": ["*"],
   "zip_exclude_packages": ["Cryptodome","PIL","mod","modtools","PyQt5"],
   "replace_paths": [["*",f".{s}lib{s}"]],

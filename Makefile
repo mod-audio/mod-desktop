@@ -197,15 +197,14 @@ PLUGINS += dpf-plugins
 PLUGINS += dragonfly-reverb
 PLUGINS += fomp
 # FIXME use of unsupported attributes on macOS https://github.com/mod-audio/mod-desktop/actions/runs/11073258401/job/30769392843
-# PLUGINS += gxbajatubedriver
+PLUGINS += gxbajatubedriver
 # FIXME use of unsupported attributes on macOS https://github.com/mod-audio/mod-desktop/actions/runs/11074280005/job/30778113413
-# PLUGINS += gxknightfuzz
+PLUGINS += gxknightfuzz
 PLUGINS += gxquack
 # FIXME use of unsupported attributes on macOS https://github.com/mod-audio/mod-desktop/actions/runs/11077433225/job/30782666413
-# PLUGINS += gxslowgear
+PLUGINS += gxslowgear
 PLUGINS += gxswitchlesswah
 PLUGINS += invada-lv2
-PLUGINS += master_me
 PLUGINS += mod-ams-lv2
 PLUGINS += mod-arpeggiator
 PLUGINS += mod-audio-mixers
@@ -228,8 +227,6 @@ PLUGINS += shiro-plugins
 PLUGINS += sooperlooper-lv2
 PLUGINS += tap-lv2
 # FIXME invalid macOS linker flags https://github.com/mod-audio/mod-desktop/actions/runs/11077667941/job/30783441664
-# PLUGINS += vallsv-midi-display
-PLUGINS += wolf-shaper
 PLUGINS += x42-fil4
 PLUGINS += x42-mclk
 PLUGINS += x42-midifilter
@@ -256,6 +253,35 @@ endif
 
 # conflict with lv2-dev
 # PLUGINS += lv2-examples
+
+# Added 2026-10-08 after the open-source plugin classification for MOD Desktop
+# (Plugins/mod-plugin-management/analysis/desktop-candidates.md): ready on linux-x86_64, win64 and macOS.
+PLUGINS += fatfrog
+PLUGINS += freaked
+PLUGINS += gxbottlerocket
+PLUGINS += gxepic
+PLUGINS += gxguvnor
+PLUGINS += gxhotbox
+PLUGINS += gxhyperion
+PLUGINS += gxsaturate
+PLUGINS += gxsd1
+PLUGINS += gxsd2lead
+PLUGINS += gxsfp
+PLUGINS += gxsupersonic
+PLUGINS += gxsvt
+PLUGINS += gxtimray
+PLUGINS += gxtonemachine
+PLUGINS += gxultracab
+PLUGINS += gxuvox
+PLUGINS += gxvbass
+PLUGINS += gxvintagefuzzmaster
+PLUGINS += gxvmk2d
+PLUGINS += gxvoodoo
+PLUGINS += gxvoxtb
+PLUGINS += gxvstb
+PLUGINS += harmonicexciter
+PLUGINS += metaltone
+PLUGINS += rumor
 
 # include plugin projects for version and bundle list
 include $(foreach PLUGIN,$(PLUGINS),src/mod-plugin-builder/plugins/package/$(PLUGIN)/$(PLUGIN).mk)
@@ -320,6 +346,34 @@ src/DPF/utils/lv2_ttl_generator$(APP_EXT):
 	./utils/run.sh $(PAWPAW_TARGET) $(MAKE) NOOPT=true -C src/DPF/utils/lv2-ttl-generator
 
 plugins: $(foreach PLUGIN,$(PLUGINS),$(call PLUGIN_STAMP,$(PLUGIN)))
+
+.PHONY: restage-plugins repackage-stage repackage-linux repackage-win64 repackage-macos
+
+# Recreate only the package-facing plugin links from already-built PawPaw
+# bundles. This deliberately does not depend on the plugin build stamps: a
+# repack must fail rather than silently rebuilding an unavailable bundle.
+restage-plugins:
+	./utils/restage-plugins.sh build/plugins $(PAWPAW_PREFIX)/lib/lv2 $(BUNDLES)
+
+# Rebuild the frozen mod-ui only when its real Python inputs changed, then
+# reconstruct package staging without touching retained root/container-owned
+# outputs. Native applications, dependencies and plugins remain cached.
+repackage-stage: build-ui/mod-ui$(APP_EXT)
+	./utils/restage-runtime.sh $(PAWPAW_TARGET)
+	$(MAKE) PAWPAW_TARGET=$(PAWPAW_TARGET) restage-plugins
+
+repackage-linux: repackage-stage
+	./utils/linux/linux-tar.sh
+
+repackage-win64:
+	$(MAKE) PAWPAW_TARGET=win64 repackage-stage
+	./utils/win64/win64-installer.sh
+	./utils/win64/win64-zip.sh
+
+repackage-macos:
+	@test -n "$(PAWPAW_TARGET)" || (echo "Set PAWPAW_TARGET to the macOS target" >&2; exit 1)
+	$(MAKE) PAWPAW_TARGET=$(PAWPAW_TARGET) repackage-stage
+	./utils/macos/macos-pkg.sh $(PAWPAW_TARGET)
 
 run: $(TARGETS)
 	./utils/test.sh $(PAWPAW_TARGET)
@@ -618,7 +672,7 @@ build-pedalboard/mod-pedalboard$(APP_EXT): utils/cxfreeze/mod-pedalboard.py util
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-build-ui/mod-ui$(APP_EXT): utils/cxfreeze/mod-ui.py utils/cxfreeze/mod-ui-setup.py build-pedalboard/mod-pedalboard$(APP_EXT)
+build-ui/mod-ui$(APP_EXT): utils/cxfreeze/mod-ui.py utils/cxfreeze/mod-ui-setup.py $(wildcard src/mod-ui/mod/*.py) build-pedalboard/mod-pedalboard$(APP_EXT)
 	./utils/run.sh $(PAWPAW_TARGET) python3 utils/cxfreeze/mod-ui.py build_exe
 	rm -rf build-ui/lib/PyQt5
 	zip -j build-ui/lib/library.zip build-pedalboard/mod$(PYNSEP)pedalboard__init__.pyc build-pedalboard/mod$(PYNSEP)pedalboard__main__.pyc

@@ -1,0 +1,12 @@
+diff --git a/src/effects.c b/src/effects.c
+index 40cd24d..e15339f 100644
+--- a/src/effects.c
++++ b/src/effects.c
+@@ -5848,6 +5848,7 @@ int effects_add(const char *uri, int instance, int activate)
+     }
+ 
+     lilv_node_free(plugin_uri);
++    plugin_uri = NULL;
+ 
+     /* create ring buffer for events from socket/commandline */
+     if (control_in_size != 0)
