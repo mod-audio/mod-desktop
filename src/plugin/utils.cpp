@@ -76,6 +76,14 @@ static const char* getDataDir()
 
     if (dataDir[0] == 0)
     {
+       #ifdef __linux__
+        // must match initEvironment from systray side: "~/MOD Desktop", created (or moved there) by the application.
+        // not created here, so that a plugin loaded before the application ran does not block moving the old data
+        if (const char* const home = getenv("HOME"))
+            std::strncpy(dataDir, home, PATH_MAX - 1);
+
+        std::strncat(dataDir, "/MOD Desktop", PATH_MAX - 1);
+       #else
         // TODO
         std::strncpy(dataDir, getenv("HOME"), PATH_MAX - 1);
         mkdir(dataDir, 0777);
@@ -85,6 +93,7 @@ static const char* getDataDir()
 
         std::strncat(dataDir, "/MOD Desktop", PATH_MAX - 1);
         mkdir(dataDir, 0777);
+       #endif
     }
 
     return dataDir;
