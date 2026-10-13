@@ -26,7 +26,6 @@
 #include <unistd.h>
 #endif
 
-#include <cstdio>
 #include <cstring>
 
 #if defined(__APPLE__)
@@ -122,28 +121,6 @@ void initEvironment()
     _wmkdir(dataDir);
 
     SetEnvironmentVariableW(L"MOD_DATA_DIR", dataDir);
-   #elif defined(__linux__)
-    char dataDir[PATH_MAX] = {};
-
-    // on Linux the data lives in "~/MOD Desktop", not under the documents folder:
-    // that one is localized (~/Dokumente, ~/ドキュメント, ...) and the plugin must find the same path without Qt
-    std::strncpy(dataDir, QDir::homePath().toUtf8().constData(), PATH_MAX - 1);
-    std::strncat(dataDir, "/MOD Desktop", PATH_MAX - 1);
-
-    // move the data from the documents folder used up to 0.0.13
-    if (access(dataDir, F_OK) != 0)
-    {
-        const QByteArray oldDataDir(QString(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)
-                                            + "/MOD Desktop").toUtf8());
-
-        // rename fails across filesystems, then a symlink keeps the data where it is
-        if (access(oldDataDir.constData(), F_OK) == 0 && std::rename(oldDataDir.constData(), dataDir) != 0)
-            symlink(oldDataDir.constData(), dataDir);
-    }
-
-    mkdir(dataDir, 0777);
-
-    setenv("MOD_DATA_DIR", dataDir, 1);
    #else
     char dataDir[PATH_MAX] = {};
 

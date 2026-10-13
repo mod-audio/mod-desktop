@@ -53,7 +53,7 @@ MOD Desktop will close to the "system tray" by default, but this can also be cha
 ### Handling files
 
 There are a few plugins on the MOD platform, like AIDA-X and NAM, that load external files.
-On their GUIs they will list the files as available under the `MOD Desktop/user-files` directory, which lives in your Documents folder on Windows and macOS and directly in your home folder on Linux (`~/MOD Desktop/user-files`).
+On their GUIs they will list the files as available under $Documents/MOD Desktop/user-files directory (the actual file path depends on the operating system).
 
 You are meant to copy the files you wish to load into the relevant directory for them.
 For convenience, MOD Desktop includes a "Open User Files" button that will automatically open your file explorer in the directory dedicated to such files.

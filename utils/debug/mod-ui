@@ -34,7 +34,7 @@ fi
 if [ -e mod-desktop.app ]; then
     DOCS_DIR="${HOME}/Documents"
 else
-    DOCS_DIR="${HOME}"
+    DOCS_DIR="$(xdg-user-dir DOCUMENTS)"
 fi
 
 PYTHON="${EXE_WRAPPER} ${PAWPAW_PREFIX}/bin/python3${APP_EXT}"
