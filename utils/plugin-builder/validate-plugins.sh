@@ -30,7 +30,7 @@ elif [ -e mod-desktop.app ]; then
     OS_SEP='/'
 else
     source ../src/PawPaw/local.env linux
-    DOCS_DIR=$(xdg-user-dir DOCUMENTS)
+    DOCS_DIR="${HOME}"
     LV2_PATH="$(pwd)/plugins"
     OS_SEP='/'
 fi

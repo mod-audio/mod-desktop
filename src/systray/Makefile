@@ -105,7 +105,8 @@ ifeq ($(MACOS),true)
 	install_name_tool -change "@rpath/QtWidgets.framework/Versions/5/QtWidgets" "@executable_path/../Frameworks/QtWidgets.framework/QtWidgets" $@
 endif
 
-main.cpp.o: main.cpp mod-desktop.hpp qrc_mod-desktop.hpp ui_mod-desktop.hpp utils.cpp utils.hpp widgets.hpp
+# VERSION is compiled in (-DVERSION), a change must rebuild
+main.cpp.o: main.cpp mod-desktop.hpp qrc_mod-desktop.hpp ui_mod-desktop.hpp utils.cpp utils.hpp widgets.hpp ../../VERSION
 	$(CXX) $< $(CXXFLAGS) $(QT5_FLAGS) -c -o $@
 
 mod-desktop.rc.o: mod-desktop.rc
