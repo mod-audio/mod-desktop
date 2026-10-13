@@ -70,30 +70,104 @@ static const wchar_t* getDataDirW()
     return dataDir;
 }
 #else
+#ifdef __linux__
+// XDG_DOCUMENTS_DIR from <configDir>/user-dirs.dirs, parsed like Qt 5.12 QStandardPaths::DocumentsLocation does
+static bool readXdgDocumentsDir(char dir[PATH_MAX], const char* const configDir, const char* const home)
+{
+    char path[PATH_MAX] = {};
+    std::strncpy(path, configDir, PATH_MAX - 1);
+    std::strncat(path, "/user-dirs.dirs", PATH_MAX - 1);
+
+    FILE* const f = std::fopen(path, "r");
+    if (f == nullptr)
+        return false;
+
+    // the last XDG_DOCUMENTS_DIR line wins, as in Qt
+    char line[PATH_MAX + 32];
+    while (std::fgets(line, sizeof(line), f) != nullptr)
+    {
+        if (std::strncmp(line, "XDG_DOCUMENTS_DIR=", 18) != 0)
+            continue;
+
+        char* value = line + 18;
+        size_t len = std::strlen(value);
+
+        while (len != 0 && (value[len - 1] == '\n' || value[len - 1] == '\r'))
+            value[--len] = 0;
+
+        if (len > 2 && value[0] == '"' && value[len - 1] == '"')
+        {
+            value[--len] = 0;
+            ++value;
+            --len;
+        }
+
+        if (len == 0)
+            continue;
+
+        if (len > 1 && value[len - 1] == '/')
+            value[--len] = 0;
+
+        if (std::strncmp(value, "$HOME", 5) == 0)
+        {
+            std::strncpy(dir, home, PATH_MAX - 1);
+            std::strncat(dir, value + 5, PATH_MAX - 1);
+        }
+        else
+        {
+            std::strncpy(dir, value, PATH_MAX - 1);
+        }
+    }
+
+    std::fclose(f);
+    return dir[0] != 0;
+}
+#endif
+
 static const char* getDataDir()
 {
     static char dataDir[PATH_MAX] = {};
 
     if (dataDir[0] == 0)
     {
-       #ifdef __linux__
-        // must match initEvironment from systray side: "~/MOD Desktop", created (or moved there) by the application.
-        // not created here, so that a plugin loaded before the application ran does not block moving the old data
-        if (const char* const home = getenv("HOME"))
-            std::strncpy(dataDir, home, PATH_MAX - 1);
+        const char* const home = getenv("HOME");
 
-        std::strncat(dataDir, "/MOD Desktop", PATH_MAX - 1);
+       #ifdef __linux__
+        // must match initEvironment from systray side, which uses Qt's DocumentsLocation:
+        // the XDG documents dir is localized (~/Documenti, ~/ドキュメント, ...), "~/Documents" when not set.
+        // a sandboxed DAW (flatpak) gets its own XDG_CONFIG_HOME, so also try the one in the real home
+        bool found = false;
+
+        if (const char* const configHome = getenv("XDG_CONFIG_HOME"))
+            if (configHome[0] != 0)
+                found = readXdgDocumentsDir(dataDir, configHome, home);
+
+        if (! found)
+        {
+            char configDir[PATH_MAX] = {};
+            std::strncpy(configDir, home, PATH_MAX - 1);
+            std::strncat(configDir, "/.config", PATH_MAX - 1);
+            found = readXdgDocumentsDir(dataDir, configDir, home);
+        }
+
+        if (! found)
+        {
+            std::strncpy(dataDir, home, PATH_MAX - 1);
+            std::strncat(dataDir, "/Documents", PATH_MAX - 1);
+        }
+
+        mkdir(dataDir, 0777);
        #else
         // TODO
-        std::strncpy(dataDir, getenv("HOME"), PATH_MAX - 1);
+        std::strncpy(dataDir, home, PATH_MAX - 1);
         mkdir(dataDir, 0777);
 
         std::strncat(dataDir, "/Documents", PATH_MAX - 1);
         mkdir(dataDir, 0777);
+       #endif
 
         std::strncat(dataDir, "/MOD Desktop", PATH_MAX - 1);
         mkdir(dataDir, 0777);
-       #endif
     }
 
     return dataDir;

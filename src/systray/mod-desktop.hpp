@@ -656,12 +656,7 @@ private:
     // persistent copy of what the launcher starts and what jackd/mod-host print, to diagnose without a debug run
     static void appendLauncherLog(const QString& text)
     {
-       #ifdef __linux__
-        // "~/MOD Desktop", set by initEvironment
-        const QString dir(QString::fromLocal8Bit(qgetenv("MOD_DATA_DIR")));
-       #else
         const QString dir(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/MOD Desktop");
-       #endif
         QDir().mkpath(dir);
         QFile f(dir + "/launcher.log");
         if (f.open(QIODevice::Append | QIODevice::Text))
