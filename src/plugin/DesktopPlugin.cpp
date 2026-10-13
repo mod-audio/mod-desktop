@@ -174,6 +174,14 @@ protected:
              const MidiEvent* const midiEvents,
              const uint32_t midiEventCount) override
     {
+        // resamplers are only set up after a successful init, a failed one (e.g. app not found) outputs silence
+        if (resamplerToTarget == nullptr || resamplerFromTarget == nullptr)
+        {
+            for (uint32_t c = 0; c < DISTRHO_PLUGIN_NUM_OUTPUTS; ++c)
+                std::memset(outputs[c], 0, sizeof(float) * frames);
+            return;
+        }
+
         // optimize for non-denormal usage
         const ScopedDenormalDisable sdd;
         for (uint32_t c = 0; c < DISTRHO_PLUGIN_NUM_INPUTS; ++c)
