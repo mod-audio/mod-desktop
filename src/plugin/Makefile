@@ -32,6 +32,9 @@ USING_WEBVIEW = true
 
 include ../DPF/Makefile.plugins.mk
 
+# VERSION is compiled in (-DVERSION), a change must rebuild
+$(OBJS_DSP) $(OBJS_UI): ../../VERSION
+
 TARGETS = features jack au clap lv2_sep vst2 vst3
 
 BUILD_CXX_FLAGS += -DVERSION='"$(shell cat ../../VERSION)"'
