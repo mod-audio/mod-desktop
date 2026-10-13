@@ -75,6 +75,27 @@ Current known issues:
 - Handling of Windows filepaths is not always correct (differences between POSIX vs Windows path separators)
 - When mod-host crashes it will stop the UI process, instead of being automatically restarted like in MOD units
 
+## mod-ui: one code base with MOD OS
+
+MOD Desktop ships the same [mod-ui](https://github.com/mod-audio/mod-ui) as the MOD devices, from the
+**same commit as the MOD OS release line it belongs to** (`hotfix-<version>` in mod-ui). Rules:
+
+- `src/mod-ui` always points at a commit on the current release line of mod-ui. Never at `master`,
+  never at a Desktop-only branch. Bumping the pin is how a mod-ui fix reaches the Desktop.
+- Desktop-only behaviour is implemented **in mod-ui**, behind `MOD_DESKTOP=1` (set by the launcher),
+  and is inert on devices. This repository never carries a modified copy of a mod-ui file; it only
+  decides what gets packaged (`utils/pack-html.sh`, `utils/win64/win64-installer.iss`,
+  `utils/macos/macos-pkg.sh`). When mod-ui gains a new directory under `html/`, the packagers must
+  learn it; a package is verified by inspecting its payload, not by its exit status.
+- `VERSION` holds the release number (plain `0.0.N` while MOD Desktop is in beta; internal test builds add a
+  fourth `.<build>` part); it shows in the web UI's address bar
+  (`?v=`), in the launcher's settings dialog and in every package name, so a report can always be
+  tied to a build. The launcher and the plugin compile it in; changing `VERSION` rebuilds both.
+- The Tone3000 client id is a publishable identifier passed as `MOD_TONE3000_CLIENT_ID` in the
+  environment at freeze time and baked into the frozen mod-ui; it is never committed.
+
+See `CONTRIBUTING.md` in mod-ui for the branch model and how a change travels to both products.
+
 ## Development
 
 If you want to contribute, here are a few items where help would be appreciated:
