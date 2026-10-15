@@ -112,3 +112,5 @@ Also help in these areas, but they are much more involved:
 ## License
 
 MOD Desktop is licensed under AGPLv3+, see [LICENSE](LICENSE) for more details.
+
+That licence does not cover the logo. The MOD logo is a registered trademark (EU trade mark no. 016228827; UK trade mark no. UK00916228827). See [TRADEMARKS.md](TRADEMARKS.md).
