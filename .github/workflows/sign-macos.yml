@@ -1,0 +1,73 @@
+name: sign-macos
+
+# Signs a macOS installer that was built outside CI.
+#
+# 1. Create a DRAFT release and upload the unsigned installer to it, named
+#    mod-desktop-<version>-macOS-unsigned.pkg
+# 2. Run this workflow with that tag and asset name.
+# 3. The signed mod-desktop-<version>-macOS.pkg and its SHA256SUMS file are
+#    attached to the same draft release, and kept as a run artifact.
+# 4. Check the signed installer on a Mac, then delete the -unsigned asset
+#    before publishing the release.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag of the draft release that holds the unsigned installer'
+        required: true
+      asset:
+        description: 'Unsigned installer asset, e.g. mod-desktop-0.0.14-macOS-unsigned.pkg'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  sign:
+    runs-on: macos-14
+    env:
+      TAG: ${{ inputs.tag }}
+      ASSET: ${{ inputs.asset }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check input
+        run: |
+          case "${ASSET}" in
+            mod-desktop-*-macOS-unsigned.pkg) ;;
+            *) echo "Asset must be named mod-desktop-<version>-macOS-unsigned.pkg"; exit 1 ;;
+          esac
+          if [ "$(gh release view "${TAG}" --repo "${GITHUB_REPOSITORY}" --json isDraft -q .isDraft)" != "true" ]; then
+            echo "Release ${TAG} is not a draft; refusing to attach files to a published release"
+            exit 1
+          fi
+      - name: Download unsigned installer
+        run: |
+          gh release download "${TAG}" --repo "${GITHUB_REPOSITORY}" --pattern "${ASSET}" --dir in
+          shasum -a 256 "in/${ASSET}"
+      - name: Sign
+        env:
+          CODESIGN_APP_IDENTITY: ${{ secrets.CODESIGN_APP_IDENTITY }}
+          CODESIGN_PKG_IDENTITY: ${{ secrets.CODESIGN_PKG_IDENTITY }}
+          CODESIGN_APP_P12_CONTENTS: ${{ secrets.CODESIGN_APP_P12_CONTENTS }}
+          CODESIGN_PKG_P12_CONTENTS: ${{ secrets.CODESIGN_PKG_P12_CONTENTS }}
+          CODESIGN_APP_P12_PASSWORD: ${{ secrets.CODESIGN_APP_P12_PASSWORD }}
+          CODESIGN_PKG_P12_PASSWORD: ${{ secrets.CODESIGN_PKG_P12_PASSWORD }}
+          NOTARY_KEY_P8_CONTENTS: ${{ secrets.NOTARY_KEY_P8_CONTENTS }}
+          NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
+          NOTARY_ISSUER_ID: ${{ secrets.NOTARY_ISSUER_ID }}
+        run: |
+          ./utils/macos/macos-sign-pkg.sh "in/${ASSET}" "out/${ASSET%-unsigned.pkg}.pkg"
+      - name: Checksum
+        run: |
+          cd out
+          v="${ASSET#mod-desktop-}"; v="${v%-macOS-unsigned.pkg}"
+          shasum -a 256 *.pkg | tee "SHA256SUMS-mod-desktop-${v}-macOS.txt"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: signed-${{ inputs.asset }}
+          path: out/*
+      - name: Attach to the draft release
+        run: |
+          gh release upload "${TAG}" out/* --repo "${GITHUB_REPOSITORY}" --clobber
