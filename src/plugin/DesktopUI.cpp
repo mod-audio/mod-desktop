@@ -9,6 +9,8 @@
 
 #include "utils.hpp"
 
+#include <atomic>
+
 START_NAMESPACE_DISTRHO
 
 // -----------------------------------------------------------------------------------------------------------
@@ -25,6 +27,9 @@ class DesktopUI : public UI,
     ResizeHandle resizeHandle;
     int port = 0;
     WebViewHandle webview = nullptr;
+    // port value from parameterChanged, handled in uiIdle: some hosts (REAPER AU) report output
+    // parameters on the audio thread, and the web view must only be created on the main thread
+    std::atomic<float> pendingPortValue { 0.f };
 
 public:
     DesktopUI()
@@ -81,114 +86,125 @@ protected:
     */
     void parameterChanged(const uint32_t index, const float value) override
     {
-        if (index == kParameterBasePortNumber)
+        if (index == kParameterBasePortNumber && d_isNotZero(value))
+            pendingPortValue.store(value);
+    }
+
+   /**
+      Idle callback, always on the main thread.
+    */
+    void uiIdle() override
+    {
+        const float value = pendingPortValue.exchange(0.f);
+
+        if (d_isNotZero(value))
+            portValueChanged(value);
+    }
+
+    void portValueChanged(const float value)
+    {
+        if (value < 0.f)
         {
-            if (d_isZero(value))
-                return;
-
-            if (value < 0.f)
-            {
-                const int nport = d_roundToIntNegative(value);
-                DISTRHO_SAFE_ASSERT_RETURN(nport != 0,);
-
-                if (nport == port)
-                    return;
-
-                port = nport;
-
-                if (webview != nullptr)
-                {
-                    webViewDestroy(webview);
-                    webview = nullptr;
-                    buttonOpenWebGui.hide();
-                }
-
-                switch (-nport)
-                {
-                case kErrorAppDirNotFound:
-                    error = "Error: MOD Desktop application directory not found";
-                    errorDetail = "Make sure to install the standalone and run it at least once";
-                    break;
-                case kErrorJackdExecFailed:
-                    error = "Error: Failed to start jackd";
-                    errorDetail = "";
-                    break;
-                case kErrorModUiExecFailed:
-                    error = "Error: Failed to start mod-ui";
-                    errorDetail = "";
-                    break;
-                case kErrorShmSetupFailed:
-                    error = "Error initializing MOD Desktop plugin";
-                    errorDetail = "Shared memory setup failed";
-                    break;
-                case kErrorUndefined:
-                    error = "Error initializing MOD Desktop plugin";
-                    errorDetail = "";
-                    break;
-                }
-
-                repaint();
-                return;
-            }
-
-            const int nport = d_roundToUnsignedInt(value);
+            const int nport = d_roundToIntNegative(value);
             DISTRHO_SAFE_ASSERT_RETURN(nport != 0,);
 
             if (nport == port)
                 return;
 
-            if (error.isNotEmpty())
-            {
-                error.clear();
-                errorDetail.clear();
-                repaint();
-            }
+            port = nport;
 
             if (webview != nullptr)
             {
                 webViewDestroy(webview);
                 webview = nullptr;
-
                 buttonOpenWebGui.hide();
-                repaint();
             }
 
-            port = nport;
-
-            const double scaleFactor = getScaleFactor();
-
-            uint offset = kVerticalOffset * scaleFactor;
-            uint width = getWidth();
-            uint height = getHeight() - offset * 2;
-
-            WebViewOptions opts;
-            opts.offset.y = offset;
-
-            char url[32] = {};
-            std::snprintf(url, 31, "http://127.0.0.1:%u/", kPortNumOffset + port * 3 + 2);
-
-            webview = webViewCreate(url,
-                                    getWindow().getNativeWindowHandle(),
-                                    width,
-                                    height,
-                                    scaleFactor,
-                                    opts);
-
-            if (webview == nullptr)
+            switch (-nport)
             {
-                error = "Error: Failed to create web view";
-               #if defined(DISTRHO_OS_MAC)
-                // no path for failure on macOS
-               #elif defined(DISTRHO_OS_WINDOWS)
-                errorDetail = "Please install the Microsoft Edge WebView2 Runtime";
-               #else
-                errorDetail = "Could not initialize X11";
-               #endif
+            case kErrorAppDirNotFound:
+                error = "Error: MOD Desktop application directory not found";
+                errorDetail = "Make sure to install the standalone and run it at least once";
+                break;
+            case kErrorJackdExecFailed:
+                error = "Error: Failed to start jackd";
+                errorDetail = "";
+                break;
+            case kErrorModUiExecFailed:
+                error = "Error: Failed to start mod-ui";
+                errorDetail = "";
+                break;
+            case kErrorShmSetupFailed:
+                error = "Error initializing MOD Desktop plugin";
+                errorDetail = "Shared memory setup failed";
+                break;
+            case kErrorUndefined:
+                error = "Error initializing MOD Desktop plugin";
+                errorDetail = "";
+                break;
             }
 
-            buttonOpenWebGui.show();
+            repaint();
+            return;
+        }
+
+        const int nport = d_roundToUnsignedInt(value);
+        DISTRHO_SAFE_ASSERT_RETURN(nport != 0,);
+
+        if (nport == port)
+            return;
+
+        if (error.isNotEmpty())
+        {
+            error.clear();
+            errorDetail.clear();
             repaint();
         }
+
+        if (webview != nullptr)
+        {
+            webViewDestroy(webview);
+            webview = nullptr;
+
+            buttonOpenWebGui.hide();
+            repaint();
+        }
+
+        port = nport;
+
+        const double scaleFactor = getScaleFactor();
+
+        uint offset = kVerticalOffset * scaleFactor;
+        uint width = getWidth();
+        uint height = getHeight() - offset * 2;
+
+        WebViewOptions opts;
+        opts.offset.y = offset;
+
+        char url[32] = {};
+        std::snprintf(url, 31, "http://127.0.0.1:%u/", kPortNumOffset + port * 3 + 2);
+
+        webview = webViewCreate(url,
+                                getWindow().getNativeWindowHandle(),
+                                width,
+                                height,
+                                scaleFactor,
+                                opts);
+
+        if (webview == nullptr)
+        {
+            error = "Error: Failed to create web view";
+           #if defined(DISTRHO_OS_MAC)
+            // no path for failure on macOS
+           #elif defined(DISTRHO_OS_WINDOWS)
+            errorDetail = "Please install the Microsoft Edge WebView2 Runtime";
+           #else
+            errorDetail = "Could not initialize X11";
+           #endif
+        }
+
+        buttonOpenWebGui.show();
+        repaint();
     }
 
    /**
