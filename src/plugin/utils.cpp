@@ -206,7 +206,7 @@ const char* getAppDir()
         WideCharToMultiByte(CP_UTF8, 0, getAppDirW(), -1, appDir, PATH_MAX, nullptr, nullptr);
        #else
         std::strncpy(appDir, getDataDir(), PATH_MAX - 1);
-        std::strncat(appDir, "/.last-known-location-" VERSION, PATH_MAX - 1);
+        std::strncat(appDir, "/.last-known-location-" VERSION_LINE, PATH_MAX - 1);
 
         if (FILE* const f = std::fopen(appDir, "r"))
         {
