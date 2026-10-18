@@ -6,7 +6,9 @@
 # The installer is unpacked, its contents are signed the same way
 # macos-pkg.sh signs them, and each component package is rebuilt with the
 # identifier, version and install location it already had. Nothing else in
-# the payload changes.
+# the payload changes. Takes either a product archive (macos-pkg.sh output)
+# or a single component package with the app only (as 0.0.13 shipped), and
+# gives back the same kind.
 #
 # Needs the same CODESIGN_* variables as macos-pkg.sh. If NOTARY_KEY_P8_CONTENTS
 # (base64 of an App Store Connect API key), NOTARY_KEY_ID and NOTARY_ISSUER_ID
@@ -69,23 +71,22 @@ sign() {
         "$@"
 }
 
-pkgutil --expand-full "${IN}" "${WORK}/x"
-mkdir "${WORK}/out"
-
-for comp in "${WORK}"/x/*.pkg; do
-    name="$(basename "${comp}")"
-    info="${comp}/PackageInfo"
-    payload="${comp}/Payload"
+# sign one component package (expanded at $1, named $2) into $3
+sign_component() {
+    local comp="${1}" name="${2}" target="${3}"
+    local info="${comp}/PackageInfo"
+    local payload="${comp}/Payload"
+    local id version location
     id="$(xmllint --xpath 'string(/pkg-info/@identifier)' "${info}")"
     version="$(xmllint --xpath 'string(/pkg-info/@version)' "${info}")"
     location="$(xmllint --xpath 'string(/pkg-info/@install-location)' "${info}")"
-    extra=()
+    local extra=()
 
     echo "== ${name} (${id} -> ${location})"
 
     case "${name}" in
     mod-desktop.pkg)
-        app="${payload}/MOD Desktop.app"
+        local app="${payload}/MOD Desktop.app"
         find "${app}/Contents/LV2" -name "*.dylib" -print0 | while IFS= read -r -d '' f; do sign "${f}"; done
         sign --deep "${app}"
         extra=(--component-plist "${ROOT}/utils/macos/build.plist")
@@ -107,19 +108,36 @@ for comp in "${WORK}"/x/*.pkg; do
         "${extra[@]}" \
         --sign "${CODESIGN_PKG_IDENTITY}" \
         --keychain "${KEYCHAIN}" \
-        "${WORK}/out/${name}"
-done
+        "${target}"
+}
 
-productbuild \
-    --distribution "${WORK}/x/Distribution" \
-    --resources "${WORK}/x/Resources" \
-    --package-path "${WORK}/out" \
-    --sign "${CODESIGN_PKG_IDENTITY}" \
-    --keychain "${KEYCHAIN}" \
-    "${OUT}"
+pkgutil --expand-full "${IN}" "${WORK}/x"
+
+if [ -f "${WORK}/x/PackageInfo" ]; then
+    # a single component package holding only the app (as 0.0.13 shipped)
+    if [ ! -d "${WORK}/x/Payload/MOD Desktop.app" ]; then
+        echo "Single package without MOD Desktop.app, refusing" >&2
+        exit 1
+    fi
+    sign_component "${WORK}/x" mod-desktop.pkg "${OUT}"
+    app="${WORK}/x/Payload/MOD Desktop.app"
+else
+    # product archive: Distribution + one component package per install choice
+    mkdir "${WORK}/out"
+    for comp in "${WORK}"/x/*.pkg; do
+        sign_component "${comp}" "$(basename "${comp}")" "${WORK}/out/$(basename "${comp}")"
+    done
+    productbuild \
+        --distribution "${WORK}/x/Distribution" \
+        --resources "${WORK}/x/Resources" \
+        --package-path "${WORK}/out" \
+        --sign "${CODESIGN_PKG_IDENTITY}" \
+        --keychain "${KEYCHAIN}" \
+        "${OUT}"
+    app="${WORK}/x/mod-desktop.pkg/Payload/MOD Desktop.app"
+fi
 
 # checks: a failure here stops before anything is published
-app="${WORK}/x/mod-desktop.pkg/Payload/MOD Desktop.app"
 codesign --verify --deep --strict --verbose=2 "${app}"
 for arch in arm64 x86_64; do
     for bin in mod-desktop jackd; do
