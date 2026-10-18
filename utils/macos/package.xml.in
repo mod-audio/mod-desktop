@@ -18,9 +18,6 @@
     <choice id="audio.mod.desktop-lv2" title="LV2 plugin" description="Install LV2 plugin" selected="true" visible="true">
         <pkg-ref id="audio.mod.desktop-lv2bundles" version="0">mod-desktop-lv2bundles.pkg</pkg-ref>
     </choice>
-    <choice id="audio.mod.desktop-vst2" title="VST2 plugin" description="Install VST2 plugin" selected="true" visible="true">
-        <pkg-ref id="audio.mod.desktop-vst2bundles" version="0">mod-desktop-vst2bundles.pkg</pkg-ref>
-    </choice>
     <choice id="audio.mod.desktop-vst3" title="VST3 plugin" description="Install VST3 plugin" selected="true" visible="true">
         <pkg-ref id="audio.mod.desktop-vst3bundles" version="0">mod-desktop-vst3bundles.pkg</pkg-ref>
     </choice>
@@ -29,7 +26,6 @@
        <line choice="audio.mod.desktop-au"/>
        <line choice="audio.mod.desktop-clap"/>
        <line choice="audio.mod.desktop-lv2"/>
-       <line choice="audio.mod.desktop-vst2"/>
        <line choice="audio.mod.desktop-vst3"/>
     </choices-outline>
 </installer-gui-script>

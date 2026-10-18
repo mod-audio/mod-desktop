@@ -30,11 +30,11 @@ mkdir build/pkg build/pkg/app
 gcp -rL "build/mod-desktop.app" "build/pkg/app/MOD Desktop.app"
 
 # create pkg dir for plugins
-mkdir build/pkg/au build/pkg/clap build/pkg/lv2 build/pkg/vst2 build/pkg/vst3
+# no VST2 on macOS: AU, VST3, CLAP and LV2 cover the hosts there
+mkdir build/pkg/au build/pkg/clap build/pkg/lv2 build/pkg/vst3
 gcp -rL build-plugin/*.component build/pkg/au/
 gcp -rL build-plugin/*.clap build/pkg/clap/
 gcp -rL build-plugin/*.lv2 build/pkg/lv2/
-gcp -rL build-plugin/*.vst build/pkg/vst2/
 gcp -rL build-plugin/*.vst3 build/pkg/vst3/
 
 # patch rpath for Qt libs and jack tools
@@ -134,15 +134,6 @@ if [ -n "${CODESIGN_APP_IDENTITY}" ]; then
         --timestamp \
         --option runtime \
         --entitlements "utils/macos/entitlements.plist" \
-        build/pkg/vst2/*.vst
-
-    codesign -s "${CODESIGN_APP_IDENTITY}" \
-        --deep \
-        --force \
-        --verbose \
-        --timestamp \
-        --option runtime \
-        --entitlements "utils/macos/entitlements.plist" \
         build/pkg/vst3/*.vst3
 
     PKG_SIGN_ARGS=(--sign "${CODESIGN_PKG_IDENTITY}")
@@ -178,13 +169,6 @@ pkgbuild \
   --root "${PWD}/build/pkg/lv2/" \
   "${PKG_SIGN_ARGS[@]}" \
   build/mod-desktop-lv2bundles.pkg
-
-pkgbuild \
-  --identifier "audio.mod.desktop-vst2bundles" \
-  --install-location "/Library/Audio/Plug-Ins/VST/" \
-  --root "${PWD}/build/pkg/vst2/" \
-  "${PKG_SIGN_ARGS[@]}" \
-  build/mod-desktop-vst2bundles.pkg
 
 pkgbuild \
   --identifier "audio.mod.desktop-vst3bundles" \

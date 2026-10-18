@@ -95,7 +95,7 @@ sign_component() {
         for f in "${payload}"/*.lv2/*.dylib; do sign "${f}"; done
         ;;
     *)
-        # AU components, CLAP, VST2 and VST3 bundles
+        # AU components, CLAP and VST3 bundles (and VST2 in pkgs made before 0.0.14)
         for b in "${payload}"/*; do sign --deep "${b}"; done
         ;;
     esac
