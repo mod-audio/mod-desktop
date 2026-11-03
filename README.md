@@ -87,8 +87,10 @@ MOD Desktop ships the same [mod-ui](https://github.com/mod-audio/mod-ui) as the 
   decides what gets packaged (`utils/pack-html.sh`, `utils/win64/win64-installer.iss`,
   `utils/macos/macos-pkg.sh`). When mod-ui gains a new directory under `html/`, the packagers must
   learn it; a package is verified by inspecting its payload, not by its exit status.
-- `VERSION` holds the release number (plain `0.0.N` while MOD Desktop is in beta; internal test builds add a
-  fourth `.<build>` part); it shows in the web UI's address bar
+- `VERSION` holds the version, `0.<MOD OS line>.<build>` (since 0.14.1): `0` while MOD Desktop is in beta,
+  the MOD OS line whose mod-ui it pins (`14` = MOD OS 1.14), and a build number that restarts at 1 on each
+  new line and only goes up (published builds may skip numbers). Versions compare as numbers, never as text.
+  Before 0.14.1 the scheme was `0.0.N` (last: 0.0.13; test builds 0.0.14.N). It shows in the web UI's address bar
   (`?v=`), in the launcher's settings dialog and in every package name, so a report can always be
   tied to a build. The launcher and the plugin compile it in; changing `VERSION` rebuilds both.
 - The Tone3000 client id is a publishable identifier passed as `MOD_TONE3000_CLIENT_ID` in the
