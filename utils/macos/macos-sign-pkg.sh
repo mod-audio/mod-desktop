@@ -113,6 +113,11 @@ sign_component() {
 
 pkgutil --expand-full "${IN}" "${WORK}/x"
 
+# make every payload readable by all users before re-packing: pkgbuild keeps
+# the modes it finds, and an input built under umask 077 has root-only files
+# (0.0.14.36)
+find "${WORK}/x" -type d -name Payload -prune -exec chmod -R a+rX {} +
+
 if [ -f "${WORK}/x/PackageInfo" ]; then
     # a single component package holding only the app (as 0.0.13 shipped)
     if [ ! -d "${WORK}/x/Payload/MOD Desktop.app" ]; then
@@ -147,6 +152,12 @@ for arch in arm64 x86_64; do
     done
 done
 pkgutil --check-signature "${OUT}"
+locked="$(find "${WORK}/x" -path '*/Payload/*' ! -perm -o+r -print)"
+if [ -n "${locked}" ]; then
+    echo "Payload entries not readable by all users:" >&2
+    echo "${locked}" | head -20 >&2
+    exit 1
+fi
 
 if [ -n "${NOTARY_KEY_P8_CONTENTS}" ] && [ -n "${NOTARY_KEY_ID}" ] && [ -n "${NOTARY_ISSUER_ID}" ]; then
     echo "${NOTARY_KEY_P8_CONTENTS}" | base64 -d -o "${WORK}/notary.p8"

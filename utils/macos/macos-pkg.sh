@@ -65,6 +65,11 @@ done
 
 popd
 
+# make everything readable by all users: pkgbuild keeps the modes it finds on
+# disk, so a strict umask (077) on the build machine ships root-only files
+# that a normal user cannot load (0.0.14.36)
+chmod -R a+rX build/pkg
+
 # sign app bundle
 if [ -n "${CODESIGN_APP_IDENTITY}" ]; then
     security create-keychain -p dummypassword build.keychain

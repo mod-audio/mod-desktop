@@ -30,6 +30,8 @@ case "${TARGET}" in
 esac
 
 STAGING=$(mktemp -d "${ROOT}/.build.stage.XXXXXX")
+# mktemp creates 0700; the staging dir becomes the app folder in the package and must be world-readable
+chmod 755 "${STAGING}"
 trap 'rm -rf "${STAGING}"' EXIT
 
 link_output() {
