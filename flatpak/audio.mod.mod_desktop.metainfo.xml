@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>audio.mod.mod_desktop</id>
+  
+  <name>MOD Desktop</name>
+  <summary>MOD Audio for the desktop</summary>
+  <url type="homepage">https://mod.audio</url>
+  
+  <metadata_license>MIT</metadata_license>
+  <project_license>AGPL-3.0-or-later</project_license>
+  
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+    <control>touch</control>
+  </supports>
+  
+  <description>
+    <p>The mod universe, now for Desktops free, as in beer too</p>
+    <p>Explore, Create &amp; Play, Sculpt your tone, community-enhanced.</p>
+    <p>Effortlessly create your dream rigs using a familiar pedalboard workflow, enriched by a vast library of community-driven plugins.</p>
+  </description>
+  
+  <launchable type="desktop-id">mod-desktop.desktop</launchable>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://github.com/mod-audio/mod-desktop/raw/main/mod-desktop.png</image>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/mod-audio/mod-desktop/raw/main/docs/user-files-1.png</image>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/mod-audio/mod-desktop/raw/main/docs/user-files-2.png</image>
+    </screenshot>
+  </screenshots>
+</component>
