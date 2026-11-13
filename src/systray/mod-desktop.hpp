@@ -630,6 +630,7 @@ private:
         settings.setValue("FirstRun", false);
         settings.setValue("AutoStart", ui.cb_autostart->isChecked());
         settings.setValue("CloseToSystray", ui.cb_systray->isChecked());
+        settings.setValue("CheckForUpdates", ui.cb_update_check->isChecked());
         settings.setValue("Geometry", saveGeometry());
         settings.setValue("AudioDevice", ui.cb_device->currentText());
         settings.setValue("AudioInputDevice", ui.cb_input->currentText());
@@ -726,6 +727,9 @@ private:
         ui.cb_systray->setChecked(closeToSystray);
 
         ui.cb_autostart->setChecked(settings.value("AutoStart", false).toBool());
+
+        // on by default (2026-10-25); mod-ui does the check, see MOD_DESKTOP_UPDATE_CHECK below
+        ui.cb_update_check->setChecked(settings.value("CheckForUpdates", true).toBool());
 
         ui.cb_midi->setChecked(settings.value("EnableMIDI", true).toBool());
         ui.sp_midi_pb->setValue(settings.value("PedalboardsMidiChannel", 0).toInt());
@@ -1188,6 +1192,8 @@ private slots:
 
             if (ui.cb_lv2_only_with_modgui->isChecked())
                 env.insert("MOD_UI_ONLY_SHOW_PLUGINS_WITH_MODGUI", "1");
+
+            env.insert("MOD_DESKTOP_UPDATE_CHECK", ui.cb_update_check->isChecked() ? "1" : "0");
 
             processUI.setProcessEnvironment(env);
             processUI.start();
