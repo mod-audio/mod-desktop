@@ -370,6 +370,7 @@ char* const* getEvironment(const uint portBaseNum)
         envpl[envsize + i] = nullptr;
 
     // base environment details
+    set_envp_value(envpl, L"JACK_NO_START_SERVER=1");
     set_envp_value(envpl, L"LANG=en_US.UTF-8");
     set_envp_value(envpl, L"MOD_DESKTOP=1");
     set_envp_value(envpl, L"MOD_DESKTOP_PLUGIN=1");
@@ -388,6 +389,7 @@ char* const* getEvironment(const uint portBaseNum)
         envp[envsize + i] = nullptr;
 
     // base environment details
+    set_envp_value(envp, "JACK_NO_START_SERVER=1");
     set_envp_value(envp, "LANG=en_US.UTF-8");
     set_envp_value(envp, "MOD_DESKTOP=1");
     set_envp_value(envp, "MOD_DESKTOP_PLUGIN=1");
