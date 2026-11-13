@@ -688,7 +688,8 @@ static void* _openWebGui(void* const arg)
    #ifdef __APPLE__
     String cmd("open \"http://127.0.0.1:");
    #else
-    String cmd("xdg-open \"http://127.0.0.1:");
+    // the DAW's library paths (e.g. Ardour's bundled glib) break xdg-open and the browser it starts
+    String cmd("env -u LD_LIBRARY_PATH -u LD_PRELOAD xdg-open \"http://127.0.0.1:");
    #endif
     cmd += String(port);
     cmd += "/\"";
@@ -727,7 +728,8 @@ static void* _openUserFilesDir(void*)
    #ifdef __APPLE__
     String cmd("open \"");
    #else
-    String cmd("xdg-open \"");
+    // the DAW's library paths (e.g. Ardour's bundled glib) break xdg-open and the file manager it starts
+    String cmd("env -u LD_LIBRARY_PATH -u LD_PRELOAD xdg-open \"");
    #endif
     cmd += getDataDir();
     cmd += "/user-files\"";
