@@ -63,6 +63,12 @@ So when wishing to load NAM models for the "Neural Amp Modeller" plugin for exam
 
 ![screenshot](docs/user-files-2.png "user-files-2")
 
+### Your own plugins
+
+MOD Desktop also loads LV2 plugins you build or download yourself, built natively for your computer.
+Copy the `.lv2` bundle into `$Documents/MOD Desktop/lv2` and restart the audio.
+See [docs/plugins.md](docs/plugins.md) for what to build, where MOD Desktop looks, and what to check when a plugin does not load.
+
 ## Current status
 
 At this point this tool should be considered in beta state.
