@@ -95,7 +95,7 @@ sign_component() {
         for f in "${payload}"/*.lv2/*.dylib; do sign "${f}"; done
         ;;
     *)
-        # AU components, CLAP, VST2 and VST3 bundles
+        # AU components, CLAP and VST3 bundles (and VST2 in pkgs made before 0.0.14)
         for b in "${payload}"/*; do sign --deep "${b}"; done
         ;;
     esac
@@ -150,6 +150,10 @@ for arch in arm64 x86_64; do
             | grep -q "com.apple.security.device.audio-input" \
             || { echo "No audio-input entitlement on ${bin} (${arch})" >&2; exit 1; }
     done
+    # mod-host loads the plugins inside jackd: without this, plugins not signed by MOD are refused
+    codesign -d --arch "${arch}" --entitlements - "${app}/Contents/MacOS/jackd" 2>/dev/null \
+        | grep -q "com.apple.security.cs.disable-library-validation" \
+        || { echo "No disable-library-validation entitlement on jackd (${arch})" >&2; exit 1; }
 done
 pkgutil --check-signature "${OUT}"
 locked="$(find "${WORK}/x" -path '*/Payload/*' ! -perm -o+r -print)"

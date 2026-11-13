@@ -423,8 +423,9 @@ public:
             shm.stopWait();
         }
 
-        jackd.stop();
+        // mod-ui first: stopped after jackd, it could reconnect in between and libjack would start a new server
         mod_ui.stop();
+        jackd.stop();
         shm.deinit();
 
 //         delete[] tempBuffers[0];

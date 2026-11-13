@@ -206,7 +206,7 @@ const char* getAppDir()
         WideCharToMultiByte(CP_UTF8, 0, getAppDirW(), -1, appDir, PATH_MAX, nullptr, nullptr);
        #else
         std::strncpy(appDir, getDataDir(), PATH_MAX - 1);
-        std::strncat(appDir, "/.last-known-location-" VERSION, PATH_MAX - 1);
+        std::strncat(appDir, "/.last-known-location-" VERSION_LINE, PATH_MAX - 1);
 
         if (FILE* const f = std::fopen(appDir, "r"))
         {
@@ -370,6 +370,7 @@ char* const* getEvironment(const uint portBaseNum)
         envpl[envsize + i] = nullptr;
 
     // base environment details
+    set_envp_value(envpl, L"JACK_NO_START_SERVER=1");
     set_envp_value(envpl, L"LANG=en_US.UTF-8");
     set_envp_value(envpl, L"MOD_DESKTOP=1");
     set_envp_value(envpl, L"MOD_DESKTOP_PLUGIN=1");
@@ -388,6 +389,7 @@ char* const* getEvironment(const uint portBaseNum)
         envp[envsize + i] = nullptr;
 
     // base environment details
+    set_envp_value(envp, "JACK_NO_START_SERVER=1");
     set_envp_value(envp, "LANG=en_US.UTF-8");
     set_envp_value(envp, "MOD_DESKTOP=1");
     set_envp_value(envp, "MOD_DESKTOP_PLUGIN=1");
@@ -686,7 +688,8 @@ static void* _openWebGui(void* const arg)
    #ifdef __APPLE__
     String cmd("open \"http://127.0.0.1:");
    #else
-    String cmd("xdg-open \"http://127.0.0.1:");
+    // the DAW's library paths (e.g. Ardour's bundled glib) break xdg-open and the browser it starts
+    String cmd("env -u LD_LIBRARY_PATH -u LD_PRELOAD xdg-open \"http://127.0.0.1:");
    #endif
     cmd += String(port);
     cmd += "/\"";
@@ -725,7 +728,8 @@ static void* _openUserFilesDir(void*)
    #ifdef __APPLE__
     String cmd("open \"");
    #else
-    String cmd("xdg-open \"");
+    // the DAW's library paths (e.g. Ardour's bundled glib) break xdg-open and the file manager it starts
+    String cmd("env -u LD_LIBRARY_PATH -u LD_PRELOAD xdg-open \"");
    #endif
     cmd += getDataDir();
     cmd += "/user-files\"";

@@ -911,6 +911,16 @@ Smaller buffer gives less latency but consumes more CPU, while bigger buffers ha
                 </widget>
                </item>
                <item>
+                <widget class="QCheckBox" name="cb_update_check">
+                 <property name="toolTip">
+                  <string>Once a day, ask GitHub whether a newer MOD Desktop build is out for this computer, and show a notice in the web interface. Nothing about you is sent.</string>
+                 </property>
+                 <property name="text">
+                  <string>Check for updates</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
                 <widget class="QCheckBox" name="cb_verbose_basic">
                  <property name="text">
                   <string>Show logging panel</string>

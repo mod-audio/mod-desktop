@@ -5,6 +5,9 @@ CXX ?= g++
 PKG_CONFIG ?= pkg-config
 
 CXXFLAGS += -fPIC -std=gnu++14 -I. -DVERSION='"$(shell cat ../../VERSION)"'
+# the app/plugin link file is keyed on the release line (0.14), not the build (0.14.N),
+# so a plugin from one build still finds the app from another build of the same line
+CXXFLAGS += -DVERSION_LINE='"$(shell cut -d. -f1-2 ../../VERSION)"'
 
 TARGET_MACHINE := $(shell $(CC) -dumpmachine)
 
